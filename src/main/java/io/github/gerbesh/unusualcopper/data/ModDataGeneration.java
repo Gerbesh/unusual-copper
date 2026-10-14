@@ -46,6 +46,10 @@ public final class ModDataGeneration {
                     .define('F', ModContent.FRAME.get()).define('Q', Items.QUARTZ).define('K', ModContent.CORE.get()).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.ENERGY_PIPE.get(), 8).pattern("CRC").pattern("CRC").pattern("CC ")
                     .define('C', Items.COPPER_INGOT).define('R', Items.REDSTONE).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.ITEM_PIPE.get(), 8).pattern("CIC").pattern("CIC").pattern("CC ")
+                    .define('C', Items.COPPER_INGOT).define('I', Items.IRON_NUGGET).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModContent.FACE_SELECTOR.get()).pattern(" C").pattern("IR")
+                    .define('C', Items.COPPER_INGOT).define('I', Items.IRON_INGOT).define('R', Items.REDSTONE).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
             for (var item : new net.minecraft.world.item.Item[]{Items.COPPER_INGOT, Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE}) {
                 var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
                 int multiplier = item == Items.COPPER_INGOT ? 2 : 1;

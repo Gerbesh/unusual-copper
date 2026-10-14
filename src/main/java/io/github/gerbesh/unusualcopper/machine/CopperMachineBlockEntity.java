@@ -77,6 +77,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
 
     public void setOwner(UUID id) { owner = id; setChanged(); }
+    public UUID owner() { return owner; }
+    public boolean allowsAutomation(UUID actor) { return owner == null || owner.equals(actor); }
     public boolean canAccess(Player player) { return owner == null || owner.equals(player.getUUID()) || player.hasPermissions(2); }
     public MachineStatus status() { return status; }
     public void status(MachineStatus value) { if (status != value) { status = value; setChanged(); } }

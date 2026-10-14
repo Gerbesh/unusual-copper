@@ -1,0 +1,24 @@
+Item transport verification — 2026-10-15; Minecraft 1.20.1 / Forge 47.4.10 / Java 17
+Command: gradlew.bat --no-daemon build runGameTestServer
+[01:30:26] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=1, committed=false
+[01:30:28] [Server thread/INFO] [minecraft/GameTestServer]: All 28 required tests passed :)
+BUILD SUCCESSFUL in 34s
+[01:11:12] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE DEDICATED SMOKE PASS: fully automatic chest/item-pipe chain; 64 copper -> 128 essence -> 64000 CuE; one iron operation paid 240, remaining 63760; ticks=1087
+BUILD SUCCESSFUL in 1m 18s
+[01:26:47] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied
+BUILD SUCCESSFUL in 28s
+Ten separate GameTest server processes:
+[01:31:52] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=2, committed=false
+[01:32:20] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=3, committed=false
+[01:32:47] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=4, committed=false
+[01:33:13] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=5, committed=false
+[01:33:40] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=6, committed=false
+[01:34:07] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=7, committed=false
+[01:34:33] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=8, committed=false
+[01:34:59] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=9, committed=false
+[01:35:26] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=10, committed=false
+[01:35:54] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=11, committed=true
+Final 0.2 checkpoint:
+[02:15:17] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE pipe disk checkpoint: round=12, committed=true
+[02:15:19] [Server thread/INFO] [minecraft/GameTestServer]: All 28 required tests passed :)
+BUILD SUCCESSFUL in 1m 9s

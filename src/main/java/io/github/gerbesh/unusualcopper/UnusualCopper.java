@@ -20,9 +20,11 @@ public final class UnusualCopper {
     public UnusualCopper() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModContent.register(bus);
+        io.github.gerbesh.unusualcopper.network.PipeNetwork.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         bus.addListener(CopperCapabilities::register);
         MinecraftForge.EVENT_BUS.register(EnergyNetworks.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         LOGGER.info("Unusual Copper: server-authoritative CuE machinery initialized");
     }
 }

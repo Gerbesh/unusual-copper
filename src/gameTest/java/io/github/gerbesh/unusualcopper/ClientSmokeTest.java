@@ -30,13 +30,17 @@ public final class ClientSmokeTest {
     private static final AtomicBoolean saved = new AtomicBoolean();
     private static int ticks;
     private static int stage;
-    private static BlockPos menuPos;
+    private static BlockPos menuPos, pipeMenuPos;
+    private static boolean settingsSent;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !Boolean.getBoolean("unusualcopper.smokeClient")) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.getSingleplayerServer() == null) return;
         if (!requested) {
             requested = true;
+            if (Boolean.getBoolean("unusualcopper.smokeClientRu")) {
+                mc.options.languageCode = "ru_ru"; mc.getLanguageManager().setSelected("ru_ru"); mc.reloadResourcePacks();
+            }
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             mc.getSingleplayerServer().execute(() -> {
                 var server = mc.getSingleplayerServer();
@@ -61,6 +65,17 @@ public final class ClientSmokeTest {
                     else if (kinds[i] == MachineKind.RESONANCE_SMELTER) { machine.inventory.setStackInSlot(0, new ItemStack(Items.RAW_GOLD, 64)); machine.energy.add(24_000, false); }
                     else if (kinds[i] == MachineKind.COPPER_CELL) machine.energy.add(123_456, false);
                 }
+                var splitter = (CopperMachineBlockEntity)level.getBlockEntity(new BlockPos(45, y, 42));
+                while (splitter.sideMode(net.minecraft.core.Direction.WEST) != io.github.gerbesh.unusualcopper.machine.SideMode.ITEM_INPUT) splitter.cycleSide(net.minecraft.core.Direction.WEST);
+                for (int x = 41; x <= 44; x++) {
+                    var pos = new BlockPos(x, y - 1, 42);
+                    level.setBlock(pos, ModContent.ITEM_PIPE.get().defaultBlockState(), 3);
+                    ((io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity)level.getBlockEntity(pos)).owner(mc.player.getUUID());
+                }
+                pipeMenuPos = new BlockPos(44, y, 42);
+                level.setBlock(pipeMenuPos, ModContent.ITEM_PIPE.get().defaultBlockState(), 3);
+                var routingPipe = (io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity)level.getBlockEntity(pipeMenuPos);
+                routingPipe.owner(mc.player.getUUID()); routingPipe.rule(net.minecraft.core.Direction.EAST).filter(0, new ItemStack(ModContent.ESSENCE.get())); routingPipe.changed();
                 for (int x : new int[]{46, 47, 49, 50}) level.setBlock(new BlockPos(x, y, 42), ModContent.ENERGY_PIPE.get().defaultBlockState(), 3);
                 var player = server.getPlayerList().getPlayer(mc.player.getUUID());
                 if (player != null) {
@@ -71,7 +86,7 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || (stage == 1 && mc.screen instanceof CopperMachineScreen) || (stage == 2 && mc.screen == null))) ticks++;
+        if (ready.get() && (stage == 0 || (stage == 1 && mc.screen instanceof CopperMachineScreen) || (stage == 2 && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -90,6 +105,17 @@ public final class ClientSmokeTest {
             captured = true;
             Screenshot.grab(mc.gameDirectory, "cue-night.png", mc.getMainRenderTarget(), text -> {
                 UnusualCopper.LOGGER.info("CuE night smoke screenshot: {}", text.getString()); saved.set(true);
+            });
+        }
+        if (stage == 3 && ticks == 5) mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId, net.minecraft.core.Direction.EAST.ordinal());
+        if (stage == 3 && ticks >= 12 && !settingsSent && mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ItemPipeMenu menu && menu.selected() == net.minecraft.core.Direction.EAST) {
+            settingsSent = true;
+            io.github.gerbesh.unusualcopper.network.PipeNetwork.settings(new io.github.gerbesh.unusualcopper.network.PipeNetwork.Settings(menu.containerId, net.minecraft.core.Direction.EAST.ordinal(), 20, 8, 16, 0, "forge:ingots/copper", false));
+        }
+        if (stage == 3 && ticks >= 40 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-item-pipe-menu.png", mc.getMainRenderTarget(), text -> {
+                UnusualCopper.LOGGER.info("CuE item pipe menu screenshot: {}", text.getString()); saved.set(true);
             });
         }
         if (saved.get()) {
@@ -113,6 +139,16 @@ public final class ClientSmokeTest {
                         player.teleportTo(server.overworld(), 46.5, menuPos.getY() + 2.2, 36, 0, 28);
                     }
                     server.overworld().setDayTime(18000);
+                });
+            } else if (stage == 2) {
+                stage = 3; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = false;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer(); var player = server.getPlayerList().getPlayer(mc.player.getUUID());
+                    var pipe = (io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity)server.overworld().getBlockEntity(pipeMenuPos);
+                    if (player != null && pipe != null) {
+                        player.teleportTo(server.overworld(), pipeMenuPos.getX() + .5, pipeMenuPos.getY() + 1, pipeMenuPos.getZ() - 2, 0, 20);
+                        NetworkHooks.openScreen(player, pipe, pipeMenuPos);
+                    }
                 });
             } else { mc.options.hideGui = false; mc.stop(); }
         }

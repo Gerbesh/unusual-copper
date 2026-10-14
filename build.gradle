@@ -18,6 +18,10 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
+    opacTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
 }
 
 minecraft {
@@ -35,6 +39,7 @@ minecraft {
         client {
             if (project.hasProperty('smokeClient')) {
                 property 'unusualcopper.smokeClient', 'true'
+                if (project.hasProperty('smokeClientRu')) property 'unusualcopper.smokeClientRu', 'true'
                 args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
                 mods { "${mod_id}" { source sourceSets.gameTest } }
             }
@@ -45,6 +50,13 @@ minecraft {
             if (project.hasProperty('smokeServer')) {
                 property 'unusualcopper.smokeServer', 'true'
                 mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
+            if (project.hasProperty('opacTests')) {
+                workingDirectory project.file('run-opac-server')
+                property 'unusualcopper.opacSmoke', 'true'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                mods { "${mod_id}" { source sourceSets.gameTest; source sourceSets.opacTest } }
             }
         }
         gameTestServer {
@@ -62,6 +74,11 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+}
+if (project.hasProperty('opacTests')) {
+    repositories { flatDir { dirs '.codex-tmp/compat' } }
+    dependencies { runtimeOnly fg.deobf('local:open-parties-and-claims-forge-1.20.1:0.30.1') }
+    tasks.matching { it.name == 'runServer' }.configureEach { dependsOn 'createSrgToMcp' }
 }
 
 tasks.named('test', Test).configure { useJUnitPlatform() }

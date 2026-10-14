@@ -47,6 +47,7 @@ public final class CopperMachineBlock extends BaseEntityBlock {
         return level.isClientSide ? null : createTickerHelper(type, ModContent.MACHINE_ENTITY.get(), (world, pos, blockState, be) -> CopperMachineBlockEntity.tick((ServerLevel)world, pos, blockState, be));
     }
     @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.getItemInHand(hand).is(ModContent.FACE_SELECTOR.get())) return InteractionResult.PASS;
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) NetworkHooks.openScreen((ServerPlayer)player, machine, pos);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

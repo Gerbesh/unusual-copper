@@ -153,12 +153,27 @@ def models():
     write_json(ASSETS / "blockstates/copper_energy_pipe.json", {"multipart": multipart})
     write_json(ASSETS / "models/item/copper_energy_pipe.json", {"parent": "unusualcopper:block/pipe_center"})
     write_bbmodel("copper_energy_pipe", center + arm + glass, pipe_materials)
-    for name, color in (("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper")):
+    item_center = json.loads(json.dumps(center).replace('"#aqua"', '"#fire"'))
+    item_arm = json.loads(json.dumps(arm).replace('"#aqua"', '"#fire"'))
+    for name, parts in (("item_pipe_center", item_center), ("item_pipe_arm", item_arm)):
+        write_json(ASSETS / f"models/block/{name}.json", {"render_type": "minecraft:cutout", "textures": refs, "elements": parts})
+    item_parts = [{"apply": {"model": "unusualcopper:block/item_pipe_center"}}]
+    for side, rotations in (("north", {}), ("east", {"y": 90}), ("south", {"y": 180}), ("west", {"y": 270}), ("up", {"x": 270}), ("down", {"x": 90})):
+        item_parts.append({"when": {side: "true"}, "apply": {"model": "unusualcopper:block/item_pipe_arm", **rotations}})
+    write_json(ASSETS / "blockstates/copper_item_pipe.json", {"multipart": item_parts})
+    write_json(ASSETS / "models/item/copper_item_pipe.json", {"parent": "unusualcopper:block/item_pipe_center"})
+    write_bbmodel("copper_item_pipe", item_center + item_arm, pipe_materials)
+    for name, color in (("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark")):
         img = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
         if name == "diamond_solar_lens":
             d.ellipse((3, 3, 28, 28), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.ellipse((7, 7, 24, 24), fill=(43, 169, 175)); d.line((10, 13, 16, 7), fill=(170, 249, 239), width=3)
         elif name == "saturated_copper_essence":
             d.polygon([(16, 2), (25, 10), (25, 22), (16, 29), (7, 22), (7, 10)], fill=(44, 199, 192), outline=(186, 249, 238)); d.line((16, 3, 12, 18, 16, 28), fill=(99, 237, 224), width=2)
+        elif name == "face_selector":
+            d.line((8, 25, 22, 10), fill=(115, 65, 42), width=7); d.line((8, 25, 22, 10), fill=(215, 141, 86), width=3)
+            d.rectangle((16, 3, 28, 14), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.rectangle((20, 6, 26, 10), fill=(55, 214, 211))
+        elif name == "cargo_bundle":
+            d.polygon([(8, 7), (24, 7), (28, 26), (4, 26)], fill=(92, 69, 48), outline=(192, 126, 76)); d.rectangle((13, 6, 18, 28), fill=(40, 48, 44)); d.rectangle((11, 13, 21, 20), fill=(192, 126, 76)); d.rectangle((14, 15, 18, 18), fill=(55, 214, 211))
         else:
             d.rectangle((4, 4, 27, 27), fill=(87, 50, 36), outline=(215, 141, 86), width=3); d.rectangle((8, 8, 23, 23), fill=(0, 0, 0, 0) if name == "copper_frame" else (47, 206, 193))
         path = ASSETS / f"textures/item/{name}.png"; path.parent.mkdir(parents=True, exist_ok=True); img.save(path)
@@ -177,6 +192,26 @@ def languages():
     statuses = {"idle": ("Idle", "Ожидание"), "working": ("Working", "Работает"), "no_sun": ("Waiting for sunlight", "Нет дневного неба"), "no_lens": ("Insert a solar lens", "Нужна солнечная линза"), "output_full": ("Output is full", "Выход заполнен"), "no_energy": ("Waiting for CuE", "Недостаточно CuE"), "invalid_input": ("No valid recipe", "Нет подходящего рецепта"), "redstone_paused": ("Paused by redstone", "Пауза по редстоуну"), "recipe_changed": ("Recipe changed; cancel to restart", "Рецепт изменён; отмените задачу"), "buffer_full": ("Energy buffer is full", "Энергобуфер заполнен")}
     en["gui.unusualcopper.cancel_hint"] = "Cancel the operation. Input remains; spent CuE is not refunded."
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
+    additions = {
+        "block.unusualcopper.copper_item_pipe": ("Copper Item Pipe", "Предметная труба"),
+        "item.unusualcopper.face_selector": ("Copper Face Selector", "Селектор граней"),
+        "item.unusualcopper.cargo_bundle": ("Recovered Cargo", "Сохранённый груз"),
+        "pipe.unusualcopper.mode.auto": ("Auto", "Авто"), "pipe.unusualcopper.mode.extract": ("Extract", "Извлекать"), "pipe.unusualcopper.mode.insert": ("Insert", "Вставлять"), "pipe.unusualcopper.mode.disabled": ("Disabled", "Выключено"),
+        "pipe.unusualcopper.whitelist": ("Whitelist", "Разрешённые"), "pipe.unusualcopper.blacklist": ("Blacklist", "Запрещённые"),
+        "pipe.unusualcopper.exact_on": ("All item data", "Все данные"), "pipe.unusualcopper.exact_off": ("Item type", "Тип предмета"),
+        "pipe.unusualcopper.exact_hint": ("Include durability, names, enchantments and other item data in the filter.", "Учитывать прочность, имя, чары и остальные данные предмета."),
+        "pipe.unusualcopper.priority": ("Priority", "Приоритет"), "pipe.unusualcopper.minimum": ("Min.", "Ниже"), "pipe.unusualcopper.maximum": ("Max.", "До"), "pipe.unusualcopper.reserve": ("Keep", "Резерв"),
+        "pipe.unusualcopper.minimum_hint": ("Start replenishing below this stock; 0 keeps replenishment enabled.", "Начинать пополнение ниже этого запаса. 0 — пополнять постоянно."),
+        "pipe.unusualcopper.maximum_hint": ("Stop at this stock. * means unlimited. Each item variant is counted separately.", "Остановиться на этом запасе. * — без предела. Варианты предмета считаются отдельно."),
+        "pipe.unusualcopper.reserve_hint": ("Leave this many matching items in the extraction inventory.", "Оставлять столько соответствующих предметов в источнике."),
+        "pipe.unusualcopper.apply": ("Set", "OK"), "pipe.unusualcopper.tag_add": ("Add", "+ Тег"), "pipe.unusualcopper.tag_remove": ("Remove", "− Тег"),
+        "pipe.unusualcopper.tags_hint": ("Tags on this face: %s", "Теги этой грани: %s"), "pipe.unusualcopper.invalid_settings": ("Invalid settings", "Неверные значения"),
+    }
+    for name, values in additions.items(): en[name], ru[name] = values
+    for name, english, russian in (("down", "Down", "Низ"), ("up", "Up", "Верх"), ("north", "North", "Север"), ("south", "South", "Юг"), ("west", "West", "Запад"), ("east", "East", "Восток")):
+        en["direction.unusualcopper." + name] = english; ru["direction.unusualcopper." + name] = russian
+    for name, english, russian in (("idle", "Idle", "Ожидание"), ("transferring", "Moving", "Перенос"), ("buffered", "Buffered", "В буфере"), ("no_route", "No route", "Нет маршрута"), ("paused", "Paused", "Пауза"), ("denied", "Access denied", "Нет доступа"), ("fault", "Handler error", "Ошибка порта")):
+        en["pipe.unusualcopper.status." + name] = english; ru["pipe.unusualcopper.status." + name] = russian
     for name, (english, russian) in statuses.items():
         en["status.unusualcopper." + name] = english; ru["status.unusualcopper." + name] = russian
     for mode, english, russian in (("disabled", "Disabled", "Закрыто"), ("item_input", "Item input", "Вход предметов"), ("item_output", "Item output", "Выход предметов"), ("energy_input", "CuE input", "Вход CuE"), ("energy_output", "CuE output", "Выход CuE")):
@@ -186,4 +221,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 5 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 6 editable Blockbench projects, models, item tags and RU/EN.")

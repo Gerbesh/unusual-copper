@@ -12,6 +12,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue PIPE_RATE;
     private static final ForgeConfigSpec.IntValue NETWORK_LIMIT;
     private static final ForgeConfigSpec.IntValue TRANSFER_BUDGET;
+    private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -24,6 +25,11 @@ public final class ServerConfig {
         PIPE_RATE = builder.comment("Maximum total CuE through one basic pipe or machine port per tick.").defineInRange("basic_transfer_rate", 256, 1, 4096);
         NETWORK_LIMIT = builder.comment("Oversized connected components stop transferring until split or the limit is raised.").defineInRange("maximum_component_nodes", 1024, 16, 16_384);
         TRANSFER_BUDGET = builder.comment("Maximum source/target transfer attempts per dimension per tick.").defineInRange("transfer_attempts_per_tick", 128, 1, 4096);
+        builder.pop().push("item_transport");
+        ITEM_RATE = builder.comment("Maximum items through each basic item pipe per transport interval.").defineInRange("items_per_interval", 8, 1, 64);
+        ITEM_INTERVAL = builder.defineInRange("interval_ticks", 5, 1, 100);
+        ITEM_BUDGET = builder.defineInRange("attempts_per_dimension", 64, 1, 4096);
+        ITEM_REBUILD = builder.comment("Graph nodes visited per tick while rebuilding item networks.").defineInRange("rebuild_nodes_per_tick", 128, 8, 4096);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -35,4 +41,8 @@ public final class ServerConfig {
     public static int pipeRate() { return value(PIPE_RATE); }
     public static int networkLimit() { return value(NETWORK_LIMIT); }
     public static int transferBudget() { return value(TRANSFER_BUDGET); }
+    public static int itemRate() { return value(ITEM_RATE); }
+    public static int itemInterval() { return value(ITEM_INTERVAL); }
+    public static int itemTransferBudget() { return value(ITEM_BUDGET); }
+    public static int itemRebuildBudget() { return value(ITEM_REBUILD); }
 }

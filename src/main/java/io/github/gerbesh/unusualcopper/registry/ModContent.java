@@ -43,9 +43,15 @@ public final class ModContent {
     public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
     public static final RegistryObject<Item> FRAME = ITEMS.register("copper_frame", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> CORE = ITEMS.register("copper_core", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);
+    public static final RegistryObject<Item> ITEM_PIPE_ITEM = ITEMS.register("copper_item_pipe", () -> new BlockItem(ITEM_PIPE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> FACE_SELECTOR = ITEMS.register("face_selector", io.github.gerbesh.unusualcopper.item.FaceSelectorItem::new);
+    public static final RegistryObject<Item> CARGO_BUNDLE = ITEMS.register("cargo_bundle", io.github.gerbesh.unusualcopper.item.CargoBundleItem::new);
     public static final RegistryObject<BlockEntityType<CopperMachineBlockEntity>> MACHINE_ENTITY = ENTITIES.register("copper_machine", () -> BlockEntityType.Builder.of(CopperMachineBlockEntity::new, MACHINES.values().stream().map(RegistryObject::get).toArray(Block[]::new)).build(null));
     public static final RegistryObject<BlockEntityType<EnergyPipeBlockEntity>> PIPE_ENTITY = ENTITIES.register("energy_pipe", () -> BlockEntityType.Builder.of(EnergyPipeBlockEntity::new, ENERGY_PIPE.get()).build(null));
     public static final RegistryObject<MenuType<CopperMachineMenu>> MACHINE_MENU = MENUS.register("copper_machine", () -> IForgeMenuType.create(CopperMachineMenu::new));
+    public static final RegistryObject<BlockEntityType<io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity>> ITEM_PIPE_ENTITY = ENTITIES.register("item_pipe", () -> BlockEntityType.Builder.of(io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity::new, ITEM_PIPE.get()).build(null));
+    public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.menu.ItemPipeMenu>> PIPE_MENU = MENUS.register("item_pipe", () -> IForgeMenuType.create(io.github.gerbesh.unusualcopper.menu.ItemPipeMenu::new));
     public static final RegistryObject<RecipeType<SolarRecipe>> SOLAR_RECIPE = RECIPES.register("solar_infusion", () -> new RecipeType<>() { @Override public String toString() { return "unusualcopper:solar_infusion"; } });
     public static final RegistryObject<RecipeSerializer<SolarRecipe>> SOLAR_SERIALIZER = SERIALIZERS.register("solar_infusion", SolarRecipe.Serializer::new);
     public static final TagKey<Item> SMELTABLE_ORES = TagKey.create(Registries.ITEM, new ResourceLocation(UnusualCopper.MOD_ID, "smeltable_ores"));

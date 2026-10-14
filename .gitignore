@@ -19,6 +19,7 @@ hs_err_pid*
 run/
 run-data/
 run-server/
+run-*/
 src/generated/resources/.cache/
 runs/
 logs/

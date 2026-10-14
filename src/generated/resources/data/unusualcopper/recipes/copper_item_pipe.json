@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    "CIC",
+    "CIC",
+    "CC "
+  ],
+  "result": {
+    "count": 8,
+    "item": "unusualcopper:copper_item_pipe"
+  },
+  "show_notification": true
+}
