@@ -18,6 +18,8 @@ hs_err_pid*
 # Development game instances / private saves
 run/
 run-data/
+run-server/
+src/generated/resources/.cache/
 runs/
 logs/
 crash-reports/

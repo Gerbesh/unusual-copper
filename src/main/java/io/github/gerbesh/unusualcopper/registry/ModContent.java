@@ -1,0 +1,58 @@
+package io.github.gerbesh.unusualcopper.registry;
+
+import io.github.gerbesh.unusualcopper.UnusualCopper;
+import io.github.gerbesh.unusualcopper.energy.EnergyPipeBlock;
+import io.github.gerbesh.unusualcopper.energy.EnergyPipeBlockEntity;
+import io.github.gerbesh.unusualcopper.item.SolarLensItem;
+import io.github.gerbesh.unusualcopper.machine.*;
+import io.github.gerbesh.unusualcopper.menu.CopperMachineMenu;
+import io.github.gerbesh.unusualcopper.recipe.SolarRecipe;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.*;
+import java.util.EnumMap;
+
+public final class ModContent {
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<RecipeType<?>> RECIPES = DeferredRegister.create(Registries.RECIPE_TYPE, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, UnusualCopper.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, UnusualCopper.MOD_ID);
+    public static final EnumMap<MachineKind, RegistryObject<Block>> MACHINES = new EnumMap<>(MachineKind.class);
+    static {
+        for (MachineKind kind : MachineKind.values()) {
+            RegistryObject<Block> block = BLOCKS.register(kind.id, () -> new CopperMachineBlock(kind));
+            MACHINES.put(kind, block); ITEMS.register(kind.id, () -> new BlockItem(block.get(), new Item.Properties()));
+        }
+    }
+    public static final RegistryObject<Block> ENERGY_PIPE = BLOCKS.register("copper_energy_pipe", EnergyPipeBlock::new);
+    public static final RegistryObject<Item> ENERGY_PIPE_ITEM = ITEMS.register("copper_energy_pipe", () -> new BlockItem(ENERGY_PIPE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> ESSENCE = ITEMS.register("saturated_copper_essence", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
+    public static final RegistryObject<Item> FRAME = ITEMS.register("copper_frame", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> CORE = ITEMS.register("copper_core", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<CopperMachineBlockEntity>> MACHINE_ENTITY = ENTITIES.register("copper_machine", () -> BlockEntityType.Builder.of(CopperMachineBlockEntity::new, MACHINES.values().stream().map(RegistryObject::get).toArray(Block[]::new)).build(null));
+    public static final RegistryObject<BlockEntityType<EnergyPipeBlockEntity>> PIPE_ENTITY = ENTITIES.register("energy_pipe", () -> BlockEntityType.Builder.of(EnergyPipeBlockEntity::new, ENERGY_PIPE.get()).build(null));
+    public static final RegistryObject<MenuType<CopperMachineMenu>> MACHINE_MENU = MENUS.register("copper_machine", () -> IForgeMenuType.create(CopperMachineMenu::new));
+    public static final RegistryObject<RecipeType<SolarRecipe>> SOLAR_RECIPE = RECIPES.register("solar_infusion", () -> new RecipeType<>() { @Override public String toString() { return "unusualcopper:solar_infusion"; } });
+    public static final RegistryObject<RecipeSerializer<SolarRecipe>> SOLAR_SERIALIZER = SERIALIZERS.register("solar_infusion", SolarRecipe.Serializer::new);
+    public static final TagKey<Item> SMELTABLE_ORES = TagKey.create(Registries.ITEM, new ResourceLocation(UnusualCopper.MOD_ID, "smeltable_ores"));
+    public static final TagKey<Item> SMELTING_BLACKLIST = TagKey.create(Registries.ITEM, new ResourceLocation(UnusualCopper.MOD_ID, "smelting_blacklist"));
+    public static final RegistryObject<CreativeModeTab> TAB = TABS.register("machines", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.unusualcopper"))
+            .icon(() -> new ItemStack(MACHINES.get(MachineKind.SOLAR_INFUSER).get()))
+            .displayItems((parameters, output) -> ITEMS.getEntries().forEach(item -> output.accept(item.get()))).build());
+    public static void register(IEventBus bus) { BLOCKS.register(bus); ITEMS.register(bus); ENTITIES.register(bus); MENUS.register(bus); RECIPES.register(bus); SERIALIZERS.register(bus); TABS.register(bus); }
+}

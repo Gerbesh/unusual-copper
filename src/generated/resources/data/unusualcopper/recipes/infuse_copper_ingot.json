@@ -1,0 +1,7 @@
+{
+  "type": "unusualcopper:solar_infusion",
+  "essence_per_item": 2,
+  "ingredient": {
+    "item": "minecraft:copper_ingot"
+  }
+}

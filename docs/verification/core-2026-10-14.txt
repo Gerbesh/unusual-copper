@@ -1,0 +1,12 @@
+Local core verification — 2026-10-14; Windows x64 / Java 17.0.19 / Forge 47.4.10 / Minecraft 1.20.1
+Command: gradlew.bat --no-daemon build runGameTestServer -PsmokeClient runClient
+JUnit: 5 tests, 0 failures, 0 errors
+[23:50:00] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE disk restart checkpoint: round=19, committed=true
+[23:50:02] [Server thread/INFO] [minecraft/GameTestServer]: All 19 required tests passed :)
+[23:50:30] [IO-Worker-12/INFO] [io.gi.ge.un.UnusualCopper/]: CuE client smoke screenshot: Saved screenshot as cue-smoke.png
+[23:50:31] [IO-Worker-14/INFO] [io.gi.ge.un.UnusualCopper/]: CuE menu smoke screenshot: Saved screenshot as cue-menu.png
+[23:50:35] [IO-Worker-13/INFO] [io.gi.ge.un.UnusualCopper/]: CuE night smoke screenshot: Saved screenshot as cue-night.png
+BUILD SUCCESSFUL in 1m 4s
+Command: gradlew.bat --no-daemon -PsmokeServer runServer
+[23:47:22] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE DEDICATED SMOKE PASS: 64 copper -> 128 essence -> 64000 CuE; one iron operation paid 240, remaining 63760; ticks=1146
+BUILD SUCCESSFUL in 1m 20s

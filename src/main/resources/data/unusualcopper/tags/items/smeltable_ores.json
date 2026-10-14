@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:ores",
+    "#forge:raw_materials",
+    "minecraft:raw_copper",
+    "minecraft:raw_iron",
+    "minecraft:raw_gold"
+  ]
+}

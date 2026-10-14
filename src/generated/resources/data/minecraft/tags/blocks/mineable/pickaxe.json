@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "unusualcopper:solar_infuser",
+    "unusualcopper:essence_splitter",
+    "unusualcopper:copper_cell",
+    "unusualcopper:resonance_smelter",
+    "unusualcopper:copper_energy_pipe"
+  ]
+}

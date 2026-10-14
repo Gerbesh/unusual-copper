@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "unusualcopper:saturated_copper_essence"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FRF",
+    "IEI",
+    "RRR"
+  ],
+  "result": {
+    "item": "unusualcopper:essence_splitter"
+  },
+  "show_notification": true
+}

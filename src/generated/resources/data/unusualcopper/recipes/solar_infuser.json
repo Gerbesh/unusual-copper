@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "GFG",
+    "GRG"
+  ],
+  "result": {
+    "item": "unusualcopper:solar_infuser"
+  },
+  "show_notification": true
+}

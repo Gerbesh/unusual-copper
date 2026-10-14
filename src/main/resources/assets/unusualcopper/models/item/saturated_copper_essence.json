@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "unusualcopper:item/saturated_copper_essence"
+  }
+}

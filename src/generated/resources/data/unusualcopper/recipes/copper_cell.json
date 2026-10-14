@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "K": {
+      "item": "unusualcopper:copper_core"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FQF",
+    "QKQ",
+    "RRR"
+  ],
+  "result": {
+    "item": "unusualcopper:copper_cell"
+  },
+  "show_notification": true
+}

@@ -5,12 +5,18 @@
 *.json text eol=lf
 *.java text eol=lf
 *.gradle text eol=lf
+*.properties text eol=lf
+*.toml text eol=lf
+*.mcmeta text eol=lf
+*.py text eol=lf
+*.txt text eol=lf
 *.yml text eol=lf
 *.sh text eol=lf
 gradlew text eol=lf
 *.bat text eol=crlf
 *.png binary
 *.ogg binary
+*.nbt binary
 *.bbmodel text eol=lf
 # Keep the supplied concept document byte-for-byte, including Markdown hard breaks.
 docs/Unusual_Copper_GDD_TDD_v0.2.md -text whitespace=-blank-at-eol,cr-at-eol
