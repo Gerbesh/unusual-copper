@@ -10,7 +10,10 @@ base.archivesName = mod_id
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets {
-    main.resources.srcDir 'src/generated/resources'
+    main.resources {
+        srcDir 'src/generated/resources'
+        exclude '**/.cache/**'
+    }
     gameTest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
