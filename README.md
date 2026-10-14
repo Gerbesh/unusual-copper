@@ -11,6 +11,7 @@
 | Документ | Содержание |
 |---|---|
 | [Маршрут разработки](docs/ROADMAP.md) | M0–M5, порядок работ, зависимости, критерии готовности |
+| [Индекс 18 задач](docs/BACKLOG.md) | Прямые ссылки на issues, приоритеты и зависимости |
 | [Задачи на GitHub](https://github.com/Gerbesh/unusual-copper/issues) | Практический backlog по этапам |
 | [Этапы на GitHub](https://github.com/Gerbesh/unusual-copper/milestones) | Прогресс каждого milestone |
 | [Моделирование и визуальный стиль](docs/MODELING.md) | Blockbench, материалы, форматы, перечень моделей, приёмка |
