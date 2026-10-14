@@ -1,0 +1,16 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.java text eol=lf
+*.gradle text eol=lf
+*.yml text eol=lf
+*.sh text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.png binary
+*.ogg binary
+*.bbmodel text eol=lf
+# Keep the supplied concept document byte-for-byte, including Markdown hard breaks.
+docs/Unusual_Copper_GDD_TDD_v0.2.md -text whitespace=-blank-at-eol,cr-at-eol

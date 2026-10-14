@@ -1,0 +1,30 @@
+# Gradle / Java
+.gradle/
+build/
+out/
+*.class
+
+# IDE / local environment
+.idea/
+*.iml
+.vscode/
+.env
+.env.*
+!.env.example
+*.log
+*.hprof
+hs_err_pid*
+
+# Development game instances / private saves
+run/
+run-data/
+runs/
+logs/
+crash-reports/
+saves/
+
+# OS and temporary planning payloads
+Thumbs.db
+Desktop.ini
+.DS_Store
+.codex-tmp/
