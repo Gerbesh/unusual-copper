@@ -30,7 +30,7 @@ public final class ClientSmokeTest {
     private static final AtomicBoolean saved = new AtomicBoolean();
     private static int ticks;
     private static int stage;
-    private static BlockPos menuPos, pipeMenuPos;
+    private static BlockPos menuPos, pipeMenuPos, cultivatorPos;
     private static boolean settingsSent;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !Boolean.getBoolean("unusualcopper.smokeClient")) return;
@@ -86,7 +86,7 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || (stage == 1 && mc.screen instanceof CopperMachineScreen) || (stage == 2 && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if (ready.get() && (stage == 0 || (stage == 1 && mc.screen instanceof CopperMachineScreen) || (stage == 2 && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen) || (stage == 4 && mc.screen instanceof CopperMachineScreen) || (stage == 5 && mc.screen == null))) ticks++;
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -116,6 +116,19 @@ public final class ClientSmokeTest {
             captured = true;
             Screenshot.grab(mc.gameDirectory, "cue-item-pipe-menu.png", mc.getMainRenderTarget(), text -> {
                 UnusualCopper.LOGGER.info("CuE item pipe menu screenshot: {}", text.getString()); saved.set(true);
+            });
+        }
+        if (stage == 4 && ticks == 5) mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId, 2);
+        if (stage == 4 && ticks >= 25 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-cultivator-menu.png", mc.getMainRenderTarget(), text -> {
+                UnusualCopper.LOGGER.info("CuE cultivator menu screenshot: {}", text.getString()); saved.set(true);
+            });
+        }
+        if (stage == 5 && ticks >= 60 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-cultivator-area.png", mc.getMainRenderTarget(), text -> {
+                UnusualCopper.LOGGER.info("CuE cultivator area screenshot: {}", text.getString()); saved.set(true);
             });
         }
         if (saved.get()) {
@@ -149,6 +162,39 @@ public final class ClientSmokeTest {
                         player.teleportTo(server.overworld(), pipeMenuPos.getX() + .5, pipeMenuPos.getY() + 1, pipeMenuPos.getZ() - 2, 0, 20);
                         NetworkHooks.openScreen(player, pipe, pipeMenuPos);
                     }
+                });
+            } else if (stage == 3) {
+                stage = 4; captured = false; saved.set(false); ticks = 0;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer(); var level = server.overworld(); var player = server.getPlayerList().getPlayer(mc.player.getUUID()); int y = menuPos.getY();
+                    level.setDayTime(6000);
+                    cultivatorPos = new BlockPos(47, y, 45);
+                    level.setBlock(cultivatorPos, Blocks.AIR.defaultBlockState(), 3);
+                    level.setBlock(cultivatorPos, ModContent.MACHINES.get(MachineKind.AURA_CULTIVATOR).get().defaultBlockState(), 3);
+                    var cultivator = (CopperMachineBlockEntity)level.getBlockEntity(cultivatorPos); cultivator.setOwner(player.getUUID()); cultivator.energy.add(4480, false);
+                    for (int x = 44; x <= 50; x++) for (int z = 46; z <= 49; z++) {
+                        level.setBlock(new BlockPos(x, y - 1, z), Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7), 3);
+                        level.setBlock(new BlockPos(x, y, z), Blocks.WHEAT.defaultBlockState(), 3);
+                    }
+                    player.teleportTo(level, 47.5, y + 1.8, 42, 0, 20);
+                    var wand = new ItemStack(ModContent.AREA_WAND.get()); player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, wand);
+                    for (var point : new BlockPos[]{cultivatorPos, new BlockPos(44, y, 46), new BlockPos(50, y, 49)}) {
+                        var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(point), net.minecraft.core.Direction.UP, point, false);
+                        ModContent.AREA_WAND.get().useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+                    }
+                    if (cultivator.workArea() == null || cultivator.workArea().volume() != 28) throw new IllegalStateException("Wand did not set the client fixture work area");
+                    wand.getOrCreateTag().putInt("Mode", 2);
+                    var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(cultivatorPos), net.minecraft.core.Direction.UP, cultivatorPos, false);
+                    ModContent.AREA_WAND.get().useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+                    UnusualCopper.LOGGER.info("CuE WAND SELECTION PASS: native server useOn selected 28 coordinates and opened the rules menu");
+                });
+            } else if (stage == 4) {
+                stage = 5; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = true;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer(); var player = server.getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer();
+                    player.teleportTo(server.overworld(), 47.5, cultivatorPos.getY() + 3.2, 41, 0, 30);
+                    var cultivator = (CopperMachineBlockEntity)server.overworld().getBlockEntity(cultivatorPos);
+                    io.github.gerbesh.unusualcopper.network.AreaNetwork.preview(player, cultivator.workArea().min(), cultivator.workArea().max(), true);
                 });
             } else { mc.options.hideGui = false; mc.stop(); }
         }

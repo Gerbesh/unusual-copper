@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    " Q ",
+    "FEF",
+    " R "
+  ],
+  "result": {
+    "item": "unusualcopper:aura_cultivator"
+  },
+  "show_notification": true
+}

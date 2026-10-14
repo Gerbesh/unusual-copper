@@ -231,7 +231,7 @@ public final class CoreGameTests {
         var oldOutput = m.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).orElseThrow(() -> new IllegalStateException("No output port"));
         m.cycleSide(Direction.DOWN);
         h.assertTrue(oldOutput.extractItem(2, 8, false).isEmpty(), "Reconfigured port tombstones cached handler");
-        m.cycleSide(Direction.DOWN); m.cycleSide(Direction.DOWN); m.cycleSide(Direction.DOWN); m.cycleSide(Direction.DOWN);
+        while (m.sideMode(Direction.DOWN) != SideMode.ITEM_OUTPUT) m.cycleSide(Direction.DOWN);
         var currentOutput = m.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).orElseThrow(() -> new IllegalStateException("No rebuilt output"));
         m.setRemoved();
         h.assertTrue(currentOutput.extractItem(2, 8, false).isEmpty(), "Removed machine cannot be drained through a cached interface");

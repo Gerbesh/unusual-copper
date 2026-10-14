@@ -13,6 +13,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue NETWORK_LIMIT;
     private static final ForgeConfigSpec.IntValue TRANSFER_BUDGET;
     private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
+    private static final ForgeConfigSpec.IntValue CULTIVATOR_COST, CULTIVATOR_INTERVAL, CULTIVATOR_CHECKS, AREA_BUDGET;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -30,6 +31,11 @@ public final class ServerConfig {
         ITEM_INTERVAL = builder.defineInRange("interval_ticks", 5, 1, 100);
         ITEM_BUDGET = builder.defineInRange("attempts_per_dimension", 64, 1, 4096);
         ITEM_REBUILD = builder.comment("Graph nodes visited per tick while rebuilding item networks.").defineInRange("rebuild_nodes_per_tick", 128, 8, 4096);
+        builder.pop().push("area_machines");
+        CULTIVATOR_COST = builder.defineInRange("cultivator_cue_per_growth", 140, 1, 50_000);
+        CULTIVATOR_INTERVAL = builder.defineInRange("cultivator_interval_ticks", 20, 20, 200);
+        CULTIVATOR_CHECKS = builder.defineInRange("cultivator_checks_per_wave", 8, 1, 8);
+        AREA_BUDGET = builder.comment("Global coordinate-check budget per dimension and tick, shared by queued machines.").defineInRange("checks_per_dimension_tick", 128, 8, 4096);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -45,4 +51,8 @@ public final class ServerConfig {
     public static int itemInterval() { return value(ITEM_INTERVAL); }
     public static int itemTransferBudget() { return value(ITEM_BUDGET); }
     public static int itemRebuildBudget() { return value(ITEM_REBUILD); }
+    public static int cultivatorCost() { return value(CULTIVATOR_COST); }
+    public static int cultivatorInterval() { return value(CULTIVATOR_INTERVAL); }
+    public static int cultivatorChecks() { return value(CULTIVATOR_CHECKS); }
+    public static int areaBudget() { return value(AREA_BUDGET); }
 }

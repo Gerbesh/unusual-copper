@@ -1,12 +1,18 @@
 package io.github.gerbesh.unusualcopper;
 
 import io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy;
+import io.github.gerbesh.unusualcopper.gameplay.WorkArea;
+import io.github.gerbesh.unusualcopper.machine.*;
+import io.github.gerbesh.unusualcopper.machine.logic.CultivatorLogic;
+import io.github.gerbesh.unusualcopper.registry.ModContent;
 import io.github.gerbesh.unusualcopper.storage.*;
 import net.minecraft.core.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.*;
@@ -40,6 +46,27 @@ public final class OpenPacServerSmoke {
             var allowed = new HandlerStorageEndpoint(level, pos, Direction.UP, owner);
             check(allowed.extract(key, 8).stream().mapToInt(ItemStack::getCount).sum() == 8 && barrel.getItem(0).isEmpty(), "Owner endpoint could not perform the real extraction");
             UnusualCopper.LOGGER.info("CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied");
+            // The machine itself is outside the claim: this exercises target permission, too.
+            var machinePos = pos.offset(-1, 0, 3); var cropPos = pos.offset(1, 0, 3);
+            level.getChunkAt(machinePos); level.setDayTime(6000);
+            level.setBlock(machinePos, Blocks.AIR.defaultBlockState(), 3);
+            level.setBlock(machinePos, ModContent.MACHINES.get(MachineKind.AURA_CULTIVATOR).get().defaultBlockState(), 3);
+            var cultivator = (CopperMachineBlockEntity)level.getBlockEntity(machinePos);
+            var actor = net.minecraftforge.common.util.FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(owner, "CuEOwner"));
+            actor.setPos(machinePos.getX() + .5, machinePos.getY() + .5, machinePos.getZ() + .5);
+            level.setBlock(cropPos.above(), Blocks.AIR.defaultBlockState(), 3);
+            level.setBlock(cropPos.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7), 3);
+            level.setBlock(cropPos, Blocks.WHEAT.defaultBlockState(), 3);
+            check(cultivator.setWorkArea(new WorkArea(cropPos, cropPos), actor), "Claim owner could not select the crop area");
+            cultivator.energy.add(140, false); cultivator.setOwner(stranger);
+            check(ProtectionPolicy.allowed(level, machinePos, stranger), "Fixture machine unexpectedly falls inside a claim");
+            CultivatorLogic.process(cultivator, level);
+            check(cultivator.status() == MachineStatus.PROTECTED && cultivator.energy.stored() == 140 && level.getBlockState(cropPos).getValue(CropBlock.AGE) == 0,
+                    "Foreign crop automation changed a claimed plant or charged energy");
+            cultivator.setOwner(owner); CultivatorLogic.process(cultivator, level);
+            check(cultivator.grown == 1 && cultivator.energy.stored() == 0 && level.getBlockState(cropPos).getValue(CropBlock.AGE) > 0,
+                    "Claim owner could not perform one paid crop growth");
+            UnusualCopper.LOGGER.info("CuE OPENPAC CULTIVATOR PASS: foreign target access denied without charge; owner grew claimed wheat for exactly 140 CuE");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

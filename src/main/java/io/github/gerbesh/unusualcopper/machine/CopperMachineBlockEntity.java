@@ -46,6 +46,45 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public int duration;
     public int paid;
     public int operationCost;
+    public final UUID runtimeIdentity = UUID.randomUUID();
+    private io.github.gerbesh.unusualcopper.gameplay.WorkArea workArea;
+    public int scanCursor, growthMode, inspected, grown;
+    private net.minecraft.core.BlockPos boundInventory;
+    private Direction boundSide = Direction.UP;
+    private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
+    public io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint(ServerLevel level) {
+        if (boundInventory == null) return null;
+        if (boundEndpoint == null) boundEndpoint = new io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint(level, boundInventory, boundSide, owner);
+        return boundEndpoint;
+    }
+    private final java.util.List<ItemStack> boundCargo = new java.util.ArrayList<>();
+    public int boundCargoSlot = -1;
+    public boolean boundFaulted;
+    public BlockPos boundInventory() { return boundInventory; }
+    public Direction boundSide() { return boundSide; }
+    public java.util.List<ItemStack> boundCargo() { return boundCargo.stream().map(ItemStack::copy).toList(); }
+    public int boundCargoCount() { return (int)Math.min(Integer.MAX_VALUE, boundCargo.stream().mapToLong(ItemStack::getCount).sum()); }
+    public void boundCargo(java.util.List<ItemStack> items) {
+        boundCargo.clear(); for (var item : items) if (!item.isEmpty()) boundCargo.add(item.copy());
+        if (boundCargo.isEmpty()) { boundFaulted = false; boundCargoSlot = -1; } setChanged();
+    }
+    public boolean bind(BlockPos pos, Direction side, Player player) {
+        if (!kind.hasInventory() || !canAccess(player) || !boundCargo.isEmpty() || !(level instanceof ServerLevel server) || pos.equals(worldPosition)
+                || worldPosition.distSqr(pos) > 32 * 32 || !server.hasChunkAt(pos) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server, worldPosition, player.getUUID())) return false;
+        var endpoint = new io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint(server, pos, side, owner == null ? player.getUUID() : owner);
+        if (!endpoint.isAvailable()) return false;
+        if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundSide = side; boundEndpoint = null; setChanged(); return true;
+    }
+    public void clearBinding() { boundInventory = null; boundEndpoint = null; setChanged(); }
+    public void recoverBinding(Player player) {
+        if (!canAccess(player)) return;
+        var remainder = new java.util.ArrayList<ItemStack>();
+        for (var stored : boundCargo) {
+            var offered = stored.copyWithCount(Math.min(stored.getCount(), stored.getMaxStackSize())); int before = offered.getCount(); player.getInventory().add(offered);
+            var rest = stored.copyWithCount(stored.getCount() - before + offered.getCount()); if (!rest.isEmpty()) remainder.add(rest);
+        }
+        boundCargo(remainder);
+    }
 
     public CopperMachineBlockEntity(BlockPos pos, BlockState state) {
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
@@ -54,7 +93,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         inventory = new ItemStackHandler(4) {
             @Override protected void onContentsChanged(int slot) { setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
-                if (slot >= 2 || kind == MachineKind.COPPER_CELL) return false;
+                if (slot >= 2 || !kind.hasInventory()) return false;
                 if (slot == 1) return kind == MachineKind.SOLAR_INFUSER && stack.is(ModContent.SOLAR_LENS.get());
                 if (kind == MachineKind.ESSENCE_SPLITTER) return stack.is(ModContent.ESSENCE.get());
                 if (kind == MachineKind.RESONANCE_SMELTER) return stack.is(ModContent.SMELTABLE_ORES) && !stack.is(ModContent.SMELTING_BLACKLIST);
@@ -66,9 +105,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
             case COPPER_CELL -> (m, level) -> m.status(MachineStatus.IDLE);
+            case AURA_CULTIVATOR -> new CultivatorLogic();
         };
         for (Direction side : Direction.values()) {
-            SideMode mode = kind == MachineKind.COPPER_CELL ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
+            SideMode mode = kind == MachineKind.AURA_CULTIVATOR ? SideMode.ENERGY_INPUT
+                    : kind == MachineKind.COPPER_CELL ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
                     : side == Direction.UP ? SideMode.ITEM_INPUT : side == Direction.DOWN ? SideMode.ITEM_OUTPUT
                     : kind.produces() ? SideMode.ENERGY_OUTPUT : kind.consumes() ? SideMode.ENERGY_INPUT : SideMode.DISABLED;
             sides.put(side, mode);
@@ -76,10 +117,15 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         rebuildCaps();
     }
 
-    public void setOwner(UUID id) { owner = id; setChanged(); }
+    public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged(); }
     public UUID owner() { return owner; }
     public boolean allowsAutomation(UUID actor) { return owner == null || owner.equals(actor); }
     public boolean canAccess(Player player) { return owner == null || owner.equals(player.getUUID()) || player.hasPermissions(2); }
+    public io.github.gerbesh.unusualcopper.gameplay.WorkArea workArea() { return workArea; }
+    public boolean setWorkArea(io.github.gerbesh.unusualcopper.gameplay.WorkArea area, Player player) {
+        if (!kind.usesArea() || !canAccess(player) || !(level instanceof ServerLevel server) || !io.github.gerbesh.unusualcopper.gameplay.AreaAccess.valid(server, worldPosition, area, owner == null ? player.getUUID() : owner)) return false;
+        if (owner == null) setOwner(player.getUUID()); workArea = area; scanCursor = 0; inspected = grown = 0; setChanged(); return true;
+    }
     public MachineStatus status() { return status; }
     public void status(MachineStatus value) { if (status != value) { status = value; setChanged(); } }
     public SideMode sideMode(Direction side) { return sides.get(side); }
@@ -89,13 +135,23 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         return !((redstoneMode == 1 && !signal) || (redstoneMode == 2 && signal));
     }
     public void cycleSide(Direction side) {
-        sides.put(side, sides.get(side).next());
+        SideMode next = sides.get(side).next();
+        while (!supportsSideMode(next)) next = next.next();
+        sides.put(side, next);
         invalidateCaps(); rebuildCaps(); setChanged();
         if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
             EnergyNetworks.dirty(level);
         }
+    }
+    public boolean supportsSideMode(SideMode mode) {
+        return switch (mode) {
+            case DISABLED -> true;
+            case ITEM_INPUT, ITEM_OUTPUT -> kind.hasInventory();
+            case ENERGY_INPUT -> kind.consumes();
+            case ENERGY_OUTPUT -> kind.produces();
+        };
     }
 
     public boolean hasOperation() { return !recipeId.isEmpty() && duration > 0; }
@@ -140,6 +196,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         boolean signal = level.hasNeighborSignal(pos);
         if ((machine.redstoneMode == 1 && !signal) || (machine.redstoneMode == 2 && signal)) machine.status(MachineStatus.REDSTONE_PAUSED);
         else machine.logic.tick(machine, level);
+        if (machine.energyEnabled() && level.getGameTime() % 20 == 0) io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
         boolean active = machine.status == MachineStatus.WORKING;
         if (state.getValue(CopperMachineBlock.ACTIVE) != active) level.setBlock(pos, state.setValue(CopperMachineBlock.ACTIVE, active), 2);
         if (level.getGameTime() % 10 == 0) level.sendBlockUpdated(pos, machine.getBlockState(), machine.getBlockState(), 2);
@@ -202,6 +259,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("ResultCount", result.getCount());
         tag.putInt("Progress", progress); tag.putInt("Duration", duration); tag.putInt("Paid", paid);
         tag.putInt("Cost", operationCost);
+        if (workArea != null) tag.put("WorkArea", workArea.save());
+        tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
+        if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
+        var cargo = new net.minecraft.nbt.ListTag();
+        for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
     }
     @Override public void load(CompoundTag tag) {
         super.load(tag);
@@ -213,10 +275,18 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         duration = Math.max(0, tag.getInt("Duration")); progress = Math.max(0, Math.min(duration, tag.getInt("Progress"))); paid = Math.max(0, tag.getInt("Paid"));
         operationCost = tag.contains("Cost") ? Math.max(0, tag.getInt("Cost")) : kind == MachineKind.RESONANCE_SMELTER ? 240 : 0;
         if (source.isEmpty() || result.isEmpty() || duration == 0) cancelOperation();
+        workArea = null;
+        if (tag.contains("WorkArea")) try { workArea = io.github.gerbesh.unusualcopper.gameplay.WorkArea.load(tag.getCompound("WorkArea")); } catch (IllegalArgumentException ignored) {}
+        scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 2);
+        boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
+        boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
+        for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
     }
     private void saveSides(CompoundTag tag) { for (Direction side : Direction.values()) tag.putInt("Side" + side.ordinal(), sides.get(side).ordinal()); }
     private void loadSides(CompoundTag tag) {
-        for (Direction side : Direction.values()) if (tag.contains("Side" + side.ordinal())) sides.put(side, SideMode.values()[Math.floorMod(tag.getInt("Side" + side.ordinal()), SideMode.values().length)]);
+        for (Direction side : Direction.values()) if (tag.contains("Side" + side.ordinal())) {
+            var mode = SideMode.values()[Math.floorMod(tag.getInt("Side" + side.ordinal()), SideMode.values().length)]; sides.put(side, supportsSideMode(mode) ? mode : SideMode.DISABLED);
+        }
     }
     @Override public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal()); saveSides(tag); return tag;
@@ -239,7 +309,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 4 -> progress & 0xffff; case 5 -> duration & 0xffff; case 6 -> status.ordinal();
                     case 7 -> redstoneMode; case 8 -> kind.ordinal(); case 9 -> paid;
                     case 10 -> progress >>> 16; case 11 -> duration >>> 16;
-                    case 12 -> operationCost & 0xffff; case 13 -> operationCost >>> 16; default -> 0;
+                    case 12 -> operationCost & 0xffff; case 13 -> operationCost >>> 16;
+                    case 14 -> growthMode; case 15 -> workArea == null ? 0 : workArea.volume(); case 16 -> scanCursor; case 17 -> inspected; case 18 -> grown;
+                    case 19 -> boundInventory == null ? 0 : 1; case 20 -> boundCargoCount() & 0xffff; case 21 -> boundCargoCount() >>> 16; default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}

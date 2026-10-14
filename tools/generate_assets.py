@@ -139,6 +139,11 @@ def models():
     export_model("solar_infuser", solar, [])
     smelter = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 2], [15, 13, 15], "patina"), part([0, 11, 1], [16, 14, 16], "copper"), part([1, 2, 0], [4, 11, 2], "copper"), part([12, 2, 0], [15, 11, 2], "copper"), part([4, 2, 0], [12, 4, 2], "dark"), part([4, 9, 0], [12, 11, 2], "copper"), part([4, 4, 1], [12, 9, 2], "fire"), part([10, 14, 10], [14, 16, 14], "dark"), part([9, 14, 9], [15, 15, 15], "copper"), part([15, 4, 5], [16, 9, 11], "dark")]
     export_model("resonance_smelter", smelter, [part([4, 4, .5], [12, 9, 1], "glass")])
+    cultivator = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 7, 15], "patina"), part([0, 6, 0], [16, 8, 16], "copper"),
+                  part([3, 8, 3], [13, 10, 13], "dark"), part([2, 9, 2], [14, 10, 4], "copper"), part([2, 9, 12], [14, 10, 14], "copper"),
+                  part([2, 9, 4], [4, 10, 12], "copper"), part([12, 9, 4], [14, 10, 12], "copper"),
+                  part([6, 10, 6], [10, 15, 10], "aqua", {"origin": [8, 12, 8], "axis": "y", "angle": 45}), part([4, 3, .5], [12, 5, 1], "aqua")]
+    export_model("aura_cultivator", cultivator, [])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -163,12 +168,15 @@ def models():
     write_json(ASSETS / "blockstates/copper_item_pipe.json", {"multipart": item_parts})
     write_json(ASSETS / "models/item/copper_item_pipe.json", {"parent": "unusualcopper:block/item_pipe_center"})
     write_bbmodel("copper_item_pipe", item_center + item_arm, pipe_materials)
-    for name, color in (("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark")):
+    for name, color in (("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
         img = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
         if name == "diamond_solar_lens":
             d.ellipse((3, 3, 28, 28), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.ellipse((7, 7, 24, 24), fill=(43, 169, 175)); d.line((10, 13, 16, 7), fill=(170, 249, 239), width=3)
         elif name == "saturated_copper_essence":
             d.polygon([(16, 2), (25, 10), (25, 22), (16, 29), (7, 22), (7, 10)], fill=(44, 199, 192), outline=(186, 249, 238)); d.line((16, 3, 12, 18, 16, 28), fill=(99, 237, 224), width=2)
+        elif name == "area_wand":
+            d.line((6, 28, 22, 9), fill=(111, 64, 42), width=5); d.line((6, 28, 22, 9), fill=(222, 148, 91), width=2)
+            d.polygon([(23, 1), (30, 8), (23, 15), (16, 8)], fill=(55, 214, 211), outline=(190, 251, 237)); d.line((23, 3, 20, 8, 23, 13), fill=(220, 255, 249), width=2)
         elif name == "face_selector":
             d.line((8, 25, 22, 10), fill=(115, 65, 42), width=7); d.line((8, 25, 22, 10), fill=(215, 141, 86), width=3)
             d.rectangle((16, 3, 28, 14), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.rectangle((20, 6, 26, 10), fill=(55, 214, 211))
@@ -193,6 +201,18 @@ def languages():
     en["gui.unusualcopper.cancel_hint"] = "Cancel the operation. Input remains; spent CuE is not refunded."
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
     additions = {
+        "block.unusualcopper.aura_cultivator": ("Aura Cultivator", "Культиватор ауры"), "item.unusualcopper.area_wand": ("Copper Configuration Wand", "Медный жезл настройки"),
+        "gui.unusualcopper.preview": ("Area", "Область"), "gui.unusualcopper.unbind": ("Remove inventory binding", "Снять привязку хранилища"), "gui.unusualcopper.recover": ("Recover held cargo", "Вернуть удерживаемый груз"),
+        "gui.unusualcopper.area_size": ("Area: %s blocks", "Зона: %s блоков"), "gui.unusualcopper.growth_stats": ("Checked: %s; grown: %s", "Проверено: %s; рост: %s"),
+        "gui.unusualcopper.growth_mode.0": ("Even growth", "Равномерно"), "gui.unusualcopper.growth_mode.1": ("Finish maturation", "До зрелости"),
+        "wand.unusualcopper.mode.0": ("Mode: area selection", "Режим: выбор области"), "wand.unusualcopper.mode.1": ("Mode: inventory binding", "Режим: привязка хранилища"), "wand.unusualcopper.mode.2": ("Mode: machine rules", "Режим: правила машины"),
+        "wand.unusualcopper.tooltip": ("Shift + use in air: change mode. Use on a machine to begin.", "Shift + ПКМ в воздух: смена режима. ПКМ по машине — начать."),
+        "wand.unusualcopper.first": ("Machine selected. Choose the first corner.", "Машина выбрана. Укажите первую точку."), "wand.unusualcopper.second": ("First corner selected. Choose the second corner.", "Первая точка выбрана. Укажите вторую."),
+        "wand.unusualcopper.storage": ("Machine selected. Choose an inventory face.", "Машина выбрана. Укажите грань хранилища."), "wand.unusualcopper.bound": ("Inventory bound.", "Хранилище привязано."), "wand.unusualcopper.selected": ("Work area saved.", "Рабочая область сохранена."),
+        "wand.unusualcopper.denied": ("No access, unavailable target, or held cargo.", "Нет доступа, цель недоступна или есть удерживаемый груз."), "wand.unusualcopper.select_machine": ("Select a compatible machine in this dimension first.", "Сначала выберите подходящую машину в этом измерении."),
+        "wand.unusualcopper.stale": ("Machine changed or unloaded. Select it again.", "Машина изменилась или выгружена. Выберите её снова."), "wand.unusualcopper.too_far": ("Selection must be within 32 blocks of the machine.", "Выбор должен быть в пределах 32 блоков от машины."), "wand.unusualcopper.too_large": ("Maximum work area is 16 x 16 x 16.", "Максимальная область: 16 × 16 × 16."),
+        "status.unusualcopper.no_area": ("Select a work area", "Выберите рабочую область"), "status.unusualcopper.no_targets": ("No targets in this pass", "Нет целей в этом проходе"), "status.unusualcopper.protected": ("Access denied by protection", "Запрещено защитой"),
+        "status.unusualcopper.unloaded": ("Area chunk is unloaded", "Чанк области выгружен"), "status.unusualcopper.unsupported": ("Plant needs an adapter", "Растению нужен адаптер"), "status.unusualcopper.no_growth": ("Mature or cannot grow", "Зрелое или нет условий роста"),
         "block.unusualcopper.copper_item_pipe": ("Copper Item Pipe", "Предметная труба"),
         "item.unusualcopper.face_selector": ("Copper Face Selector", "Селектор граней"),
         "item.unusualcopper.cargo_bundle": ("Recovered Cargo", "Сохранённый груз"),
@@ -221,4 +241,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 6 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 7 editable Blockbench projects, models, item tags and RU/EN.")

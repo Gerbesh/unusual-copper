@@ -46,6 +46,7 @@ public final class ModContent {
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);
     public static final RegistryObject<Item> ITEM_PIPE_ITEM = ITEMS.register("copper_item_pipe", () -> new BlockItem(ITEM_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Item> FACE_SELECTOR = ITEMS.register("face_selector", io.github.gerbesh.unusualcopper.item.FaceSelectorItem::new);
+    public static final RegistryObject<Item> AREA_WAND = ITEMS.register("area_wand", io.github.gerbesh.unusualcopper.item.AreaWandItem::new);
     public static final RegistryObject<Item> CARGO_BUNDLE = ITEMS.register("cargo_bundle", io.github.gerbesh.unusualcopper.item.CargoBundleItem::new);
     public static final RegistryObject<BlockEntityType<CopperMachineBlockEntity>> MACHINE_ENTITY = ENTITIES.register("copper_machine", () -> BlockEntityType.Builder.of(CopperMachineBlockEntity::new, MACHINES.values().stream().map(RegistryObject::get).toArray(Block[]::new)).build(null));
     public static final RegistryObject<BlockEntityType<EnergyPipeBlockEntity>> PIPE_ENTITY = ENTITIES.register("energy_pipe", () -> BlockEntityType.Builder.of(EnergyPipeBlockEntity::new, ENERGY_PIPE.get()).build(null));

@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 14;
+    public static final int DATA_COUNT = 22;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -30,7 +30,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
-                @Override public boolean isActive() { return data.get(8) != MachineKind.COPPER_CELL.ordinal() && (slotIndex != 1 || data.get(8) == MachineKind.SOLAR_INFUSER.ordinal()); }
+                @Override public boolean isActive() { return kind().hasInventory() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER); }
                 @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
             });
         }
@@ -45,12 +45,16 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         if (machine == null || !stillValid(player)) return false;
         if (button == 0) { machine.redstoneMode = (machine.redstoneMode + 1) % 3; machine.setChanged(); return true; }
         if (button == 1) { machine.cancelOperation(); return true; }
+        if (button == 2 && machine.kind.usesArea()) { machine.growthMode = (machine.growthMode + 1) % 2; machine.setChanged(); return true; }
+        if (button == 3 && machine.workArea() != null && player instanceof net.minecraft.server.level.ServerPlayer server) { io.github.gerbesh.unusualcopper.network.AreaNetwork.preview(server, machine.workArea().min(), machine.workArea().max(), true); return true; }
+        if (button == 4) { machine.clearBinding(); return true; }
+        if (button == 5) { machine.recoverBinding(player); return true; }
         return false;
     }
     @Override public ItemStack quickMoveStack(Player player, int index) {
         if (index < 0 || index >= slots.size()) return ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (!slot.hasItem() || !slot.mayPickup(player) || !stillValid(player)) return ItemStack.EMPTY;
+        if (!slot.isActive() || !slot.hasItem() || !slot.mayPickup(player) || !stillValid(player)) return ItemStack.EMPTY;
         ItemStack current = slot.getItem(); ItemStack original = current.copy();
         if (index < 4) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
         else if (!moveItemStackTo(current, 0, 2, false)) return ItemStack.EMPTY;
@@ -62,4 +66,5 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     public int progress() { return (data.get(4) & 0xffff) | ((data.get(10) & 0xffff) << 16); }
     public int duration() { return (data.get(5) & 0xffff) | ((data.get(11) & 0xffff) << 16); }
     public int operationCost() { return (data.get(12) & 0xffff) | ((data.get(13) & 0xffff) << 16); }
+    public MachineKind kind() { return MachineKind.values()[Math.floorMod(data.get(8), MachineKind.values().length)]; }
 }

@@ -1,0 +1,20 @@
+Unusual Copper 0.3.0-alpha.1 — local verification, 2026-10-15
+Source logs are ignored local build artifacts; excerpts below preserve the recorded result.
+
+.codex-tmp/verify-area-binding.log
+[02:50:32] [Server thread/INFO] [minecraft/GameTestServer]: All 35 required tests passed :)
+BUILD SUCCESSFUL in 33s
+
+.codex-tmp/verify-openpac-cultivator.log
+[02:49:39] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied
+[02:49:39] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CULTIVATOR PASS: foreign target access denied without charge; owner grew claimed wheat for exactly 140 CuE
+BUILD SUCCESSFUL in 27s
+
+.codex-tmp/client-cultivator.log
+[02:45:18] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE WAND SELECTION PASS: native server useOn selected 28 coordinates and opened the rules menu
+[02:45:20] [IO-Worker-14/INFO] [io.gi.ge.un.UnusualCopper/]: CuE cultivator menu screenshot: ������ ������ �������� ��� cue-cultivator-menu.png
+[02:45:23] [IO-Worker-12/INFO] [io.gi.ge.un.UnusualCopper/]: CuE cultivator area screenshot: ������ ������ �������� ��� cue-cultivator-area.png
+BUILD SUCCESSFUL in 48s
+
+io.github.gerbesh.unusualcopper.AccountingTest: tests=5, failures=0, errors=0, skipped=0
+io.github.gerbesh.unusualcopper.WorkAreaTest: tests=3, failures=0, errors=0, skipped=0
