@@ -8,6 +8,13 @@ import java.util.*;
 
 /** Owned emergency loot, independent of external storage simulation. */
 public final class ReaperState {
+    public static final int WINDUP_TICKS = 12;
+    public record Plan(UUID owner, io.github.gerbesh.unusualcopper.gameplay.WorkArea area, ReaperRule rule, int trigger, int keep, net.minecraft.core.BlockPos storage, net.minecraft.core.Direction side) {
+        public static Plan of(CopperMachineBlockEntity machine) { var state=machine.reaper; return new Plan(machine.owner(),machine.workArea(),state.rule,state.trigger,state.keep,machine.boundInventory(),machine.boundSide()); }
+    }
+    /** Transient intent, never an owned resource or permission to skip a fresh server check. */
+    public record Windup(UUID action, UUID target, long strikeAt, Plan plan) {}
+    public Windup windup;
     public ReaperRule rule = ReaperRule.defaults();
     public int trigger, keep, population;
     public boolean active;
@@ -33,6 +40,7 @@ public final class ReaperState {
         var items = new ListTag(); for (var stack : loot) { var item = new CompoundTag(); item.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); item.putInt("Count", stack.getCount()); items.add(item); } data.put("Loot", items); return data;
     }
     public void load(CompoundTag data) {
+        windup = null;
         rule = data.contains("Rule") ? ReaperRule.load(data.getCompound("Rule")) : ReaperRule.defaults(); trigger = Math.max(0, Math.min(1_000_000, data.getInt("Trigger"))); keep = Math.max(0, Math.min(trigger, data.getInt("Keep"))); active = data.getBoolean("Active"); loot.clear();
         for (var raw : data.getList("Loot", Tag.TAG_COMPOUND)) { var item = (CompoundTag)raw; var stack = ItemStack.of(item.getCompound("Stack")); stack.setCount(Math.max(0, item.getInt("Count"))); if (!stack.isEmpty()) loot.add(stack); }
     }

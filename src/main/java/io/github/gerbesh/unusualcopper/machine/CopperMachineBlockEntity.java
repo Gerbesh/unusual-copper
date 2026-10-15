@@ -221,10 +221,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
 
     public static void tick(ServerLevel level, BlockPos pos, BlockState state, CopperMachineBlockEntity machine) {
         boolean signal = level.hasNeighborSignal(pos);
-        if ((machine.redstoneMode == 1 && !signal) || (machine.redstoneMode == 2 && signal)) machine.status(MachineStatus.REDSTONE_PAUSED);
+        if ((machine.redstoneMode == 1 && !signal) || (machine.redstoneMode == 2 && signal)) { if(machine.reaper!=null) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(machine,level); machine.status(MachineStatus.REDSTONE_PAUSED); }
         else machine.logic.tick(machine, level);
         if (machine.energyEnabled() && level.getGameTime() % 20 == 0) io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
-        boolean active = machine.status == MachineStatus.WORKING;
+        boolean active = machine.status == MachineStatus.WORKING || machine.status == MachineStatus.CHARGING;
         if (state.getValue(CopperMachineBlock.ACTIVE) != active) level.setBlock(pos, state.setValue(CopperMachineBlock.ACTIVE, active), 2);
         if (level.getGameTime() % 10 == 0) level.sendBlockUpdated(pos, machine.getBlockState(), machine.getBlockState(), 2);
     }
@@ -272,8 +272,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
     @Override public void onLoad() { super.onLoad(); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); }
-    @Override public void onChunkUnloaded() { invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
-    @Override public void setRemoved() { super.setRemoved(); EnergyNetworks.dirty(level); }
+    @Override public void onChunkUnloaded() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
+    @Override public void setRemoved() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); super.setRemoved(); EnergyNetworks.dirty(level); }
 
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);

@@ -22,6 +22,7 @@
   "status.unusualcopper.scanning": "Подсчёт популяции",
   "status.unusualcopper.population_limit": "Порог популяции",
   "status.unusualcopper.kill_cancelled": "Убийство отменено",
+  "status.unusualcopper.charging": "Сжатие руны",
   "block.unusualcopper.growth_shepherd": "Пастырь роста",
   "gui.unusualcopper.own_pets.0": "Свои питомцы: выкл.",
   "gui.unusualcopper.own_pets.1": "Свои питомцы: вкл.",

@@ -1,0 +1,49 @@
+Unusual Copper 0.5.1-alpha.1 — reaper windup and effects, 2026-10-15
+Successful final runs; local raw logs are ignored.
+
+.codex-tmp/verify-reaper-fx-release-candidate.log
+[08:34:15] [Server thread/INFO] [minecraft/GameTestServer]: All 66 required tests passed :)
+BUILD SUCCESSFUL in 41s
+
+.codex-tmp/opac-reaper-fx-repeat.log
+[08:30:20] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC REAPER WINDUP PASS: claim ownership changed after preparation; commit rechecked permission and cancelled without damage or fee
+[08:30:20] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC REAPER PASS: foreign target damage denied without charge; owner killed target for exactly 1500 CuE and kept real loot
+BUILD SUCCESSFUL in 29s
+
+.codex-tmp/client-reaper-fx-billboard.log
+[08:40:20] [IO-Worker-15/INFO] [io.gi.ge.un.UnusualCopper/]: CuE reaper rune screenshot: ������ ������ �������� ��� cue-reaper-rune.png
+[08:40:20] [IO-Worker-15/INFO] [io.gi.ge.un.UnusualCopper/]: CuE reaper flash screenshot: ������ ������ �������� ��� cue-reaper-flash.png
+[08:40:20] [IO-Worker-15/INFO] [io.gi.ge.un.UnusualCopper/]: CuE reaper loot screenshot: ������ ������ �������� ��� cue-reaper-loot.png
+[08:40:21] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE REAPER FX CLIENT PASS: actual ticker preparation, paid death, accepted loot icons and real barrel transfer; no client inventory authority
+[08:40:21] [IO-Worker-15/INFO] [io.gi.ge.un.UnusualCopper/]: CuE reaper transfer screenshot: ������ ������ �������� ��� cue-reaper-transfer.png
+[08:40:21] [Render thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE REAPER FX BUDGET PASS: 3000 synthetic client events; accepted <=8/tick, active=16, peak drawn icons=24/frame; actual rune/model renders=88,183
+BUILD SUCCESSFUL in 1m 4s
+
+.codex-tmp/production-reaper-fx-final1-full.log
+[08:36:27] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.20, for MC 1.20.1 with MCP 20230612.114412
+[08:36:33] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round=3
+[08:36:33] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round=3
+[08:36:34] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot
+
+.codex-tmp/production-reaper-fx-final2.log
+[08:38:16] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round=4
+[08:38:16] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round=4
+[08:38:16] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot
+
+.codex-tmp/production-population.log
+[08:40:56] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.20, for MC 1.20.1 with MCP 20230612.114412
+[08:41:01] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round=5
+[08:41:01] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round=5
+[08:41:02] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot
+
+io.github.gerbesh.unusualcopper.AccountingTest: tests=5, failures=0, errors=0, skipped=0
+io.github.gerbesh.unusualcopper.WorkAreaTest: tests=3, failures=0, errors=0, skipped=0
+
+Final production JAR: 99 JSON resources parsed; dev/probe/fixture classes/resources absent.
+SHA256: 88ab544b2240f3f89f64ac30e2c722c31c2e4887101b35427865f692d1cd358b
+
+Production fixture epoch v2 permits animals and disables natural spawning by gamerule. The old single-tick fixture had spawn-animals=false, which vanilla discards on real ticks; v2 uses its own SavedData witness. Rounds 3/4 restored the same UUID and five named emergency emeralds. The final cosmetic billboard JAR repeated the production checks in round 5.
+Real ticker tests use world time. Transaction-focused tests advance only their own transient deadline; OpenPAC permission test does likewise between real claim changes.
+The deliberate downstream loot-listener error is caught by its regression test.
+Client stress uses 3000 synthetic cosmetic events after the real operation screenshots. It proves cache/message/draw limits, not the full 50–100-machine performance gate.
+Remaining release gates and unchanged full scope: docs/MOB_REAPER.md, docs/ROADMAP.md and original GDD.

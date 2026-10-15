@@ -42,7 +42,7 @@ sync-chunk-writes=true
 enable-rcon=false
 enable-query=false
 spawn-monsters=false
-spawn-animals=false
+spawn-animals=true
 spawn-npcs=false
 spawn-protection=0
 """
@@ -66,9 +66,11 @@ with log.open("w", encoding="utf-8") as output:
 text = log.read_text(encoding="utf-8", errors="replace")
 passed = [line for line in text.splitlines() if "CuE PRODUCTION POPULATION PASS" in line]
 reaper = [line for line in text.splitlines() if "CuE PRODUCTION REAPER PASS" in line]
-if process.returncode or not passed or not reaper:
+windup = [line for line in text.splitlines() if "CuE PRODUCTION WINDUP PASS" in line]
+if process.returncode or not passed or not reaper or not windup:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
 print(reaper[-1])
+print(windup[-1])
 print("Production server stopped cleanly; log:", log)

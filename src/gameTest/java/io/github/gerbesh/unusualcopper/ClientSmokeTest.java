@@ -33,6 +33,14 @@ public final class ClientSmokeTest {
     private static BlockPos menuPos, pipeMenuPos, cultivatorPos, shepherdPos, reaperPos;
     private static final java.util.List<java.util.UUID> shepherdAnimals = new java.util.ArrayList<>();
     private static boolean settingsSent;
+    private static boolean reaperFxStarted;
+    private static final AtomicBoolean reaperFxReady=new AtomicBoolean(), reaperFxVerified=new AtomicBoolean();
+    private static volatile java.util.UUID reaperVictim;
+    private static BlockPos reaperStorage;
+    private static long reaperWindupBaseline, reaperStrikeBaseline, reaperTransferBaseline;
+    private static boolean reaperFlashCaptured;
+    private static long reaperStressTick=Long.MIN_VALUE, reaperStressId;
+    private static int reaperStressWaves;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !Boolean.getBoolean("unusualcopper.smokeClient")) return;
         Minecraft mc = Minecraft.getInstance();
@@ -87,7 +95,8 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7 || stage == 10) && mc.screen instanceof CopperMachineScreen) || (stage == 9 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ReaperScreen) || ((stage == 2 || stage == 5 || stage == 8) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7 || stage == 10) && mc.screen instanceof CopperMachineScreen) || (stage == 9 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ReaperScreen) || ((stage == 2 || stage == 5 || stage == 8 || stage>=11) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if(stage>=11 && ticks>400) throw new IllegalStateException("Reaper visual fixture timed out at stage "+stage+", stats="+io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics());
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -170,7 +179,43 @@ public final class ClientSmokeTest {
             captured=true;
             Screenshot.grab(mc.gameDirectory,"cue-reaper-menu.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE reaper machine screenshot: {}",text.getString()); saved.set(true); });
         }
+        if(stage==11 && reaperFxReady.get() && !reaperFxStarted) {
+            reaperFxStarted=true;
+            mc.getSingleplayerServer().execute(() -> ((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(reaperPos)).redstoneMode=0);
+        }
+        if(stage==11 && !captured && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().windups()>reaperWindupBaseline && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(0)>=4 && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(0)<10 && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().runeFrames()>0 && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().compressedModels()>0) {
+            captured=true; Screenshot.grab(mc.gameDirectory,"cue-reaper-rune.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE reaper rune screenshot: {}",text.getString()); saved.set(true); });
+        }
+        if(stage==12 && !captured && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().strikes()>reaperStrikeBaseline && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(1)>=5 && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(1)<13 && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().iconFrames()>0) {
+            captured=true; Screenshot.grab(mc.gameDirectory,"cue-reaper-loot.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE reaper loot screenshot: {}",text.getString()); saved.set(true); });
+        }
+        if(stage==12 && !reaperFlashCaptured && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(1)>=1 && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(1)<3) {
+            reaperFlashCaptured=true; Screenshot.grab(mc.gameDirectory,"cue-reaper-flash.png",mc.getMainRenderTarget(),text -> UnusualCopper.LOGGER.info("CuE reaper flash screenshot: {}",text.getString()));
+        }
+        if(stage==13 && !captured && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().transfers()>reaperTransferBaseline && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(3)>=8 && io.github.gerbesh.unusualcopper.client.ReaperEffects.youngestAge(3)<14) {
+            captured=true;
+            mc.getSingleplayerServer().execute(() -> {
+                var level=serverLevel(mc); var reaper=(CopperMachineBlockEntity)level.getBlockEntity(reaperPos); var victim=level.getEntity(reaperVictim); var barrel=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(reaperStorage);
+                if(victim!=null && victim.isAlive() || reaper.energy.stored()!=0 || barrel.isEmpty() || !reaperFlashCaptured) throw new IllegalStateException("Reaper cosmetic event does not correspond to real paid loot transfer/flash");
+                reaperFxVerified.set(true); UnusualCopper.LOGGER.info("CuE REAPER FX CLIENT PASS: actual ticker preparation, paid death, accepted loot icons and real barrel transfer; no client inventory authority");
+            });
+            Screenshot.grab(mc.gameDirectory,"cue-reaper-transfer.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE reaper transfer screenshot: {}",text.getString()); saved.set(true); });
+        }
+        if(stage==14 && mc.level.getGameTime()!=reaperStressTick && reaperStressWaves<3) {
+            reaperStressTick=mc.level.getGameTime(); reaperStressWaves++;
+            var before=io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics();
+            int[] icons={net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(Items.BEEF),net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(Items.LEATHER),net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(Items.COPPER_INGOT),net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(Items.REDSTONE)};
+            for(int i=0;i<1000;i++) io.github.gerbesh.unusualcopper.client.ReaperEffects.accept(new io.github.gerbesh.unusualcopper.network.MachineEffects.Reap(mc.level.dimension().location(),reaperPos,new java.util.UUID(0,++reaperStressId),3,-1,new java.util.UUID(0,0),net.minecraft.world.phys.Vec3.atCenterOf(reaperPos),reaperStorage,icons));
+            var after=io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics();
+            if(after.transfers()-before.transfers()>8 || after.active()>16 || after.peakIcons()>24) throw new IllegalStateException("Client cosmetic budget exceeded: "+after);
+        }
+        if(stage==14 && reaperStressWaves==3 && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().peakIcons()==24) {
+            var stats=io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics();
+            if(stats.active()!=16) throw new IllegalStateException("Stress scene did not reach the bounded event cache");
+            UnusualCopper.LOGGER.info("CuE REAPER FX BUDGET PASS: 3000 synthetic client events; accepted <=8/tick, active=16, peak drawn icons=24/frame; actual rune/model renders={},{}",stats.runeFrames(),stats.compressedModels()); mc.options.hideGui=false; mc.stop();
+        }
         if (saved.get()) {
+            if(stage==13 && !reaperFxVerified.get()) return;
             if (stage == 0) {
                 stage = 1; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = false;
                 mc.getSingleplayerServer().execute(() -> {
@@ -285,6 +330,32 @@ public final class ClientSmokeTest {
             } else if (stage == 9) {
                 stage=10; captured=false; saved.set(false); ticks=0;
                 mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId,0);
+            } else if(stage==10) {
+                stage=11; captured=false; saved.set(false); ticks=0; mc.options.hideGui=true;
+                var stats=io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics(); reaperWindupBaseline=stats.windups(); reaperStrikeBaseline=stats.strikes(); reaperTransferBaseline=stats.transfers();
+                mc.getSingleplayerServer().execute(() -> {
+                    var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer();
+                    var reaper=(CopperMachineBlockEntity)level.getBlockEntity(reaperPos); reaper.redstoneMode=1; reaper.clearBinding(); reaper.energy.spend(reaper.energy.stored()); reaper.energy.add(1500,false); reaper.nextWaveTick=0;
+                    for(int slot=0;slot<4;slot++) reaper.inventory.setStackInSlot(slot,ItemStack.EMPTY);
+                    var target=reaperPos.offset(2,0,3); var area=new io.github.gerbesh.unusualcopper.gameplay.WorkArea(target,target);
+                    if(!reaper.setWorkArea(area,player)) throw new IllegalStateException("Reaper FX fixture area failed");
+                    reaper.reaper.settings(new io.github.gerbesh.unusualcopper.gameplay.ReaperRule(true,true,java.util.Set.of(new net.minecraft.resources.ResourceLocation("minecraft","cow")),java.util.Set.of(),java.util.Set.of()),0,0);
+                    for(var mob:level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,new net.minecraft.world.phys.AABB(target))) mob.discard();
+                    var cow=net.minecraft.world.entity.EntityType.COW.create(level); cow.setPos(target.getX()+.5,target.getY()+.1,target.getZ()+.5); cow.setNoAi(true); cow.setNoGravity(true); level.addFreshEntity(cow); reaperVictim=cow.getUUID();
+                    reaperStorage=reaperPos.east(4); level.setBlock(reaperStorage,Blocks.AIR.defaultBlockState(),3); level.setBlock(reaperStorage,Blocks.BARREL.defaultBlockState(),3);
+                    for(var item:level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(reaperPos).inflate(8))) item.discard();
+                    player.teleportTo(level,reaperPos.getX()+2.5,reaperPos.getY()+2.3,reaperPos.getZ()-4,0,22); reaperFxReady.set(true);
+                });
+            } else if(stage==11) {
+                stage=12; captured=false; saved.set(false); ticks=0;
+            } else if(stage==12) {
+                stage=13; captured=false; saved.set(false); ticks=0;
+                mc.getSingleplayerServer().execute(() -> {
+                    var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); var reaper=(CopperMachineBlockEntity)level.getBlockEntity(reaperPos);
+                    if(!reaper.bind(reaperStorage,net.minecraft.core.Direction.UP,player)) throw new IllegalStateException("Reaper FX barrel binding failed");
+                });
+            } else if(stage==13) {
+                stage=14; captured=false; saved.set(false); ticks=0;
             } else { mc.options.hideGui = false; mc.stop(); }
         }
     }

@@ -216,6 +216,7 @@ def languages():
     additions = {
         "block.unusualcopper.mob_reaper": ("Mob Reaper", "Жнец сущностей"),
         "status.unusualcopper.scanning": ("Scanning population", "Подсчёт популяции"), "status.unusualcopper.population_limit": ("Population threshold", "Порог популяции"), "status.unusualcopper.kill_cancelled": ("Kill cancelled", "Убийство отменено"),
+        "status.unusualcopper.charging": ("Compressing the rune", "Сжатие руны"),
         "block.unusualcopper.growth_shepherd": ("Growth Shepherd", "Пастырь роста"),
         "gui.unusualcopper.own_pets.0": ("Own pets: excluded", "Свои питомцы: выкл."), "gui.unusualcopper.own_pets.1": ("Own pets: allowed", "Свои питомцы: вкл."),
         "gui.unusualcopper.shepherd_stats": ("Grown: %s · next: %s s", "Рост: %s · волна: %s с"),

@@ -8,23 +8,32 @@ import net.minecraft.server.level.ServerLevel;
 
 public final class ReaperLogic implements MachineLogic {
     @Override public void tick(CopperMachineBlockEntity machine, ServerLevel level) {
-        if (machine.workArea() == null) { machine.status(MachineStatus.NO_AREA); return; }
-        if (level.getGameTime() >= machine.nextWaveTick) AreaWorkScheduler.request(level, machine);
+        if (machine.workArea() == null) { cancel(machine,level); machine.status(MachineStatus.NO_AREA); return; }
+        long now=level.getGameTime(); var windup=machine.reaper.windup;
+        if (windup != null && !windup.plan().equals(ReaperState.Plan.of(machine))) cancel(machine,level);
+        windup=machine.reaper.windup;
+        if (windup != null ? now >= windup.strikeAt() : now >= Math.max(0,machine.nextWaveTick-ReaperState.WINDUP_TICKS)) AreaWorkScheduler.request(level, machine);
+    }
+    public static void cancel(CopperMachineBlockEntity machine,ServerLevel level) {
+        var windup=machine.reaper.windup; machine.reaper.windup=null;
+        if (windup != null) io.github.gerbesh.unusualcopper.network.MachineEffects.reaperCancel(level,machine,windup.action());
     }
     public static void process(CopperMachineBlockEntity machine, ServerLevel level) {
-        if (!machine.energyEnabled()) { machine.status(MachineStatus.REDSTONE_PAUSED); return; }
-        if (level.getGameTime() < machine.nextWaveTick) return;
+        if (!machine.energyEnabled()) { cancel(machine,level); machine.status(MachineStatus.REDSTONE_PAUSED); return; }
+        long now=level.getGameTime(); var windup=machine.reaper.windup;
+        if (windup != null && !windup.plan().equals(ReaperState.Plan.of(machine))) { cancel(machine,level); machine.status(MachineStatus.SCANNING); return; }
+        if (windup != null ? now < windup.strikeAt() || now < machine.nextWaveTick : now < Math.max(0,machine.nextWaveTick-ReaperState.WINDUP_TICKS)) return;
         var area = machine.workArea(); var state = machine.reaper; machine.grown = 0;
-        if (area == null || !AreaAccess.geometryValid(level, machine.getBlockPos(), area)) { machine.status(MachineStatus.NO_AREA); return; }
-        if (!ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) { machine.status(MachineStatus.PROTECTED); return; }
+        if (area == null || !AreaAccess.geometryValid(level, machine.getBlockPos(), area)) { cancel(machine,level); machine.status(MachineStatus.NO_AREA); return; }
+        if (!ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) { cancel(machine,level); machine.status(MachineStatus.PROTECTED); return; }
         state.drain(machine);
-        if (state.lootCount() > 0 || machine.boundCargoCount() > 0 || (machine.boundInventory() != null && (!machine.inventory.getStackInSlot(2).isEmpty() || !machine.inventory.getStackInSlot(3).isEmpty()))) { machine.status(MachineStatus.OUTPUT_FULL); return; }
+        if (state.lootCount() > 0 || machine.boundCargoCount() > 0 || (machine.boundInventory() != null && (!machine.inventory.getStackInSlot(2).isEmpty() || !machine.inventory.getStackInSlot(3).isEmpty()))) { cancel(machine,level); machine.status(MachineStatus.OUTPUT_FULL); return; }
         boolean room = false; for (int slot = 2; slot <= 3; slot++) { var stack = machine.inventory.getStackInSlot(slot); if (stack.isEmpty() || stack.getCount() < Math.min(stack.getMaxStackSize(), machine.inventory.getSlotLimit(slot))) room = true; }
-        if (!room) { machine.status(MachineStatus.OUTPUT_FULL); return; }
+        if (!room) { cancel(machine,level); machine.status(MachineStatus.OUTPUT_FULL); return; }
         if (machine.boundInventory() != null) {
-            if (!level.hasChunkAt(machine.boundInventory())) { machine.status(MachineStatus.UNLOADED); return; }
+            if (!level.hasChunkAt(machine.boundInventory())) { cancel(machine,level); machine.status(MachineStatus.UNLOADED); return; }
             var space = machine.boundEndpoint(level).space();
-            if (space != HandlerStorageEndpoint.Space.AVAILABLE) { machine.status(space == HandlerStorageEndpoint.Space.SCANNING ? MachineStatus.SCANNING : MachineStatus.OUTPUT_FULL); return; }
+            if (space != HandlerStorageEndpoint.Space.AVAILABLE) { if(space!=HandlerStorageEndpoint.Space.SCANNING) cancel(machine,level); machine.status(space == HandlerStorageEndpoint.Space.SCANNING ? MachineStatus.SCANNING : MachineStatus.OUTPUT_FULL); return; }
         }
         var population = MobPopulations.ledger(level, machine.runtimeIdentity, machine.getBlockPos(), area, state.rule);
         machine.inspected = population.step(ServerConfig.reaperCandidates() - 1);
@@ -33,15 +42,21 @@ public final class ReaperLogic implements MachineLogic {
         if (!state.active && state.population > state.trigger) state.active = true;
         if (state.population <= state.keep) state.active = false;
         machine.setChanged();
-        if (!state.active) { machine.status(MachineStatus.POPULATION_LIMIT); return; }
-        var target = population.target();
-        if (!population.ready() || target == null || population.count() <= state.keep || !area.contains(target.blockPosition()) || !state.rule.matches(target)) { machine.status(MachineStatus.SCANNING); return; }
+        if (!state.active) { cancel(machine,level); machine.status(MachineStatus.POPULATION_LIMIT); return; }
+        var target = windup == null ? population.target() : level.getEntity(windup.target()) instanceof net.minecraft.world.entity.Mob mob ? mob : null;
+        if (!population.ready() || target == null || population.count() <= state.keep || !area.contains(target.blockPosition()) || !state.rule.matches(target)) { cancel(machine,level); machine.status(MachineStatus.SCANNING); return; }
         machine.inspected++;
-        if (!level.hasChunkAt(target.blockPosition()) || !ProtectionPolicy.allowed(level, target.blockPosition(), machine.owner())) { machine.status(MachineStatus.PROTECTED); machine.nextWaveTick = level.getGameTime() + ServerConfig.reaperInterval(); return; }
+        if (!level.hasChunkAt(target.blockPosition()) || !ProtectionPolicy.allowed(level, target.blockPosition(), machine.owner())) { cancel(machine,level); machine.status(MachineStatus.PROTECTED); machine.nextWaveTick = now + ServerConfig.reaperInterval(); return; }
         int price = ServerConfig.reaperCost();
-        if (machine.energy.stored() < price) { machine.status(MachineStatus.NO_ENERGY); return; }
-        machine.nextWaveTick = level.getGameTime() + ServerConfig.reaperInterval();
-        boolean killed = ReaperLoot.kill(machine, target, level, price);
+        if (machine.energy.stored() < price) { cancel(machine,level); machine.status(MachineStatus.NO_ENERGY); return; }
+        if (windup == null) {
+            var action=java.util.UUID.randomUUID();
+            state.windup=new ReaperState.Windup(action,target.getUUID(),Math.max(now+ReaperState.WINDUP_TICKS,machine.nextWaveTick),ReaperState.Plan.of(machine));
+            io.github.gerbesh.unusualcopper.network.MachineEffects.reaperWindup(level,machine,target,action);
+            machine.status(MachineStatus.CHARGING); return;
+        }
+        state.windup=null; machine.nextWaveTick = now + ServerConfig.reaperInterval();
+        boolean killed = ReaperLoot.kill(machine, target, level, price,windup.action());
         state.population = population.count(); if (state.population <= state.keep) state.active = false;
         machine.grown = killed ? 1 : 0; machine.status(killed ? MachineStatus.WORKING : MachineStatus.KILL_CANCELLED); machine.setChanged();
     }

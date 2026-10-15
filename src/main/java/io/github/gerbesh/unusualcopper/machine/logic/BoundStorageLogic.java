@@ -46,9 +46,12 @@ public final class BoundStorageLogic {
         if (machine.boundCargoSlot >= 0) rest = machine.inventory.insertItem(machine.boundCargoSlot, offered, false);
         else if (endpoint != null && endpoint.isAvailable()) rest = endpoint.insert(offered, false);
         else return;
+        int moved=count-rest.getCount();
+        boolean showTransfer=moved>0 && machine.boundCargoSlot<0 && machine.kind==MachineKind.MOB_REAPER && machine.boundInventory()!=null && ItemKey.of(stack).matches(offered) && (rest.isEmpty() || ItemKey.of(stack).matches(rest));
         var after = new ArrayList<ItemStack>();
         if (stack.getCount() > count) after.add(stack.copyWithCount(stack.getCount() - count));
         if (!rest.isEmpty()) after.add(rest.copy()); after.addAll(cargo.subList(1, cargo.size())); machine.boundCargo(after);
         if (!rest.isEmpty() && (!ItemKey.of(stack).matches(rest) || rest.getCount() > count)) { machine.boundFaulted = true; machine.setChanged(); }
+        if(showTransfer) io.github.gerbesh.unusualcopper.network.MachineEffects.reaperTransfer((ServerLevel)machine.getLevel(),machine,machine.boundInventory(),stack.copyWithCount(moved));
     }
 }

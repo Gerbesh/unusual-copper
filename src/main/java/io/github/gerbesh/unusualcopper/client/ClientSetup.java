@@ -21,6 +21,7 @@ public final class ClientSetup {
             MenuScreens.register(ModContent.PIPE_MENU.get(), ItemPipeScreen::new);
             io.github.gerbesh.unusualcopper.network.AreaNetwork.clientReceiver(AreaPreviewRenderer::accept);
             io.github.gerbesh.unusualcopper.network.MachineEffects.clientReceiver(ShepherdEffects::accept);
+            io.github.gerbesh.unusualcopper.network.MachineEffects.reaperReceiver(ReaperEffects::accept);
             io.github.gerbesh.unusualcopper.network.PipeNetwork.clientReceiver(message -> {
                 var player = net.minecraft.client.Minecraft.getInstance().player;
                 if (player != null && player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ItemPipeMenu menu && menu.containerId == message.menu() && menu.pos.equals(message.pos())) menu.tags(message.face(), message.tags());

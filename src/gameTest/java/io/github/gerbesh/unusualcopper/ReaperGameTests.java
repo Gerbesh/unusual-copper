@@ -40,7 +40,12 @@ public final class ReaperGameTests {
         h.assertTrue(machine.setWorkArea(area, owner), "Owner selects the reaper area"); machine.reaper.settings(cows(), 0, 0); return machine;
     }
     private static Cow cow(ServerLevel level, BlockPos pos) { var cow = EntityType.COW.create(level); cow.setPos(pos.getX() + .5, pos.getY() + .1, pos.getZ() + .5); cow.setNoAi(true); cow.setNoGravity(true); level.addFreshEntity(cow); return cow; }
-    private static void process(CopperMachineBlockEntity m, ServerLevel level) { m.nextWaveTick = 0; for (int i = 0; i < 30; i++) { ReaperLogic.process(m, level); if (m.status() != MachineStatus.SCANNING) break; } }
+    // Transaction-focused cases advance only this intent's deadline. Real ticker/latency tests below use world time.
+    private static void process(CopperMachineBlockEntity m, ServerLevel level) { m.nextWaveTick = 0; for (int i = 0; i < 30; i++) {
+        ReaperLogic.process(m, level);
+        if(m.reaper.windup!=null) { var pending=m.reaper.windup; m.reaper.windup=new ReaperState.Windup(pending.action(),pending.target(),level.getGameTime(),pending.plan()); continue; }
+        if (m.status() != MachineStatus.SCANNING) break;
+    } }
     private static void loaded(GameTestHelper h, WorkArea area, Runnable test) {
         PopulationGameTests.loaded(h, area, () -> { var box = new AABB(area.min(), area.max().offset(1,1,1)).inflate(4); for (var item : h.getLevel().getEntitiesOfClass(ItemEntity.class, box)) item.discard(); try { test.run(); } finally { for (var item : h.getLevel().getEntitiesOfClass(ItemEntity.class, box)) item.discard(); } });
     }
@@ -165,7 +170,7 @@ public final class ReaperGameTests {
     @GameTest(template = "empty", timeoutTicks = 300)
     public static void actualTickerHonorsTwentyTicksEnergyAndRedstone(GameTestHelper h) {
         var level=h.getLevel(); var base=new BlockPos(59008,70,59008); var target=base.east(2); var area=new WorkArea(target,target);
-        var machine=new CopperMachineBlockEntity[1]; var victims=new ArrayList<Cow>(); var firstKillTick=new long[1];
+        var machine=new CopperMachineBlockEntity[1]; var victims=new ArrayList<Cow>(); var firstKillTick=new long[1]; var firstDeadline=new long[1];
         PopulationGameTests.loadedSequence(h,area,sequence -> sequence
             .thenExecute(() -> {
                 var m=machine(h,base,area); machine[0]=m; m.redstoneMode=1; m.energy.add(1499,false);
@@ -177,7 +182,9 @@ public final class ReaperGameTests {
             .thenExecuteAfter(25,() -> {
                 h.assertTrue(victims.stream().allMatch(Entity::isAlive) && machine[0].energy.stored()==1499 && machine[0].status()==MachineStatus.NO_ENERGY,"1499 CuE never buys a partial damage attempt"); machine[0].energy.add(3001,false);
             })
-            .thenWaitUntil(() -> { h.assertTrue(victims.stream().filter(Entity::isAlive).count()==2,"First real ticker kill"); firstKillTick[0]=level.getGameTime(); })
+            .thenWaitUntil(() -> { h.assertTrue(machine[0].reaper.windup!=null,"Real ticker begins a windup"); firstDeadline[0]=machine[0].reaper.windup.strikeAt(); h.assertTrue(victims.stream().allMatch(Entity::isAlive) && machine[0].energy.stored()==4500,"Windup alone never damages or charges"); })
+            .thenExecuteAfter(10,() -> h.assertTrue(victims.stream().allMatch(Entity::isAlive) && machine[0].energy.stored()==4500,"Ten following real ticks still precede the strike"))
+            .thenWaitUntil(() -> { h.assertTrue(victims.stream().filter(Entity::isAlive).count()==2,"First real ticker kill"); firstKillTick[0]=level.getGameTime(); h.assertTrue(firstKillTick[0]>=firstDeadline[0],"First strike occurs after its twelve-tick preparation"); })
             .thenExecuteAfter(18,() -> h.assertTrue(victims.stream().filter(Entity::isAlive).count()==2 && machine[0].energy.stored()==3000,"No second kill during the following eighteen ticks"))
             .thenWaitUntil(() -> { h.assertTrue(victims.stream().filter(Entity::isAlive).count()==1,"Second real ticker kill"); h.assertTrue(level.getGameTime()-firstKillTick[0]>=20 && machine[0].energy.stored()==1500,"At least twenty real ticks and exactly 1500 CuE per death"); })
             .thenExecute(() -> {
@@ -204,5 +211,52 @@ public final class ReaperGameTests {
             h.assertTrue(!wild.isAlive() && m.energy.stored()==1500 && m.reaper.population==0,"Explicit passive mode pays only for the one permitted wild adult");
             h.assertTrue(protectedMobs.stream().allMatch(mob -> mob.isAlive() && mob.getHealth()==mob.getMaxHealth()) && leashed.isAlive() && leashed.getHealth()==leashed.getMaxHealth() && player.getHealth()==20,"Named, baby, NPC, owned wolf/horse, leashed mob and player remain undamaged");
         });
+    }
+    @GameTest(template = "empty", timeoutTicks = 200)
+    public static void pendingStrikeRevalidatesTargetsSettingsOutputEnergyAndIdentity(GameTestHelper h) {
+        var level=h.getLevel(); var base=new BlockPos(63008,70,63008); var target=base.east(2); var area=new WorkArea(target,target);
+        loaded(h,area,()->{
+            for(int scenario=0;scenario<9;scenario++) {
+                var m=machine(h,base,area); var victim=cow(level,target); m.energy.add(1500,false);
+                for(int i=0;i<30 && m.reaper.windup==null;i++) ReaperLogic.process(m,level);
+                h.assertTrue(m.reaper.windup!=null && m.energy.stored()==1500 && victim.isAlive(),"Prepared intent owns no resources");
+                var pending=m.reaper.windup;
+                switch(scenario) {
+                    case 0 -> victim.setCustomName(Component.literal("Now protected"));
+                    case 1 -> victim.setPos(target.getX()+2.5,target.getY()+.1,target.getZ()+.5);
+                    case 2 -> victim.setAge(-5000);
+                    case 3 -> { m.inventory.setStackInSlot(2,new ItemStack(Items.STONE,64)); m.inventory.setStackInSlot(3,new ItemStack(Items.STONE,64)); }
+                    case 4 -> m.energy.spend(1000);
+                    case 5 -> m.setOwner(UUID.randomUUID());
+                    case 6 -> m.reaper.settings(ReaperRule.defaults(),0,0);
+                    case 7 -> m.redstoneMode=1;
+                    case 8 -> victim.discard();
+                }
+                m.reaper.windup=new ReaperState.Windup(pending.action(),pending.target(),level.getGameTime(),pending.plan());
+                var replacement=scenario==8?cow(level,target):null;
+                ReaperLogic.process(m,level);
+                h.assertTrue(m.reaper.windup==null && m.energy.stored()==(scenario==4?500:1500) && (scenario==8 || victim.isAlive() && victim.getHealth()==victim.getMaxHealth()) && (replacement==null || replacement.isAlive()),"Changed preparation is cancelled without paid damage or UUID retargeting: scenario="+scenario);
+                victim.discard(); if(replacement!=null) replacement.discard();
+            }
+        });
+    }
+    @GameTest(template = "empty", timeoutTicks = 200)
+    public static void unloadAndNbtRestoreDiscardUnpaidWindup(GameTestHelper h) {
+        var level=h.getLevel(); var base=new BlockPos(65008,70,65008); var target=base.east(2); var area=new WorkArea(target,target);
+        loaded(h,area,()->{
+            var m=machine(h,base,area); var victim=cow(level,target); m.energy.add(1500,false); ReaperLogic.process(m,level);
+            h.assertTrue(m.reaper.windup!=null && victim.isAlive(),"Fixture begins unpaid preparation");
+            var restored=(CopperMachineBlockEntity)BlockEntity.loadStatic(base,m.getBlockState(),m.saveWithFullMetadata());
+            h.assertTrue(restored!=null && restored.reaper.windup==null && restored.energy.stored()==1500,"NBT restore never resumes an old authority or spends a preparation fee");
+            m.onChunkUnloaded(); h.assertTrue(m.reaper.windup==null && m.energy.stored()==1500 && victim.isAlive(),"Chunk unload cancels the transient intent without a fee or damage");
+        });
+    }
+    @GameTest(template = "empty")
+    public static void cosmeticPacketsRejectUnboundedOrNonfiniteVisuals(GameTestHelper h) {
+        var origin=BlockPos.ZERO; int rejected=0;
+        for(int scenario=0;scenario<5;scenario++) try {
+            new io.github.gerbesh.unusualcopper.network.MachineEffects.Reap(new ResourceLocation("minecraft","overworld"),origin,UUID.randomUUID(),scenario==0?4:1,1,UUID.randomUUID(),scenario==1?new net.minecraft.world.phys.Vec3(Double.NaN,0,0):scenario==2?new net.minecraft.world.phys.Vec3(100,0,0):net.minecraft.world.phys.Vec3.atCenterOf(origin),scenario==3?origin.east(33):origin,scenario==4?new int[]{1,2,3,4,5}:new int[0]);
+        } catch (IllegalArgumentException expected) { rejected++; }
+        h.assertTrue(rejected==5,"Phase, coordinates, destination and icon count are bounded"); h.succeed();
     }
 }

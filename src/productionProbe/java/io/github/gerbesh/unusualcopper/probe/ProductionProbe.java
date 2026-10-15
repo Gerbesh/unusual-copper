@@ -20,6 +20,9 @@ import java.util.*;
 public final class ProductionProbe {
     private static ServerLevel level; private static long started; private static boolean done;
     private static UUID cancelledVictim;
+    private static io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity phaseMachine;
+    private static Cow phaseVictim;
+    private static long phaseStarted, phaseDeadline;
     @SubscribeEvent public static void death(net.minecraftforge.event.entity.living.LivingDeathEvent event) { if (event.getEntity().getUUID().equals(cancelledVictim)) event.setCanceled(true); }
     private static final BlockPos TARGET = new BlockPos(130, 70, 130);
     private static final class Checkpoint extends net.minecraft.world.level.saveddata.SavedData {
@@ -35,12 +38,16 @@ public final class ProductionProbe {
     @SubscribeEvent public static void started(ServerStartedEvent event) {
         if (!Boolean.getBoolean("unusualcopper.productionProbe")) return;
         level = event.getServer().overworld(); started = level.getGameTime(); level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, true); level.getChunkAt(TARGET);
+        level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(false,event.getServer());
     }
     @SubscribeEvent public static void tick(TickEvent.LevelTickEvent event) {
-        if (done || level == null || event.level != level || event.phase != TickEvent.Phase.END) return;
+        if (level == null || event.level != level || event.phase != TickEvent.Phase.END) return;
+        if(done) { phaseTick(); return; }
         if (level.getGameTime() - started > 400) throw new IllegalStateException("Production probe could not load entity region");
         if (!level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(TARGET.getX() >> 4, TARGET.getZ() >> 4)) || !level.isPositionEntityTicking(TARGET)) return;
-        var checkpoint = level.getDataStorage().computeIfAbsent(Checkpoint::load, Checkpoint::new, "unusualcopper_production_population_probe");
+        // Epoch 2 runs multiple real ticks with animals enabled. The old single-tick fixture
+        // disabled animals globally, so extending it could discard its persisted UUID witness.
+        var checkpoint = level.getDataStorage().computeIfAbsent(Checkpoint::load, Checkpoint::new, "unusualcopper_production_population_probe_v2");
         if (checkpoint.animal != null && level.getEntity(checkpoint.animal) == null) return;
         done = true;
         var area = WorkArea.between(TARGET, TARGET.east(2));
@@ -83,7 +90,27 @@ public final class ProductionProbe {
         checkpoint.round++; checkpoint.setDirty();
         LogUtils.getLogger().info("CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round={}",checkpoint.round);
         LogUtils.getLogger().info("CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round={}", checkpoint.round);
-        level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, false); level.getServer().halt(false);
+        var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
+        for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
+        level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        level.setBlock(phasePos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.MOB_REAPER).get().defaultBlockState(),3);
+        phaseMachine=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(phasePos);
+        previousPlayer.setPos(phasePos.getX()+.5,phasePos.getY()+.5,phasePos.getZ()+.5); phaseMachine.setOwner(previousPlayer.getUUID());
+        check(phaseMachine.setWorkArea(new WorkArea(phaseTarget,phaseTarget),previousPlayer),"Production windup area rejected");
+        phaseMachine.reaper.settings(new ReaperRule(true,true,Set.of(new net.minecraft.resources.ResourceLocation("minecraft","cow")),Set.of(),Set.of()),0,0); phaseMachine.energy.add(1500,false);
+        phaseVictim=spawn(EntityType.COW,phaseTarget); phaseVictim.setInvulnerable(false); phaseStarted=level.getGameTime();
+    }
+    private static void phaseTick() {
+        if(phaseMachine==null) return;
+        long now=level.getGameTime(); check(now-phaseStarted<120,"Production windup ticker timed out");
+        var pending=phaseMachine.reaper.windup;
+        if(pending!=null && phaseDeadline==0) { phaseDeadline=pending.strikeAt(); check(phaseDeadline-now>=10,"Production preparation was shorter than twelve ticks"); }
+        if(phaseDeadline>0 && now<phaseDeadline) check(phaseVictim.isAlive() && phaseMachine.energy.stored()==1500,"Production preparation damaged or charged early");
+        if(phaseVictim.isAlive()) return;
+        check(phaseDeadline>0 && now>=phaseDeadline && phaseMachine.energy.stored()==0 && !phaseMachine.inventory.getStackInSlot(2).isEmpty(),"Production prepared strike did not commit real paid loot: deadline="+phaseDeadline+", now="+now+", removed="+phaseVictim.isRemoved()+", hp="+phaseVictim.getHealth()+", energy="+phaseMachine.energy.stored());
+        phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
+        LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
+        level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
     }
     @SubscribeEvent public static void stopping(ServerStoppingEvent event) { if (level != null) level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, false); }
 }
