@@ -72,7 +72,9 @@ sentinel = [line for line in text.splitlines() if "CuE PRODUCTION SENTINEL PASS"
 brewer = [line for line in text.splitlines() if "CuE PRODUCTION BREWER PASS" in line]
 enchanter = [line for line in text.splitlines() if "CuE PRODUCTION ENCHANTER PASS" in line]
 inventory_index = [line for line in text.splitlines() if "CuE PRODUCTION INVENTORY INDEX PASS" in line]
-if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel or not brewer or not enchanter or not inventory_index:
+energy_tiers = [line for line in text.splitlines() if "CuE PRODUCTION ENERGY TIERS PASS" in line]
+energy_checkpoint = [line for line in text.splitlines() if "CuE PRODUCTION ENERGY TIERS DISK CHECKPOINT" in line]
+if process.returncode or "Encountered an unexpected exception" in text or not passed or not reaper or not windup or not arborist or not sentinel or not brewer or not enchanter or not inventory_index or not energy_tiers or not energy_checkpoint:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
@@ -83,7 +85,9 @@ print(sentinel[-1])
 print(brewer[-1])
 print(enchanter[-1])
 print(inventory_index[-1])
+print(energy_tiers[-1])
+print(energy_checkpoint[-1])
 for line in text.splitlines():
-    if "CuE PRODUCTION BREWER DISK" in line or "CuE PRODUCTION ENCHANTER DISK" in line:
+    if "CuE PRODUCTION BREWER DISK" in line or "CuE PRODUCTION ENCHANTER DISK" in line or "CuE PRODUCTION ENERGY TIERS DISK RESTORE" in line:
         print(line)
 print("Production server stopped cleanly; log:", log)

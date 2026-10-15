@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "pattern": [
+    "FRF",
+    "RDR",
+    "FRF"
+  ],
+  "result": {
+    "item": "unusualcopper:copper_cell_ii"
+  },
+  "show_notification": true
+}

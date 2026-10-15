@@ -10,6 +10,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class EnergyPipeBlock extends AbstractPipeBlock {
+    private final int tier;
+    public EnergyPipeBlock() { this(0); }
+    public EnergyPipeBlock(int tier) {
+        if (tier < 0 || tier > 2) throw new IllegalArgumentException("Unknown energy pipe tier");
+        this.tier = tier;
+    }
+    public int tier() { return tier; }
     protected boolean connects(LevelAccessor level, BlockPos pos, Direction side) {
         BlockPos other = pos.relative(side);
         if (!level.hasChunkAt(other)) return false;

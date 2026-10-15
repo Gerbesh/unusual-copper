@@ -36,9 +36,10 @@ public final class EnergyNetworks {
     private record PathKey(BlockPos from, BlockPos to) {}
     private static final class Component {
         final Set<BlockPos> pipes;
+        final Map<BlockPos, Integer> tiers;
         final List<Port> ports = new ArrayList<>();
         final Map<PathKey, List<BlockPos>> paths = new HashMap<>();
-        Component(Set<BlockPos> pipes) { this.pipes = pipes; }
+        Component(Set<BlockPos> pipes, Map<BlockPos, Integer> tiers) { this.pipes = pipes; this.tiers = Map.copyOf(tiers); }
         List<BlockPos> path(BlockPos from, BlockPos to) {
             return paths.computeIfAbsent(new PathKey(from, to), key -> {
                 Map<BlockPos, BlockPos> previous = new HashMap<>(); ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -65,7 +66,9 @@ public final class EnergyNetworks {
                 BlockPos start = unseen.iterator().next(); ArrayDeque<BlockPos> queue = new ArrayDeque<>(); Set<BlockPos> group = new HashSet<>(); queue.add(start); unseen.remove(start);
                 while (!queue.isEmpty()) { BlockPos pos = queue.remove(); group.add(pos); for (Direction side : Direction.values()) { BlockPos neighbor = pos.relative(side); if (unseen.remove(neighbor)) queue.add(neighbor); } }
                 if (group.size() > ServerConfig.networkLimit()) continue;
-                Component component = new Component(Set.copyOf(group));
+                Map<BlockPos, Integer> tiers = new HashMap<>();
+                for (BlockPos pipe : group) tiers.put(pipe, ((EnergyPipeBlock)level.getBlockState(pipe).getBlock()).tier());
+                Component component = new Component(Set.copyOf(group), tiers);
                 for (BlockPos pipe : group) for (Direction side : Direction.values()) {
                     BlockPos pos = pipe.relative(side);
                     if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) component.ports.add(new Port(pipe, pos, side.getOpposite(), machine));
@@ -85,11 +88,11 @@ public final class EnergyNetworks {
                     Port source = sources.get(Math.floorMod(sourceIndex + cursor, sources.size()));
                     for (int sinkIndex = 0; sinkIndex < sinks.size(); sinkIndex++) {
                         Port sink = sinks.get(Math.floorMod(sinkIndex + cursor, sinks.size()));
-                        if (source.pos.equals(sink.pos) || (source.machine.kind == MachineKind.COPPER_CELL && sink.machine.kind == MachineKind.COPPER_CELL)) continue;
+                        if (source.pos.equals(sink.pos) || (source.machine.kind.isCell() && sink.machine.kind.isCell())) continue;
                         if (++attempts > ServerConfig.transferBudget()) return;
                         List<BlockPos> path = component.path(source.pipe, sink.pipe); if (path.isEmpty()) continue;
-                        int amount = Math.min(ServerConfig.pipeRate() - used.getOrDefault(source.pos, 0), ServerConfig.pipeRate() - used.getOrDefault(sink.pos, 0));
-                        for (BlockPos node : path) amount = Math.min(amount, ServerConfig.pipeRate() - used.getOrDefault(node, 0));
+                        int amount = Math.min(source.machine.energyTransferRate() - used.getOrDefault(source.pos, 0), sink.machine.energyTransferRate() - used.getOrDefault(sink.pos, 0));
+                        for (BlockPos node : path) amount = Math.min(amount, ServerConfig.pipeRate(component.tiers.get(node)) - used.getOrDefault(node, 0));
                         amount = Math.min(amount, source.machine.energy.extract(amount, true));
                         amount = Math.min(amount, sink.machine.energy.receive(amount, true));
                         if (amount <= 0) continue;

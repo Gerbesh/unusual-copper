@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "P": {
+      "item": "unusualcopper:reinforced_energy_pipe"
+    }
+  },
+  "pattern": [
+    "ADA",
+    "PPP",
+    "PPP"
+  ],
+  "result": {
+    "count": 6,
+    "item": "unusualcopper:crystalline_energy_pipe"
+  },
+  "show_notification": true
+}

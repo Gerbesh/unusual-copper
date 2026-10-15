@@ -132,6 +132,13 @@ def write_bbmodel(name, parts, materials):
 def models():
     copper_cell = frame() + [part([5, 3, 5], [11, 12, 11], "aqua"), part([4, 14, 4], [12, 16, 12], "patina")]
     export_model("copper_cell", copper_cell, tank_windows())
+    for tier, name in ((2, "copper_cell_ii"), (3, "copper_cell_iii")):
+        body = frame() + [part([4, 3, 4], [12, 13, 12], "aqua"), part([3, 14, 3], [13, 16, 13], "patina")]
+        for ring in range(tier):
+            y = 3 + ring * 4
+            body += [part([0, y, 0], [16, y + 1, 3], "copper"), part([0, y, 13], [16, y + 1, 16], "copper"),
+                     part([0, y, 3], [3, y + 1, 13], "patina"), part([13, y, 3], [16, y + 1, 13], "patina")]
+        export_model(name, body, tank_windows())
     splitter = frame() + [part([6, 4, 6], [10, 10, 10], "aqua"), part([4, 14, 4], [12, 16, 12], "patina"), part([5, 12, 5], [11, 14, 11], "dark"), part([3, 4, .5], [6, 8, 1.5], "patina")]
     export_model("essence_splitter", splitter, tank_windows())
     tilt = {"origin": [8, 10, 8], "axis": "x", "angle": -22.5}
@@ -202,6 +209,20 @@ def models():
     write_json(ASSETS / "blockstates/copper_energy_pipe.json", {"multipart": multipart})
     write_json(ASSETS / "models/item/copper_energy_pipe.json", {"parent": "unusualcopper:block/pipe_center"})
     write_bbmodel("copper_energy_pipe", center + arm + glass, pipe_materials)
+    for name, bands in (("reinforced_energy_pipe", 1), ("crystalline_energy_pipe", 2)):
+        tier_center = copy.deepcopy(center) + [part([4, 4, 4], [12, 5, 12], "patina"), part([4, 11, 4], [12, 12, 12], "patina")]
+        tier_arm = copy.deepcopy(arm)
+        for band in range(bands):
+            z = 1 + band * 2
+            tier_arm += [part([5, 5, z], [11, 6, z + .5], "copper"), part([5, 10, z], [11, 11, z + .5], "copper")]
+        if bands == 2:
+            tier_center += [part([6, 6, 4], [10, 10, 4.5], "aqua"), part([6, 12, 6], [10, 13, 10], "aqua")]
+        for suffix, parts, layer in (("center", tier_center, "cutout"), ("arm", tier_arm, "cutout"), ("arm_glass", glass, "translucent")):
+            write_json(ASSETS / f"models/block/{name}_{suffix}.json", {"render_type": "minecraft:" + layer, "textures": refs, "elements": parts})
+        tier_states = json.loads(json.dumps(multipart).replace("unusualcopper:block/pipe_", f"unusualcopper:block/{name}_"))
+        write_json(ASSETS / f"blockstates/{name}.json", {"multipart": tier_states})
+        write_json(ASSETS / f"models/item/{name}.json", {"parent": f"unusualcopper:block/{name}_center"})
+        write_bbmodel(name, tier_center + tier_arm + glass, pipe_materials)
     item_center = json.loads(json.dumps(center).replace('"#aqua"', '"#fire"'))
     item_arm = json.loads(json.dumps(arm).replace('"#aqua"', '"#fire"'))
     for name, parts in (("item_pipe_center", item_center), ("item_pipe_arm", item_arm)):
@@ -398,6 +419,17 @@ def languages():
         en["status.unusualcopper." + name] = english; ru["status.unusualcopper." + name] = russian
     for mode, english, russian in (("disabled", "Disabled", "Закрыто"), ("item_input", "Item input", "Вход предметов"), ("item_output", "Item output", "Выход предметов"), ("energy_input", "CuE input", "Вход CuE"), ("energy_output", "CuE output", "Выход CuE")):
         en["side.unusualcopper." + mode] = english; ru["side.unusualcopper." + mode] = russian
+    for key, english, russian in (
+        ("block.unusualcopper.copper_cell", "Copper Cell I", "Медная ячейка I"),
+        ("block.unusualcopper.copper_cell_ii", "Copper Cell II", "Медная ячейка II"),
+        ("block.unusualcopper.copper_cell_iii", "Copper Cell III", "Медная ячейка III"),
+        ("block.unusualcopper.reinforced_energy_pipe", "Reinforced Energy Pipe", "Укреплённый энергопровод"),
+        ("block.unusualcopper.crystalline_energy_pipe", "Crystalline Energy Pipe", "Кристаллический энергопровод"),
+        ("jei.unusualcopper.solar_infusion", "Solar Infusion", "Солнечное насыщение"),
+        ("jei.unusualcopper.essence_info", "1 essence provides 500 CuE by default (configurable on the server). The Essence Splitter needs buffer space.", "1 эссенция даёт 500 CuE по умолчанию (меняется в настройках сервера). Требуется место в расщепителе."),
+        ("jei.unusualcopper.lens_info", "Reusable solar lens: 16,384 input copper units of durability. Infusion needs open daytime sky.", "Многоразовая солнечная линза: ресурс 16 384 единицы входной меди. Насыщение требует открытого дневного неба."),
+    ):
+        en[key], ru[key] = english, russian
     write_json(ASSETS / "lang/en_us.json", en); write_json(ASSETS / "lang/ru_ru.json", ru)
 
 

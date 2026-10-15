@@ -1,0 +1,101 @@
+Unusual Copper 0.11.0-alpha.1 — energy tiers, 2026-10-15
+
+Main artifact: build/libs/unusualcopper-0.11.0-alpha.1.jar
+SHA256: 8FCFF75484265980B5FFDA4396AC094D40664217C7D84F8F3DBE75376152B913
+JDK 17, Gradle 8.8, ForgeGradle 6.0.54, official 1.20.1 mappings.
+Development Forge 47.4.10; ordinary dedicated server Forge 47.4.20.
+Original user client/server directories were not modified or launched.
+
+Scope
+GDD 6.2: reinforced/crystalline wires at 1024/4096 CuE per world tick;
+cell II/III at 2000000/16000000 CuE. Per-path node budgets and aggregate
+machine budgets, shared across routes. Cell I remains 250000 CuE / 256
+per tick. Non-cell ports use the 4096 tier; basic wires still cap at 256.
+Energy-only devices, no FE or extra inventory. Old IDs and enum ordinals
+preserved. New recipes, RU/EN and four original Blockbench projects.
+
+Default build and server GameTests
+.codex-tmp/verify-0.11-core.log
+gradlew.bat --no-daemon runData build runGameTestServer
+[20:12:13] All 123 required tests passed :)
+BUILD SUCCESSFUL in 1m28s
+13 JUnit tests; zero failures/errors.
+Six new EnergyTierGameTests exercise actual world ticks and real packets:
+- exactly 256 through basic wire between advanced ports;
+- exactly 1024 through reinforced wire;
+- exactly 4096 through crystalline wire;
+- mixed basic bottleneck 256, upgrade 4096, downgrade 1024;
+- branched trunk shared 4096, cell I/II limits, equal-priority progress,
+  exact conserved total 50000 CuE;
+- exact cell II/III charge/capacity, owner/redstone NBT, no FE/item handler,
+  free nearly-full simulation and signed-short menu packet round-trip.
+
+Final default build and actual client
+.codex-tmp/verify-0.11-client.log
+gradlew.bat --no-daemon build productionProbeJar runClient
+  -PsmokeClient -PsmokeClientRu
+[20:15:46] ENERGY TIERS CLIENT MODELS PASS
+[20:15:46] ENERGY TIERS CLIENT MENU PASS: actual 15999999 / 16000000 CuE
+BUILD SUCCESSFUL in 1m40s, clean client shutdown.
+Both images visually inspected:
+run/screenshots/cue-energy-tiers.png — all three cell and wire tiers;
+run/screenshots/cue-cell-iii-menu.png — Russian title, exact full-width
+numbers and charge bar; no clipped number or missing texture placeholder.
+Existing menus, actions and effects also pass in the same client.
+Asset regeneration initially dropped the three manually added JEI language
+keys. They are now part of the generator; both locales retain every prior
+key, plus four new block names. Final JAR includes those restored keys.
+
+Ordinary production JAR, no optional mods
+.codex-tmp/verify-0.11-production-r2-1.log
+.codex-tmp/verify-0.11-production-r2-2.log
+gradlew.bat --no-daemon productionProbeJar
+python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.11.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.11.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Two sequential processes: both helper exit 0 and clean server shutdown.
+[20:16:46] ENERGY TIERS PASS: physical three-node crystalline line,
+exact 4096 CuE in one world tick, conserved 50000 CuE.
+[20:17:04] ENERGY TIERS DISK RESTORE PASS: actual region-file cells II/III
+preserve 1999999/15999999 CuE, original owner and redstone pause.
+All prior population/reaper/windup/arborist/sentinel/brewer/enchanter/index
+probes and their normal restart checkpoints pass in both processes.
+First attempt (.codex-tmp/verify-0.11-production-1.log) failed with a
+NoSuchMethodError in the new test-only EnergyTierProbe: a call to inherited
+BlockEntity.setChanged used the mod subclass as its symbolic owner and was
+not remapped. Explicit BlockEntity calls fix the probe. The failed result
+was rejected despite Java exit 0. No main-mod logic change was needed.
+
+SSN + Progressive + OpenPAC regression on the final ordinary artifact
+.codex-tmp/verify-0.11-ssn-production.log
+gradlew.bat --no-daemon ssnProbeJar -PssnTests
+python tools/run_ssn_probe.py run-ssn-production
+  --jar build/libs/unusualcopper-0.11.0-alpha.1.jar
+  --probe .codex-tmp/ssn-probe/unusualcopper-ssn-probe-0.11.0-alpha.1.jar
+  --progressive .codex-tmp/compat/ssn_progressive-1.2.4.jar
+  --opac .codex-tmp/compat/open-parties-and-claims-forge-1.20.1-0.30.1.jar
+  --java <JDK 17>/bin/java.exe
+Native connection, exact NBT/priority, sided last-slot index, far insertion,
+native filters and double-chest deduplication markers pass.
+[20:19:38] STOCK PASS: two bridges/brewers, nineteen real storages,
+sixteen physical potions and 80000 CuE; 478 world ticks with stability wait.
+[20:19:38] CLAIMS PASS: actual source/master/bridge revocation.
+[20:19:43] PROGRESSIVE PROFILE PASS: two recursively crafted iron swords;
+concurrent smelter returns three iron ingots for 720 CuE.
+Paid brewing stage disk restore/checkpoint pass; helper exit 0, clean stop.
+This checks the existing bridge scenarios with the new machine/port code;
+it does not certify arbitrary SSN versions, handlers or the full modpack.
+
+Artifact checks
+175 JSON/mcmeta entries parsed; new blockstates/item models, recipes and
+Blockbench sources exist; referenced own textures resolve. Main JAR contains
+no GameTests, smoke/probe classes or nested dependency JARs. The optional
+SSN probe build does not change the main JAR checksum above.
+
+Limits
+Normal restart is verified, not cross-chunk crash atomicity D11.
+No charge-preserving dropped cell item or automatic cell-to-cell balancing.
+Energy branch router/monitor/consumer priority and alternate-route routing
+remain open, along with full modpack/shader/performance/balance/art/licensing
+and T01–T36 release acceptance. This checkpoint is not release 1.0.

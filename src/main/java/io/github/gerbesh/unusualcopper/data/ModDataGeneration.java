@@ -46,6 +46,14 @@ public final class ModDataGeneration {
                     .define('F', ModContent.FRAME.get()).define('Q', Items.QUARTZ).define('K', ModContent.CORE.get()).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.ENERGY_PIPE.get(), 8).pattern("CRC").pattern("CRC").pattern("CC ")
                     .define('C', Items.COPPER_INGOT).define('R', Items.REDSTONE).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.REINFORCED_ENERGY_PIPE.get(), 8).pattern("PPP").pattern("PIP").pattern("PPP")
+                    .define('I', Items.IRON_INGOT).define('P', ModContent.ENERGY_PIPE.get()).unlockedBy("has_pipe", has(ModContent.ENERGY_PIPE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.CRYSTALLINE_ENERGY_PIPE.get(), 6).pattern("ADA").pattern("PPP").pattern("PPP")
+                    .define('A', Items.AMETHYST_SHARD).define('D', Items.DIAMOND).define('P', ModContent.REINFORCED_ENERGY_PIPE.get()).unlockedBy("has_pipe", has(ModContent.REINFORCED_ENERGY_PIPE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.COPPER_CELL_II).get()).pattern("FRF").pattern("RDR").pattern("FRF")
+                    .define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE_BLOCK).define('D', Items.DIAMOND).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.COPPER_CELL_III).get()).pattern("FDF").pattern("DSD").pattern("FDF")
+                    .define('F', ModContent.FRAME.get()).define('D', Items.DIAMOND_BLOCK).define('S', Items.NETHER_STAR).unlockedBy("has_star", has(Items.NETHER_STAR)).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.ITEM_PIPE.get(), 8).pattern("CIC").pattern("CIC").pattern("CC ")
                     .define('C', Items.COPPER_INGOT).define('I', Items.IRON_NUGGET).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModContent.FACE_SELECTOR.get()).pattern(" C").pattern("IR")

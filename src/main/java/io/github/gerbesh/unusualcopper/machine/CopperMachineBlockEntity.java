@@ -111,7 +111,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
         sentinel = kind == MachineKind.COPPER_SENTINEL ? new SentinelState() : null;
         brewer = kind == MachineKind.AETHERIC_BREWER ? new BrewerState() : null;
-        energy = new CopperEnergyBuffer(kind.capacity, 256, 256, this::setChanged);
+        energy = new CopperEnergyBuffer(kind.capacity, this::energyTransferRate, this::energyTransferRate, this::setChanged);
         inventory = new ItemStackHandler(4) {
             @Override public int getSlotLimit(int slot){return (brewer!=null && slot==1)||(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0)?1:super.getSlotLimit(slot);}
             @Override protected void onContentsChanged(int slot) { if(slot==0)enchantmentRevision++;setChanged(); }
@@ -133,7 +133,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case SOLAR_INFUSER -> new SolarLogic();
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
-            case COPPER_CELL -> (m, level) -> m.status(MachineStatus.IDLE);
+            case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
             case GROWTH_SHEPHERD -> new ShepherdLogic();
@@ -145,7 +145,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
-                    : kind == MachineKind.COPPER_CELL ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
+                    : kind.isCell() ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
                     : side == Direction.UP && kind.acceptsInputs() ? SideMode.ITEM_INPUT : side == Direction.DOWN && kind.hasInventory() ? SideMode.ITEM_OUTPUT
                     : kind.produces() ? SideMode.ENERGY_OUTPUT : kind.consumes() ? SideMode.ENERGY_INPUT : SideMode.DISABLED;
             sides.put(side, mode);
@@ -153,6 +153,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         rebuildCaps();
     }
 
+    public int energyTransferRate() { return io.github.gerbesh.unusualcopper.config.ServerConfig.pipeRate(kind.energyTier()); }
     public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged(); }
     public boolean togglePlantation(BlockPos pos,Player player) {
         if(arborist==null || !canAccess(player) || !(level instanceof ServerLevel server)) return false;

@@ -54,6 +54,7 @@ public final class ClientSmokeTest {
     private static final AtomicBoolean brewerVerified=new AtomicBoolean();
     private static BlockPos enchanterPos;
     private static BlockPos bridgePreview;
+    private static BlockPos tierPreview;
     private static boolean enchanterSelected;
     private static int enchanterPriceFrames,enchanterAppliedFrames;
     private static java.util.UUID enchanterNonce;
@@ -301,6 +302,8 @@ public final class ClientSmokeTest {
         if(stage==26&&!captured&&enchanterVerified.get()&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu&&menu.snapshot!=null&&menu.snapshot.result()==io.github.gerbesh.unusualcopper.network.EnchanterNetwork.Result.APPLIED&&Math.abs(io.github.gerbesh.unusualcopper.gameplay.XpWallet.points(mc.player)-765)<.0001&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,menu.slots.get(0).getItem())==5&&++enchanterAppliedFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-applied.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter applied screenshot: {}",text.getString());saved.set(true);});}
         if(stage==27&&!captured&&ticks>=5&&mc.screen==null){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-machine.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter machine screenshot: {}",text.getString());saved.set(true);});}
         if(stage==28&&!captured&&ticks>=20&&mc.screen==null&&bridgePreview!=null&&mc.level.getBlockState(bridgePreview).is(ModContent.SSN_BRIDGE.get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-ssn-bridge-ports.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE SSN BRIDGE CLIENT PASS: six rendered port directions, actual bridge models and base client running without SSN; {}",text.getString());saved.set(true);});}
+        if(stage==29&&!captured&&ticks>=20&&mc.screen==null&&tierPreview!=null&&mc.level.getBlockState(tierPreview.east(2)).is(ModContent.MACHINES.get(MachineKind.COPPER_CELL_III).get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-energy-tiers.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY TIERS CLIENT MODELS PASS: three cell tiers and three connected wire tiers rendered; {}",text.getString());saved.set(true);});}
+        if(stage==30&&!captured&&ticks>=10&&mc.screen instanceof io.github.gerbesh.unusualcopper.client.CopperMachineScreen&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.CopperMachineMenu menu&&menu.kind()==MachineKind.COPPER_CELL_III&&menu.energy()==15_999_999&&menu.capacity()==16_000_000){captured=true;Screenshot.grab(mc.gameDirectory,"cue-cell-iii-menu.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY TIERS CLIENT MENU PASS: real server menu synchronized exactly 15999999 / 16000000 CuE; {}",text.getString());saved.set(true);});}
         if(stage==21&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&!menu.options.isEmpty()){
             if(!brewerSettingsSent){brewerSettingsSent=true;io.github.gerbesh.unusualcopper.network.BrewerNetwork.configure(menu.containerId,menu.snapshot.runtime(),new io.github.gerbesh.unusualcopper.network.BrewerNetwork.Settings(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2,3,true,7));}
             if(!brewerEnabled&&menu.snapshot.result()==1&&menu.snapshot.settings().vessel()==2){brewerEnabled=true;mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(brewerPos)).redstoneMode=0);}
@@ -511,6 +514,17 @@ public final class ClientSmokeTest {
                 var directions=net.minecraft.core.Direction.values();for(int i=0;i<6;i++){var pos=bridgePreview.offset((i%3-1)*2,0,i/3*2);level.setBlock(pos,ModContent.SSN_BRIDGE.get().defaultBlockState().setValue(io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlock.FACING,directions[i]),3);((io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlockEntity)level.getBlockEntity(pos)).owner(player.getUUID());}
                 // The center front model is also the client chunk-readiness witness.
                 player.teleportTo(level,bridgePreview.getX()+.5,bridgePreview.getY()+3,bridgePreview.getZ()-6,0,18);
+            });}
+            else if(stage==28){stage=29;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());tierPreview=bridgePreview.south(10);
+                for(int x=-4;x<=4;x++)for(int z=-4;z<=3;z++){for(int y=0;y<5;y++)level.setBlock(tierPreview.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);level.setBlock(tierPreview.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3);}
+                var kinds=new MachineKind[]{MachineKind.COPPER_CELL,MachineKind.COPPER_CELL_II,MachineKind.COPPER_CELL_III};
+                var pipes=new net.minecraft.world.level.block.Block[]{ModContent.ENERGY_PIPE.get(),ModContent.REINFORCED_ENERGY_PIPE.get(),ModContent.CRYSTALLINE_ENERGY_PIPE.get()};
+                for(int i=0;i<3;i++){var pos=tierPreview.offset((i-1)*2,0,0);level.setBlock(pos,ModContent.MACHINES.get(kinds[i]).get().defaultBlockState(),3);var cell=(CopperMachineBlockEntity)level.getBlockEntity(pos);cell.setOwner(player.getUUID());cell.energy.add(kinds[i].capacity-1,false);cell.redstoneMode=1;cell.setChanged();for(int z=1;z<=2;z++)level.setBlock(pos.north(z),pipes[i].defaultBlockState(),3);}
+                player.teleportTo(level,tierPreview.getX()+.5,tierPreview.getY()+3,tierPreview.getZ()-7,0,18);
+            });}
+            else if(stage==29){stage=30;captured=false;saved.set(false);ticks=0;mc.options.hideGui=false;mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());var cell=(CopperMachineBlockEntity)level.getBlockEntity(tierPreview.east(2));player.teleportTo(level,cell.getBlockPos().getX()+.5,cell.getBlockPos().getY()+1,cell.getBlockPos().getZ()-2,0,18);net.minecraftforge.network.NetworkHooks.openScreen(player,cell,cell.getBlockPos());
             });}
             else { mc.options.hideGui = false; mc.stop(); }
         }

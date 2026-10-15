@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "S": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "pattern": [
+    "FDF",
+    "DSD",
+    "FDF"
+  ],
+  "result": {
+    "item": "unusualcopper:copper_cell_iii"
+  },
+  "show_notification": true
+}

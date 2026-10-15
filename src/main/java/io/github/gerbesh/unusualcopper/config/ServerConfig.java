@@ -10,6 +10,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue SMELT_COST;
     private static final ForgeConfigSpec.IntValue SMELT_DIVISOR;
     private static final ForgeConfigSpec.IntValue PIPE_RATE;
+    private static final ForgeConfigSpec.IntValue REINFORCED_PIPE_RATE, CRYSTALLINE_PIPE_RATE;
     private static final ForgeConfigSpec.IntValue NETWORK_LIMIT;
     private static final ForgeConfigSpec.IntValue TRANSFER_BUDGET;
     private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
@@ -37,7 +38,9 @@ public final class ServerConfig {
         SMELT_COST = builder.comment("CuE cost per smelting operation. An active job retains its quoted cost.").defineInRange("smelting_cue_cost", 240, 1, 24_000);
         SMELT_DIVISOR = builder.comment("Divide the original recipe duration by this number, rounding up.").defineInRange("smelting_speed_divisor", 10, 1, 100);
         builder.pop().push("network");
-        PIPE_RATE = builder.comment("Maximum total CuE through one basic pipe or machine port per tick.").defineInRange("basic_transfer_rate", 256, 1, 4096);
+        PIPE_RATE = builder.comment("Maximum total CuE through one basic pipe or cell I per network tick.").defineInRange("basic_transfer_rate", 256, 1, 4096);
+        REINFORCED_PIPE_RATE = builder.comment("Maximum total CuE per reinforced pipe or cell II port per tick.").defineInRange("reinforced_transfer_rate", 1024, 1, 16_384);
+        CRYSTALLINE_PIPE_RATE = builder.comment("Maximum total CuE per crystalline pipe, cell III or non-cell machine per network tick.").defineInRange("crystalline_transfer_rate", 4096, 1, 65_536);
         NETWORK_LIMIT = builder.comment("Oversized connected components stop transferring until split or the limit is raised.").defineInRange("maximum_component_nodes", 1024, 16, 16_384);
         TRANSFER_BUDGET = builder.comment("Maximum source/target transfer attempts per dimension per tick.").defineInRange("transfer_attempts_per_tick", 128, 1, 4096);
         builder.pop().push("item_transport");
@@ -106,6 +109,7 @@ public final class ServerConfig {
     public static int smeltCost() { return value(SMELT_COST); }
     public static int smeltDivisor() { return value(SMELT_DIVISOR); }
     public static int pipeRate() { return value(PIPE_RATE); }
+    public static int pipeRate(int tier) { return tier == 2 ? value(CRYSTALLINE_PIPE_RATE) : tier == 1 ? value(REINFORCED_PIPE_RATE) : pipeRate(); }
     public static int networkLimit() { return value(NETWORK_LIMIT); }
     public static int transferBudget() { return value(TRANSFER_BUDGET); }
     public static int itemRate() { return value(ITEM_RATE); }

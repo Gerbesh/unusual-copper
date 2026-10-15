@@ -39,6 +39,10 @@ public final class ModContent {
     }
     public static final RegistryObject<Block> ENERGY_PIPE = BLOCKS.register("copper_energy_pipe", EnergyPipeBlock::new);
     public static final RegistryObject<Item> ENERGY_PIPE_ITEM = ITEMS.register("copper_energy_pipe", () -> new BlockItem(ENERGY_PIPE.get(), new Item.Properties()));
+    public static final RegistryObject<Block> REINFORCED_ENERGY_PIPE = BLOCKS.register("reinforced_energy_pipe", () -> new EnergyPipeBlock(1));
+    public static final RegistryObject<Item> REINFORCED_ENERGY_PIPE_ITEM = ITEMS.register("reinforced_energy_pipe", () -> new BlockItem(REINFORCED_ENERGY_PIPE.get(), new Item.Properties()));
+    public static final RegistryObject<Block> CRYSTALLINE_ENERGY_PIPE = BLOCKS.register("crystalline_energy_pipe", () -> new EnergyPipeBlock(2));
+    public static final RegistryObject<Item> CRYSTALLINE_ENERGY_PIPE_ITEM = ITEMS.register("crystalline_energy_pipe", () -> new BlockItem(CRYSTALLINE_ENERGY_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Item> ESSENCE = ITEMS.register("saturated_copper_essence", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
     public static final RegistryObject<Item> SENTINEL_FOCUS = ITEMS.register("sentinel_range_focus", () -> new Item(new Item.Properties().stacksTo(1)));
@@ -54,7 +58,7 @@ public final class ModContent {
     public static final RegistryObject<Item> AREA_WAND = ITEMS.register("area_wand", io.github.gerbesh.unusualcopper.item.AreaWandItem::new);
     public static final RegistryObject<Item> CARGO_BUNDLE = ITEMS.register("cargo_bundle", io.github.gerbesh.unusualcopper.item.CargoBundleItem::new);
     public static final RegistryObject<BlockEntityType<CopperMachineBlockEntity>> MACHINE_ENTITY = ENTITIES.register("copper_machine", () -> BlockEntityType.Builder.of(CopperMachineBlockEntity::new, MACHINES.values().stream().map(RegistryObject::get).toArray(Block[]::new)).build(null));
-    public static final RegistryObject<BlockEntityType<EnergyPipeBlockEntity>> PIPE_ENTITY = ENTITIES.register("energy_pipe", () -> BlockEntityType.Builder.of(EnergyPipeBlockEntity::new, ENERGY_PIPE.get()).build(null));
+    public static final RegistryObject<BlockEntityType<EnergyPipeBlockEntity>> PIPE_ENTITY = ENTITIES.register("energy_pipe", () -> BlockEntityType.Builder.of(EnergyPipeBlockEntity::new, ENERGY_PIPE.get(), REINFORCED_ENERGY_PIPE.get(), CRYSTALLINE_ENERGY_PIPE.get()).build(null));
     public static final RegistryObject<MenuType<CopperMachineMenu>> MACHINE_MENU = MENUS.register("copper_machine", () -> IForgeMenuType.create(CopperMachineMenu::new));
     public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.menu.ReaperMenu>> REAPER_MENU = MENUS.register("reaper_settings", () -> IForgeMenuType.create(io.github.gerbesh.unusualcopper.menu.ReaperMenu::new));
     public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.menu.BrewerMenu>> BREWER_MENU = MENUS.register("brewer_settings",()->IForgeMenuType.create(io.github.gerbesh.unusualcopper.menu.BrewerMenu::new));

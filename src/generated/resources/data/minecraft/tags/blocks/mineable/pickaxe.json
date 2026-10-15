@@ -13,7 +13,11 @@
     "unusualcopper:copper_sentinel",
     "unusualcopper:aetheric_brewer",
     "unusualcopper:enchantment_resonator",
+    "unusualcopper:copper_cell_ii",
+    "unusualcopper:copper_cell_iii",
     "unusualcopper:copper_energy_pipe",
+    "unusualcopper:reinforced_energy_pipe",
+    "unusualcopper:crystalline_energy_pipe",
     "unusualcopper:ssn_bridge",
     "unusualcopper:copper_item_pipe"
   ]
