@@ -37,7 +37,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         g.fill(x + 13, y + 43, x + 13 + bar, y + 49, 0xff3dd6d3);
         int duration = Math.max(1, menu.duration());
         int progress = (int)Math.min(56, 56L * menu.progress() / duration);
-        if (menu.kind().hasInventory()) {
+        if (menu.kind().acceptsInputs()) {
             g.fill(x + 69, y + 69, x + 125, y + 75, 0xff152d2a); g.fill(x + 69, y + 69, x + 69 + progress, y + 75, 0xff82f1e7);
         }
     }
@@ -46,22 +46,26 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         MachineStatus status = MachineStatus.values()[Math.floorMod(menu.data.get(6), MachineStatus.values().length)];
         g.drawString(font, Component.translatable(status.translationKey()), 13, 24, 0xffb8efdf, false);
         g.drawString(font, menu.energy() + " / " + menu.capacity() + " CuE", 13, 33, 0xffe6f5ee, false);
-        if (menu.kind().hasInventory()) {
+        if (menu.kind().acceptsInputs()) {
             g.drawString(font, Component.translatable("gui.unusualcopper.input"), 26, 52, 0xffe6f5ee, false);
-            g.drawString(font, Component.translatable("gui.unusualcopper.output"), 133, 52, 0xffe6f5ee, false);
         }
+        if (menu.kind().hasInventory()) g.drawString(font, Component.translatable("gui.unusualcopper.output"), 133, 52, 0xffe6f5ee, false);
         if (menu.operationCost() > 0) g.drawString(font, menu.operationCost() + " CuE", 68, 59, 0xffe6f5ee, false);
         if (menu.kind().usesArea()) {
             g.drawString(font, Component.translatable("gui.unusualcopper.area_size", menu.data.get(15)), 13, 52, 0xffe6f5ee, false);
-            g.drawString(font, Component.translatable("gui.unusualcopper.growth_stats", menu.data.get(17), menu.data.get(18)), 13, 81, 0xffe6f5ee, false);
+            if (menu.kind() == MachineKind.AURA_CULTIVATOR) g.drawString(font, Component.translatable("gui.unusualcopper.growth_stats", menu.data.get(17), menu.data.get(18)), 13, 81, 0xffe6f5ee, false);
+            else {
+                g.drawString(font, Component.translatable("gui.unusualcopper.collection_checked", menu.data.get(17)), 13, 65, 0xffe6f5ee, false);
+                g.drawString(font, Component.translatable("gui.unusualcopper.collection_taken", menu.data.get(18)), 13, 78, 0xffe6f5ee, false);
+            }
         }
         if (!menu.kind().usesArea()) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        cancelButton.visible = menu.kind().hasInventory();
+        cancelButton.visible = menu.kind().acceptsInputs();
         cancelButton.active = menu.duration() > 0;
-        growthButton.visible = areaButton.visible = menu.kind().usesArea();
+        growthButton.visible = menu.kind() == MachineKind.AURA_CULTIVATOR; areaButton.visible = menu.kind().usesArea();
         growthButton.setMessage(Component.translatable("gui.unusualcopper.growth_mode." + menu.data.get(14)));
         areaButton.active = menu.data.get(15) > 0; clearBinding.visible = menu.data.get(19) != 0; recoverBinding.visible = menu.data.get(20) != 0 || menu.data.get(21) != 0;
         if (recoverBinding.visible) cancelButton.visible = false;

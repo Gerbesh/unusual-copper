@@ -1,0 +1,23 @@
+Unusual Copper 0.3.0-alpha.2 — local verification, 2026-10-15
+Source logs are ignored local build artifacts; excerpts preserve the recorded result.
+
+.codex-tmp/verify-collector-final.log
+[03:06:12] [Server thread/INFO] [minecraft/GameTestServer]: All 41 required tests passed :)
+BUILD SUCCESSFUL in 32s
+
+.codex-tmp/verify-openpac-collector-index.log
+[03:04:11] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied
+[03:04:11] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CULTIVATOR PASS: foreign target access denied without charge; owner grew claimed wheat for exactly 140 CuE
+[03:04:11] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC COLLECTOR PASS: foreign target access denied without charge; owner collected eight real ingots
+BUILD SUCCESSFUL in 25s
+
+.codex-tmp/client-collector-index.log
+[03:05:20] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE WAND SELECTION PASS: native server useOn selected 28 coordinates and opened the rules menu
+[03:05:25] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE COLLECTOR CLIENT PASS: real sixteen-ingot entity became one output stack; 965 CuE remain
+[03:05:27] [IO-Worker-13/INFO] [io.gi.ge.un.UnusualCopper/]: CuE collector menu screenshot: ������ ������ �������� ��� cue-collector-menu.png
+BUILD SUCCESSFUL in 49s
+
+io.github.gerbesh.unusualcopper.AccountingTest: tests=5, failures=0, errors=0, skipped=0
+io.github.gerbesh.unusualcopper.WorkAreaTest: tests=3, failures=0, errors=0, skipped=0
+Production JAR: 83 JSON resources parsed; dev fixtures/classes and datagen cache absent.
+SHA256: A23153837FDEDF11015B2F6A4BF1751B07EFF2F784D3983955070679F9F8D2D7

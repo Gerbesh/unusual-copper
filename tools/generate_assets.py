@@ -144,6 +144,10 @@ def models():
                   part([2, 9, 4], [4, 10, 12], "copper"), part([12, 9, 4], [14, 10, 12], "copper"),
                   part([6, 10, 6], [10, 15, 10], "aqua", {"origin": [8, 12, 8], "axis": "y", "angle": 45}), part([4, 3, .5], [12, 5, 1], "aqua")]
     export_model("aura_cultivator", cultivator, [])
+    collector = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 9, 15], "patina"), part([0, 8, 0], [16, 10, 16], "copper"),
+                 part([4, 10, 4], [12, 11, 12], "dark"), part([3, 10, 5], [6, 16, 11], "copper"), part([10, 10, 5], [13, 16, 11], "copper"),
+                 part([3, 14, 5], [6, 16, 11], "aqua"), part([10, 14, 5], [13, 16, 11], "aqua"), part([4, 3, .5], [12, 5, 1], "aqua")]
+    export_model("magnetic_collector", collector, [])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -201,6 +205,8 @@ def languages():
     en["gui.unusualcopper.cancel_hint"] = "Cancel the operation. Input remains; spent CuE is not refunded."
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
     additions = {
+        "block.unusualcopper.magnetic_collector": ("Magnetic Collector", "Магнитный коллектор"),
+        "gui.unusualcopper.collection_checked": ("Checked: %s", "Проверено: %s"), "gui.unusualcopper.collection_taken": ("Stacks: %s", "Подобрано: %s"),
         "block.unusualcopper.aura_cultivator": ("Aura Cultivator", "Культиватор ауры"), "item.unusualcopper.area_wand": ("Copper Configuration Wand", "Медный жезл настройки"),
         "gui.unusualcopper.preview": ("Area", "Область"), "gui.unusualcopper.unbind": ("Remove inventory binding", "Снять привязку хранилища"), "gui.unusualcopper.recover": ("Recover held cargo", "Вернуть удерживаемый груз"),
         "gui.unusualcopper.area_size": ("Area: %s blocks", "Зона: %s блоков"), "gui.unusualcopper.growth_stats": ("Checked: %s; grown: %s", "Проверено: %s; рост: %s"),
@@ -241,4 +247,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 7 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 8 editable Blockbench projects, models, item tags and RU/EN.")

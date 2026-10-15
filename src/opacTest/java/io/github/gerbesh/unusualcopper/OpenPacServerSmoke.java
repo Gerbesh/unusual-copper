@@ -67,6 +67,18 @@ public final class OpenPacServerSmoke {
             check(cultivator.grown == 1 && cultivator.energy.stored() == 0 && level.getBlockState(cropPos).getValue(CropBlock.AGE) > 0,
                     "Claim owner could not perform one paid crop growth");
             UnusualCopper.LOGGER.info("CuE OPENPAC CULTIVATOR PASS: foreign target access denied without charge; owner grew claimed wheat for exactly 140 CuE");
+            var collectorPos = machinePos.south(); level.setBlock(collectorPos, Blocks.AIR.defaultBlockState(), 3);
+            level.setBlock(collectorPos, ModContent.MACHINES.get(MachineKind.MAGNETIC_COLLECTOR).get().defaultBlockState(), 3);
+            var collector = (CopperMachineBlockEntity)level.getBlockEntity(collectorPos);
+            actor.setPos(collectorPos.getX() + .5, collectorPos.getY() + .5, collectorPos.getZ() + .5);
+            check(collector.setWorkArea(new WorkArea(cropPos, cropPos), actor), "Claim owner could not select collector target");
+            var ground = new net.minecraft.world.entity.item.ItemEntity(level, cropPos.getX() + .5, cropPos.getY() + .5, cropPos.getZ() + .5, new ItemStack(Items.IRON_INGOT, 8));
+            ground.setNoPickUpDelay(); level.addFreshEntity(ground); collector.energy.add(100, false); collector.setOwner(stranger);
+            io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
+            check(ground.isAlive() && collector.energy.stored() == 100 && collector.status() == MachineStatus.PROTECTED, "Collector took a foreign claimed item");
+            collector.setOwner(owner); io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
+            check(ground.isRemoved() && collector.inventory.getStackInSlot(2).getCount() == 8 && collector.energy.stored() < 100, "Claim owner could not collect the real stack");
+            UnusualCopper.LOGGER.info("CuE OPENPAC COLLECTOR PASS: foreign target access denied without charge; owner collected eight real ingots");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

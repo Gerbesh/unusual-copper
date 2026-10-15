@@ -93,7 +93,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         inventory = new ItemStackHandler(4) {
             @Override protected void onContentsChanged(int slot) { setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
-                if (slot >= 2 || !kind.hasInventory()) return false;
+                if (slot >= 2 || !kind.acceptsInputs()) return false;
                 if (slot == 1) return kind == MachineKind.SOLAR_INFUSER && stack.is(ModContent.SOLAR_LENS.get());
                 if (kind == MachineKind.ESSENCE_SPLITTER) return stack.is(ModContent.ESSENCE.get());
                 if (kind == MachineKind.RESONANCE_SMELTER) return stack.is(ModContent.SMELTABLE_ORES) && !stack.is(ModContent.SMELTING_BLACKLIST);
@@ -106,11 +106,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case RESONANCE_SMELTER -> new SmelterLogic();
             case COPPER_CELL -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
+            case MAGNETIC_COLLECTOR -> new CollectorLogic();
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind == MachineKind.AURA_CULTIVATOR ? SideMode.ENERGY_INPUT
                     : kind == MachineKind.COPPER_CELL ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
-                    : side == Direction.UP ? SideMode.ITEM_INPUT : side == Direction.DOWN ? SideMode.ITEM_OUTPUT
+                    : side == Direction.UP && kind.acceptsInputs() ? SideMode.ITEM_INPUT : side == Direction.DOWN && kind.hasInventory() ? SideMode.ITEM_OUTPUT
                     : kind.produces() ? SideMode.ENERGY_OUTPUT : kind.consumes() ? SideMode.ENERGY_INPUT : SideMode.DISABLED;
             sides.put(side, mode);
         }
@@ -148,7 +149,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public boolean supportsSideMode(SideMode mode) {
         return switch (mode) {
             case DISABLED -> true;
-            case ITEM_INPUT, ITEM_OUTPUT -> kind.hasInventory();
+            case ITEM_INPUT -> kind.acceptsInputs();
+            case ITEM_OUTPUT -> kind.hasInventory();
             case ENERGY_INPUT -> kind.consumes();
             case ENERGY_OUTPUT -> kind.produces();
         };
@@ -190,6 +192,15 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         inventory.setStackInSlot(2, outputs[0]); inventory.setStackInSlot(3, outputs[1]);
         cancelOperation();
         return true;
+    }
+
+    /** One server-thread commit into owned slots; no external inventory or pickup callback runs here. */
+    public boolean collectOutput(net.minecraft.world.entity.item.ItemEntity entity, int cost) {
+        if (kind != MachineKind.MAGNETIC_COLLECTOR || !(level instanceof ServerLevel) || entity.level() != level || !entity.isAlive()) return false;
+        var outputs = outputPlan(entity.getItem());
+        if (outputs == null || !energy.spend(cost)) return false;
+        inventory.setStackInSlot(2, outputs[0]); inventory.setStackInSlot(3, outputs[1]);
+        entity.setItem(ItemStack.EMPTY); entity.discard(); setChanged(); return true;
     }
 
     public static void tick(ServerLevel level, BlockPos pos, BlockState state, CopperMachineBlockEntity machine) {

@@ -4,6 +4,7 @@ import io.github.gerbesh.unusualcopper.config.ServerConfig;
 import io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity;
 import io.github.gerbesh.unusualcopper.machine.MachineKind;
 import io.github.gerbesh.unusualcopper.machine.logic.CultivatorLogic;
+import io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.TickEvent;
@@ -19,13 +20,19 @@ public final class AreaWorkScheduler {
     @SubscribeEvent public static void tick(TickEvent.LevelTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
         var queue = QUEUES.get(level); if (queue == null) return;
-        int budget = ServerConfig.areaBudget();
-        while (!queue.isEmpty() && budget >= ServerConfig.cultivatorChecks()) {
+        int budget = ServerConfig.areaBudget(), entities = ServerConfig.entityBudget();
+        int attempts = Math.min(queue.size(), 128);
+        while (!queue.isEmpty() && attempts-- > 0) {
             // Growth hooks may enqueue another machine. Retire the iterator before invoking them.
             var iterator = queue.entrySet().iterator();
-            var entry = iterator.next(); iterator.remove(); budget -= ServerConfig.cultivatorChecks();
+            var entry = iterator.next(); iterator.remove();
             if (!level.hasChunkAt(entry.getKey())) continue;
-            if (level.getBlockEntity(entry.getKey()) instanceof CopperMachineBlockEntity machine && !machine.isRemoved() && machine.kind == MachineKind.AURA_CULTIVATOR && machine.runtimeIdentity.equals(entry.getValue())) CultivatorLogic.process(machine, level);
+            if (!(level.getBlockEntity(entry.getKey()) instanceof CopperMachineBlockEntity machine) || machine.isRemoved() || !machine.runtimeIdentity.equals(entry.getValue())) continue;
+            if (machine.kind == MachineKind.AURA_CULTIVATOR && budget >= ServerConfig.cultivatorChecks()) {
+                budget -= ServerConfig.cultivatorChecks(); CultivatorLogic.process(machine, level);
+            } else if (machine.kind == MachineKind.MAGNETIC_COLLECTOR && entities >= ServerConfig.collectorCandidates()) {
+                entities -= ServerConfig.collectorCandidates(); CollectorLogic.process(machine, level);
+            } else if (machine.kind.usesArea()) queue.put(entry.getKey(), entry.getValue());
         }
     }
 }

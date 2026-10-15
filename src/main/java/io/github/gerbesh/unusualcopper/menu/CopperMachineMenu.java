@@ -30,7 +30,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
-                @Override public boolean isActive() { return kind().hasInventory() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER); }
+                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER); }
                 @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
             });
         }
@@ -45,7 +45,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         if (machine == null || !stillValid(player)) return false;
         if (button == 0) { machine.redstoneMode = (machine.redstoneMode + 1) % 3; machine.setChanged(); return true; }
         if (button == 1) { machine.cancelOperation(); return true; }
-        if (button == 2 && machine.kind.usesArea()) { machine.growthMode = (machine.growthMode + 1) % 2; machine.setChanged(); return true; }
+        if (button == 2 && machine.kind == MachineKind.AURA_CULTIVATOR) { machine.growthMode = (machine.growthMode + 1) % 2; machine.setChanged(); return true; }
         if (button == 3 && machine.workArea() != null && player instanceof net.minecraft.server.level.ServerPlayer server) { io.github.gerbesh.unusualcopper.network.AreaNetwork.preview(server, machine.workArea().min(), machine.workArea().max(), true); return true; }
         if (button == 4) { machine.clearBinding(); return true; }
         if (button == 5) { machine.recoverBinding(player); return true; }

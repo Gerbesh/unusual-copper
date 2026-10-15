@@ -86,7 +86,7 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || (stage == 1 && mc.screen instanceof CopperMachineScreen) || (stage == 2 && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen) || (stage == 4 && mc.screen instanceof CopperMachineScreen) || (stage == 5 && mc.screen == null))) ticks++;
+        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6) && mc.screen instanceof CopperMachineScreen) || ((stage == 2 || stage == 5) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -129,6 +129,12 @@ public final class ClientSmokeTest {
             captured = true;
             Screenshot.grab(mc.gameDirectory, "cue-cultivator-area.png", mc.getMainRenderTarget(), text -> {
                 UnusualCopper.LOGGER.info("CuE cultivator area screenshot: {}", text.getString()); saved.set(true);
+            });
+        }
+        if (stage == 6 && ticks >= 45 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-collector-menu.png", mc.getMainRenderTarget(), text -> {
+                UnusualCopper.LOGGER.info("CuE collector menu screenshot: {}", text.getString()); saved.set(true);
             });
         }
         if (saved.get()) {
@@ -195,6 +201,21 @@ public final class ClientSmokeTest {
                     player.teleportTo(server.overworld(), 47.5, cultivatorPos.getY() + 3.2, 41, 0, 30);
                     var cultivator = (CopperMachineBlockEntity)server.overworld().getBlockEntity(cultivatorPos);
                     io.github.gerbesh.unusualcopper.network.AreaNetwork.preview(player, cultivator.workArea().min(), cultivator.workArea().max(), true);
+                });
+            } else if (stage == 5) {
+                stage = 6; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = false;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer(); var level = server.overworld(); var player = server.getPlayerList().getPlayer(mc.player.getUUID());
+                    var pos = cultivatorPos.east(5); var target = pos.south(2); level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                    level.setBlock(pos, ModContent.MACHINES.get(MachineKind.MAGNETIC_COLLECTOR).get().defaultBlockState(), 3);
+                    var collector = (CopperMachineBlockEntity)level.getBlockEntity(pos); collector.setOwner(player.getUUID()); collector.energy.add(1000, false);
+                    player.teleportTo(level, pos.getX() + .5, pos.getY() + 1, pos.getZ() - 2, 0, 20);
+                    if (!collector.setWorkArea(new io.github.gerbesh.unusualcopper.gameplay.WorkArea(target, target), player)) throw new IllegalStateException("Collector fixture selection failed");
+                    var ground = new net.minecraft.world.entity.item.ItemEntity(level, target.getX() + .5, target.getY() + .5, target.getZ() + .5, new ItemStack(Items.IRON_INGOT, 16)); ground.setNoPickUpDelay(); ground.setNoGravity(true); level.addFreshEntity(ground);
+                    io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
+                    if (!ground.isRemoved() || collector.inventory.getStackInSlot(2).getCount() != 16) throw new IllegalStateException("Collector client fixture did not physically commit the stack");
+                    NetworkHooks.openScreen(player, collector, pos);
+                    UnusualCopper.LOGGER.info("CuE COLLECTOR CLIENT PASS: real sixteen-ingot entity became one output stack; {} CuE remain", collector.energy.stored());
                 });
             } else { mc.options.hideGui = false; mc.stop(); }
         }

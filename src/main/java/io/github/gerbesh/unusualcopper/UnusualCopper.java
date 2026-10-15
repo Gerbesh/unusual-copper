@@ -27,6 +27,7 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(EnergyNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.AreaWorkScheduler.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.ItemEntityIndex.class);
         LOGGER.info("Unusual Copper: server-authoritative CuE machinery initialized");
     }
 }

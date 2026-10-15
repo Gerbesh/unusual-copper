@@ -14,6 +14,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue TRANSFER_BUDGET;
     private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
     private static final ForgeConfigSpec.IntValue CULTIVATOR_COST, CULTIVATOR_INTERVAL, CULTIVATOR_CHECKS, AREA_BUDGET;
+    private static final ForgeConfigSpec.IntValue COLLECTOR_BASE_COST, COLLECTOR_DISTANCE_COST, COLLECTOR_CANDIDATES, ENTITY_BUDGET;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -36,6 +37,10 @@ public final class ServerConfig {
         CULTIVATOR_INTERVAL = builder.defineInRange("cultivator_interval_ticks", 20, 20, 200);
         CULTIVATOR_CHECKS = builder.defineInRange("cultivator_checks_per_wave", 8, 1, 8);
         AREA_BUDGET = builder.comment("Global coordinate-check budget per dimension and tick, shared by queued machines.").defineInRange("checks_per_dimension_tick", 128, 8, 4096);
+        COLLECTOR_BASE_COST = builder.defineInRange("collector_stack_base_cue", 30, 1, 1000);
+        COLLECTOR_DISTANCE_COST = builder.comment("Additional CuE at distance 32; linear and rounded upward.").defineInRange("collector_distance_cue", 70, 0, 1000);
+        COLLECTOR_CANDIDATES = builder.defineInRange("collector_candidates_per_wave", 16, 1, 64);
+        ENTITY_BUDGET = builder.defineInRange("entity_candidates_per_dimension_tick", 256, 64, 4096);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -55,4 +60,8 @@ public final class ServerConfig {
     public static int cultivatorInterval() { return value(CULTIVATOR_INTERVAL); }
     public static int cultivatorChecks() { return value(CULTIVATOR_CHECKS); }
     public static int areaBudget() { return value(AREA_BUDGET); }
+    public static int collectorBaseCost() { return value(COLLECTOR_BASE_COST); }
+    public static int collectorDistanceCost() { return value(COLLECTOR_DISTANCE_COST); }
+    public static int collectorCandidates() { return value(COLLECTOR_CANDIDATES); }
+    public static int entityBudget() { return value(ENTITY_BUDGET); }
 }
