@@ -44,6 +44,21 @@ public final class ClientSmokeTest {
     private static BlockPos arboristPos, arboristRoot;
     private static volatile int arboristLogs;
     private static final AtomicBoolean arboristPaused=new AtomicBoolean(),arboristVerified=new AtomicBoolean();
+    private static BlockPos sentinelPos;
+    private static volatile java.util.UUID sentinelVictim;
+    private static int sentinelUpkeepTicks;
+    private static final AtomicBoolean sentinelVerified=new AtomicBoolean();
+    @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void sentinelWitness(TickEvent.LevelTickEvent event) {
+        if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage!=19||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||sentinelPos==null) return;
+        if(!(level.getBlockEntity(sentinelPos) instanceof CopperMachineBlockEntity m)) return;
+        if(m.sentinel.active) sentinelUpkeepTicks++;
+        if(m.grown==1&&!sentinelVerified.get()) {
+            var victim=(net.minecraft.world.entity.LivingEntity)level.getEntity(sentinelVictim);
+            if(victim==null||victim.getHealth()!=10||m.energy.stored()!=10000-2500-sentinelUpkeepTicks) throw new IllegalStateException("Native sentinel health/fee/upkeep mismatch: "+m.status()+", energy="+m.energy.stored()+", ticks="+sentinelUpkeepTicks);
+            UnusualCopper.LOGGER.info("CuE SENTINEL CLIENT PASS: actual queued beam, 10 HP, 2500 CuE plus {} active ticks, real client crystal and beam event",sentinelUpkeepTicks); sentinelVerified.set(true);
+        }
+    }
     @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
     public static void forestryWitness(TickEvent.LevelTickEvent event) {
         if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage<16||stage>17||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||arboristPos==null) return;
@@ -246,6 +261,10 @@ public final class ClientSmokeTest {
                 UnusualCopper.LOGGER.info("CuE ARBORIST WAND PASS: real server useOn marked one actual spruce plantation"); NetworkHooks.openScreen(player,m,arboristPos);
             });
         }
+        if(stage==18 && mc.screen instanceof CopperMachineScreen) ticks++;
+        if(stage==18 && ticks>=30 && !captured && mc.screen instanceof CopperMachineScreen) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-menu.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel menu screenshot: {}",text.getString()); saved.set(true); }); }
+        if(stage==19 && !captured && sentinelVerified.get() && io.github.gerbesh.unusualcopper.client.SentinelEffects.youngest()>=2 && io.github.gerbesh.unusualcopper.client.SentinelEffects.youngest()<7 && io.github.gerbesh.unusualcopper.client.SentinelEffects.rendered>0 && io.github.gerbesh.unusualcopper.client.SentinelRenderer.activeFrames>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-beam.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel beam screenshot: {}",text.getString()); saved.set(true); }); }
+        if(stage==20 && ticks>=30 && !captured && io.github.gerbesh.unusualcopper.client.SentinelRenderer.inactiveFrames>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-off.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel off screenshot: {}",text.getString()); saved.set(true); }); }
         if(stage==15 && ticks>=30 && !captured && mc.screen instanceof CopperMachineScreen) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-arborist-menu.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE arborist menu screenshot: {}",text.getString()); saved.set(true); }); }
         if(stage==16 && arboristPaused.get() && !captured && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(false)>=3 && io.github.gerbesh.unusualcopper.client.ArboristEffects.statistics().particles()>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-arborist-cut.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE arborist cut screenshot: {}",text.getString()); saved.set(true); }); }
         if(stage==17 && !captured && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(true)>=3 && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(true)<13) {
@@ -406,6 +425,21 @@ public final class ClientSmokeTest {
             } else if(stage==16) {
                 stage=17; captured=false; saved.set(false); ticks=0;
                 mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(arboristPos)).redstoneMode=0);
+            } else if(stage==17) {
+                stage=18; captured=false; saved.set(false); ticks=0; mc.options.hideGui=false;
+                mc.getSingleplayerServer().execute(()->{
+                    var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); sentinelPos=arboristRoot.east(24);
+                    for(int x=-4;x<=10;x++) for(int z=-4;z<=4;z++) { level.setBlock(sentinelPos.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3); for(int y=0;y<5;y++) level.setBlock(sentinelPos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3); }
+                    for(var mob:level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,new net.minecraft.world.phys.AABB(sentinelPos).inflate(12))) mob.discard();
+                    var m=SentinelGameTests.machine(level,sentinelPos); m.setOwner(player.getUUID()); m.redstoneMode=1; var victim=SentinelGameTests.hostile(level,sentinelPos.east(6)); sentinelVictim=victim.getUUID();
+                    player.teleportTo(level,sentinelPos.getX()+.5,sentinelPos.getY()+1,sentinelPos.getZ()-2,0,15); player.getInventory().clearContent(); NetworkHooks.openScreen(player,m,sentinelPos);
+                });
+            } else if(stage==18) {
+                stage=19; captured=false; saved.set(false); ticks=0; mc.options.hideGui=true;
+                mc.getSingleplayerServer().execute(()->{ var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer(); player.teleportTo(level,sentinelPos.getX()+3.5,sentinelPos.getY()+3,sentinelPos.getZ()-9,0,12); ((CopperMachineBlockEntity)level.getBlockEntity(sentinelPos)).redstoneMode=0; });
+            } else if(stage==19) {
+                stage=20; captured=false; saved.set(false); ticks=0;
+                mc.getSingleplayerServer().execute(()->{var m=(CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(sentinelPos); m.energy.restore(0); m.redstoneMode=0;});
             } else { mc.options.hideGui = false; mc.stop(); }
         }
     }

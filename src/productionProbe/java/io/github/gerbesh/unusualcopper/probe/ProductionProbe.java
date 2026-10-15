@@ -92,6 +92,7 @@ public final class ProductionProbe {
         LogUtils.getLogger().info("CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round={}",checkpoint.round);
         LogUtils.getLogger().info("CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round={}", checkpoint.round);
         verifyArborist();
+        verifySentinel();
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -113,6 +114,20 @@ public final class ProductionProbe {
         phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
+    }
+    private static void verifySentinel() {
+        var pos=TARGET.east(6); var targetPos=pos.east(6);
+        for(int x=pos.getX();x<=targetPos.getX();x++) for(int z=pos.getZ()-1;z<=pos.getZ()+1;z++) { for(int y=0;y<5;y++) level.setBlock(new BlockPos(x,pos.getY()+y,z),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3); level.setBlock(new BlockPos(x,pos.getY()-1,z),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3); }
+        level.setBlock(pos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.COPPER_SENTINEL).get().defaultBlockState(),3);
+        var m=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(pos); m.setOwner(UUID.randomUUID()); m.energy.add(7500,false); m.sentinel.active=true;
+        var target=spawn(EntityType.HUSK,targetPos); target.setInvulnerable(false); target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).setBaseValue(0);
+        for(int y=0;y<4;y++) level.setBlock(pos.offset(3,y,0),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3);
+        io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(m,level); check(target.getHealth()==20 && m.energy.stored()==7500,"Production sentinel fired through a real collision wall");
+        for(int y=0;y<4;y++) level.setBlock(pos.offset(3,y,0),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(m,level); check(target.getHealth()==10 && m.energy.stored()==5000,"Production sentinel real damage or custom type/fee failed: status="+m.status()+", hp="+target.getHealth());
+        target.invulnerableTime=0; io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(m,level); check(target.getHealth()==10 && m.energy.stored()==5000,"Production sentinel bypassed its paid cooldown");
+        target.discard(); m.redstoneMode=1;
+        LogUtils.getLogger().info("CuE PRODUCTION SENTINEL PASS: real collision wall denied; custom damage type dealt ten HP for 2500 CuE; paid cooldown blocked a duplicate hit");
     }
     private static void verifyArborist() {
         var root=TARGET.south(10); var pos=root.west(5);

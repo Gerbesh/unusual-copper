@@ -41,6 +41,7 @@ public final class ModContent {
     public static final RegistryObject<Item> ENERGY_PIPE_ITEM = ITEMS.register("copper_energy_pipe", () -> new BlockItem(ENERGY_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Item> ESSENCE = ITEMS.register("saturated_copper_essence", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
+    public static final RegistryObject<Item> SENTINEL_FOCUS = ITEMS.register("sentinel_range_focus", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FRAME = ITEMS.register("copper_frame", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> CORE = ITEMS.register("copper_core", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);

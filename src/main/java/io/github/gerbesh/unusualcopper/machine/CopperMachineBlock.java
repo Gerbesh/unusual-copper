@@ -47,6 +47,10 @@ public final class CopperMachineBlock extends BaseEntityBlock {
         return level.isClientSide ? null : createTickerHelper(type, ModContent.MACHINE_ENTITY.get(), (world, pos, blockState, be) -> CopperMachineBlockEntity.tick((ServerLevel)world, pos, blockState, be));
     }
     @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if(kind==MachineKind.COPPER_SENTINEL && player.getItemInHand(hand).is(ModContent.SENTINEL_FOCUS.get())) {
+            if(!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity m) m.installSentinelFocus(player,hand);
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
         if (player.getItemInHand(hand).is(ModContent.FACE_SELECTOR.get()) || player.getItemInHand(hand).is(ModContent.AREA_WAND.get())) return InteractionResult.PASS;
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) NetworkHooks.openScreen((ServerPlayer)player, machine, pos);
         return InteractionResult.sidedSuccess(level.isClientSide);
@@ -56,6 +60,7 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     }
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!state.is(replacement.getBlock()) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) {
+            if(machine.sentinel!=null && machine.sentinel.focused) popResource(level,pos,new ItemStack(ModContent.SENTINEL_FOCUS.get()));
             if (machine.boundCargoCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.boundCargo()));
             if (machine.reaper != null && machine.reaper.lootCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.reaper.loot()));
             if(machine.arborist!=null) {

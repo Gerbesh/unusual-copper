@@ -20,6 +20,9 @@ public final class EntityIndexes {
     private EntityIndexes() {}
     public static List<ItemEntity> items(ServerLevel level, CopperMachineBlockEntity machine, int limit) { return ITEMS.sample(level, machine, limit); }
     public static List<Mob> mobs(ServerLevel level, CopperMachineBlockEntity machine, int limit) { return MOBS.sample(level, machine, limit); }
+    public static List<Mob> sentinelMobs(ServerLevel level,CopperMachineBlockEntity machine,int radius,int height,int limit) {
+        return MOBS.sample(level,machine,machine.getBlockPos().offset(-radius,-height,-radius),machine.getBlockPos().offset(radius,height,radius),limit);
+    }
     @SubscribeEvent(priority = EventPriority.LOWEST) public static void join(EntityJoinLevelEvent event) {
         if (!event.isCanceled() && event.getLevel() instanceof ServerLevel level)
             for (var index : INDEXES) index.add(level, SectionPos.asLong(event.getEntity().blockPosition()), event.getEntity());
@@ -52,12 +55,15 @@ public final class EntityIndexes {
             remove(level, event.getPackedOldPos(), event.getEntity().getUUID()); add(level, event.getPackedNewPos(), event.getEntity());
         }
         private List<T> sample(ServerLevel level, CopperMachineBlockEntity machine, int limit) {
-            var area = machine.workArea(); var sections = levels.get(level);
-            if (area == null || sections == null) return List.of();
+            var area = machine.workArea(); if(area==null) return List.of();
+            return sample(level,machine,area.min(),area.max(),limit);
+        }
+        private List<T> sample(ServerLevel level,CopperMachineBlockEntity machine,net.minecraft.core.BlockPos min,net.minecraft.core.BlockPos max,int limit) {
+            var sections=levels.get(level); if(sections==null) return List.of();
             var keys = new ArrayList<Long>(8);
-            for (int x = area.min().getX() >> 4; x <= area.max().getX() >> 4; x++)
-                for (int y = area.min().getY() >> 4; y <= area.max().getY() >> 4; y++)
-                    for (int z = area.min().getZ() >> 4; z <= area.max().getZ() >> 4; z++) keys.add(SectionPos.asLong(x, y, z));
+            for (int x = min.getX() >> 4; x <= max.getX() >> 4; x++)
+                for (int y = min.getY() >> 4; y <= max.getY() >> 4; y++)
+                    for (int z = min.getZ() >> 4; z <= max.getZ() >> 4; z++) keys.add(SectionPos.asLong(x, y, z));
             var result = new ArrayList<T>(limit);
             for (int visited = 0; visited < keys.size() && result.size() < limit; visited++) {
                 long key = keys.get(Math.floorMod(machine.scanCursor++, keys.size())); var bucket = sections.get(key); if (bucket == null) continue;

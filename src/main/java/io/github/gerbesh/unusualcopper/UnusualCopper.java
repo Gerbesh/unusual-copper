@@ -30,6 +30,7 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.AreaWorkScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.EntityIndexes.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MobPopulations.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.ReaperLoot.class);
         LOGGER.info("Unusual Copper: server-authoritative CuE machinery initialized");

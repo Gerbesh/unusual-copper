@@ -140,6 +140,20 @@ public final class OpenPacServerSmoke {
             for(int i=0;i<20 && forestry.arborist.job!=null;i++) io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(forestry,level);
             check(forestry.grown==1 && forestry.energy.stored()==0 && forestry.inventory.getStackInSlot(2).getCount()==8 && forestry.inventory.getStackInSlot(1).getDamageValue()==8 && level.getBlockState(tree).is(Blocks.OAK_SAPLING),"Claim-restored tree did not complete exact loot, tool wear and one placement"); forestry.redstoneMode=1;
             UnusualCopper.LOGGER.info("CuE OPENPAC ARBORIST PASS: foreign tree denied; claim change stopped after four cuts; permission restore completed eight exact logs, 2120 CuE, tool wear and one sapling");
+            var sentinelPos=machinePos.south(2); var targetPos=cropPos.above();
+            for(int x=Math.min(sentinelPos.getX(),targetPos.getX())-1;x<=Math.max(sentinelPos.getX(),targetPos.getX())+1;x++) for(int z=Math.min(sentinelPos.getZ(),targetPos.getZ())-1;z<=Math.max(sentinelPos.getZ(),targetPos.getZ())+1;z++) for(int y=sentinelPos.getY()+1;y<=sentinelPos.getY()+4;y++) level.setBlock(new net.minecraft.core.BlockPos(x,y,z),Blocks.AIR.defaultBlockState(),3);
+            level.setBlock(sentinelPos,Blocks.AIR.defaultBlockState(),3); level.setBlock(sentinelPos,ModContent.MACHINES.get(MachineKind.COPPER_SENTINEL).get().defaultBlockState(),3);
+            var sentinel=(CopperMachineBlockEntity)level.getBlockEntity(sentinelPos); sentinel.setOwner(stranger); sentinel.energy.add(7500,false); sentinel.sentinel.active=true;
+            var hostile=net.minecraft.world.entity.EntityType.HUSK.create(level); hostile.setPos(targetPos.getX()+.5,targetPos.getY(),targetPos.getZ()+.5); hostile.setNoAi(true); hostile.setNoGravity(true); hostile.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).setBaseValue(0); check(level.addFreshEntity(hostile),"Claim fixture hostile spawn failed");
+            io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(sentinel,level);
+            check(hostile.getHealth()==20 && sentinel.energy.stored()==7500,"Foreign sentinel damaged a claimed target or paid a shot fee");
+            sentinel.setOwner(owner); io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(sentinel,level);
+            check(hostile.getHealth()==10 && sentinel.energy.stored()==5000,"Claim owner sentinel did not apply ten real HP for 2500 CuE");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),stranger,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            sentinel.sentinel.nextShot=0; hostile.invulnerableTime=0; io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.process(sentinel,level);
+            check(hostile.getHealth()==10 && sentinel.energy.stored()==5000,"Claim transfer did not stop an already cached hostile target"); sentinel.redstoneMode=1; hostile.discard();
+            UnusualCopper.LOGGER.info("CuE OPENPAC SENTINEL PASS: foreign damage denied; owner hit for ten HP and 2500 CuE; claim transfer blocked cached target without another fee");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

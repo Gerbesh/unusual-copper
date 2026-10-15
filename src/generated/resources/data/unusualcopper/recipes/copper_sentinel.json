@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "unusualcopper:sentinel_range_focus"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "pattern": [
+    "FFF",
+    "OQC",
+    "FFF"
+  ],
+  "result": {
+    "item": "unusualcopper:copper_sentinel"
+  },
+  "show_notification": true
+}

@@ -45,10 +45,19 @@ public final class MachineEffects {
         }
         static void encode(Forestry v,FriendlyByteBuf b) { b.writeResourceLocation(v.dimension); b.writeBlockPos(v.origin); b.writeBoolean(v.planted); b.writeByte(v.positions.size()); v.positions.forEach(b::writeBlockPos); }
     }
-    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "3", "3"::equals, "3"::equals);
+    public record Beam(ResourceLocation dimension,BlockPos origin,Vec3 target) {
+        public Beam {
+            origin=origin.immutable();
+            if(!Double.isFinite(target.x)||!Double.isFinite(target.y)||!Double.isFinite(target.z)||target.distanceToSqr(Vec3.atCenterOf(origin))>80*80) throw new IllegalArgumentException("Invalid sentinel beam");
+        }
+        static Beam decode(FriendlyByteBuf b) { return new Beam(b.readResourceLocation(),b.readBlockPos(),new Vec3(b.readDouble(),b.readDouble(),b.readDouble())); }
+        static void encode(Beam v,FriendlyByteBuf b) { b.writeResourceLocation(v.dimension); b.writeBlockPos(v.origin); b.writeDouble(v.target.x); b.writeDouble(v.target.y); b.writeDouble(v.target.z); }
+    }
+    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "4", "4"::equals, "4"::equals);
     private static Consumer<Wave> receiver = ignored -> {};
     private static Consumer<Reap> reaperReceiver = ignored -> {};
     private static Consumer<Forestry> forestryReceiver = ignored -> {};
+    private static Consumer<Beam> beamReceiver=ignored->{};
     private MachineEffects() {}
     public static void register() {
         CHANNEL.registerMessage(0, Wave.class, Wave::encode, Wave::decode, (wave, supplier) -> {
@@ -60,10 +69,19 @@ public final class MachineEffects {
         CHANNEL.registerMessage(2,Forestry.class,Forestry::encode,Forestry::decode,(effect,supplier) -> {
             var context=supplier.get(); context.enqueueWork(()->forestryReceiver.accept(effect)); context.setPacketHandled(true);
         },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(3,Beam.class,Beam::encode,Beam::decode,(effect,supplier)-> {
+            var context=supplier.get(); context.enqueueWork(()->beamReceiver.accept(effect)); context.setPacketHandled(true);
+        },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     public static void clientReceiver(Consumer<Wave> handler) { receiver = handler; }
     public static void reaperReceiver(Consumer<Reap> handler) { reaperReceiver=handler; }
     public static void forestryReceiver(Consumer<Forestry> handler) { forestryReceiver=handler; }
+    public static void beamReceiver(Consumer<Beam> handler) { beamReceiver=handler; }
+    public static void sentinel(ServerLevel level,CopperMachineBlockEntity m,Vec3 target) {
+        try {
+            var p=m.getBlockPos(); CHANNEL.send(PacketDistributor.NEAR.with(()->new PacketDistributor.TargetPoint(p.getX()+.5,p.getY()+.5,p.getZ()+.5,96,level.dimension())),new Beam(level.dimension().location(),p,target));
+        } catch(RuntimeException unavailable) { UnusualCopper.LOGGER.debug("Skipped unavailable sentinel effect",unavailable); }
+    }
     public static void forestry(ServerLevel level,CopperMachineBlockEntity machine,boolean planted,List<BlockPos> changed) {
         if(changed.isEmpty()) return;
         try {

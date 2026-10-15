@@ -55,6 +55,10 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         if (menu.kind().hasInventory()) g.drawString(font, Component.translatable("gui.unusualcopper.output"), 133, 52, 0xffe6f5ee, false);
         if (menu.operationCost() > 0) g.drawString(font, menu.operationCost() + " CuE", 68, 59, 0xffe6f5ee, false);
         if(menu.kind()==MachineKind.ARBORIST) g.drawString(font,Component.translatable("arborist.unusualcopper.stats",menu.data.get(34),menu.data.get(36)),69,81,0xffe6f5ee,false);
+        if(menu.kind()==MachineKind.COPPER_SENTINEL) {
+            g.drawString(font,Component.translatable("sentinel.unusualcopper.stats",menu.data.get(40),menu.data.get(18)),13,57,0xffe6f5ee,false);
+            g.drawString(font,Component.translatable("sentinel.unusualcopper.price",(menu.data.get(41)&0xffff)|((menu.data.get(44)&0xffff)<<16),menu.data.get(42)),13,70,0xffe6f5ee,false);
+        }
         if (menu.kind().usesArea()) {
             g.drawString(font, Component.translatable("gui.unusualcopper.area_size", menu.data.get(15)), 13, 52, 0xffe6f5ee, false);
             if (menu.kind() == MachineKind.AURA_CULTIVATOR) g.drawString(font, Component.translatable("gui.unusualcopper.growth_stats", menu.data.get(17), menu.data.get(18)), 13, 81, 0xffe6f5ee, false);

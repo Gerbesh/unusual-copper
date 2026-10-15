@@ -162,6 +162,11 @@ def models():
                 part([7,4,0],[9,11,.4],"aqua"),part([5,8,0],[11,10,.4],"aqua"),part([6,14,6],[10,16,10],"copper"),
                 part([2,14,6],[6,16,10],"dark"),part([10,14,6],[14,16,10],"dark")]
     export_model("arboreal_reconstructor",arborist,[])
+    sentinel = [part([0,0,0],[16,2,16],"dark"),part([1,2,1],[15,4,15],"copper"),part([3,4,3],[13,7,13],"patina"),
+                part([5,7,5],[11,9,11],"copper"),part([6,9,6],[10,10,10],"dark"),part([1,4,1],[3,9,3],"copper"),
+                part([13,4,1],[15,9,3],"copper"),part([1,4,13],[3,9,15],"copper"),part([13,4,13],[15,9,15],"copper"),
+                part([7,3,0],[9,6,.4],"aqua"),part([4,2,4],[12,3,12],"aqua")]
+    export_model("copper_sentinel",sentinel,[])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -186,7 +191,7 @@ def models():
     write_json(ASSETS / "blockstates/copper_item_pipe.json", {"multipart": item_parts})
     write_json(ASSETS / "models/item/copper_item_pipe.json", {"parent": "unusualcopper:block/item_pipe_center"})
     write_bbmodel("copper_item_pipe", item_center + item_arm, pipe_materials)
-    for name, color in (("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
+    for name, color in (("sentinel_range_focus", "aqua"), ("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
         img = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
         if name == "diamond_solar_lens":
             d.ellipse((3, 3, 28, 28), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.ellipse((7, 7, 24, 24), fill=(43, 169, 175)); d.line((10, 13, 16, 7), fill=(170, 249, 239), width=3)
@@ -221,6 +226,14 @@ def languages():
     additions = {
         "block.unusualcopper.mob_reaper": ("Mob Reaper", "Жнец сущностей"),
         "block.unusualcopper.arboreal_reconstructor": ("Arborist", "Арборист"),
+        "block.unusualcopper.copper_sentinel": ("Copper Sentinel", "Медный часовой"),
+        "item.unusualcopper.sentinel_range_focus": ("Sentinel Range Focus", "Фокус дальности часового"),
+        "sentinel.unusualcopper.stats": ("Radius: %s | Hits: %s", "Радиус: %s | Попаданий: %s"),
+        "sentinel.unusualcopper.price": ("%s CuE / shot + %s / tick", "%s CuE / выстрел + %s / тик"),
+        "sentinel.unusualcopper.focus_hint": ("Use the range focus on this block to upgrade the horizontal radius.", "Примените фокус к блоку для увеличения радиуса."),
+        "status.unusualcopper.sentinel_limit": ("Sentinel chunk limit", "Лимит часовых в чанке"),
+        "status.unusualcopper.shot_denied": ("Shot cancelled", "Выстрел отменён"),
+        "death.attack.unusualcopper.sentinel_beam": ("%1$s was struck by a Copper Sentinel", "%1$s поражён Медным часовым"),
         "wand.unusualcopper.plantation": ("Select saplings or a trunk base; click again to remove a point", "Выберите саженец или основание ствола; повторный клик снимает точку"),
         "wand.unusualcopper.plantation_added": ("Plantation point added", "Точка посадки добавлена"),
         "wand.unusualcopper.plantation_removed": ("Plantation point removed", "Точка посадки снята"),
@@ -315,4 +328,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 11 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 12 editable Blockbench projects, models, item tags and RU/EN.")

@@ -1,0 +1,71 @@
+Unusual Copper 0.7.0-alpha.1 — Copper Sentinel, 2026-10-15
+Windows 11 / Temurin 17.0.19+10 / dev Forge 47.4.10 / official 1.20.1.
+Raw logs, test worlds and downloaded CI artifacts are ignored by Git.
+
+.codex-tmp/verify-sentinel-spider.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+[10:33:53] All 90 required tests passed :)
+BUILD SUCCESSFUL in 54s
+JUnit: AccountingTest 5, WorkAreaTest 3; zero failures/errors.
+
+Ten Sentinel GameTests cover:
+- actual ten HP/2500 CuE hit, no duplicate hit, paid cooldown through NBT;
+- normal armor and absorption (custom damage type has no armor-bypass tag);
+- actual collision wall, circular range, height, named/neutral/pet/NPC/boss exclusions;
+- cancelled LivingAttackEvent and 2499/2500 CuE admission boundary;
+- two neighboring machines coordinate one target and can select another;
+- chunk quota, physical owner focus, repeat install, NBT and exact removal drop;
+- same real loaded hostile 25 blocks away rejected at base radius, admitted
+  after actual focus consumption; stranger cannot consume/install the focus;
+- actual machine ticker upkeep, empty energy, redstone pause;
+- actual local light propagation makes the same real spider neutral/hostile
+  after installing/removing a sea lantern in a closed stone room;
+- actual scheduled repeated shots separated by at least twenty ticking frames,
+  exact shot fees and active upkeep, normal real death.
+
+Source API check for spider neutrality: javap of Minecraft 1.20.1 official
+Spider$SpiderTargetGoal.canUse shows getLightLevelDependentMagicValue >= .5
+rejects acquisition. The adapter additionally retains an already aggressive
+spider as a valid hostile while its target is still alive.
+
+.codex-tmp/verify-sentinel-synced.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+  runClient -PsmokeClient -PsmokeClientRu
+[10:29:55] All 89 required tests passed :) (before the final spider case)
+[10:31:02] CuE SENTINEL CLIENT PASS: actual queued beam, 10 HP, 2500 CuE
+plus 1 active ticks, real client crystal and beam event
+BUILD SUCCESSFUL in 1m 54s
+Native 1280x720 images inspected: sentinel-menu-ru.png, sentinel-beam.png,
+sentinel-off.png. Active/off state changes are sent immediately so the first
+real beam starts from the lit floating crystal instead of a stale lowered one.
+Scene uses a real server tick, actual hostile HP and a separate witness count
+of active ticks. No client damage authority or artificial shot event is used.
+
+.codex-tmp/opac-sentinel-final.log
+Command: gradlew --no-daemon runServer -PopacTests
+Actual Open Parties and Claims 0.30.1 on an isolated dedicated server.
+CuE OPENPAC SENTINEL PASS: foreign damage denied; owner hit for ten HP and
+2500 CuE; claim transfer blocked cached target without another fee
+BUILD SUCCESSFUL in 30s
+
+.codex-tmp/production-sentinel-final.log
+Command: python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.7.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.7.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Actual isolated Forge 47.4.20 and final reobfuscated JAR.
+[10:34:54] CuE PRODUCTION SENTINEL PASS: real collision wall denied; custom
+damage type dealt ten HP for 2500 CuE; paid cooldown blocked a duplicate hit
+Existing population/reaper persistence probes also passed at round 9;
+arborist and actual reaper windup probes passed. Owned server stopped cleanly.
+
+Production JAR: build/libs/unusualcopper-0.7.0-alpha.1.jar
+SHA256: 7122E8909FC234FC17CA1C2E134CFDAFE7952C297BE035862506851919BE888B
+119 JSON entries parsed. GameTests, smoke scenes, production probe and test
+loot modifiers absent from the main JAR. Six-frame sentinel recipe confirmed
+inside the archive (48 copper via frames, obsidian, quartz, physical focus).
+
+Remaining gates: full target/boss matrix in Better MC, provider matrix,
+50-100-machine profiling, final art/sound/balance, full reload/crash/upgrade
+matrix. This prototype does not close M4 or the stable release criteria.
+Only repository-owned isolated fixture worlds/servers were launched.

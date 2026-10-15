@@ -19,6 +19,9 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue REAPER_COST, REAPER_INTERVAL, REAPER_CANDIDATES;
     private static final ForgeConfigSpec.IntValue ARBORIST_COST, ARBORIST_PLANT, ARBORIST_NODES, ARBORIST_LOGS, ARBORIST_TREE;
     private static final ForgeConfigSpec.BooleanValue ARBORIST_BUILDINGS;
+    private static final ForgeConfigSpec.IntValue SENTINEL_COST,SENTINEL_UPKEEP,SENTINEL_RANGE,SENTINEL_FOCUSED_RANGE,SENTINEL_HEIGHT,SENTINEL_INTERVAL,SENTINEL_SCAN,SENTINEL_CHUNK,SENTINEL_CANDIDATES,SENTINEL_BUDGET;
+    private static final ForgeConfigSpec.DoubleValue SENTINEL_DAMAGE;
+    private static final ForgeConfigSpec.BooleanValue SENTINEL_LOS;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -58,6 +61,19 @@ public final class ServerConfig {
         ARBORIST_LOGS=builder.defineInRange("arborist_logs_per_step",4,1,4);
         ARBORIST_TREE=builder.comment("Includes both logs and naturally generated leaves.").defineInRange("arborist_maximum_tree_blocks",256,16,256);
         ARBORIST_BUILDINGS=builder.define("arborist_reject_construction",true);
+        builder.pop().push("sentinel");
+        SENTINEL_COST=builder.defineInRange("cue_per_shot",2500,1,100000);
+        SENTINEL_UPKEEP=builder.defineInRange("cue_per_active_tick",1,0,1000);
+        SENTINEL_DAMAGE=builder.defineInRange("damage_hp",10.0,0.1,1000.0);
+        SENTINEL_RANGE=builder.defineInRange("base_horizontal_range",24,8,64);
+        SENTINEL_FOCUSED_RANGE=builder.defineInRange("focused_horizontal_range",64,8,64);
+        SENTINEL_HEIGHT=builder.defineInRange("vertical_range",32,4,32);
+        SENTINEL_INTERVAL=builder.defineInRange("shot_interval_ticks",20,20,1200);
+        SENTINEL_SCAN=builder.defineInRange("scan_interval_ticks",10,10,200);
+        SENTINEL_CHUNK=builder.defineInRange("machines_per_chunk",2,1,16);
+        SENTINEL_CANDIDATES=builder.defineInRange("candidates_per_scan",32,1,64);
+        SENTINEL_BUDGET=builder.defineInRange("candidates_per_dimension_tick",256,64,4096);
+        SENTINEL_LOS=builder.define("require_line_of_sight",true);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -94,4 +110,16 @@ public final class ServerConfig {
     public static int arboristLogs() { return value(ARBORIST_LOGS); }
     public static int arboristTreeBlocks() { return value(ARBORIST_TREE); }
     public static boolean arboristBuildingGuard() { return SPEC.isLoaded()?ARBORIST_BUILDINGS.get():ARBORIST_BUILDINGS.getDefault(); }
+    public static int sentinelCost() { return value(SENTINEL_COST); }
+    public static int sentinelUpkeep() { return value(SENTINEL_UPKEEP); }
+    public static int sentinelRange() { return value(SENTINEL_RANGE); }
+    public static int sentinelFocusedRange() { return value(SENTINEL_FOCUSED_RANGE); }
+    public static int sentinelHeight() { return value(SENTINEL_HEIGHT); }
+    public static int sentinelInterval() { return value(SENTINEL_INTERVAL); }
+    public static int sentinelScan() { return value(SENTINEL_SCAN); }
+    public static int sentinelChunkLimit() { return value(SENTINEL_CHUNK); }
+    public static int sentinelCandidates() { return value(SENTINEL_CANDIDATES); }
+    public static int sentinelBudget() { return value(SENTINEL_BUDGET); }
+    public static boolean sentinelLos() { return SPEC.isLoaded()?SENTINEL_LOS.get():SENTINEL_LOS.getDefault(); }
+    public static float sentinelDamage() { return (float)(SPEC.isLoaded()?SENTINEL_DAMAGE.get():SENTINEL_DAMAGE.getDefault()).doubleValue(); }
 }

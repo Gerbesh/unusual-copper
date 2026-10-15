@@ -68,11 +68,13 @@ passed = [line for line in text.splitlines() if "CuE PRODUCTION POPULATION PASS"
 reaper = [line for line in text.splitlines() if "CuE PRODUCTION REAPER PASS" in line]
 windup = [line for line in text.splitlines() if "CuE PRODUCTION WINDUP PASS" in line]
 arborist = [line for line in text.splitlines() if "CuE PRODUCTION ARBORIST PASS" in line]
-if process.returncode or not passed or not reaper or not windup or not arborist:
+sentinel = [line for line in text.splitlines() if "CuE PRODUCTION SENTINEL PASS" in line]
+if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
 print(reaper[-1])
 print(windup[-1])
 print(arborist[-1])
+print(sentinel[-1])
 print("Production server stopped cleanly; log:", log)

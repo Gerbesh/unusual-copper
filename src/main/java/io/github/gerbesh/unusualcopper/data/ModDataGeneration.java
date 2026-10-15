@@ -62,6 +62,10 @@ public final class ModDataGeneration {
                     .define('F', ModContent.FRAME.get()).define('O', Items.OBSIDIAN).define('E', Items.ENDER_PEARL).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ARBORIST).get()).pattern("FIF").pattern("RAR").pattern("FIF")
                     .define('F',ModContent.FRAME.get()).define('I',Items.IRON_INGOT).define('R',Items.REDSTONE).define('A',Items.DIAMOND_AXE).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_SENTINEL).get()).pattern("FFF").pattern("OQC").pattern("FFF")
+                    .define('F',ModContent.FRAME.get()).define('Q',Items.QUARTZ).define('O',Items.OBSIDIAN).define('C',ModContent.SENTINEL_FOCUS.get()).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.SENTINEL_FOCUS.get()).pattern("DQD").pattern("QEQ").pattern("DQD")
+                    .define('D',Items.DIAMOND).define('Q',Items.QUARTZ).define('E',Items.ENDER_PEARL).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
             for (var item : new net.minecraft.world.item.Item[]{Items.COPPER_INGOT, Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE}) {
                 var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
                 int multiplier = item == Items.COPPER_INGOT ? 2 : 1;
