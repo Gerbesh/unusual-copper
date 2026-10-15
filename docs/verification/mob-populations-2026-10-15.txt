@@ -1,0 +1,35 @@
+Unusual Copper 0.4.1-alpha.1 — mob population prerequisites, 2026-10-15
+Successful final runs only; raw local logs are ignored.
+
+.codex-tmp/verify-population-bulk.log
+[07:22:03] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[07:22:16] [Server thread/INFO] [minecraft/GameTestServer]: All 53 required tests passed :)
+BUILD SUCCESSFUL in 58s
+
+.codex-tmp/production-population-round1.log
+[07:24:09] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.20, for MC 1.20.1 with MCP 20230612.114412
+[07:24:15] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round=1
+
+.codex-tmp/production-population-round2.log
+[07:24:24] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.20, for MC 1.20.1 with MCP 20230612.114412
+[07:24:29] [Server thread/INFO] [io.gi.ge.un.pr.ProductionProbe/]: CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round=2
+
+.codex-tmp/verify-population-openpac.log
+[07:25:37] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[07:25:44] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied
+[07:25:44] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC CULTIVATOR PASS: foreign target access denied without charge; owner grew claimed wheat for exactly 140 CuE
+[07:25:44] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC COLLECTOR PASS: foreign target access denied without charge; owner collected eight real ingots
+[07:25:44] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE OPENPAC SHEPHERD PASS: foreign calf access denied without charge; owner advanced age by 2400 for exactly 400 CuE
+BUILD SUCCESSFUL in 26s
+
+.codex-tmp/verify-population-client.log
+[07:26:02] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[07:26:27] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE WAND SELECTION PASS: native server useOn selected 28 coordinates and opened the rules menu
+[07:26:31] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE COLLECTOR CLIENT PASS: real sixteen-ingot entity became one output stack; 965 CuE remain
+[07:26:35] [Server thread/INFO] [io.gi.ge.un.UnusualCopper/]: CuE SHEPHERD CLIENT PASS: three calves each advanced 2400 ticks, paid 1200 CuE; real menu enabled own pets
+BUILD SUCCESSFUL in 52s
+
+io.github.gerbesh.unusualcopper.AccountingTest: tests=5, failures=0, errors=0, skipped=0
+io.github.gerbesh.unusualcopper.WorkAreaTest: tests=3, failures=0, errors=0, skipped=0
+Production JAR: 91 JSON resources parsed, probe/tests/fixtures/cache absent, MixinConfigs present.
+SHA256: BC5A86219C231DA6C2589D850ACA66F163630ADE723908E6C50FC9F2C80B7CA1

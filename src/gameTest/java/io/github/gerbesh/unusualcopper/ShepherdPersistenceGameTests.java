@@ -37,6 +37,10 @@ public final class ShepherdPersistenceGameTests {
         h.succeedWhen(() -> {
             h.assertTrue(level.getEntity(checkpoint.animal) instanceof Cow, "The original saved animal UUID has loaded from its entity region");
             var calf = (Cow)level.getEntity(checkpoint.animal); var machine = (CopperMachineBlockEntity)level.getBlockEntity(ANCHOR);
+            var population = io.github.gerbesh.unusualcopper.gameplay.MobPopulations.ledger(level, OWNER, ANCHOR, new WorkArea(target,target),
+                    new io.github.gerbesh.unusualcopper.gameplay.ReaperRule(true, false, java.util.Set.of(new net.minecraft.resources.ResourceLocation("minecraft", "cow")), java.util.Set.of(), java.util.Set.of()));
+            population.step(16);
+            h.assertTrue(population.ready() && population.count() == 1 && population.target() == calf, "The original disk-loaded entity participates in exact population accounting");
             if (checkpoint.round == 0) {
                 for (var old : level.getEntitiesOfClass(Cow.class, new net.minecraft.world.phys.AABB(target).inflate(2))) if (old != calf) old.discard();
                 int before = calf.getAge(); machine.redstoneMode = 0; machine.nextWaveTick = 0; ShepherdLogic.process(machine, level);

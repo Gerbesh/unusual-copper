@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "io.github.gerbesh.unusualcopper.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["EntityPopulationMixin", "EntityDataPopulationMixin", "HorsePopulationMixin", "MobLeashPopulationMixin"],
+  "injectors": {"defaultRequire": 1}
+}

@@ -1,0 +1,13 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="unusualcopper_probe"
+version="1"
+displayName="Unusual Copper production verification probe"
+[[dependencies.unusualcopper_probe]]
+modId="unusualcopper"
+mandatory=true
+versionRange="[0,)"
+ordering="AFTER"
+side="SERVER"
