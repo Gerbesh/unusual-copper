@@ -30,7 +30,7 @@ public final class ClientSmokeTest {
     private static final AtomicBoolean saved = new AtomicBoolean();
     private static int ticks;
     private static int stage;
-    private static BlockPos menuPos, pipeMenuPos, cultivatorPos, shepherdPos;
+    private static BlockPos menuPos, pipeMenuPos, cultivatorPos, shepherdPos, reaperPos;
     private static final java.util.List<java.util.UUID> shepherdAnimals = new java.util.ArrayList<>();
     private static boolean settingsSent;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
@@ -87,7 +87,7 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7) && mc.screen instanceof CopperMachineScreen) || ((stage == 2 || stage == 5 || stage == 8) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7 || stage == 10) && mc.screen instanceof CopperMachineScreen) || (stage == 9 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ReaperScreen) || ((stage == 2 || stage == 5 || stage == 8) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -156,6 +156,19 @@ public final class ClientSmokeTest {
         if (stage == 8 && ticks >= 20 && !captured) {
             captured = true;
             Screenshot.grab(mc.gameDirectory, "cue-shepherd-wave.png", mc.getMainRenderTarget(), text -> { UnusualCopper.LOGGER.info("CuE shepherd wave screenshot: {}", text.getString()); saved.set(true); });
+        }
+        if (stage == 9 && ticks >= 15 && mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ReaperMenu menu && menu.snapshot()!=null && !settingsSent) {
+            settingsSent=true;
+            io.github.gerbesh.unusualcopper.network.ReaperNetwork.settings(menu.containerId,new io.github.gerbesh.unusualcopper.gameplay.ReaperSettings(20,12,true,true,"minecraft:cow","","creature"));
+        }
+        if (stage == 9 && ticks >= 30 && !captured && mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ReaperMenu menu && menu.result==1) {
+            if (menu.snapshot().trigger()!=20 || menu.snapshot().keep()!=12 || !menu.snapshot().passive()) throw new IllegalStateException("Reaper settings acknowledgement failed");
+            captured=true;
+            Screenshot.grab(mc.gameDirectory,"cue-reaper-settings.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE REAPER CLIENT PASS: real C2S settings and S2C acknowledgement; screenshot {}",text.getString()); saved.set(true); });
+        }
+        if (stage == 10 && ticks >= 30 && !captured && mc.screen instanceof CopperMachineScreen) {
+            captured=true;
+            Screenshot.grab(mc.gameDirectory,"cue-reaper-menu.png",mc.getMainRenderTarget(),text -> { UnusualCopper.LOGGER.info("CuE reaper machine screenshot: {}",text.getString()); saved.set(true); });
         }
         if (saved.get()) {
             if (stage == 0) {
@@ -260,6 +273,18 @@ public final class ClientSmokeTest {
                 stage = 8; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = true;
                 io.github.gerbesh.unusualcopper.client.AreaPreviewRenderer.clear();
                 mc.getSingleplayerServer().execute(() -> { var level = serverLevel(mc); var player = level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer(); player.teleportTo(level, 42.5, shepherdPos.getY() + 2.2, 42, 0, 34); });
+            } else if (stage == 8) {
+                stage=9; captured=false; saved.set(false); ticks=0; settingsSent=false; mc.options.hideGui=false;
+                mc.getSingleplayerServer().execute(() -> {
+                    var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); reaperPos=shepherdPos.east(4);
+                    level.setBlock(reaperPos,ModContent.MACHINES.get(MachineKind.MOB_REAPER).get().defaultBlockState(),3);
+                    var reaper=(CopperMachineBlockEntity)level.getBlockEntity(reaperPos); reaper.setOwner(player.getUUID()); reaper.energy.add(1500,false);
+                    player.teleportTo(level,reaperPos.getX()+.5,reaperPos.getY()+1,reaperPos.getZ()-2,0,20);
+                    io.github.gerbesh.unusualcopper.menu.ReaperMenu.open(player,reaper);
+                });
+            } else if (stage == 9) {
+                stage=10; captured=false; saved.set(false); ticks=0;
+                mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId,0);
             } else { mc.options.hideGui = false; mc.stop(); }
         }
     }

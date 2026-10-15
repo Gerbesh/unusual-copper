@@ -65,8 +65,10 @@ with log.open("w", encoding="utf-8") as output:
         raise SystemExit("Owned production probe timed out; inspect " + str(log))
 text = log.read_text(encoding="utf-8", errors="replace")
 passed = [line for line in text.splitlines() if "CuE PRODUCTION POPULATION PASS" in line]
-if process.returncode or not passed:
+reaper = [line for line in text.splitlines() if "CuE PRODUCTION REAPER PASS" in line]
+if process.returncode or not passed or not reaper:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
+print(reaper[-1])
 print("Production server stopped cleanly; log:", log)

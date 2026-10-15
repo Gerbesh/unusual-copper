@@ -1,0 +1,22 @@
+{
+  "mappings": {
+    "io/github/gerbesh/unusualcopper/mixin/ReaperVictimMixin": {
+      "lastHurtByPlayer": "f_20888_:Lnet/minecraft/world/entity/player/Player;",
+      "lastHurtByPlayerTime": "f_20889_:I",
+      "lastHurtByMob": "f_20949_:Lnet/minecraft/world/entity/LivingEntity;",
+      "lastHurtByMobTimestamp": "f_20950_:I",
+      "dead": "f_20890_:Z"
+    }
+  },
+  "data": {
+    "searge": {
+      "io/github/gerbesh/unusualcopper/mixin/ReaperVictimMixin": {
+        "lastHurtByPlayer": "f_20888_:Lnet/minecraft/world/entity/player/Player;",
+        "lastHurtByPlayerTime": "f_20889_:I",
+        "lastHurtByMob": "f_20949_:Lnet/minecraft/world/entity/LivingEntity;",
+        "lastHurtByMobTimestamp": "f_20950_:I",
+        "dead": "f_20890_:Z"
+      }
+    }
+  }
+}

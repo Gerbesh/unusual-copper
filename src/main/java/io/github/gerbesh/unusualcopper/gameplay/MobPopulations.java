@@ -125,6 +125,7 @@ public final class MobPopulations {
         /** Counts each examined row, including stale ones, against the caller's budget. */
         public int step(int budget) {
             if (retired) return 0;
+            lastUse = state.level.getGameTime();
             int used = 0;
             while (sectionCursor < sections.size() && used < budget) {
                 var bucket = state.sections.get(sections.get(sectionCursor)); var entry = bucket == null ? null : bucket.higherEntry(cursor);
@@ -140,6 +141,7 @@ public final class MobPopulations {
         public boolean ready() { return !retired && sectionCursor == sections.size() && pending.isEmpty() && epoch == tagEpoch; }
         public int count() { return members.size(); }
         public Mob target() {
+            lastUse = state.level.getGameTime();
             if (!ready() || members.isEmpty()) return null;
             var iterator = members.entrySet().iterator(); var entry = iterator.next(); iterator.remove(); var row = entry.getValue(); state.refresh(row, false); touch(row);
             var mob = row.entity.get();

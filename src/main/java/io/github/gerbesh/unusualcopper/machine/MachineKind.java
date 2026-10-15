@@ -7,7 +7,8 @@ public enum MachineKind {
     RESONANCE_SMELTER("resonance_smelter", 24_000),
     AURA_CULTIVATOR("aura_cultivator", 50_000),
     MAGNETIC_COLLECTOR("magnetic_collector", 24_000),
-    GROWTH_SHEPHERD("growth_shepherd", 50_000);
+    GROWTH_SHEPHERD("growth_shepherd", 50_000),
+    MOB_REAPER("mob_reaper", 50_000);
 
     public final String id;
     public final int capacity;
@@ -15,6 +16,6 @@ public enum MachineKind {
     public boolean produces() { return this == ESSENCE_SPLITTER || this == COPPER_CELL; }
     public boolean consumes() { return this == RESONANCE_SMELTER || this == COPPER_CELL || usesArea(); }
     public boolean hasInventory() { return this != COPPER_CELL && this != AURA_CULTIVATOR && this != GROWTH_SHEPHERD; }
-    public boolean acceptsInputs() { return hasInventory() && this != MAGNETIC_COLLECTOR; }
-    public boolean usesArea() { return this == AURA_CULTIVATOR || this == MAGNETIC_COLLECTOR || this == GROWTH_SHEPHERD; }
+    public boolean acceptsInputs() { return hasInventory() && this != MAGNETIC_COLLECTOR && this != MOB_REAPER; }
+    public boolean usesArea() { return this == AURA_CULTIVATOR || this == MAGNETIC_COLLECTOR || this == GROWTH_SHEPHERD || this == MOB_REAPER; }
 }

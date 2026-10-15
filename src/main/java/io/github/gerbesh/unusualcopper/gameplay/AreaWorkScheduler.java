@@ -6,6 +6,7 @@ import io.github.gerbesh.unusualcopper.machine.MachineKind;
 import io.github.gerbesh.unusualcopper.machine.logic.CultivatorLogic;
 import io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic;
 import io.github.gerbesh.unusualcopper.machine.logic.ShepherdLogic;
+import io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.TickEvent;
@@ -35,6 +36,8 @@ public final class AreaWorkScheduler {
                 entities -= ServerConfig.collectorCandidates(); CollectorLogic.process(machine, level);
             } else if (machine.kind == MachineKind.GROWTH_SHEPHERD && entities >= ServerConfig.shepherdCandidates()) {
                 entities -= ServerConfig.shepherdCandidates(); ShepherdLogic.process(machine, level);
+            } else if (machine.kind == MachineKind.MOB_REAPER && entities >= ServerConfig.reaperCandidates()) {
+                entities -= ServerConfig.reaperCandidates(); ReaperLogic.process(machine, level);
             } else if (machine.kind.usesArea()) queue.put(entry.getKey(), entry.getValue());
         }
     }

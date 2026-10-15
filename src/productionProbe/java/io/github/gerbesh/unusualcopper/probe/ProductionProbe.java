@@ -19,11 +19,13 @@ import java.util.*;
 @Mod("unusualcopper_probe")
 public final class ProductionProbe {
     private static ServerLevel level; private static long started; private static boolean done;
+    private static UUID cancelledVictim;
+    @SubscribeEvent public static void death(net.minecraftforge.event.entity.living.LivingDeathEvent event) { if (event.getEntity().getUUID().equals(cancelledVictim)) event.setCanceled(true); }
     private static final BlockPos TARGET = new BlockPos(130, 70, 130);
     private static final class Checkpoint extends net.minecraft.world.level.saveddata.SavedData {
-        UUID animal; int round;
-        static Checkpoint load(net.minecraft.nbt.CompoundTag tag) { var value = new Checkpoint(); value.animal = tag.hasUUID("Animal") ? tag.getUUID("Animal") : null; value.round = tag.getInt("Round"); return value; }
-        @Override public net.minecraft.nbt.CompoundTag save(net.minecraft.nbt.CompoundTag tag) { if (animal != null) tag.putUUID("Animal", animal); tag.putInt("Round",round); return tag; }
+        UUID animal; int round, emergency;
+        static Checkpoint load(net.minecraft.nbt.CompoundTag tag) { var value = new Checkpoint(); value.animal = tag.hasUUID("Animal") ? tag.getUUID("Animal") : null; value.round = tag.getInt("Round"); value.emergency=tag.getInt("Emergency"); return value; }
+        @Override public net.minecraft.nbt.CompoundTag save(net.minecraft.nbt.CompoundTag tag) { if (animal != null) tag.putUUID("Animal", animal); tag.putInt("Round",round); tag.putInt("Emergency",emergency); return tag; }
     }
     public ProductionProbe() { MinecraftForge.EVENT_BUS.register(ProductionProbe.class); }
     private static void check(boolean condition, String reason) { if (!condition) throw new IllegalStateException(reason); }
@@ -58,11 +60,28 @@ public final class ProductionProbe {
         cow.setPos(TARGET.getX() + .5, TARGET.getY() + .1, TARGET.getZ() + .5); cow.setAge(-5000); check(ledger.count() == 22, "SRG age hook failed"); cow.setAge(0); check(ledger.count() == 23, "SRG adulthood hook failed");
         cow.setHealth(0); check(ledger.count() == 22, "SRG health hook failed");
         cows.forEach(Mob::discard); horse.discard(); wolf.discard(); check(ledger.count() == 0, "SRG entity removal hook failed");
+        var machinePos=TARGET.west(2);
+        if (checkpoint.emergency>0) {
+            var restored=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(machinePos);
+            check(restored!=null && restored.reaper.lootCount()==checkpoint.emergency && restored.reaper.loot().get(0).getHoverName().getString().equals("Production emergency loot"),"Emergency loot lost count or NBT on real process restart");
+        }
+        level.setBlock(machinePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        for(var item:level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(TARGET).inflate(4))) item.discard();
+        level.setBlock(machinePos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.MOB_REAPER).get().defaultBlockState(),3);
+        var machine=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(machinePos); machine.energy.add(3000,false);
+        var previousPlayer=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"ProductionAttacker"));
+        var cancelled=spawn(EntityType.COW,TARGET); cancelled.setInvulnerable(false); cancelled.setLastHurtByPlayer(previousPlayer); cancelledVictim=cancelled.getUUID();
+        check(!ReaperLoot.kill(machine,cancelled,level,1500) && cancelled.isAlive() && cancelled.getHealth()==cancelled.getMaxHealth() && cancelled.getKillCredit()==previousPlayer && machine.energy.stored()==3000,"SRG cancellation failed health/credit/energy restore"); cancelledVictim=null; cancelled.discard();
+        var victim=spawn(EntityType.COW,TARGET); victim.setInvulnerable(false); victim.setLastHurtByPlayer(previousPlayer);
+        check(ReaperLoot.kill(machine,victim,level,1500) && ((ReaperVictim)victim).unusualcopper$deathCommitted() && victim.getKillCredit()==null && machine.energy.stored()==1500,"SRG real death or player credit suppression failed");
+        check(!machine.inventory.getStackInSlot(2).isEmpty() && level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class,new net.minecraft.world.phys.AABB(TARGET).inflate(4)).isEmpty(),"SRG real loot capture or zero XP failed"); victim.discard();
+        var emergency=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.EMERALD,5); emergency.setHoverName(Component.literal("Production emergency loot")); machine.reaper.hold(emergency); ((net.minecraft.world.level.block.entity.BlockEntity)machine).setChanged(); checkpoint.emergency=5;
         var savedPos = TARGET.east(8);
         if (checkpoint.animal == null) checkpoint.animal = spawn(EntityType.COW, savedPos).getUUID();
         var savedArea = new WorkArea(savedPos,savedPos); var loaded = MobPopulations.ledger(level, UUID.randomUUID(), TARGET, savedArea, rule); loaded.step(16);
         check(loaded.ready() && loaded.count() == 1 && loaded.target().getUUID().equals(checkpoint.animal), "Original persisted cow is not indexed exactly once");
         checkpoint.round++; checkpoint.setDirty();
+        LogUtils.getLogger().info("CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round={}",checkpoint.round);
         LogUtils.getLogger().info("CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round={}", checkpoint.round);
         level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, false); level.getServer().halt(false);
     }

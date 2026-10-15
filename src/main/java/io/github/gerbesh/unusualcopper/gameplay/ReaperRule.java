@@ -20,6 +20,7 @@ public record ReaperRule(boolean allowPassive, boolean adultsOnly, Set<ResourceL
     public static ReaperRule defaults() { return new ReaperRule(false, true, Set.of(), Set.of(), Set.of(MobCategory.MONSTER)); }
     public boolean matches(Mob mob) {
         if (!mob.isAlive() || mob instanceof AbstractVillager || mob.hasCustomName() || mob.isLeashed() || mob.getType().is(net.minecraftforge.common.Tags.EntityTypes.BOSSES)) return false;
+        if (mob instanceof OwnableEntity owned && owned.getOwnerUUID() != null) return false;
         if (mob instanceof TamableAnimal pet && (pet.isTame() || pet.getOwnerUUID() != null)) return false;
         if (mob instanceof AbstractHorse horse && (horse.isTamed() || horse.getOwnerUUID() != null) && !(mob.getClass() == net.minecraft.world.entity.animal.camel.Camel.class && horse.getOwnerUUID() == null)) return false;
         if (adultsOnly && mob.isBaby()) return false;

@@ -27,14 +27,19 @@ public final class PopulationGameTests {
     private static void clear(ServerLevel level, WorkArea area) {
         for (var mob : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(area.min(), area.max().offset(1, 1, 1)).inflate(2))) mob.discard();
     }
-    private static void loaded(GameTestHelper h, WorkArea area, Runnable test) {
+    public static void loaded(GameTestHelper h, WorkArea area, Runnable test) {
+        loadedSequence(h, area, sequence -> sequence.thenExecute(test));
+    }
+    public static void loadedSequence(GameTestHelper h, WorkArea area, java.util.function.Consumer<GameTestSequence> steps) {
         var level = h.getLevel();
         for (int x = area.min().getX() >> 4; x <= area.max().getX() >> 4; x++) for (int z = area.min().getZ() >> 4; z <= area.max().getZ() >> 4; z++) { level.setChunkForced(x, z, true); FORCED.computeIfAbsent(level, ignored -> new HashSet<>()).add(net.minecraft.world.level.ChunkPos.asLong(x,z)); }
         level.getChunkAt(area.min()); level.getChunkAt(area.max());
-        h.startSequence().thenWaitUntil(() -> {
+        var sequence = h.startSequence().thenWaitUntil(() -> {
             for (int x = area.min().getX() >> 4; x <= area.max().getX() >> 4; x++) for (int z = area.min().getZ() >> 4; z <= area.max().getZ() >> 4; z++) h.assertTrue(level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(x,z)), "Fixture entity regions have finished loading");
             h.assertTrue(level.isPositionEntityTicking(area.min()) && level.isPositionEntityTicking(area.max()), "Fixture chunks are ready to track and tick entities");
-        }).thenExecute(() -> { clear(level, area); test.run(); clear(level, area); }).thenSucceed();
+        }).thenExecute(() -> clear(level, area));
+        steps.accept(sequence);
+        sequence.thenExecute(() -> clear(level, area)).thenSucceed();
     }
     @GameTest(template = "empty", timeoutTicks = 100)
     public static void coldLedgerCountsThreeHundredWithBoundedStepsAndConcurrentChanges(GameTestHelper h) {

@@ -34,6 +34,8 @@ minecraft {
     runs {
         configureEach {
             args '--mixin.config', 'unusualcopper.mixins.json'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'info'
             property 'forge.enabledGameTestNamespaces', mod_id
@@ -59,8 +61,6 @@ minecraft {
             if (project.hasProperty('opacTests')) {
                 workingDirectory project.file('run-opac-server')
                 property 'unusualcopper.opacSmoke', 'true'
-                property 'mixin.env.remapRefMap', 'true'
-                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 mods { "${mod_id}" { source sourceSets.gameTest; source sourceSets.opacTest } }
             }
         }
@@ -74,6 +74,10 @@ minecraft {
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
+}
+
+tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer', 'runData'] }.configureEach {
+    dependsOn 'createSrgToMcp'
 }
 
 dependencies {

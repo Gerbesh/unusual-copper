@@ -57,6 +57,7 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!state.is(replacement.getBlock()) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) {
             if (machine.boundCargoCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.boundCargo()));
+            if (machine.reaper != null && machine.reaper.lootCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.reaper.loot()));
             ItemStack[] contents = new ItemStack[4];
             for (int i = 0; i < 4; i++) contents[i] = machine.inventory.getStackInSlot(i).copy();
             Containers.dropContents(level, pos, new SimpleContainer(contents));

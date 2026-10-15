@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 27;
+    public static final int DATA_COUNT = 34;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -50,6 +50,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         if (button == 4) { machine.clearBinding(); return true; }
         if (button == 5) { machine.recoverBinding(player); return true; }
         if (button == 6 && machine.kind == MachineKind.GROWTH_SHEPHERD) { machine.allowOwnTamed = !machine.allowOwnTamed; machine.setChanged(); return true; }
+        if (button == 7 && machine.reaper != null && player instanceof net.minecraft.server.level.ServerPlayer server) { ReaperMenu.open(server,machine); return true; }
         return false;
     }
     @Override public ItemStack quickMoveStack(Player player, int index) {

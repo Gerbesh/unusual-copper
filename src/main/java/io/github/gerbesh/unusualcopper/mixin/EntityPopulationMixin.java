@@ -12,7 +12,7 @@ public abstract class EntityPopulationMixin {
     @Inject(method = {"setPosRaw(DDD)V", "m_20343_(DDD)V"}, at = @At("TAIL"), remap = false)
     private void unusualcopper$position(CallbackInfo callback) { MobPopulations.changed((Entity)(Object)this); }
     @Inject(method = "onAddedToWorld()V", at = @At("TAIL"), remap = false)
-    private void unusualcopper$added(CallbackInfo callback) { MobPopulations.added((Entity)(Object)this); }
+    private void unusualcopper$added(CallbackInfo callback) { MobPopulations.added((Entity)(Object)this); io.github.gerbesh.unusualcopper.gameplay.ReaperLoot.accepted((Entity)(Object)this); }
     @Inject(method = "onRemovedFromWorld()V", at = @At("TAIL"), remap = false)
     private void unusualcopper$removed(CallbackInfo callback) { MobPopulations.removed((Entity)(Object)this); }
 }

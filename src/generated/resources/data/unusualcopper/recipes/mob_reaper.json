@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FOF",
+    "OEO",
+    "FRF"
+  ],
+  "result": {
+    "item": "unusualcopper:mob_reaper"
+  },
+  "show_notification": true
+}

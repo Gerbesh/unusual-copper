@@ -92,6 +92,18 @@ public final class OpenPacServerSmoke {
             check(calf.getAge() == -2600 && shepherd.energy.stored() == 0 && shepherd.grown == 1, "Claim owner could not pay for exactly 2400 ticks of calf growth");
             calf.discard();
             UnusualCopper.LOGGER.info("CuE OPENPAC SHEPHERD PASS: foreign calf access denied without charge; owner advanced age by 2400 for exactly 400 CuE");
+            var reaperPos=shepherdPos.east(); level.setBlock(reaperPos,ModContent.MACHINES.get(MachineKind.MOB_REAPER).get().defaultBlockState(),3);
+            var reaper=(CopperMachineBlockEntity)level.getBlockEntity(reaperPos); actor.setPos(reaperPos.getX()+.5,reaperPos.getY()+.5,reaperPos.getZ()+.5);
+            check(reaper.setWorkArea(new WorkArea(cropPos,cropPos),actor),"Claim owner could not select reaper area");
+            reaper.reaper.settings(new io.github.gerbesh.unusualcopper.gameplay.ReaperRule(true,true,java.util.Set.of(new ResourceLocation("minecraft","cow")),java.util.Set.of(),java.util.Set.of()),0,0);
+            var victim=net.minecraft.world.entity.EntityType.COW.create(level); victim.setPos(cropPos.getX()+.5,cropPos.getY()+.1,cropPos.getZ()+.5); victim.setNoAi(true); victim.setNoGravity(true); level.addFreshEntity(victim);
+            reaper.energy.add(1500,false); reaper.setOwner(stranger);
+            for(int i=0;i<20;i++) { io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.process(reaper,level); if(reaper.status()!=MachineStatus.SCANNING) break; }
+            check(victim.isAlive() && victim.getHealth()==victim.getMaxHealth() && reaper.energy.stored()==1500 && reaper.status()==MachineStatus.PROTECTED,"Foreign reaper damaged a claimed target or charged energy");
+            reaper.setOwner(owner); reaper.nextWaveTick=0;
+            for(int i=0;i<20;i++) { io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.process(reaper,level); if(reaper.status()!=MachineStatus.SCANNING) break; }
+            check(!victim.isAlive() && reaper.energy.stored()==0 && !reaper.inventory.getStackInSlot(2).isEmpty(),"Claim owner could not pay for a real death and actual loot"); victim.discard();
+            UnusualCopper.LOGGER.info("CuE OPENPAC REAPER PASS: foreign target damage denied without charge; owner killed target for exactly 1500 CuE and kept real loot");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

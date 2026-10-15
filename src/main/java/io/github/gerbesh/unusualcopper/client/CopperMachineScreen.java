@@ -12,12 +12,13 @@ import net.minecraft.world.entity.player.Inventory;
 
 public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
     private Button cancelButton;
-    private Button growthButton, areaButton, clearBinding, recoverBinding, petButton;
+    private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
     }
     @Override protected void init() {
         super.init();
+        reaperButton = addRenderableWidget(Button.builder(Component.translatable("reaper.unusualcopper.settings"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 7)).bounds(leftPos + 13, topPos + 63, 112, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.redstone"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0)).bounds(leftPos + 88, topPos + 91, 98, 18).build());
         cancelButton = addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.cancel"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 1))
                 .tooltip(Tooltip.create(Component.translatable("gui.unusualcopper.cancel_hint"))).bounds(leftPos + 188, topPos + 91, 28, 18).build());
@@ -56,7 +57,11 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
             g.drawString(font, Component.translatable("gui.unusualcopper.area_size", menu.data.get(15)), 13, 52, 0xffe6f5ee, false);
             if (menu.kind() == MachineKind.AURA_CULTIVATOR) g.drawString(font, Component.translatable("gui.unusualcopper.growth_stats", menu.data.get(17), menu.data.get(18)), 13, 81, 0xffe6f5ee, false);
             else if (menu.kind() == MachineKind.GROWTH_SHEPHERD) g.drawString(font, Component.translatable("gui.unusualcopper.shepherd_stats", menu.data.get(18), (menu.data.get(23) + 19) / 20), 13, 81, 0xffe6f5ee, false);
-            else {
+            else if (menu.kind() == MachineKind.MOB_REAPER) {
+                int population=(menu.data.get(27)&0xffff)|((menu.data.get(28)&0xffff)<<16);
+                int loot=(menu.data.get(29)&0xffff)|((menu.data.get(30)&0xffff)<<16);
+                g.drawString(font, Component.translatable("reaper.unusualcopper.stats", population, loot), 13, 81, 0xffe6f5ee, false);
+            } else {
                 g.drawString(font, Component.translatable("gui.unusualcopper.collection_checked", menu.data.get(17)), 13, 65, 0xffe6f5ee, false);
                 g.drawString(font, Component.translatable("gui.unusualcopper.collection_taken", menu.data.get(18)), 13, 78, 0xffe6f5ee, false);
             }
@@ -66,6 +71,8 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         cancelButton.visible = menu.kind().acceptsInputs();
+        reaperButton.visible = menu.kind() == MachineKind.MOB_REAPER;
+        if (reaperButton.visible) reaperButton.setTooltip(Tooltip.create(Component.translatable("reaper.unusualcopper.cost", (menu.data.get(32)&0xffff)|((menu.data.get(33)&0xffff)<<16))));
         cancelButton.active = menu.duration() > 0;
         growthButton.visible = menu.kind() == MachineKind.AURA_CULTIVATOR; areaButton.visible = menu.kind().usesArea();
         petButton.visible = menu.kind() == MachineKind.GROWTH_SHEPHERD;

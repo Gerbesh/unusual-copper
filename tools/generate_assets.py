@@ -153,6 +153,10 @@ def models():
                 part([3, 13, 4], [4, 14, 12], "copper"), part([12, 13, 4], [13, 14, 12], "copper"),
                 part([6, 14, 6], [10, 16, 10], "aqua"), part([4, 3, .5], [12, 5, 1], "aqua")]
     export_model("growth_shepherd", shepherd, [])
+    reaper = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 13, 15], "patina"), part([0, 12, 0], [16, 14, 16], "copper"),
+              part([1, 2, 0], [4, 12, 2], "copper"), part([12, 2, 0], [15, 12, 2], "copper"), part([4, 3, .5], [12, 12, 1], "dark"),
+              part([7, 4, .2], [9, 11, .5], "aqua"), part([5, 7, .2], [11, 9, .5], "aqua"), part([6, 14, 6], [10, 16, 10], "aqua")]
+    export_model("mob_reaper", reaper, [])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -210,9 +214,35 @@ def languages():
     en["gui.unusualcopper.cancel_hint"] = "Cancel the operation. Input remains; spent CuE is not refunded."
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
     additions = {
+        "block.unusualcopper.mob_reaper": ("Mob Reaper", "Жнец сущностей"),
+        "status.unusualcopper.scanning": ("Scanning population", "Подсчёт популяции"), "status.unusualcopper.population_limit": ("Population threshold", "Порог популяции"), "status.unusualcopper.kill_cancelled": ("Kill cancelled", "Убийство отменено"),
         "block.unusualcopper.growth_shepherd": ("Growth Shepherd", "Пастырь роста"),
         "gui.unusualcopper.own_pets.0": ("Own pets: excluded", "Свои питомцы: выкл."), "gui.unusualcopper.own_pets.1": ("Own pets: allowed", "Свои питомцы: вкл."),
         "gui.unusualcopper.shepherd_stats": ("Grown: %s · next: %s s", "Рост: %s · волна: %s с"),
+        "reaper.unusualcopper.settings": ("Target rules", "Правила целей"),
+        "reaper.unusualcopper.trigger": ("Start above N", "Начать, если > N"),
+        "reaper.unusualcopper.keep": ("Keep M (0 ≤ M ≤ N)", "Оставить M (0 ≤ M ≤ N)"),
+        "reaper.unusualcopper.passive.0": ("Passive: excluded", "Мирные: исключены"),
+        "reaper.unusualcopper.passive.1": ("Passive: allowed", "Мирные: разрешены"),
+        "reaper.unusualcopper.adults.0": ("Any age", "Любой возраст"),
+        "reaper.unusualcopper.adults.1": ("Adults only", "Только взрослые"),
+        "reaper.unusualcopper.types": ("Entity IDs (up to 8, comma separated)", "Виды (до 8 ID через запятую)"),
+        "reaper.unusualcopper.tags": ("Entity tags (up to 8, without #)", "Теги сущностей (до 8, без #)"),
+        "reaper.unusualcopper.categories": ("Categories (comma separated)", "Категории (через запятую)"),
+        "reaper.unusualcopper.types_hint": ("Example: minecraft:cow,minecraft:sheep. IDs, tags and categories match with OR. Empty filters select nothing.", "Пример: minecraft:cow,minecraft:sheep. Виды, теги и категории объединяются по ИЛИ. Пустые фильтры никого не выбирают."),
+        "reaper.unusualcopper.tags_hint": ("Example: forge:animals. Uses entity type tags from loaded datapacks. Unknown or empty tags select nothing.", "Пример: forge:animals. Теги типов сущностей из датапаков. Неизвестные и пустые теги никого не выбирают."),
+        "reaper.unusualcopper.categories_hint": ("monster,creature,ambient,axolotls,underground_water_creature,water_creature,water_ambient,misc", "monster,creature,ambient,axolotls,underground_water_creature,water_creature,water_ambient,misc"),
+        "reaper.unusualcopper.protected": ("Pets, NPCs and named mobs stay protected.", "Питомцы, NPC и именные мобы защищены."),
+        "reaper.unusualcopper.apply": ("Apply", "Применить"),
+        "reaper.unusualcopper.back": ("Back to machine", "К машине"),
+        "reaper.unusualcopper.loading": ("Reading server settings…", "Загрузка настроек…"),
+        "reaper.unusualcopper.pending": ("Waiting for server…", "Ожидание сервера…"),
+        "reaper.unusualcopper.throttled": ("Too fast; try again", "Слишком часто; повторите"),
+        "reaper.unusualcopper.ready": ("Settings received", "Настройки получены"),
+        "reaper.unusualcopper.applied": ("Saved by server", "Сохранено сервером"),
+        "reaper.unusualcopper.invalid": ("Invalid N/M or entity filters", "Ошибка N/M или фильтра сущностей"),
+        "reaper.unusualcopper.stats": ("Targets: %s · loot: %s", "Целей: %s · буфер: %s"),
+        "reaper.unusualcopper.cost": ("%s CuE per real kill; no XP or Looting", "%s CuE за убийство; без XP и Looting"),
         "gui.unusualcopper.shepherd_hint": ("%s CuE per animal; advance age by up to %s ticks. Pet permission applies only to the machine owner's animals.", "%s CuE за особь; взросление до %s тиков. Разрешение действует только на животных владельца машины."),
         "status.unusualcopper.no_babies": ("No eligible babies", "Нет подходящих детёнышей"), "status.unusualcopper.unsupported_animal": ("Species needs an adapter", "Виду нужен адаптер"),
         "block.unusualcopper.magnetic_collector": ("Magnetic Collector", "Магнитный коллектор"),
@@ -257,4 +287,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 9 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 10 editable Blockbench projects, models, item tags and RU/EN.")

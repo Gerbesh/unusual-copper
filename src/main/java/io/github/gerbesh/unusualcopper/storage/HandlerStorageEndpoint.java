@@ -24,6 +24,8 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
     private WeakReference<IItemHandler> previous = new WeakReference<>(null);
     private int scanCursor, extractCursor, insertCursor;
     private int simulatedInsertion = -1;
+    private int spaceCursor, spaceVisited;
+    public enum Space { AVAILABLE, FULL, SCANNING, UNAVAILABLE }
     private long snapshotTick = Long.MIN_VALUE;
     private int snapshotLimit;
     private View rawSnapshot;
@@ -44,10 +46,23 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
         if (entity == null || entity.isRemoved()) return null;
         if (entity instanceof CopperMachineBlockEntity machine && !machine.allowsAutomation(owner)) return null;
         IItemHandler handler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null);
-        if (previous.get() != handler) { previous = new WeakReference<>(handler); hints.clear(); scanCursor = extractCursor = insertCursor = 0; simulatedInsertion = -1; rawSnapshot = null; }
+        if (previous.get() != handler) { previous = new WeakReference<>(handler); hints.clear(); scanCursor = extractCursor = insertCursor = spaceCursor = spaceVisited = 0; simulatedInsertion = -1; rawSnapshot = null; }
         return handler;
     }
     @Override public boolean isAvailable() { return resolve() != null; }
+    /** Potential insertion capacity, not a reservation for an unknown future loot type. */
+    public Space space() {
+        var handler = resolve(); if (handler == null) return Space.UNAVAILABLE;
+        int slots = Math.max(0, handler.getSlots()); if (slots == 0) return Space.FULL;
+        spaceCursor = Math.floorMod(spaceCursor, slots);
+        for (int i = 0; i < Math.min(slots, SLOT_BUDGET); i++) {
+            int slot = spaceCursor; spaceCursor = (spaceCursor + 1) % slots; spaceVisited++;
+            var stack = handler.getStackInSlot(slot); int limit = handler.getSlotLimit(slot);
+            if (limit > 0 && (stack.isEmpty() || (stack.getCount() < Math.min(limit, stack.getMaxStackSize()) && handler.insertItem(slot, stack.copyWithCount(1), true).isEmpty()))) { spaceVisited = 0; return Space.AVAILABLE; }
+            if (spaceVisited >= slots) { spaceVisited = 0; return Space.FULL; }
+        }
+        return Space.SCANNING;
+    }
     @Override public StorageIdentity identity() {
         BlockPos canonical = pos;
         if (level.hasChunkAt(pos)) {

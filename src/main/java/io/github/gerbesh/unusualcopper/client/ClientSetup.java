@@ -12,6 +12,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public final class ClientSetup {
     @SubscribeEvent public static void setup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);
+            io.github.gerbesh.unusualcopper.network.ReaperNetwork.clientReceiver(message -> {
+                var player=net.minecraft.client.Minecraft.getInstance().player;
+                if (player != null && player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ReaperMenu menu) menu.receive(message);
+            });
             MenuScreens.register(ModContent.MACHINE_MENU.get(), CopperMachineScreen::new);
             MenuScreens.register(ModContent.PIPE_MENU.get(), ItemPipeScreen::new);
             io.github.gerbesh.unusualcopper.network.AreaNetwork.clientReceiver(AreaPreviewRenderer::accept);

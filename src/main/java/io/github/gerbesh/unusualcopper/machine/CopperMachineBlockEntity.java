@@ -51,6 +51,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public int scanCursor, growthMode, inspected, grown;
     public long nextWaveTick;
     public boolean allowOwnTamed;
+    public final ReaperState reaper;
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
@@ -91,6 +92,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public CopperMachineBlockEntity(BlockPos pos, BlockState state) {
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
         kind = ((CopperMachineBlock)state.getBlock()).kind;
+        reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
         energy = new CopperEnergyBuffer(kind.capacity, 256, 256, this::setChanged);
         inventory = new ItemStackHandler(4) {
             @Override protected void onContentsChanged(int slot) { setChanged(); }
@@ -110,6 +112,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
             case GROWTH_SHEPHERD -> new ShepherdLogic();
+            case MOB_REAPER -> new ReaperLogic();
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
@@ -174,6 +177,16 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         recipeId = ""; source = ItemStack.EMPTY; result = ItemStack.EMPTY; progress = 0; duration = 0; paid = 0; operationCost = 0; setChanged();
     }
     public boolean canFitOutput(ItemStack stack) { return outputPlan(stack) != null; }
+    public ItemStack insertOutput(ItemStack stack) {
+        var rest = stack.copy();
+        for (int slot = 2; slot <= 3 && !rest.isEmpty(); slot++) {
+            var stored = inventory.getStackInSlot(slot);
+            if (!stored.isEmpty() && !io.github.gerbesh.unusualcopper.storage.ItemKey.of(rest).matches(stored)) continue;
+            int count = Math.min(rest.getCount(), Math.min(rest.getMaxStackSize(), inventory.getSlotLimit(slot)) - stored.getCount()); if (count <= 0) continue;
+            inventory.setStackInSlot(slot, rest.copyWithCount(stored.getCount() + count)); rest.shrink(count);
+        }
+        return rest;
+    }
     private ItemStack[] outputPlan(ItemStack stack) {
         if (stack.isEmpty()) return null;
         ItemStack remaining = stack.copy();
@@ -276,6 +289,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (workArea != null) tag.put("WorkArea", workArea.save());
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
         tag.putLong("NextWaveTick", nextWaveTick); tag.putBoolean("AllowOwnTamed", allowOwnTamed);
+        if (reaper != null) tag.put("Reaper", reaper.save());
         if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
@@ -294,6 +308,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (tag.contains("WorkArea")) try { workArea = io.github.gerbesh.unusualcopper.gameplay.WorkArea.load(tag.getCompound("WorkArea")); } catch (IllegalArgumentException ignored) {}
         scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 2);
         nextWaveTick = Math.max(0, tag.getLong("NextWaveTick")); allowOwnTamed = tag.getBoolean("AllowOwnTamed");
+        if (reaper != null) reaper.load(tag.getCompound("Reaper"));
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
@@ -331,7 +346,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 22 -> allowOwnTamed ? 1 : 0; case 23 -> level == null ? 0 : (int)Math.max(0, Math.min(32767, nextWaveTick - level.getGameTime()));
                     case 24 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdCost() & 0xffff;
                     case 25 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdCost() >>> 16;
-                    case 26 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdAdvance(); default -> 0;
+                    case 26 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdAdvance();
+                    case 27 -> reaper == null ? 0 : reaper.population & 0xffff;
+                    case 28 -> reaper == null ? 0 : reaper.population >>> 16;
+                    case 29 -> reaper == null ? 0 : reaper.lootCount() & 0xffff;
+                    case 30 -> reaper == null ? 0 : reaper.lootCount() >>> 16;
+                    case 31 -> reaper != null && reaper.active ? 1 : 0;
+                    case 32 -> io.github.gerbesh.unusualcopper.config.ServerConfig.reaperCost() & 0xffff;
+                    case 33 -> io.github.gerbesh.unusualcopper.config.ServerConfig.reaperCost() >>> 16; default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}
