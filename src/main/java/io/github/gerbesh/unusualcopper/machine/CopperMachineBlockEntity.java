@@ -54,6 +54,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public final ReaperState reaper;
     public final ArboristState arborist;
     public final SentinelState sentinel;
+    public final BrewerState brewer;
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
@@ -74,13 +75,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (boundCargo.isEmpty()) { boundFaulted = false; boundCargoSlot = -1; } setChanged();
     }
     public boolean bind(BlockPos pos, Direction side, Player player) {
+        if(brewer!=null && brewer.job!=null)return false;
         if (!kind.hasInventory() || !canAccess(player) || !boundCargo.isEmpty() || !(level instanceof ServerLevel server) || pos.equals(worldPosition)
                 || worldPosition.distSqr(pos) > 32 * 32 || !server.hasChunkAt(pos) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server, worldPosition, player.getUUID())) return false;
         var endpoint = new io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint(server, pos, side, owner == null ? player.getUUID() : owner);
         if (!endpoint.isAvailable()) return false;
-        if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundSide = side; boundEndpoint = null; setChanged(); return true;
+        if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundSide = side; boundEndpoint = null; if(brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); return true;
     }
-    public void clearBinding() { boundInventory = null; boundEndpoint = null; setChanged(); }
+    public void clearBinding() { if(brewer!=null && brewer.job!=null)return; boundInventory = null; boundEndpoint = null; if(brewer!=null&&level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); }
     public void recoverBinding(Player player) {
         if (!canAccess(player)) return;
         var remainder = new java.util.ArrayList<ItemStack>();
@@ -97,11 +99,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
         arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
         sentinel = kind == MachineKind.COPPER_SENTINEL ? new SentinelState() : null;
+        brewer = kind == MachineKind.AETHERIC_BREWER ? new BrewerState() : null;
         energy = new CopperEnergyBuffer(kind.capacity, 256, 256, this::setChanged);
         inventory = new ItemStackHandler(4) {
+            @Override public int getSlotLimit(int slot){return brewer!=null && slot==1?1:super.getSlotLimit(slot);}
             @Override protected void onContentsChanged(int slot) { setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
                 if (slot >= 2 || !kind.acceptsInputs()) return false;
+                if(brewer!=null)return slot==0?stack.is(net.minecraft.world.item.Items.GLASS_BOTTLE):io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.ingredient(CopperMachineBlockEntity.this,stack);
                 if(arborist!=null) {
                     if(arborist.job!=null) return false;
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
@@ -123,6 +128,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case MOB_REAPER -> new ReaperLogic();
             case ARBORIST -> new ArboristLogic();
             case COPPER_SENTINEL -> new SentinelLogic();
+            case AETHERIC_BREWER -> new BrewerLogic();
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
@@ -187,7 +193,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         };
     }
 
-    public boolean hasOperation() { return arborist!=null && arborist.job!=null || !recipeId.isEmpty() && duration > 0; }
+    public boolean hasOperation() { return brewer!=null && brewer.job!=null || arborist!=null && arborist.job!=null || !recipeId.isEmpty() && duration > 0; }
     public boolean inputMatches() {
         ItemStack current = inventory.getStackInSlot(0);
         return ItemStack.isSameItemSameTags(current, source) && current.getCount() >= source.getCount();
@@ -246,6 +252,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
 
     public static void tick(ServerLevel level, BlockPos pos, BlockState state, CopperMachineBlockEntity machine) {
         boolean signal = level.hasNeighborSignal(pos);
+        if(machine.brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(level,machine);
         boolean sentinelWasActive=machine.sentinel!=null && machine.sentinel.active;
         if(machine.sentinel!=null) machine.sentinel.active=false;
         if ((machine.redstoneMode == 1 && !signal) || (machine.redstoneMode == 2 && signal)) { if(machine.reaper!=null) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(machine,level); machine.status(MachineStatus.REDSTONE_PAUSED); }
@@ -298,9 +305,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         super.invalidateCaps(); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
-    @Override public void onLoad() { super.onLoad(); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); }
-    @Override public void onChunkUnloaded() { releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
-    @Override public void setRemoved() { releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
+    @Override public void onLoad() { super.onLoad(); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
+    @Override public void onChunkUnloaded() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
+    @Override public void setRemoved() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
 
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -319,6 +326,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (reaper != null) tag.put("Reaper", reaper.save());
         if (arborist != null) tag.put("Arborist", arborist.save());
         if (sentinel != null) tag.put("Sentinel",sentinel.save());
+        if (brewer != null) tag.put("Brewer",brewer.save());
         if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
@@ -340,6 +348,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (reaper != null) reaper.load(tag.getCompound("Reaper"));
         if (arborist != null) arborist.load(tag.getCompound("Arborist"));
         if (sentinel != null) sentinel.load(tag.getCompound("Sentinel"));
+        if (brewer != null) {brewer.load(tag.getCompound("Brewer"));if(brewer.job!=null){progress=brewer.job.stage;duration=brewer.job.plan.stages();operationCost=brewer.job.price();}}
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:brewing_stand"
+    },
+    "C": {
+      "item": "minecraft:cauldron"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    }
+  },
+  "pattern": [
+    "FGF",
+    "GCG",
+    "FBF"
+  ],
+  "result": {
+    "item": "unusualcopper:aetheric_brewer"
+  },
+  "show_notification": true
+}

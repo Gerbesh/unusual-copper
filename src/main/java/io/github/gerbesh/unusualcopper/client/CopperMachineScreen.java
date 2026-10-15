@@ -11,13 +11,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
-    private Button cancelButton, redstoneButton;
+    private Button cancelButton, redstoneButton,brewerButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
     }
     @Override protected void init() {
         super.init();
+        brewerButton=addRenderableWidget(Button.builder(Component.literal("B"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,9)).bounds(leftPos+184,topPos+63,28,18).tooltip(Tooltip.create(Component.translatable("brewer.unusualcopper.settings"))).build());
         plantationButton=addRenderableWidget(Button.builder(Component.literal("P"),b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId,8)).bounds(leftPos+184,topPos+63,28,18).tooltip(Tooltip.create(Component.translatable("arborist.unusualcopper.hint"))).build());
         reaperButton = addRenderableWidget(Button.builder(Component.translatable("reaper.unusualcopper.settings"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 7)).bounds(leftPos + 13, topPos + 63, 112, 18).build());
         redstoneButton=addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.redstone"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0)).bounds(leftPos + 88, topPos + 91, 98, 18).build());
@@ -76,6 +77,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
         cancelButton.visible = menu.kind().acceptsInputs();
         redstoneButton.setTooltip(Tooltip.create(Component.translatable("gui.unusualcopper.redstone_mode."+menu.data.get(7))));
         reaperButton.visible = menu.kind() == MachineKind.MOB_REAPER;

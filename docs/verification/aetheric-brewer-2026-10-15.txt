@@ -1,0 +1,84 @@
+Unusual Copper 0.8.0-alpha.1 — Aetheric Brewer, 2026-10-15
+Windows 11 / Temurin 17.0.19+10 / dev Forge 47.4.10 / official 1.20.1.
+Raw logs, server worlds, downloaded artifacts and caches are ignored by Git.
+
+.codex-tmp/verify-brewer-nbt.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+[11:20:36] All 101 required tests passed :)
+BUILD SUCCESSFUL in 1m 7s
+JUnit: AccountingTest 5, WorkAreaTest 3, zero failures/errors.
+
+Eleven brewer GameTests cover the generated graph of 123 exact variants
+(every advertised edge checked against actual Forge BrewingRecipeRegistry),
+missing wart/bottles/energy, exact staged pricing, intermediate NBT, cancel
+returning real awkward potions, full output, sixteen physical barrel potions,
+six batches of each reagent, shared-stock reservations, three actual lingering
+potions and the real dragon-breath container, settings authority/bounds/runtime
+token/rate limit, actual queued priority and stage interval, exact potion NBT
+and different inventory faces, and recipe-provider drift/exception recovery.
+
+The intentionally throwing provider is installed and removed in a try/finally
+inside one synchronous test. Its logged exception is expected evidence; no
+production mod gains a test recipe or fixture.
+
+.codex-tmp/verify-brewer-providers.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+  runClient -PsmokeClient -PsmokeClientRu
+[11:16:53] All 100 required tests passed :) (before final NBT/face case)
+[11:18:13] CuE BREWER CLIENT PASS: actual C2S long fire resistance/lingering/
+stock three/priority seven; missing magma paused; three exact physical potions,
+24000 CuE, one dragon-breath bottle and no excess order
+BUILD SUCCESSFUL in 2m 19s
+Native client uses the real server queue, physical barrel, C2S menu command,
+server validation and S2C acknowledgement. No synthetic finished product or
+client inventory authority. Three lingering long-fire-resistance potions and
+one returned empty bottle are visible in the vanilla barrel screen.
+
+.codex-tmp/client-brewer-magma.log
+Command: gradlew --no-daemon runClient -PsmokeClient -PsmokeClientRu
+[11:29:19] CuE BREWER CLIENT PASS: actual C2S long fire resistance/lingering/
+stock three/priority seven; missing magma paused; three exact physical potions,
+24000 CuE, one dragon-breath bottle and no excess order
+BUILD SUCCESSFUL in 1m 26s
+Final missing-reagent capture waits until the actual current saved recipe step
+is magma cream and the client has drawn the stable pause, not merely until
+magma appears among some later missing ingredients. Native 1280x720 images
+inspected and copied to docs/references: brewer-missing-ru.png,
+brewer-settings-ru.png, brewer-stock.png, brewer-machine.png.
+
+.codex-tmp/opac-brewer.log
+Command: gradlew --no-daemon runServer -PopacTests
+Actual Open Parties and Claims 0.30.1, isolated dedicated server.
+[11:23:01] CuE OPENPAC BREWER PASS: foreign source denied; claim transfer
+preserved the paid intermediate and blocked reagent extraction; restored
+rights completed three exact potions for 15000 CuE
+BUILD SUCCESSFUL in 39s
+
+.codex-tmp/production-brewer-r1.log
+.codex-tmp/production-brewer-r2.log
+Command: python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.8.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.8.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Actual isolated Forge 47.4.20 and reobfuscated artifacts.
+First process saves a real three-bottle awkward job in the region file;
+second process reads and finishes that exact checkpoint with its original owner.
+[11:22:44] CuE PRODUCTION BREWER PASS: actual Forge brewing registry, physical
+barrel, sixteen exact potions, six batches of real reagents and 80000 CuE
+[11:22:44] CuE PRODUCTION BREWER DISK RESTORE PASS: actual region-file awkward
+batch, original owner, three exact final potions and total 15000 CuE
+[11:22:44] CuE PRODUCTION BREWER DISK CHECKPOINT: real three-bottle awkward
+batch, one paid wart stage, 92500 CuE and redstone pause
+Existing population/reaper persistence probes also pass at round 11;
+arborist, sentinel and actual reaper windup probes pass. Server exits cleanly.
+
+Final JAR: build/libs/unusualcopper-0.8.0-alpha.1.jar
+SHA256: 76430B7A13C5F5FB88738819B9C00CE9172838A5383F89C52ABBDFBEAB3266E0
+126 JSON entries parsed. Ordinary JAR excludes GameTests, smoke scenes,
+production probe and test loot modifiers. Brewer recipe is in the artifact.
+
+Limits: generated vanilla graph and real stage validation, not arbitrary mod
+IBrewingRecipe enumeration. Brewing-stand Pre/Post events are not emulated.
+SSN Bridge/large-network counts, full modpack, D11 crash atomicity, profiling,
+enchanter and the rest of the release matrix remain open.
+Only repo-owned isolated fixture worlds and runtimes were launched.

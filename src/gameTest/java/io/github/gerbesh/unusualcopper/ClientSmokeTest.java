@@ -48,6 +48,20 @@ public final class ClientSmokeTest {
     private static volatile java.util.UUID sentinelVictim;
     private static int sentinelUpkeepTicks;
     private static final AtomicBoolean sentinelVerified=new AtomicBoolean();
+    private static BlockPos brewerPos,brewerStorage;
+    private static boolean brewerSettingsSent,brewerEnabled;
+    private static int brewerMissingFrames;
+    private static final AtomicBoolean brewerVerified=new AtomicBoolean();
+    @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void brewerWitness(TickEvent.LevelTickEvent event){
+        if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage<21||stage>22||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||brewerPos==null||brewerVerified.get())return;
+        if(!(level.getBlockEntity(brewerPos)instanceof CopperMachineBlockEntity m)||m.status()!=io.github.gerbesh.unusualcopper.machine.MachineStatus.STOCK_REACHED)return;
+        var chest=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(brewerStorage);int products=0,glass=0,reagents=0;
+        for(int i=0;i<chest.getContainerSize();i++){var stack=chest.getItem(i);if(stack.is(Items.LINGERING_POTION)&&net.minecraft.world.item.alchemy.PotionUtils.getPotion(stack)==net.minecraft.world.item.alchemy.Potions.LONG_FIRE_RESISTANCE)products+=stack.getCount();if(stack.is(Items.GLASS_BOTTLE))glass+=stack.getCount();if(stack.is(Items.NETHER_WART)||stack.is(Items.MAGMA_CREAM)||stack.is(Items.REDSTONE)||stack.is(Items.GUNPOWDER)||stack.is(Items.DRAGON_BREATH))reagents+=stack.getCount();}
+        var plan=io.github.gerbesh.unusualcopper.gameplay.PotionPlans.find(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2);int price=3*io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.costEach(plan);
+        if(products!=3||glass!=1||reagents!=0||m.energy.stored()!=100000-price||m.brewer.job!=null||!m.brewer.recovery.empty()||m.boundCargoCount()!=0||m.brewer.pending!=3||!m.brewer.maintain||m.brewer.priority!=7)throw new IllegalStateException("Native brewer conservation/stock mismatch: products="+products+", glass="+glass+", reagents="+reagents+", energy="+m.energy.stored());
+        UnusualCopper.LOGGER.info("CuE BREWER CLIENT PASS: actual C2S long fire resistance/lingering/stock three/priority seven; missing magma paused; three exact physical potions, {} CuE, one dragon-breath bottle and no excess order",price);brewerVerified.set(true);
+    }
     @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
     public static void sentinelWitness(TickEvent.LevelTickEvent event) {
         if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage!=19||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||sentinelPos==null) return;
@@ -262,6 +276,15 @@ public final class ClientSmokeTest {
             });
         }
         if(stage==18 && mc.screen instanceof CopperMachineScreen) ticks++;
+        if(stage>=21&&mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen)ticks++;
+        if(stage==21&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&!menu.options.isEmpty()){
+            if(!brewerSettingsSent){brewerSettingsSent=true;io.github.gerbesh.unusualcopper.network.BrewerNetwork.configure(menu.containerId,menu.snapshot.runtime(),new io.github.gerbesh.unusualcopper.network.BrewerNetwork.Settings(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2,3,true,7));}
+            if(!brewerEnabled&&menu.snapshot.result()==1&&menu.snapshot.settings().vessel()==2){brewerEnabled=true;mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(brewerPos)).redstoneMode=0);}
+            if(!captured&&ticks>30&&brewerMagmaStep(menu)&&menu.snapshot.status()==io.github.gerbesh.unusualcopper.machine.MachineStatus.NEED_REAGENT.ordinal()&&menu.snapshot.needs().stream().anyMatch(n->n.stack().is(Items.MAGMA_CREAM)&&n.available()==0)&&++brewerMissingFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-brewer-missing.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE brewer missing reagent screenshot: {}",text.getString());saved.set(true);});}
+        }
+        if(stage==22&&!captured&&brewerVerified.get()&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&menu.snapshot.status()==io.github.gerbesh.unusualcopper.machine.MachineStatus.STOCK_REACHED.ordinal()){captured=true;Screenshot.grab(mc.gameDirectory,"cue-brewer-settings.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE brewer completed settings screenshot: {}",text.getString());saved.set(true);});}
+        if(stage==23&&!captured&&ticks>=30&&mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen){captured=true;Screenshot.grab(mc.gameDirectory,"cue-brewer-stock.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE brewer real barrel screenshot: {}",text.getString());saved.set(true);});}
+        if(stage==24&&!captured&&ticks>=30&&mc.screen==null){captured=true;Screenshot.grab(mc.gameDirectory,"cue-brewer-machine.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE brewer machine screenshot: {}",text.getString());saved.set(true);});}
         if(stage==18 && ticks>=30 && !captured && mc.screen instanceof CopperMachineScreen) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-menu.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel menu screenshot: {}",text.getString()); saved.set(true); }); }
         if(stage==19 && !captured && sentinelVerified.get() && io.github.gerbesh.unusualcopper.client.SentinelEffects.youngest()>=2 && io.github.gerbesh.unusualcopper.client.SentinelEffects.youngest()<7 && io.github.gerbesh.unusualcopper.client.SentinelEffects.rendered>0 && io.github.gerbesh.unusualcopper.client.SentinelRenderer.activeFrames>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-beam.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel beam screenshot: {}",text.getString()); saved.set(true); }); }
         if(stage==20 && ticks>=30 && !captured && io.github.gerbesh.unusualcopper.client.SentinelRenderer.inactiveFrames>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-sentinel-off.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE sentinel off screenshot: {}",text.getString()); saved.set(true); }); }
@@ -440,8 +463,20 @@ public final class ClientSmokeTest {
             } else if(stage==19) {
                 stage=20; captured=false; saved.set(false); ticks=0;
                 mc.getSingleplayerServer().execute(()->{var m=(CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(sentinelPos); m.energy.restore(0); m.redstoneMode=0;});
-            } else { mc.options.hideGui = false; mc.stop(); }
+            } else if(stage==20){
+                stage=21;captured=false;saved.set(false);ticks=0;mc.options.hideGui=false;
+                mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());brewerPos=sentinelPos.south(12);brewerStorage=brewerPos.east(3);
+                    for(int x=-3;x<=6;x++)for(int z=-3;z<=3;z++){for(int y=0;y<5;y++)level.setBlock(brewerPos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);level.setBlock(brewerPos.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3);}
+                    var m=BrewerGameTests.machine(level,brewerPos);m.setOwner(player.getUUID());m.redstoneMode=1;level.setBlock(brewerStorage,Blocks.BARREL.defaultBlockState(),3);if(!m.bind(brewerStorage,net.minecraft.core.Direction.UP,player))throw new IllegalStateException("Native brewer barrel bind failed");
+                    var chest=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(brewerStorage);chest.setItem(0,new ItemStack(Items.GLASS_BOTTLE,3));chest.setItem(1,new ItemStack(Items.NETHER_WART));chest.setItem(2,new ItemStack(Items.REDSTONE));chest.setItem(3,new ItemStack(Items.GUNPOWDER));chest.setItem(4,new ItemStack(Items.DRAGON_BREATH));
+                    player.teleportTo(level,brewerPos.getX()+.5,brewerPos.getY()+1,brewerPos.getZ()-2,0,15);io.github.gerbesh.unusualcopper.menu.BrewerMenu.open(player,m);
+                });
+            } else if(stage==21){stage=22;captured=false;saved.set(false);ticks=0;mc.getSingleplayerServer().execute(()->((net.minecraft.world.level.block.entity.BarrelBlockEntity)serverLevel(mc).getBlockEntity(brewerStorage)).setItem(5,new ItemStack(Items.MAGMA_CREAM)));}
+            else if(stage==22){stage=23;captured=false;saved.set(false);ticks=0;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.openMenu((net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(brewerStorage));});}
+            else if(stage==23){stage=24;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.teleportTo(level,brewerPos.getX()+1.5,brewerPos.getY()+2,brewerPos.getZ()-5,0,12);});}
+            else { mc.options.hideGui = false; mc.stop(); }
         }
     }
+    private static boolean brewerMagmaStep(io.github.gerbesh.unusualcopper.menu.BrewerMenu menu){var state=menu.snapshot;return state!=null&&state.job()&&state.active()!=null&&state.stage()<state.active().plan().steps().size()&&state.active().plan().steps().get(state.stage()).ingredient().is(Items.MAGMA_CREAM);}
     private static net.minecraft.server.level.ServerLevel serverLevel(Minecraft mc) { return mc.getSingleplayerServer().overworld(); }
 }

@@ -167,6 +167,12 @@ def models():
                 part([13,4,1],[15,9,3],"copper"),part([1,4,13],[3,9,15],"copper"),part([13,4,13],[15,9,15],"copper"),
                 part([7,3,0],[9,6,.4],"aqua"),part([4,2,4],[12,3,12],"aqua")]
     export_model("copper_sentinel",sentinel,[])
+    brewer = [part([0,0,0],[16,2,16],"dark"),part([1,2,1],[15,4,15],"copper"),part([2,4,2],[4,14,4],"copper"),
+              part([12,4,2],[14,14,4],"copper"),part([2,4,12],[4,14,14],"copper"),part([12,4,12],[14,14,14],"copper"),
+              part([1,13,1],[15,15,15],"patina"),part([5,15,5],[11,16,11],"copper"),part([6,3,.2],[10,6,.6],"aqua"),
+              part([5,5,5],[7,9,7],"aqua"),part([9,5,5],[11,9,7],"aqua"),part([7,5,9],[9,9,11],"aqua"),
+              part([5.5,9,5.5],[6.5,11,6.5],"copper"),part([9.5,9,5.5],[10.5,11,6.5],"copper"),part([7.5,9,9.5],[8.5,11,10.5],"copper")]
+    export_model("aetheric_brewer",brewer,[part([3,4,3],[13,13,13],"glass")])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -227,6 +233,30 @@ def languages():
         "block.unusualcopper.mob_reaper": ("Mob Reaper", "Жнец сущностей"),
         "block.unusualcopper.arboreal_reconstructor": ("Arborist", "Арборист"),
         "block.unusualcopper.copper_sentinel": ("Copper Sentinel", "Медный часовой"),
+        "block.unusualcopper.aetheric_brewer": ("Aetheric Brewer", "Эфирный автоклав"),
+        "brewer.unusualcopper.settings": ("Choose a potion, bottle type, quantity and stock target", "Выбрать зелье, вид флакона, количество и запас"),
+        "brewer.unusualcopper.search": ("Find by potion name or ID", "Поиск по названию или ID зелья"),
+        "brewer.unusualcopper.count": ("Amount", "Кол-во"),
+        "brewer.unusualcopper.priority": ("Priority", "Приоритет"),
+        "brewer.unusualcopper.mode.0": ("One order", "Разовый заказ"),
+        "brewer.unusualcopper.mode.1": ("Keep stock", "Держать запас"),
+        "brewer.unusualcopper.apply": ("Apply order", "Применить"),
+        "brewer.unusualcopper.back": ("Inventory", "Инвентарь"),
+        "brewer.unusualcopper.cancel": ("Cancel order", "Отменить заказ"),
+        "brewer.unusualcopper.price": ("%s CuE / bottle | Stored: %s CuE", "%s CuE / зелье | В буфере: %s CuE"),
+        "brewer.unusualcopper.chain": ("Selected recipe (scroll)", "Цепочка (прокрутка)"),
+        "brewer.unusualcopper.reagents": ("Have / need", "Есть / нужно"),
+        "brewer.unusualcopper.progress": ("Order: %s | Stage: %s/%s | Batch: %s", "Заказ: %s | Стадия: %s/%s | Партия: %s"),
+        "brewer.unusualcopper.result.1": ("Applied", "Принято"),
+        "brewer.unusualcopper.result.2": ("Invalid order", "Неверный заказ"),
+        "brewer.unusualcopper.result.3": ("Wait briefly", "Подождите"),
+        "brewer.unusualcopper.result.4": ("Batch active", "Партия начата"),
+        "status.unusualcopper.need_bottles": ("Need empty bottles", "Нужны пустые бутылки"),
+        "status.unusualcopper.need_reagent": ("Need next reagent", "Нужен следующий реагент"),
+        "status.unusualcopper.brew_fault": ("Brewing data error; recover order", "Ошибка данных варки"),
+        "status.unusualcopper.no_storage": ("Bind storage for stock mode", "Привяжите хранилище"),
+        "status.unusualcopper.stock_unknown": ("Stock count incomplete", "Запас ещё не подсчитан"),
+        "status.unusualcopper.stock_reached": ("Stock target reached", "Нужный запас достигнут"),
         "item.unusualcopper.sentinel_range_focus": ("Sentinel Range Focus", "Фокус дальности часового"),
         "sentinel.unusualcopper.stats": ("Radius: %s | Hits: %s", "Радиус: %s | Попаданий: %s"),
         "sentinel.unusualcopper.price": ("%s CuE / shot + %s / tick", "%s CuE / выстрел + %s / тик"),
@@ -328,4 +358,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 12 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 13 editable Blockbench projects, models, item tags and RU/EN.")

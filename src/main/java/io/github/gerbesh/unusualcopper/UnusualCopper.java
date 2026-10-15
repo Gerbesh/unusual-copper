@@ -23,6 +23,7 @@ public final class UnusualCopper {
         io.github.gerbesh.unusualcopper.network.PipeNetwork.register();
         io.github.gerbesh.unusualcopper.network.AreaNetwork.register();
         io.github.gerbesh.unusualcopper.network.ReaperNetwork.register();
+        io.github.gerbesh.unusualcopper.network.BrewerNetwork.register();
         io.github.gerbesh.unusualcopper.network.MachineEffects.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         bus.addListener(CopperCapabilities::register);
@@ -31,6 +32,8 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.AreaWorkScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.EntityIndexes.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.PotionPlans.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MobPopulations.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.ReaperLoot.class);
         LOGGER.info("Unusual Copper: server-authoritative CuE machinery initialized");

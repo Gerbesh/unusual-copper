@@ -22,6 +22,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue SENTINEL_COST,SENTINEL_UPKEEP,SENTINEL_RANGE,SENTINEL_FOCUSED_RANGE,SENTINEL_HEIGHT,SENTINEL_INTERVAL,SENTINEL_SCAN,SENTINEL_CHUNK,SENTINEL_CANDIDATES,SENTINEL_BUDGET;
     private static final ForgeConfigSpec.DoubleValue SENTINEL_DAMAGE;
     private static final ForgeConfigSpec.BooleanValue SENTINEL_LOS;
+    private static final ForgeConfigSpec.IntValue BREWER_COST,BREWER_EXTRA,BREWER_INTERVAL,BREWER_BUDGET;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -74,6 +75,11 @@ public final class ServerConfig {
         SENTINEL_CANDIDATES=builder.defineInRange("candidates_per_scan",32,1,64);
         SENTINEL_BUDGET=builder.defineInRange("candidates_per_dimension_tick",256,64,4096);
         SENTINEL_LOS=builder.define("require_line_of_sight",true);
+        builder.pop().push("brewer");
+        BREWER_COST=builder.defineInRange("cue_per_bottle",5000,1,25000);
+        BREWER_EXTRA=builder.comment("Extra price per bottle for every recipe stage beyond two.").defineInRange("cue_per_extra_stage",1000,0,5000);
+        BREWER_INTERVAL=builder.defineInRange("stage_interval_ticks",20,20,1200);
+        BREWER_BUDGET=builder.defineInRange("machines_per_dimension_tick",8,1,64);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -111,6 +117,10 @@ public final class ServerConfig {
     public static int arboristTreeBlocks() { return value(ARBORIST_TREE); }
     public static boolean arboristBuildingGuard() { return SPEC.isLoaded()?ARBORIST_BUILDINGS.get():ARBORIST_BUILDINGS.getDefault(); }
     public static int sentinelCost() { return value(SENTINEL_COST); }
+    public static int brewerCost(){return value(BREWER_COST);}
+    public static int brewerExtra(){return value(BREWER_EXTRA);}
+    public static int brewerInterval(){return value(BREWER_INTERVAL);}
+    public static int brewerBudget(){return value(BREWER_BUDGET);}
     public static int sentinelUpkeep() { return value(SENTINEL_UPKEEP); }
     public static int sentinelRange() { return value(SENTINEL_RANGE); }
     public static int sentinelFocusedRange() { return value(SENTINEL_FOCUSED_RANGE); }

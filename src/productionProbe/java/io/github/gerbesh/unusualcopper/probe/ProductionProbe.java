@@ -8,6 +8,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.*;
@@ -93,6 +94,7 @@ public final class ProductionProbe {
         LogUtils.getLogger().info("CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round={}", checkpoint.round);
         verifyArborist();
         verifySentinel();
+        verifyBrewer();
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -114,6 +116,31 @@ public final class ProductionProbe {
         phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
+    }
+    private static void brewerStep(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity m){m.brewer.nextWork=0;io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.process(m,level);}
+    private static int brewerProducts(net.minecraft.world.level.block.entity.BarrelBlockEntity c){int n=0;for(int i=0;i<c.getContainerSize();i++){var stack=c.getItem(i);if(stack.is(Items.POTION)&&net.minecraft.world.item.alchemy.PotionUtils.getPotion(stack)==net.minecraft.world.item.alchemy.Potions.FIRE_RESISTANCE)n+=stack.getCount();}return n;}
+    private static void verifyBrewer(){
+        var pos=TARGET.north(10);var storage=pos.east(4);var owner=UUID.fromString("57cb2ebd-e127-4c45-80ea-92134e85041e");
+        for(var p:java.util.List.of(pos,storage)){level.setChunkForced(p.getX()>>4,p.getZ()>>4,true);EXTRA_CHUNKS.add(net.minecraft.world.level.ChunkPos.asLong(p.getX()>>4,p.getZ()>>4));level.getChunkAt(p);}
+        var previous=level.getBlockEntity(pos);
+        if(previous instanceof io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity restored&&restored.brewer!=null&&restored.brewer.job!=null){
+            var c=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(storage);
+            check(owner.equals(restored.owner())&&restored.brewer.job.stage==1&&restored.brewer.job.batch==3&&net.minecraft.world.item.alchemy.PotionUtils.getPotion(restored.brewer.job.current)==net.minecraft.world.item.alchemy.Potions.AWKWARD&&restored.energy.stored()==92500,"Production brewer region checkpoint changed its owner, intermediate or fee");
+            restored.redstoneMode=0;restored.inventory.setStackInSlot(1,new ItemStack(Items.MAGMA_CREAM));for(int i=0;i<30;i++){brewerStep(restored);io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(restored,level);}
+            check(brewerProducts(c)==3&&restored.energy.stored()==85000&&restored.brewer.job==null,"Production brewer disk continuation duplicated or lost a real bottle/fee");
+            LogUtils.getLogger().info("CuE PRODUCTION BREWER DISK RESTORE PASS: actual region-file awkward batch, original owner, three exact final potions and total 15000 CuE");
+        }
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);level.setBlock(storage,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        level.setBlock(pos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.AETHERIC_BREWER).get().defaultBlockState(),3);level.setBlock(storage,net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState(),3);
+        var m=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(pos);m.setOwner(owner);m.brewer.pending=16;m.energy.add(100000,false);
+        var actor=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(owner,"CuEBrewer"));check(m.bind(storage,net.minecraft.core.Direction.UP,actor),"Production brewer source binding failed");
+        var c=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(storage);c.setItem(0,new ItemStack(Items.GLASS_BOTTLE,16));c.setItem(1,new ItemStack(Items.NETHER_WART,6));c.setItem(2,new ItemStack(Items.MAGMA_CREAM,6));
+        for(int i=0;i<300;i++){brewerStep(m);io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(m,level);}
+        check(brewerProducts(c)==16&&m.energy.stored()==20000&&m.brewer.pending==0&&m.brewer.job==null&&m.brewer.recovery.empty()&&m.boundCargoCount()==0,"Production brewer did not conserve sixteen physical bottles and 80000 CuE");
+        LogUtils.getLogger().info("CuE PRODUCTION BREWER PASS: actual Forge brewing registry, physical barrel, sixteen exact potions, six batches of real reagents and 80000 CuE");
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);level.setBlock(storage,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);level.setBlock(pos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.AETHERIC_BREWER).get().defaultBlockState(),3);level.setBlock(storage,net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState(),3);
+        var checkpoint=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(pos);checkpoint.setOwner(owner);checkpoint.brewer.pending=3;checkpoint.energy.add(100000,false);check(checkpoint.bind(storage,net.minecraft.core.Direction.UP,actor),"Production brewer checkpoint binding failed");checkpoint.inventory.setStackInSlot(0,new ItemStack(Items.GLASS_BOTTLE,3));checkpoint.inventory.setStackInSlot(1,new ItemStack(Items.NETHER_WART));brewerStep(checkpoint);checkpoint.redstoneMode=1;((net.minecraft.world.level.block.entity.BlockEntity)checkpoint).setChanged();
+        check(checkpoint.brewer.job!=null&&checkpoint.brewer.job.stage==1&&checkpoint.energy.stored()==92500,"Production brewer partial checkpoint failed");LogUtils.getLogger().info("CuE PRODUCTION BREWER DISK CHECKPOINT: real three-bottle awkward batch, one paid wart stage, 92500 CuE and redstone pause");
     }
     private static void verifySentinel() {
         var pos=TARGET.east(6); var targetPos=pos.east(6);

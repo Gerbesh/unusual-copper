@@ -29,6 +29,7 @@ public final class BoundStorageLogic {
             var view = endpoint.snapshot(stack -> machine.inventory.isItemValid(input, stack), 32);
             for (var entry : view.entries()) {
                 int count = Math.min(8, Math.min(entry.count(), entry.key().stack(1).getMaxStackSize()));
+                if(machine.brewer!=null)count=Math.min(count,BrewerLogic.request(machine,input));
                 count -= machine.inventory.insertItem(input, entry.key().stack(count), true).getCount();
                 if (count <= 0) continue;
                 count = Math.min(count, endpoint.simulateExtract(entry.key(), count)); if (count <= 0) continue;
