@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:diamond_axe"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FIF",
+    "RAR",
+    "FIF"
+  ],
+  "result": {
+    "item": "unusualcopper:arboreal_reconstructor"
+  },
+  "show_notification": true
+}

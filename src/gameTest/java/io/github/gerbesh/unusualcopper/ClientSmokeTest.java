@@ -41,6 +41,14 @@ public final class ClientSmokeTest {
     private static boolean reaperFlashCaptured;
     private static long reaperStressTick=Long.MIN_VALUE, reaperStressId;
     private static int reaperStressWaves;
+    private static BlockPos arboristPos, arboristRoot;
+    private static volatile int arboristLogs;
+    private static final AtomicBoolean arboristPaused=new AtomicBoolean(),arboristVerified=new AtomicBoolean();
+    @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void forestryWitness(TickEvent.LevelTickEvent event) {
+        if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage<16||stage>17||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||arboristPos==null) return;
+        if(level.getBlockEntity(arboristPos) instanceof CopperMachineBlockEntity m && m.arborist!=null && m.arborist.job!=null && m.arborist.job.cut>0 && m.arborist.job.cut<m.arborist.job.logs.size() && arboristPaused.compareAndSet(false,true)) m.redstoneMode=1;
+    }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !Boolean.getBoolean("unusualcopper.smokeClient")) return;
         Minecraft mc = Minecraft.getInstance();
@@ -95,8 +103,9 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7 || stage == 10) && mc.screen instanceof CopperMachineScreen) || (stage == 9 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ReaperScreen) || ((stage == 2 || stage == 5 || stage == 8 || stage>=11) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
-        if(stage>=11 && ticks>400) throw new IllegalStateException("Reaper visual fixture timed out at stage "+stage+", stats="+io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics());
+        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7 || stage == 10 || stage==15) && mc.screen instanceof CopperMachineScreen) || (stage == 9 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ReaperScreen) || ((stage == 2 || stage == 5 || stage == 8 || stage>=11) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if(stage>=11 && ticks>400) throw new IllegalStateException("Visual fixture timed out at stage "+stage+", reaper="+io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics()+", arborist="+io.github.gerbesh.unusualcopper.client.ArboristEffects.statistics());
+        if(stage==17 && ticks==100) mc.getSingleplayerServer().execute(()->{ var m=(CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(arboristPos); UnusualCopper.LOGGER.info("CuE ARBORIST NATIVE STATE: status={}, energy={}, redstone={}, job={}, root={}, soil={}",m.status(),m.energy.stored(),m.redstoneMode,m.arborist.job==null?"none":m.arborist.job.cut+"/"+m.arborist.job.logs.size()+", planted="+m.arborist.job.planted,serverLevel(mc).getBlockState(arboristRoot),serverLevel(mc).getBlockState(arboristRoot.below())); });
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -212,10 +221,45 @@ public final class ClientSmokeTest {
         if(stage==14 && reaperStressWaves==3 && io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics().peakIcons()==24) {
             var stats=io.github.gerbesh.unusualcopper.client.ReaperEffects.statistics();
             if(stats.active()!=16) throw new IllegalStateException("Stress scene did not reach the bounded event cache");
-            UnusualCopper.LOGGER.info("CuE REAPER FX BUDGET PASS: 3000 synthetic client events; accepted <=8/tick, active=16, peak drawn icons=24/frame; actual rune/model renders={},{}",stats.runeFrames(),stats.compressedModels()); mc.options.hideGui=false; mc.stop();
+            UnusualCopper.LOGGER.info("CuE REAPER FX BUDGET PASS: 3000 synthetic client events; accepted <=8/tick, active=16, peak drawn icons=24/frame; actual rune/model renders={},{}",stats.runeFrames(),stats.compressedModels());
+            stage=15; ticks=0; captured=false; saved.set(false); mc.options.hideGui=false;
+            mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); int y=cultivatorPos.getY(); arboristRoot=new BlockPos(48,y,60); arboristPos=arboristRoot.west(5);
+                for(int x=38;x<=55;x++) for(int z=52;z<=66;z++) level.setBlock(new BlockPos(x,y-1,z),Blocks.STONE_BRICKS.defaultBlockState(),2);
+                for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) level.setBlock(arboristRoot.offset(x,-1,z),Blocks.DIRT.defaultBlockState(),2);
+                for(int x=-5;x<=5;x++) for(int z=-5;z<=5;z++) for(int dy=0;dy<26;dy++) level.setBlock(arboristRoot.offset(x,dy,z),Blocks.AIR.defaultBlockState(),2);
+                level.setBlock(arboristRoot,Blocks.SPRUCE_SAPLING.defaultBlockState().setValue(net.minecraft.world.level.block.SaplingBlock.STAGE,1),3);
+                ((net.minecraft.world.level.block.SaplingBlock)Blocks.SPRUCE_SAPLING).advanceTree(level,arboristRoot,level.getBlockState(arboristRoot),net.minecraft.util.RandomSource.create(7));
+                var scan=new io.github.gerbesh.unusualcopper.gameplay.TreeScan(arboristRoot,io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.SPRUCE,player.getUUID());
+                for(int i=0;i<300 && scan.result()==io.github.gerbesh.unusualcopper.gameplay.TreeScan.Result.SCANNING;i++) scan.step(level,32);
+                if(scan.result()!=io.github.gerbesh.unusualcopper.gameplay.TreeScan.Result.READY || scan.logs().size()<=4) throw new IllegalStateException("Native spruce forestry fixture rejected: "+scan.result()); arboristLogs=scan.logs().size();
+                level.setBlock(arboristPos,ModContent.MACHINES.get(MachineKind.ARBORIST).get().defaultBlockState(),3); var m=(CopperMachineBlockEntity)level.getBlockEntity(arboristPos); m.setOwner(player.getUUID()); m.redstoneMode=1; m.energy.add(arboristLogs*250+120,false);
+                m.inventory.setStackInSlot(0,new ItemStack(Items.SPRUCE_SAPLING,4)); m.inventory.setStackInSlot(1,new ItemStack(Items.IRON_AXE));
+                player.teleportTo(level,arboristPos.getX()+2.5,y+1,arboristPos.getZ()+1,0,20); player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new ItemStack(ModContent.AREA_WAND.get()));
+                var wand=player.getMainHandItem();
+                for(var point:java.util.List.of(arboristPos,arboristRoot)) {
+                    var hit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(point),net.minecraft.core.Direction.UP,point,false);
+                    if(!wand.useOn(new net.minecraft.world.item.context.UseOnContext(player,net.minecraft.world.InteractionHand.MAIN_HAND,hit)).consumesAction()) throw new IllegalStateException("Native arborist wand use failed");
+                }
+                if(m.arborist.points.size()!=1) throw new IllegalStateException("Native plantation was not marked");
+                for(var item:level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(arboristRoot).inflate(12))) item.discard();
+                UnusualCopper.LOGGER.info("CuE ARBORIST WAND PASS: real server useOn marked one actual spruce plantation"); NetworkHooks.openScreen(player,m,arboristPos);
+            });
+        }
+        if(stage==15 && ticks>=30 && !captured && mc.screen instanceof CopperMachineScreen) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-arborist-menu.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE arborist menu screenshot: {}",text.getString()); saved.set(true); }); }
+        if(stage==16 && arboristPaused.get() && !captured && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(false)>=3 && io.github.gerbesh.unusualcopper.client.ArboristEffects.statistics().particles()>0) { captured=true; Screenshot.grab(mc.gameDirectory,"cue-arborist-cut.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE arborist cut screenshot: {}",text.getString()); saved.set(true); }); }
+        if(stage==17 && !captured && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(true)>=3 && io.github.gerbesh.unusualcopper.client.ArboristEffects.youngest(true)<13) {
+            captured=true; mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc); var m=(CopperMachineBlockEntity)level.getBlockEntity(arboristPos); int logs=0;
+                for(int slot=2;slot<=3;slot++) if(m.inventory.getStackInSlot(slot).is(Items.SPRUCE_LOG)) logs+=m.inventory.getStackInSlot(slot).getCount(); for(var stack:m.arborist.recovery.items()) if(stack.is(Items.SPRUCE_LOG)) logs+=stack.getCount();
+                if(m.arborist.job!=null || m.grown!=1 || logs!=arboristLogs || m.energy.stored()!=0 || !level.getBlockState(arboristRoot).is(Blocks.SPRUCE_SAPLING) || m.inventory.getStackInSlot(1).getDamageValue()!=arboristLogs || m.inventory.getStackInSlot(0).getCount()!=3) throw new IllegalStateException("Native forestry conservation/replant check failed: "+m.status());
+                UnusualCopper.LOGGER.info("CuE ARBORIST CLIENT PASS: actual {}-log spruce, staged pause/resume, exact real loot, axe wear, 250/log + 120/plant, one real sapling and spiral events",arboristLogs); arboristVerified.set(true);
+            });
+            Screenshot.grab(mc.gameDirectory,"cue-arborist-replant.png",mc.getMainRenderTarget(),text->{ UnusualCopper.LOGGER.info("CuE arborist replant screenshot: {}",text.getString()); saved.set(true); });
         }
         if (saved.get()) {
             if(stage==13 && !reaperFxVerified.get()) return;
+            if(stage==17 && !arboristVerified.get()) return;
             if (stage == 0) {
                 stage = 1; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = false;
                 mc.getSingleplayerServer().execute(() -> {
@@ -356,6 +400,12 @@ public final class ClientSmokeTest {
                 });
             } else if(stage==13) {
                 stage=14; captured=false; saved.set(false); ticks=0;
+            } else if(stage==15) {
+                stage=16; captured=false; saved.set(false); ticks=0; mc.options.hideGui=true;
+                mc.getSingleplayerServer().execute(()->{ var level=serverLevel(mc); var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer(); player.teleportTo(level,arboristRoot.getX()+.5,arboristRoot.getY()+7,arboristRoot.getZ()-12,0,22); ((CopperMachineBlockEntity)level.getBlockEntity(arboristPos)).redstoneMode=0; });
+            } else if(stage==16) {
+                stage=17; captured=false; saved.set(false); ticks=0;
+                mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(arboristPos)).redstoneMode=0);
             } else { mc.options.hideGui = false; mc.stop(); }
         }
     }

@@ -44,7 +44,7 @@ enable-query=false
 spawn-monsters=false
 spawn-animals=true
 spawn-npcs=false
-spawn-protection=0
+spawn-protection=16
 """
 (runtime / "server.properties").write_text(properties, encoding="utf-8", newline="\n")
 argfile = Path("libraries/net/minecraftforge/forge") / args.forge / ("win_args.txt" if os.name == "nt" else "unix_args.txt")
@@ -67,10 +67,12 @@ text = log.read_text(encoding="utf-8", errors="replace")
 passed = [line for line in text.splitlines() if "CuE PRODUCTION POPULATION PASS" in line]
 reaper = [line for line in text.splitlines() if "CuE PRODUCTION REAPER PASS" in line]
 windup = [line for line in text.splitlines() if "CuE PRODUCTION WINDUP PASS" in line]
-if process.returncode or not passed or not reaper or not windup:
+arborist = [line for line in text.splitlines() if "CuE PRODUCTION ARBORIST PASS" in line]
+if process.returncode or not passed or not reaper or not windup or not arborist:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
 print(reaper[-1])
 print(windup[-1])
+print(arborist[-1])
 print("Production server stopped cleanly; log:", log)

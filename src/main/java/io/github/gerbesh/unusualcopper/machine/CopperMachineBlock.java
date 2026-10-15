@@ -58,6 +58,11 @@ public final class CopperMachineBlock extends BaseEntityBlock {
         if (!state.is(replacement.getBlock()) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) {
             if (machine.boundCargoCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.boundCargo()));
             if (machine.reaper != null && machine.reaper.lootCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.reaper.loot()));
+            if(machine.arborist!=null) {
+                var held=new java.util.ArrayList<>(machine.arborist.recovery.items()); var job=machine.arborist.job;
+                if(job!=null) { if(!job.tool.isEmpty()) held.add(job.tool); if(!job.saplings.isEmpty()) held.add(job.saplings); }
+                if(!held.isEmpty()) popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(held));
+            }
             ItemStack[] contents = new ItemStack[4];
             for (int i = 0; i < 4; i++) contents[i] = machine.inventory.getStackInSlot(i).copy();
             Containers.dropContents(level, pos, new SimpleContainer(contents));

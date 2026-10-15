@@ -157,6 +157,11 @@ def models():
               part([1, 2, 0], [4, 12, 2], "copper"), part([12, 2, 0], [15, 12, 2], "copper"), part([4, 3, .5], [12, 12, 1], "dark"),
               part([7, 4, .2], [9, 11, .5], "aqua"), part([5, 7, .2], [11, 9, .5], "aqua"), part([6, 14, 6], [10, 16, 10], "aqua")]
     export_model("mob_reaper", reaper, [])
+    arborist = [part([0,0,0],[16,2,16],"dark"),part([1,2,1],[15,13,15],"patina"),part([0,12,0],[16,14,16],"copper"),
+                part([1,2,0],[4,12,2],"copper"),part([12,2,0],[15,12,2],"copper"),part([5,3,.3],[11,10,1],"dark"),
+                part([7,4,0],[9,11,.4],"aqua"),part([5,8,0],[11,10,.4],"aqua"),part([6,14,6],[10,16,10],"copper"),
+                part([2,14,6],[6,16,10],"dark"),part([10,14,6],[14,16,10],"dark")]
+    export_model("arboreal_reconstructor",arborist,[])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -215,6 +220,28 @@ def languages():
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
     additions = {
         "block.unusualcopper.mob_reaper": ("Mob Reaper", "Жнец сущностей"),
+        "block.unusualcopper.arboreal_reconstructor": ("Arborist", "Арборист"),
+        "wand.unusualcopper.plantation": ("Select saplings or a trunk base; click again to remove a point", "Выберите саженец или основание ствола; повторный клик снимает точку"),
+        "wand.unusualcopper.plantation_added": ("Plantation point added", "Точка посадки добавлена"),
+        "wand.unusualcopper.plantation_removed": ("Plantation point removed", "Точка посадки снята"),
+        "arborist.unusualcopper.point": ("%s: %s, %s, %s", "%s: %s, %s, %s"),
+        "arborist.unusualcopper.hint": ("Preview next plantation. Mark up to 16 points with the wand. Top input: saplings; lower input: vanilla axe. Reserve the entire tree's saplings and energy before cutting.", "Показать следующую точку. Жезлом отметьте до 16 посадок. Верхний вход: саженцы; нижний: ванильный топор. До рубки нужны саженцы и энергия на весь цикл."),
+        "arborist.unusualcopper.stats": ("Points: %s · logs: %s", "Точек: %s · брёвен: %s"),
+        "arborist.unusualcopper.cancel": ("Cancel/retry; reserved items return through outputs", "Отмена/повтор; резерв предметов возвращается через выходы"),
+        "status.unusualcopper.no_plantations": ("Mark plantation points", "Отметьте точки посадки"),
+        "status.unusualcopper.tree_scanning": ("Inspecting the tree", "Проверка дерева"),
+        "status.unusualcopper.tree_too_large": ("Tree exceeds scan limits", "Дерево превышает лимиты"),
+        "status.unusualcopper.building_nearby": ("Construction near the tree", "Рядом признаки постройки"),
+        "status.unusualcopper.tree_ambiguous": ("Tree shape is ambiguous", "Неоднозначная форма дерева"),
+        "status.unusualcopper.need_saplings": ("Reserve matching saplings", "Нужны саженцы того же вида"),
+        "status.unusualcopper.no_tool": ("Need an axe for the entire trunk", "Нужен топор на весь ствол"),
+        "status.unusualcopper.replanting": ("Replanting", "Повторная посадка"),
+        "status.unusualcopper.tree_changed": ("Tree changed; cancel/retry", "Дерево изменено; отмена/повтор"),
+        "status.unusualcopper.tree_waiting": ("Waiting for a grown tree", "Ожидание взрослого дерева"),
+        "status.unusualcopper.tree_fault": ("Forestry job needs attention", "Проверьте задание Арбориста"),
+        "status.unusualcopper.break_denied": ("Block break denied", "Разрушение запрещено"),
+        "status.unusualcopper.plant_denied": ("Planting blocked", "Посадка заблокирована"),
+        "status.unusualcopper.tree_too_costly": ("Tree operation exceeds buffer", "Цена дерева превышает буфер"),
         "status.unusualcopper.scanning": ("Scanning population", "Подсчёт популяции"), "status.unusualcopper.population_limit": ("Population threshold", "Порог популяции"), "status.unusualcopper.kill_cancelled": ("Kill cancelled", "Убийство отменено"),
         "status.unusualcopper.charging": ("Compressing the rune", "Сжатие руны"),
         "block.unusualcopper.growth_shepherd": ("Growth Shepherd", "Пастырь роста"),
@@ -288,4 +315,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 10 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 11 editable Blockbench projects, models, item tags and RU/EN.")

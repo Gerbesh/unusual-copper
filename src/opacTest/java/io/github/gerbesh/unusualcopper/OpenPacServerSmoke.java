@@ -13,6 +13,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.*;
@@ -115,6 +116,30 @@ public final class OpenPacServerSmoke {
             for(int i=0;i<20;i++) { io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.process(reaper,level); if(reaper.reaper.windup!=null) { var pending=reaper.reaper.windup; reaper.reaper.windup=new io.github.gerbesh.unusualcopper.machine.ReaperState.Windup(pending.action(),pending.target(),level.getGameTime(),pending.plan()); continue; } if(reaper.status()!=MachineStatus.SCANNING) break; }
             check(!victim.isAlive() && reaper.energy.stored()==0 && !reaper.inventory.getStackInSlot(2).isEmpty(),"Claim owner could not pay for a real death and actual loot"); victim.discard();
             UnusualCopper.LOGGER.info("CuE OPENPAC REAPER PASS: foreign target damage denied without charge; owner killed target for exactly 1500 CuE and kept real loot");
+            var forestryPos=machinePos.north(3); var tree=cropPos;
+            for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) {
+                level.setBlock(tree.offset(x,-1,z),Blocks.DIRT.defaultBlockState(),2);
+                for(int y=0;y<10;y++) level.setBlock(tree.offset(x,y,z),Blocks.AIR.defaultBlockState(),2);
+            }
+            for(int y=0;y<8;y++) level.setBlock(tree.above(y),Blocks.OAK_LOG.defaultBlockState(),2);
+            for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) if(x!=0||z!=0) level.setBlock(tree.offset(x,7,z),Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.DISTANCE,1),2);
+            level.setBlock(forestryPos,Blocks.AIR.defaultBlockState(),3); level.setBlock(forestryPos,ModContent.MACHINES.get(MachineKind.ARBORIST).get().defaultBlockState(),3);
+            var forestry=(CopperMachineBlockEntity)level.getBlockEntity(forestryPos); actor.setPos(forestryPos.getX()+.5,forestryPos.getY()+.5,forestryPos.getZ()+.5);
+            check(forestry.togglePlantation(tree,actor),"Owner could not mark claimed plantation"); forestry.inventory.setStackInSlot(0,new ItemStack(Items.OAK_SAPLING,4)); forestry.inventory.setStackInSlot(1,new ItemStack(Items.DIAMOND_AXE)); forestry.energy.add(2120,false); forestry.setOwner(stranger);
+            for(int i=0;i<300;i++) { io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(forestry,level); if(forestry.status()!=MachineStatus.TREE_SCANNING) break; }
+            check(forestry.status()==MachineStatus.PROTECTED && forestry.arborist.job==null && forestry.energy.stored()==2120 && level.getBlockState(tree.above(7)).is(Blocks.OAK_LOG),"Foreign forestry modified the claimed tree or consumed reserve");
+            forestry.setOwner(owner); forestry.arborist.scan=null; forestry.arborist.retryAt=0;
+            for(int i=0;i<300 && forestry.arborist.job==null;i++) io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(forestry,level);
+            check(forestry.arborist.job!=null && forestry.arborist.job.cut==4 && forestry.energy.stored()==1120,"Owner did not commit exactly four physical cuts");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),stranger,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(forestry,level);
+            check(forestry.status()==MachineStatus.PROTECTED && forestry.arborist.job.cut==4 && forestry.energy.stored()==1120 && level.getBlockState(tree).is(Blocks.OAK_LOG),"Changed claims did not stop the remaining trunk");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),owner,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            for(int i=0;i<20 && forestry.arborist.job!=null;i++) io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(forestry,level);
+            check(forestry.grown==1 && forestry.energy.stored()==0 && forestry.inventory.getStackInSlot(2).getCount()==8 && forestry.inventory.getStackInSlot(1).getDamageValue()==8 && level.getBlockState(tree).is(Blocks.OAK_SAPLING),"Claim-restored tree did not complete exact loot, tool wear and one placement"); forestry.redstoneMode=1;
+            UnusualCopper.LOGGER.info("CuE OPENPAC ARBORIST PASS: foreign tree denied; claim change stopped after four cuts; permission restore completed eight exact logs, 2120 CuE, tool wear and one sapling");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

@@ -52,6 +52,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public long nextWaveTick;
     public boolean allowOwnTamed;
     public final ReaperState reaper;
+    public final ArboristState arborist;
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
@@ -93,11 +94,16 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
         kind = ((CopperMachineBlock)state.getBlock()).kind;
         reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
+        arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
         energy = new CopperEnergyBuffer(kind.capacity, 256, 256, this::setChanged);
         inventory = new ItemStackHandler(4) {
             @Override protected void onContentsChanged(int slot) { setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
                 if (slot >= 2 || !kind.acceptsInputs()) return false;
+                if(arborist!=null) {
+                    if(arborist.job!=null) return false;
+                    return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
+                }
                 if (slot == 1) return kind == MachineKind.SOLAR_INFUSER && stack.is(ModContent.SOLAR_LENS.get());
                 if (kind == MachineKind.ESSENCE_SPLITTER) return stack.is(ModContent.ESSENCE.get());
                 if (kind == MachineKind.RESONANCE_SMELTER) return stack.is(ModContent.SMELTABLE_ORES) && !stack.is(ModContent.SMELTING_BLACKLIST);
@@ -113,6 +119,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
             case GROWTH_SHEPHERD -> new ShepherdLogic();
             case MOB_REAPER -> new ReaperLogic();
+            case ARBORIST -> new ArboristLogic();
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
@@ -125,6 +132,16 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
 
     public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged(); }
+    public boolean togglePlantation(BlockPos pos,Player player) {
+        if(arborist==null || !canAccess(player) || !(level instanceof ServerLevel server)) return false;
+        for(var point:java.util.List.copyOf(arborist.points)) if(point.pos().equals(pos)||point.pos().equals(pos.above())) {
+            arborist.points.remove(point); if(arborist.job!=null && arborist.job.roots.contains(point.pos())) arborist.cancel(); arborist.scan=null; setChanged(); return true;
+        }
+        if(arborist.points.size()>=16 || worldPosition.distSqr(pos)>32*32 || !server.hasChunkAt(pos) || server.isOutsideBuildHeight(pos) || !server.getWorldBorder().isWithinBounds(pos)) return false;
+        if(!io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server,pos,owner==null?player.getUUID():owner) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server,worldPosition,owner==null?player.getUUID():owner)) return false;
+        var species=io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.at(server.getBlockState(pos)); if(species==null) return false;
+        if(owner==null) setOwner(player.getUUID()); arborist.points.add(new ArboristState.Point(pos,species)); arborist.scan=null; arborist.retryAt=0; setChanged(); return true;
+    }
     public UUID owner() { return owner; }
     public boolean allowsAutomation(UUID actor) { return owner == null || owner.equals(actor); }
     public boolean canAccess(Player player) { return owner == null || owner.equals(player.getUUID()) || player.hasPermissions(2); }
@@ -162,7 +179,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         };
     }
 
-    public boolean hasOperation() { return !recipeId.isEmpty() && duration > 0; }
+    public boolean hasOperation() { return arborist!=null && arborist.job!=null || !recipeId.isEmpty() && duration > 0; }
     public boolean inputMatches() {
         ItemStack current = inventory.getStackInSlot(0);
         return ItemStack.isSameItemSameTags(current, source) && current.getCount() >= source.getCount();
@@ -272,8 +289,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
     @Override public void onLoad() { super.onLoad(); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); }
-    @Override public void onChunkUnloaded() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
-    @Override public void setRemoved() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); super.setRemoved(); EnergyNetworks.dirty(level); }
+    @Override public void onChunkUnloaded() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
+    @Override public void setRemoved() { if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
 
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -290,6 +307,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
         tag.putLong("NextWaveTick", nextWaveTick); tag.putBoolean("AllowOwnTamed", allowOwnTamed);
         if (reaper != null) tag.put("Reaper", reaper.save());
+        if (arborist != null) tag.put("Arborist", arborist.save());
         if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
@@ -309,6 +327,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 2);
         nextWaveTick = Math.max(0, tag.getLong("NextWaveTick")); allowOwnTamed = tag.getBoolean("AllowOwnTamed");
         if (reaper != null) reaper.load(tag.getCompound("Reaper"));
+        if (arborist != null) arborist.load(tag.getCompound("Arborist"));
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
@@ -353,7 +372,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 30 -> reaper == null ? 0 : reaper.lootCount() >>> 16;
                     case 31 -> reaper != null && reaper.active ? 1 : 0;
                     case 32 -> io.github.gerbesh.unusualcopper.config.ServerConfig.reaperCost() & 0xffff;
-                    case 33 -> io.github.gerbesh.unusualcopper.config.ServerConfig.reaperCost() >>> 16; default -> 0;
+                    case 33 -> io.github.gerbesh.unusualcopper.config.ServerConfig.reaperCost() >>> 16;
+                    case 34 -> arborist==null?0:arborist.points.size(); case 35 -> arborist!=null && arborist.job!=null?1:0;
+                    case 36 -> arborist==null||arborist.job==null?0:arborist.job.logs.size()-arborist.job.cut;
+                    case 37 -> arborist==null||arborist.job==null?0:arborist.job.roots.size()-arborist.job.planted;
+                    case 38 -> arborist==null?0:arborist.recovery.count() & 0xffff; case 39 -> arborist==null?0:arborist.recovery.count()>>>16; default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}

@@ -23,6 +23,7 @@ public final class ProductionProbe {
     private static io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity phaseMachine;
     private static Cow phaseVictim;
     private static long phaseStarted, phaseDeadline;
+    private static final Set<Long> EXTRA_CHUNKS=new HashSet<>();
     @SubscribeEvent public static void death(net.minecraftforge.event.entity.living.LivingDeathEvent event) { if (event.getEntity().getUUID().equals(cancelledVictim)) event.setCanceled(true); }
     private static final BlockPos TARGET = new BlockPos(130, 70, 130);
     private static final class Checkpoint extends net.minecraft.world.level.saveddata.SavedData {
@@ -90,6 +91,7 @@ public final class ProductionProbe {
         checkpoint.round++; checkpoint.setDirty();
         LogUtils.getLogger().info("CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP, accepted loot, cancelled death restores health/credit/energy, emergency loot checkpoint round={}",checkpoint.round);
         LogUtils.getLogger().info("CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap; SRG position, name, age, health, wolf/horse ownership, leash and removal hooks; persisted round={}", checkpoint.round);
+        verifyArborist();
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -112,5 +114,31 @@ public final class ProductionProbe {
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
     }
-    @SubscribeEvent public static void stopping(ServerStoppingEvent event) { if (level != null) level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, false); }
+    private static void verifyArborist() {
+        var root=TARGET.south(10); var pos=root.west(5);
+        for(int x=(root.getX()-8)>>4;x<=(root.getX()+8)>>4;x++) for(int z=(root.getZ()-8)>>4;z<=(root.getZ()+8)>>4;z++) { level.setChunkForced(x,z,true); EXTRA_CHUNKS.add(net.minecraft.world.level.ChunkPos.asLong(x,z)); level.getChunk(x,z); }
+        level.setChunkForced(pos.getX()>>4,pos.getZ()>>4,true); EXTRA_CHUNKS.add(net.minecraft.world.level.ChunkPos.asLong(pos.getX()>>4,pos.getZ()>>4)); level.getChunkAt(pos);
+        for(int x=-3;x<=3;x++) for(int z=-3;z<=3;z++) {
+            for(int y=0;y<=7;y++) level.setBlock(root.offset(x,y,z),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),2);
+            level.setBlock(root.offset(x,-1,z),net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(),2);
+        }
+        for(int y=0;y<4;y++) level.setBlock(root.above(y),net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState(),2);
+        for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++) if(x!=0||z!=0) level.setBlock(root.offset(x,3,z),net.minecraft.world.level.block.Blocks.OAK_LEAVES.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE,1),2);
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3); level.setBlock(pos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.ARBORIST).get().defaultBlockState(),3);
+        var m=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(pos);
+        var owner=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"ForestryOwner")); owner.setPos(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5);
+        check(m.togglePlantation(root,owner),"Production plantation marker rejected");
+        m.inventory.setStackInSlot(0,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.OAK_SAPLING,4)); m.inventory.setStackInSlot(1,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_AXE)); m.energy.add(1120,false);
+        var previousSpawn=level.getSharedSpawnPos(); float angle=level.getSharedSpawnAngle();
+        level.getServer().getPlayerList().op(new com.mojang.authlib.GameProfile(UUID.fromString("ffab1381-f9a9-4a1b-b7b9-57ac86f07dab"),"SpawnAdmin")); level.setDefaultSpawnPos(root,0);
+        try {
+            for(int i=0;i<300;i++) { io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(m,level); if(m.status()!=io.github.gerbesh.unusualcopper.machine.MachineStatus.TREE_SCANNING) break; }
+            check(m.status()==io.github.gerbesh.unusualcopper.machine.MachineStatus.PROTECTED && m.arborist.job==null && m.energy.stored()==1120 && level.getBlockState(root).is(net.minecraft.world.level.block.Blocks.OAK_LOG),"Vanilla spawn protection did not stop the first cut");
+        } finally { level.setDefaultSpawnPos(previousSpawn,angle); }
+        m.arborist.retryAt=0;
+        for(int i=0;i<400 && m.grown==0;i++) io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(m,level);
+        check(m.grown==1 && m.arborist.job==null && m.energy.stored()==0 && level.getBlockState(root).is(net.minecraft.world.level.block.Blocks.OAK_SAPLING) && m.inventory.getStackInSlot(2).getCount()==4 && m.inventory.getStackInSlot(1).getDamageValue()==4 && m.inventory.getStackInSlot(0).getCount()==3,"Production forestry conservation/replant failed: "+m.status()); m.redstoneMode=1;
+        LogUtils.getLogger().info("CuE PRODUCTION ARBORIST PASS: vanilla spawn protection denied; four actual logs, exact 1120 CuE, four axe wear and one real replant after permission returned");
+    }
+    @SubscribeEvent public static void stopping(ServerStoppingEvent event) { if (level != null) { level.setChunkForced(TARGET.getX() >> 4, TARGET.getZ() >> 4, false); for(long key:EXTRA_CHUNKS) { var p=new net.minecraft.world.level.ChunkPos(key); level.setChunkForced(p.x,p.z,false); } EXTRA_CHUNKS.clear(); } }
 }

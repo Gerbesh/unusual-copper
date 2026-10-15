@@ -35,10 +35,10 @@ public final class AreaWandItem extends Item {
             if (clicked instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) { NetworkHooks.openScreen(server, machine, pos); return InteractionResult.SUCCESS; }
             message(player, "denied"); return InteractionResult.FAIL;
         }
-        if (clicked instanceof CopperMachineBlockEntity machine && (mode == 0 ? machine.kind.usesArea() : machine.kind.hasInventory())) {
+        if (clicked instanceof CopperMachineBlockEntity machine && (mode == 0 ? machine.kind.usesArea() || machine.arborist!=null : machine.kind.hasInventory())) {
             if (!machine.canAccess(player)) { message(player, "denied"); return InteractionResult.FAIL; }
             tag.putLong("Machine", pos.asLong()); tag.putString("Dimension", level.dimension().location().toString()); tag.putUUID("Instance", machine.runtimeIdentity); tag.remove("First");
-            message(player, mode == 0 ? "first" : "storage"); return InteractionResult.SUCCESS;
+            message(player, mode == 0 ? machine.arborist!=null?"plantation":"first" : "storage"); return InteractionResult.SUCCESS;
         }
         if (!tag.contains("Machine") || !tag.getString("Dimension").equals(level.dimension().location().toString())) { clearSelection(tag); message(player, "select_machine"); return InteractionResult.FAIL; }
         var anchor = BlockPos.of(tag.getLong("Machine"));
@@ -47,6 +47,11 @@ public final class AreaWandItem extends Item {
         if (mode == 1) {
             if (!machine.bind(pos, context.getClickedFace(), player)) { message(player, "denied"); return InteractionResult.FAIL; }
             message(player, "bound"); clearSelection(tag); return InteractionResult.SUCCESS;
+        }
+        if(machine.arborist!=null) {
+            int before=machine.arborist.points.size();
+            if(!machine.togglePlantation(pos,player)) { message(player,"denied"); return InteractionResult.FAIL; }
+            AreaNetwork.preview(server,pos,pos,true); message(player,machine.arborist.points.size()>before?"plantation_added":"plantation_removed"); return InteractionResult.SUCCESS;
         }
         if (!tag.contains("First")) { tag.putLong("First", pos.asLong()); AreaNetwork.preview(server, pos, pos, true); message(player, "second"); return InteractionResult.SUCCESS; }
         var first = BlockPos.of(tag.getLong("First"));

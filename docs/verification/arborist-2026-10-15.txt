@@ -1,0 +1,74 @@
+Unusual Copper 0.6.0-alpha.1 — arborist, 2026-10-15
+Successful local runs. Raw logs and isolated test worlds are ignored by Git.
+
+Windows 11 / Temurin 17.0.19+10 / dev Forge 47.4.10 / official 1.20.1.
+
+.codex-tmp/verify-arborist-rules.log
+Command: gradlew --no-daemon build runGameTestServer
+[09:58:50] All 80 required tests passed :)
+BUILD SUCCESSFUL in 57s
+JUnit: AccountingTest 5, WorkAreaTest 3; zero failures/errors.
+
+Forestry assertions include seven real vanilla generation adapters (oversized
+trees explicitly rejected at >256 logs+leaves), house rejection, full-cycle
+energy/sapling/tool admission, real oak and 2x2 dark-oak harvest/replant,
+partial job NBT, Forge break/place cancellation, real post-removal loot context
+with real enchanted tool, modifier loot, construction during a job, owner menu
+cancellation, cancelled item spawns, doTileDrops=false, 10000-item overflow.
+
+The persisted checkpoint is an actual machine saved in a region file, with
+four of seven spruce logs already cut and its real tool/sapling reserved.
+Separate successive JVMs restore the owner, exact fee, original named axe and
+remaining plan, finish seven total logs and one replant, then save the next
+checkpoint. This is normal save/restart evidence, not arbitrary crash atomicity.
+[09:58:46] CuE ARBORIST DISK RESTORE PASS: round=3, original owner/tool/escrow,
+total logs=7, exact fee and one replant
+[09:58:46] CuE ARBORIST DISK CHECKPOINT: round=4, four cuts, remaining=3,
+real tool/sapling escrow
+
+.codex-tmp/verify-arborist-final.log
+Command: gradlew --no-daemon build runGameTestServer runClient -PsmokeClient -PsmokeClientRu
+[09:50:52] All 77 required tests passed :) (before the last three loot tests)
+[09:51:49] CuE ARBORIST WAND PASS: real server useOn marked one actual spruce plantation
+[09:51:51] CuE ARBORIST CLIENT PASS: actual 7-log spruce, staged pause/resume,
+exact real loot, axe wear, 250/log + 120/plant, one real sapling and spiral events
+BUILD SUCCESSFUL in 1m 40s
+Native screenshots inspected at 1280x720: arborist-menu-ru.png,
+arborist-cut.png, arborist-replant.png in docs/references.
+
+.codex-tmp/opac-arborist-final.log
+Command: gradlew --no-daemon productionProbeJar runServer -PopacTests
+Actual Open Parties and Claims 0.30.1.
+[10:00:24] CuE OPENPAC ARBORIST PASS: foreign tree denied; claim change stopped
+after four cuts; permission restore completed eight exact logs, 2120 CuE,
+tool wear and one sapling
+BUILD SUCCESSFUL in 29s
+
+.codex-tmp/production-arborist-final.log
+Command: python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.6.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.6.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Actual isolated Forge 47.4.20, reobfuscated main and probe JARs.
+[10:01:13] CuE PRODUCTION POPULATION PASS: exact 23-mob count; bounded bootstrap;
+SRG position, name, age, health, wolf/horse ownership, leash and removal hooks;
+persisted round=7
+[10:01:13] CuE PRODUCTION REAPER PASS: real paid death, no player credit/XP,
+accepted loot, cancelled death restores health/credit/energy, emergency loot
+checkpoint round=7
+[10:01:13] CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation,
+no early damage/fee, real paid strike and loot
+[10:01:13] CuE PRODUCTION ARBORIST PASS: vanilla spawn protection denied;
+four actual logs, exact 1120 CuE, four axe wear and one real replant after
+permission returned
+Production server stopped cleanly (exit 0).
+
+Production archive: build/libs/unusualcopper-0.6.0-alpha.1.jar
+SHA256: 98E089E6D9E271C5FCE44426AA46F212AA803CA61942FF420479CD6654AE837F
+106 JSON entries parsed; GameTests, smoke scenes, production probe and test
+loot-modifier fixtures absent from the normal JAR.
+
+Scope limits: no mangrove/mod-tree adapter yet; conservative building checks
+are not exhaustive classification. Full Better MC/SSN/JEI, D11 crash matrix,
+T15 tree matrix and many-machine profiling remain release gates.
+No live user world, client instance or server was launched or modified.

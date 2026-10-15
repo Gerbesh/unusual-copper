@@ -32,9 +32,23 @@ public final class MachineEffects {
         static Reap decode(FriendlyByteBuf b) { return new Reap(b.readResourceLocation(),b.readBlockPos(),b.readUUID(),b.readUnsignedByte(),b.readInt(),b.readUUID(),new Vec3(b.readDouble(),b.readDouble(),b.readDouble()),b.readBlockPos(),b.readVarIntArray(4)); }
         static void encode(Reap v,FriendlyByteBuf b) { b.writeResourceLocation(v.dimension); b.writeBlockPos(v.origin); b.writeUUID(v.action); b.writeByte(v.phase); b.writeInt(v.entity); b.writeUUID(v.target); b.writeDouble(v.from.x); b.writeDouble(v.from.y); b.writeDouble(v.from.z); b.writeBlockPos(v.to); b.writeVarIntArray(v.icons); }
     }
-    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "2", "2"::equals, "2"::equals);
+    public record Forestry(ResourceLocation dimension,BlockPos origin,boolean planted,List<BlockPos> positions) {
+        public Forestry {
+            origin=origin.immutable(); positions=positions.stream().map(BlockPos::immutable).toList();
+            if(positions.isEmpty()||positions.size()>4) throw new IllegalArgumentException("Invalid forestry burst");
+            for(var pos:positions) if(origin.distSqr(pos)>32*32) throw new IllegalArgumentException("Forestry burst outside range");
+        }
+        static Forestry decode(FriendlyByteBuf b) {
+            var dimension=b.readResourceLocation(); var origin=b.readBlockPos(); boolean planted=b.readBoolean(); int count=b.readUnsignedByte();
+            if(count<1||count>4) throw new IllegalArgumentException("Invalid forestry burst");
+            var points=new ArrayList<BlockPos>(); for(int i=0;i<count;i++) points.add(b.readBlockPos()); return new Forestry(dimension,origin,planted,points);
+        }
+        static void encode(Forestry v,FriendlyByteBuf b) { b.writeResourceLocation(v.dimension); b.writeBlockPos(v.origin); b.writeBoolean(v.planted); b.writeByte(v.positions.size()); v.positions.forEach(b::writeBlockPos); }
+    }
+    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "3", "3"::equals, "3"::equals);
     private static Consumer<Wave> receiver = ignored -> {};
     private static Consumer<Reap> reaperReceiver = ignored -> {};
+    private static Consumer<Forestry> forestryReceiver = ignored -> {};
     private MachineEffects() {}
     public static void register() {
         CHANNEL.registerMessage(0, Wave.class, Wave::encode, Wave::decode, (wave, supplier) -> {
@@ -43,9 +57,20 @@ public final class MachineEffects {
         CHANNEL.registerMessage(1,Reap.class,Reap::encode,Reap::decode,(effect,supplier) -> {
             var context=supplier.get(); context.enqueueWork(() -> reaperReceiver.accept(effect)); context.setPacketHandled(true);
         },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(2,Forestry.class,Forestry::encode,Forestry::decode,(effect,supplier) -> {
+            var context=supplier.get(); context.enqueueWork(()->forestryReceiver.accept(effect)); context.setPacketHandled(true);
+        },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     public static void clientReceiver(Consumer<Wave> handler) { receiver = handler; }
     public static void reaperReceiver(Consumer<Reap> handler) { reaperReceiver=handler; }
+    public static void forestryReceiver(Consumer<Forestry> handler) { forestryReceiver=handler; }
+    public static void forestry(ServerLevel level,CopperMachineBlockEntity machine,boolean planted,List<BlockPos> changed) {
+        if(changed.isEmpty()) return;
+        try {
+            var pos=machine.getBlockPos(); var effect=new Forestry(level.dimension().location(),pos,planted,changed);
+            CHANNEL.send(PacketDistributor.NEAR.with(()->new PacketDistributor.TargetPoint(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5,64,level.dimension())),effect);
+        } catch(RuntimeException unavailable) { UnusualCopper.LOGGER.debug("Skipped unavailable cosmetic forestry event",unavailable); }
+    }
     private static void send(ServerLevel level,java.util.function.Supplier<Reap> event) {
         try {
             var effect=event.get(); var pos=effect.origin();

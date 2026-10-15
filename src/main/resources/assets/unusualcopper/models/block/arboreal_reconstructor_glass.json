@@ -1,0 +1,12 @@
+{
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "copper": "unusualcopper:block/copper",
+    "dark": "unusualcopper:block/dark",
+    "patina": "unusualcopper:block/patina",
+    "aqua": "unusualcopper:block/aqua",
+    "fire": "unusualcopper:block/fire",
+    "glass": "unusualcopper:block/glass"
+  },
+  "elements": []
+}

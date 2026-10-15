@@ -17,6 +17,8 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue COLLECTOR_BASE_COST, COLLECTOR_DISTANCE_COST, COLLECTOR_CANDIDATES, ENTITY_BUDGET;
     private static final ForgeConfigSpec.IntValue SHEPHERD_COST, SHEPHERD_INTERVAL, SHEPHERD_ADVANCE, SHEPHERD_CANDIDATES;
     private static final ForgeConfigSpec.IntValue REAPER_COST, REAPER_INTERVAL, REAPER_CANDIDATES;
+    private static final ForgeConfigSpec.IntValue ARBORIST_COST, ARBORIST_PLANT, ARBORIST_NODES, ARBORIST_LOGS, ARBORIST_TREE;
+    private static final ForgeConfigSpec.BooleanValue ARBORIST_BUILDINGS;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -50,6 +52,12 @@ public final class ServerConfig {
         REAPER_COST = builder.defineInRange("reaper_cue_per_kill", 1500, 1, 50_000);
         REAPER_INTERVAL = builder.defineInRange("reaper_interval_ticks", 20, 20, 200);
         REAPER_CANDIDATES = builder.defineInRange("reaper_candidates_per_step", 16, 2, 64);
+        ARBORIST_COST=builder.comment("An active forestry job retains its quoted price.").defineInRange("arborist_cue_per_log",250,1,1000);
+        ARBORIST_PLANT=builder.defineInRange("arborist_cue_per_sapling",120,1,1000);
+        ARBORIST_NODES=builder.defineInRange("arborist_nodes_per_step",32,1,32);
+        ARBORIST_LOGS=builder.defineInRange("arborist_logs_per_step",4,1,4);
+        ARBORIST_TREE=builder.comment("Includes both logs and naturally generated leaves.").defineInRange("arborist_maximum_tree_blocks",256,16,256);
+        ARBORIST_BUILDINGS=builder.define("arborist_reject_construction",true);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -80,4 +88,10 @@ public final class ServerConfig {
     public static int reaperCost() { return value(REAPER_COST); }
     public static int reaperInterval() { return value(REAPER_INTERVAL); }
     public static int reaperCandidates() { return value(REAPER_CANDIDATES); }
+    public static int arboristCost() { return value(ARBORIST_COST); }
+    public static int arboristPlantCost() { return value(ARBORIST_PLANT); }
+    public static int arboristNodes() { return value(ARBORIST_NODES); }
+    public static int arboristLogs() { return value(ARBORIST_LOGS); }
+    public static int arboristTreeBlocks() { return value(ARBORIST_TREE); }
+    public static boolean arboristBuildingGuard() { return SPEC.isLoaded()?ARBORIST_BUILDINGS.get():ARBORIST_BUILDINGS.getDefault(); }
 }

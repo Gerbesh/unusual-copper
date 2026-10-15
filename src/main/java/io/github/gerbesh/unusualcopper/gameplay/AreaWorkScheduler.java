@@ -32,13 +32,15 @@ public final class AreaWorkScheduler {
             if (!(level.getBlockEntity(entry.getKey()) instanceof CopperMachineBlockEntity machine) || machine.isRemoved() || !machine.runtimeIdentity.equals(entry.getValue())) continue;
             if (machine.kind == MachineKind.AURA_CULTIVATOR && budget >= ServerConfig.cultivatorChecks()) {
                 budget -= ServerConfig.cultivatorChecks(); CultivatorLogic.process(machine, level);
+            } else if (machine.kind == MachineKind.ARBORIST && budget>=io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.nodeBudget()) {
+                budget-=io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.nodeBudget(); io.github.gerbesh.unusualcopper.machine.logic.ArboristLogic.process(machine,level);
             } else if (machine.kind == MachineKind.MAGNETIC_COLLECTOR && entities >= ServerConfig.collectorCandidates()) {
                 entities -= ServerConfig.collectorCandidates(); CollectorLogic.process(machine, level);
             } else if (machine.kind == MachineKind.GROWTH_SHEPHERD && entities >= ServerConfig.shepherdCandidates()) {
                 entities -= ServerConfig.shepherdCandidates(); ShepherdLogic.process(machine, level);
             } else if (machine.kind == MachineKind.MOB_REAPER && entities >= ServerConfig.reaperCandidates()) {
                 entities -= ServerConfig.reaperCandidates(); ReaperLogic.process(machine, level);
-            } else if (machine.kind.usesArea()) queue.put(entry.getKey(), entry.getValue());
+            } else if (machine.kind.usesArea() || machine.kind==MachineKind.ARBORIST) queue.put(entry.getKey(), entry.getValue());
         }
     }
 }

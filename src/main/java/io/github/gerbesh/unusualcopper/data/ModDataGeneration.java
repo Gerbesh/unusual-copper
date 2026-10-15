@@ -60,6 +60,8 @@ public final class ModDataGeneration {
                     .define('G', Items.GLASS).define('F', ModContent.FRAME.get()).define('A', Items.GOLDEN_APPLE).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.MOB_REAPER).get()).pattern("FOF").pattern("OEO").pattern("FRF")
                     .define('F', ModContent.FRAME.get()).define('O', Items.OBSIDIAN).define('E', Items.ENDER_PEARL).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ARBORIST).get()).pattern("FIF").pattern("RAR").pattern("FIF")
+                    .define('F',ModContent.FRAME.get()).define('I',Items.IRON_INGOT).define('R',Items.REDSTONE).define('A',Items.DIAMOND_AXE).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
             for (var item : new net.minecraft.world.item.Item[]{Items.COPPER_INGOT, Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE}) {
                 var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
                 int multiplier = item == Items.COPPER_INGOT ? 2 : 1;
