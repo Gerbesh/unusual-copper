@@ -1,0 +1,71 @@
+Unusual Copper 0.9.0-alpha.1 — Enchantment Resonator, 2026-10-15
+Windows / Temurin 17.0.19+10 / dev Forge 47.4.10 / official 1.20.1.
+Raw logs and isolated fixture worlds are ignored by Git.
+
+.codex-tmp/verify-enchanter-release-candidate.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+  runClient -PsmokeClient -PsmokeClientRu
+[15:02:49] All 111 required tests passed :)
+JUnit: AccountingTest 5, WorkAreaTest 3, XpWalletTest 5; zero failures/errors.
+[15:04:13] CuE ENCHANTER CLIENT PASS: real C2S quote then nonce confirmation,
+Efficiency V, 235 XP points, 156250 CuE, 64 lapis, original Unbreaking I/name/
+damage/custom NBT and synchronized client XP
+BUILD SUCCESSFUL in 2m 21s
+
+Ten enchanter GameTests cover actual maximum/applicability/compatibility,
+free preview, exact charges, full metadata, missing resources, stale item
+revision/runtime/player/distance, replay, cancelled/modified XP and level
+events, provider replacement, books, malformed/duplicate/hidden/conflicting
+enchantments, protected automation ports, saved state, actual XP curve and
+quote expiration. XpWallet unit cases exercise curve boundaries, fractional
+progress, affordability, historical-counter mismatch and high-level rounding.
+Vanilla float precision remains the practical limit of fractional XP accuracy.
+
+Native 1280x720 Russian screenshots inspected and copied to docs/references:
+enchanter-price-ru.png, enchanter-applied-ru.png, enchanter-machine.png.
+Price: 235 XP + 156250 CuE + 64 lapis. After: 765 XP, 343750 CuE, no lapis.
+
+.codex-tmp/opac-enchanter.log: initial attempt failed before enchanter checks.
+The reused fixture retained the previous arborist canopy above its crop.
+Its paid growth precondition failed; subsequent watchdog occurred at shutdown.
+Fixture setup now clears the known canopy volume before testing crop rights.
+No production crop behavior or protection check was weakened.
+
+.codex-tmp/opac-enchanter-r2.log
+Command: gradlew --no-daemon runServer -PopacTests
+Actual Open Parties and Claims 0.30.1, isolated dedicated server.
+[15:12:59] CuE OPENPAC ENCHANTER PASS: claim revocation after quote denied all
+charges; fresh owner confirmation spent 188 XP points, 125000 CuE and 64 lapis
+exactly once
+BUILD SUCCESSFUL in 26s
+Existing inventory, cultivator, collector, shepherd, reaper, arborist,
+sentinel and brewer protection checks pass in the same process.
+
+.codex-tmp/production-enchanter-r1.log
+.codex-tmp/production-enchanter-r2.log
+Command: python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.9.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.9.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Actual isolated Forge 47.4.20 and ordinary reobfuscated artifacts.
+[15:04:26] First process commits and checkpoints the real enchanted item.
+[15:13:20] CuE PRODUCTION ENCHANTER PASS: real quote and one-shot confirmation;
+Efficiency V, original NBT, 235 XP points, 156250 CuE and exactly 64 lapis;
+vanilla player NBT checkpoint written
+[15:13:20] CuE PRODUCTION ENCHANTER DISK RESTORE PASS: machine region plus
+vanilla player NBT; exact enchanted item, original owner, 765 XP points,
+343750 CuE and no lapis
+The second process reads the previous normal machine region checkpoint and
+an explicit fixture file containing vanilla ServerPlayer NBT. This does not
+test actual PlayerDataStorage login/logout or cross-file crash atomicity.
+All prior production probes pass, persistence round 13; clean server stop.
+
+Final JAR: build/libs/unusualcopper-0.9.0-alpha.1.jar
+SHA256: 928D8484F6BC58463FDCEF4B3D88237B315826B763B3048A479C1227F14A39D8
+136 JSON entries parsed. Ordinary JAR excludes GameTests, smoke scenes,
+production probe and test loot modifiers. Both enchanter recipes are present.
+
+Only repo-owned isolated fixture runtimes were launched; user's client and
+server were not launched or modified. Stable 1.0 acceptance remains open:
+SSN Bridge, JEI/guide, full modpack adapters, upgrades/art/performance,
+licenses, D11 crash consistency and the rest of T01–T36.

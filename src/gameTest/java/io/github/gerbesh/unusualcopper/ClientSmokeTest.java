@@ -52,6 +52,19 @@ public final class ClientSmokeTest {
     private static boolean brewerSettingsSent,brewerEnabled;
     private static int brewerMissingFrames;
     private static final AtomicBoolean brewerVerified=new AtomicBoolean();
+    private static BlockPos enchanterPos;
+    private static boolean enchanterSelected;
+    private static int enchanterPriceFrames,enchanterAppliedFrames;
+    private static java.util.UUID enchanterNonce;
+    private static final AtomicBoolean enchanterVerified=new AtomicBoolean();
+    @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void enchanterWitness(TickEvent.LevelTickEvent event){
+        if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage!=26||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||enchanterPos==null||enchanterVerified.get())return;
+        if(!(level.getBlockEntity(enchanterPos)instanceof CopperMachineBlockEntity m))return;var result=m.inventory.getStackInSlot(0);if(net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,result)!=5)return;
+        var player=level.getServer().getPlayerList().getPlayer(Minecraft.getInstance().player.getUUID());
+        if(m.energy.stored()!=343750||!m.inventory.getStackInSlot(1).isEmpty()||Math.abs(io.github.gerbesh.unusualcopper.gameplay.XpWallet.points(player)-765)>.0001||result.getDamageValue()!=31||!result.getHoverName().getString().equals("Resonant keeper")||!result.getOrCreateTag().getString("EnchantmentWitness").equals("preserve")||net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING,result)!=1)throw new IllegalStateException("Native enchantment conservation/NBT check failed");
+        UnusualCopper.LOGGER.info("CuE ENCHANTER CLIENT PASS: real C2S quote then nonce confirmation, Efficiency V, 235 XP points, 156250 CuE, 64 lapis, original Unbreaking I/name/damage/custom NBT and synchronized client XP");enchanterVerified.set(true);
+    }
     @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.LOWEST)
     public static void brewerWitness(TickEvent.LevelTickEvent event){
         if(!Boolean.getBoolean("unusualcopper.smokeClient")||stage<21||stage>22||event.phase!=TickEvent.Phase.END||!(event.level instanceof net.minecraft.server.level.ServerLevel level)||brewerPos==null||brewerVerified.get())return;
@@ -277,6 +290,15 @@ public final class ClientSmokeTest {
         }
         if(stage==18 && mc.screen instanceof CopperMachineScreen) ticks++;
         if(stage>=21&&mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen)ticks++;
+        if(stage==25&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu&&menu.snapshot!=null){
+            if(!enchanterSelected){enchanterSelected=true;io.github.gerbesh.unusualcopper.network.EnchanterNetwork.select(menu.containerId,menu.snapshot.runtime(),new net.minecraft.resources.ResourceLocation("minecraft","efficiency"));}
+            var quote=menu.snapshot.quote();if(!captured&&quote!=null&&quote.offer().level()==5&&quote.offer().xp()==235&&quote.offer().cue()==156250&&menu.snapshot.xp()==1000&&menu.snapshot.lapis()==64&&++enchanterPriceFrames>=3){
+                captured=true;enchanterNonce=quote.nonce();mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var m=(CopperMachineBlockEntity)level.getBlockEntity(enchanterPos);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());if(m.energy.stored()!=500000||m.inventory.getStackInSlot(1).getCount()!=64||Math.abs(io.github.gerbesh.unusualcopper.gameplay.XpWallet.points(player)-1000)>.0001||net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,m.inventory.getStackInSlot(0))!=0)throw new IllegalStateException("Preview charged resources before explicit confirmation");});
+                Screenshot.grab(mc.gameDirectory,"cue-enchanter-price.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter quote screenshot: {}",text.getString());saved.set(true);});
+            }
+        }
+        if(stage==26&&!captured&&enchanterVerified.get()&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu&&menu.snapshot!=null&&menu.snapshot.result()==io.github.gerbesh.unusualcopper.network.EnchanterNetwork.Result.APPLIED&&Math.abs(io.github.gerbesh.unusualcopper.gameplay.XpWallet.points(mc.player)-765)<.0001&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,menu.slots.get(0).getItem())==5&&++enchanterAppliedFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-applied.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter applied screenshot: {}",text.getString());saved.set(true);});}
+        if(stage==27&&!captured&&ticks>=5&&mc.screen==null){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-machine.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter machine screenshot: {}",text.getString());saved.set(true);});}
         if(stage==21&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&!menu.options.isEmpty()){
             if(!brewerSettingsSent){brewerSettingsSent=true;io.github.gerbesh.unusualcopper.network.BrewerNetwork.configure(menu.containerId,menu.snapshot.runtime(),new io.github.gerbesh.unusualcopper.network.BrewerNetwork.Settings(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2,3,true,7));}
             if(!brewerEnabled&&menu.snapshot.result()==1&&menu.snapshot.settings().vessel()==2){brewerEnabled=true;mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(brewerPos)).redstoneMode=0);}
@@ -474,6 +496,13 @@ public final class ClientSmokeTest {
             } else if(stage==21){stage=22;captured=false;saved.set(false);ticks=0;mc.getSingleplayerServer().execute(()->((net.minecraft.world.level.block.entity.BarrelBlockEntity)serverLevel(mc).getBlockEntity(brewerStorage)).setItem(5,new ItemStack(Items.MAGMA_CREAM)));}
             else if(stage==22){stage=23;captured=false;saved.set(false);ticks=0;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.openMenu((net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(brewerStorage));});}
             else if(stage==23){stage=24;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.teleportTo(level,brewerPos.getX()+1.5,brewerPos.getY()+2,brewerPos.getZ()-5,0,12);});}
+            else if(stage==24){stage=25;captured=false;saved.set(false);ticks=0;mc.options.hideGui=false;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());enchanterPos=brewerPos.south(10);
+                for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++){for(int y=0;y<5;y++)level.setBlock(enchanterPos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);level.setBlock(enchanterPos.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3);}
+                var m=EnchanterGameTests.machine(level,enchanterPos);m.setOwner(player.getUUID());m.energy.restore(500000);var target=m.inventory.getStackInSlot(0);target.setHoverName(net.minecraft.network.chat.Component.literal("Resonant keeper"));target.setDamageValue(31);target.getOrCreateTag().putString("EnchantmentWitness","preserve");target.enchant(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING,1);EnchanterGameTests.xp(player,1000);
+                player.teleportTo(level,enchanterPos.getX()+.5,enchanterPos.getY()+1,enchanterPos.getZ()-2,0,15);NetworkHooks.openScreen(player,m,enchanterPos);
+            });}
+            else if(stage==25){stage=26;captured=false;saved.set(false);ticks=0;var menu=(io.github.gerbesh.unusualcopper.menu.EnchanterMenu)mc.player.containerMenu;io.github.gerbesh.unusualcopper.network.EnchanterNetwork.confirm(menu.containerId,menu.snapshot.runtime(),enchanterNonce);}
+            else if(stage==26){stage=27;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.teleportTo(level,enchanterPos.getX()+1.5,enchanterPos.getY()+2,enchanterPos.getZ()-5,0,12);});}
             else { mc.options.hideGui = false; mc.stop(); }
         }
     }

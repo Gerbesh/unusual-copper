@@ -173,6 +173,13 @@ def models():
               part([5,5,5],[7,9,7],"aqua"),part([9,5,5],[11,9,7],"aqua"),part([7,5,9],[9,9,11],"aqua"),
               part([5.5,9,5.5],[6.5,11,6.5],"copper"),part([9.5,9,5.5],[10.5,11,6.5],"copper"),part([7.5,9,9.5],[8.5,11,10.5],"copper")]
     export_model("aetheric_brewer",brewer,[part([3,4,3],[13,13,13],"glass")])
+    enchanter = [part([0,0,0],[16,2,16],"dark"),part([1,2,1],[15,4,15],"copper"),part([3,4,3],[13,8,13],"patina"),
+                 part([2,8,2],[14,10,14],"copper"),part([4,10,4],[12,11,12],"dark"),part([5,11,5],[8,12,11],"patina"),
+                 part([8,11,5],[11,12,11],"aqua"),part([7.5,10,5],[8.5,13,11],"copper"),part([1,4,1],[3,13,3],"copper"),
+                 part([13,4,1],[15,13,3],"copper"),part([1,4,13],[3,13,15],"copper"),part([13,4,13],[15,13,15],"copper"),
+                 part([1,13,1],[3,16,3],"aqua"),part([13,13,1],[15,16,3],"aqua"),part([1,13,13],[3,16,15],"aqua"),
+                 part([13,13,13],[15,16,15],"aqua"),part([6,4,.3],[10,7,.7],"aqua")]
+    export_model("enchantment_resonator",enchanter,[])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -197,7 +204,7 @@ def models():
     write_json(ASSETS / "blockstates/copper_item_pipe.json", {"multipart": item_parts})
     write_json(ASSETS / "models/item/copper_item_pipe.json", {"parent": "unusualcopper:block/item_pipe_center"})
     write_bbmodel("copper_item_pipe", item_center + item_arm, pipe_materials)
-    for name, color in (("sentinel_range_focus", "aqua"), ("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
+    for name, color in (("resonant_enchantment_core", "aqua"), ("sentinel_range_focus", "aqua"), ("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
         img = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
         if name == "diamond_solar_lens":
             d.ellipse((3, 3, 28, 28), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.ellipse((7, 7, 24, 24), fill=(43, 169, 175)); d.line((10, 13, 16, 7), fill=(170, 249, 239), width=3)
@@ -234,6 +241,32 @@ def languages():
         "block.unusualcopper.arboreal_reconstructor": ("Arborist", "Арборист"),
         "block.unusualcopper.copper_sentinel": ("Copper Sentinel", "Медный часовой"),
         "block.unusualcopper.aetheric_brewer": ("Aetheric Brewer", "Эфирный автоклав"),
+        "block.unusualcopper.enchantment_resonator": ("Enchantment Resonator", "Резонатор зачарований"),
+        "item.unusualcopper.resonant_enchantment_core": ("Resonant Enchantment Core", "Ядро резонатора зачарований"),
+        "enchanter.unusualcopper.search": ("Find an applicable enchantment", "Найти подходящее зачарование"),
+        "enchanter.unusualcopper.item": ("Item", "Предмет"),
+        "enchanter.unusualcopper.lapis": ("Lapis", "Лазурит"),
+        "enchanter.unusualcopper.preview": ("Preview", "Результат"),
+        "enchanter.unusualcopper.choose": ("Choose an enchantment to request its exact price", "Выберите чары для расчёта точной цены"),
+        "enchanter.unusualcopper.no_offers": ("No compatible enchantments for this item", "Нет подходящих чар для этого предмета"),
+        "enchanter.unusualcopper.price": ("Price: %s XP points + %s CuE + 64 lapis", "Цена: %s XP + %s CuE + 64 лазурита"),
+        "enchanter.unusualcopper.wallet": ("Available: %s XP points | %s CuE | Lapis: %s / 64", "Доступно: %s XP | %s CuE | Лазурит: %s / 64"),
+        "enchanter.unusualcopper.confirm": ("Confirm spending", "Подтвердить трату"),
+        "enchanter.unusualcopper.confirm_hint": ("Apply the displayed result and spend its price. Quote expires in %s seconds.", "Применить показанный результат и списать его цену. Цена действительна ещё %s с."),
+        "enchanter.unusualcopper.redstone": ("Cycle redstone mode", "Переключить режим редстоуна"),
+        "enchanter.unusualcopper.result.none": ("Select, then confirm", "Выберите и подтвердите"),
+        "enchanter.unusualcopper.result.quoted": ("Price is ready", "Цена рассчитана"),
+        "enchanter.unusualcopper.result.applied": ("Enchantment applied", "Чары применены"),
+        "enchanter.unusualcopper.result.stale": ("Refresh item/price", "Обновите предмет/цену"),
+        "enchanter.unusualcopper.result.invalid": ("Incompatible option", "Неподходящие чары"),
+        "enchanter.unusualcopper.result.no_xp": ("Not enough XP points", "Не хватает XP points"),
+        "enchanter.unusualcopper.result.no_lapis": ("Need 64 lapis", "Нужно 64 лазурита"),
+        "enchanter.unusualcopper.result.no_energy": ("Not enough CuE", "Не хватает CuE"),
+        "enchanter.unusualcopper.result.denied": ("Access denied", "Нет доступа"),
+        "enchanter.unusualcopper.result.paused": ("Redstone pause", "Пауза по редстоуну"),
+        "enchanter.unusualcopper.result.xp_cancelled": ("XP change cancelled", "Трата XP отменена"),
+        "enchanter.unusualcopper.result.xp_changed": ("XP price changed", "Изменена операция XP"),
+        "enchanter.unusualcopper.result.provider_error": ("Enchantment hook error", "Ошибка обработчика чар"),
         "brewer.unusualcopper.settings": ("Choose a potion, bottle type, quantity and stock target", "Выбрать зелье, вид флакона, количество и запас"),
         "brewer.unusualcopper.search": ("Find by potion name or ID", "Поиск по названию или ID зелья"),
         "brewer.unusualcopper.count": ("Amount", "Кол-во"),
@@ -358,4 +391,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 13 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 14 editable Blockbench projects, models, item tags and RU/EN.")

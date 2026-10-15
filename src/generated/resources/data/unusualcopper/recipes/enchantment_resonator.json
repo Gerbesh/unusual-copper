@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "unusualcopper:resonant_enchantment_core"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    }
+  },
+  "pattern": [
+    "FFF",
+    "FCF",
+    "FFF"
+  ],
+  "result": {
+    "item": "unusualcopper:enchantment_resonator"
+  },
+  "show_notification": true
+}

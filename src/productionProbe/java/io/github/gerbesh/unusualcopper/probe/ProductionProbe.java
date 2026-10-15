@@ -95,6 +95,7 @@ public final class ProductionProbe {
         verifyArborist();
         verifySentinel();
         verifyBrewer();
+        verifyEnchanter();
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -116,6 +117,23 @@ public final class ProductionProbe {
         phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
+    }
+    private static void verifyEnchanter(){
+        var pos=TARGET.west(8).north(10);var owner=UUID.fromString("f78455cc-b7e7-488c-bf47-e47f38410be4");level.setChunkForced(pos.getX()>>4,pos.getZ()>>4,true);EXTRA_CHUNKS.add(net.minecraft.world.level.ChunkPos.asLong(pos.getX()>>4,pos.getZ()>>4));level.getChunkAt(pos);
+        net.minecraft.server.level.ServerPlayer player=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(owner,"CuEResXP"));player.setPos(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5);
+        var receipt=level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("cue-enchanter-player.nbt").toFile();
+        if(level.getBlockEntity(pos)instanceof io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity saved&&saved.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.ENCHANTMENT_RESONATOR&&receipt.isFile()){
+            try{player.load(net.minecraft.nbt.NbtIo.readCompressed(receipt));}catch(java.io.IOException error){throw new IllegalStateException("Cannot read fixture player XP checkpoint",error);}
+            var item=saved.inventory.getStackInSlot(0);check(saved.owner().equals(owner)&&saved.energy.stored()==343750&&saved.inventory.getStackInSlot(1).isEmpty()&&Math.abs(XpWallet.points(player)-765)<.0001&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,item)==5&&item.getDamageValue()==31&&item.getHoverName().getString().equals("Production keeper")&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING,item)==1&&player.totalExperience==765&&item.getOrCreateTag().getString("EnchantmentWitness").equals("preserve"),"Saved enchanted item/XP/CuE did not survive the two-file normal checkpoint");
+            LogUtils.getLogger().info("CuE PRODUCTION ENCHANTER DISK RESTORE PASS: machine region plus vanilla player NBT; exact enchanted item, original owner, 765 XP points, 343750 CuE and no lapis");
+        }
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);level.setBlock(pos,io.github.gerbesh.unusualcopper.registry.ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.ENCHANTMENT_RESONATOR).get().defaultBlockState(),3);
+        var m=(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)level.getBlockEntity(pos);m.setOwner(owner);m.energy.add(500000,false);m.inventory.setStackInSlot(1,new ItemStack(Items.LAPIS_LAZULI,64));var target=new ItemStack(Items.DIAMOND_PICKAXE);target.setDamageValue(31);target.setHoverName(Component.literal("Production keeper"));target.getOrCreateTag().putString("EnchantmentWitness","preserve");target.enchant(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING,1);m.inventory.setStackInSlot(0,target);
+        player.setPos(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5);player.experienceLevel=0;player.experienceProgress=0;player.totalExperience=0;player.giveExperiencePoints(1000);var menu=new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(79,player.getInventory(),m);player.containerMenu=menu;
+        check(menu.select(m.runtimeIdentity,new net.minecraft.resources.ResourceLocation("minecraft","efficiency"),player),"Production enchantment quote rejected");var quote=menu.quote();check(quote.offer().xp()==235&&quote.offer().cue()==156250&&m.energy.stored()==500000&&Math.abs(XpWallet.points(player)-1000)<.0001,"Production preview changed resources or price");check(menu.confirm(m.runtimeIdentity,quote.nonce(),player),"Production enchantment confirmation rejected");
+        check(m.energy.stored()==343750&&m.inventory.getStackInSlot(1).isEmpty()&&Math.abs(XpWallet.points(player)-765)<.0001&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,m.inventory.getStackInSlot(0))==5,"Production enchanting fee/result mismatch");check(!menu.confirm(m.runtimeIdentity,quote.nonce(),player)&&m.energy.stored()==343750&&Math.abs(XpWallet.points(player)-765)<.0001,"Production confirmation replay spent resources");
+        try{net.minecraft.nbt.NbtIo.writeCompressed(player.saveWithoutId(new net.minecraft.nbt.CompoundTag()),receipt);}catch(java.io.IOException error){throw new IllegalStateException("Cannot save fixture player XP checkpoint",error);}((net.minecraft.world.level.block.entity.BlockEntity)m).setChanged();
+        LogUtils.getLogger().info("CuE PRODUCTION ENCHANTER PASS: real quote and one-shot confirmation; Efficiency V, original NBT, 235 XP points, 156250 CuE and exactly 64 lapis; vanilla player NBT checkpoint written");
     }
     private static void brewerStep(io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity m){m.brewer.nextWork=0;io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.process(m,level);}
     private static int brewerProducts(net.minecraft.world.level.block.entity.BarrelBlockEntity c){int n=0;for(int i=0;i<c.getContainerSize();i++){var stack=c.getItem(i);if(stack.is(Items.POTION)&&net.minecraft.world.item.alchemy.PotionUtils.getPotion(stack)==net.minecraft.world.item.alchemy.Potions.FIRE_RESISTANCE)n+=stack.getCount();}return n;}

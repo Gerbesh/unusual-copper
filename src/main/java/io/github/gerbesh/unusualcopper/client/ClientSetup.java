@@ -15,6 +15,8 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);
             MenuScreens.register(ModContent.BREWER_MENU.get(),BrewerScreen::new);
+            MenuScreens.register(ModContent.ENCHANTER_MENU.get(),EnchanterScreen::new);
+            io.github.gerbesh.unusualcopper.network.EnchanterNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.BrewerNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.ReaperNetwork.clientReceiver(message -> {
                 var player=net.minecraft.client.Minecraft.getInstance().player;

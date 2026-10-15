@@ -23,6 +23,11 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.DoubleValue SENTINEL_DAMAGE;
     private static final ForgeConfigSpec.BooleanValue SENTINEL_LOS;
     private static final ForgeConfigSpec.IntValue BREWER_COST,BREWER_EXTRA,BREWER_INTERVAL,BREWER_BUDGET;
+    private static final ForgeConfigSpec.IntValue ENCHANT_LEVEL,ENCHANT_XP_BASE,ENCHANT_CUE_BASE,ENCHANT_CUE_MIN;
+    private static final ForgeConfigSpec.DoubleValue ENCHANT_XP_MULT,ENCHANT_ADDITIONAL;
+    private static final ForgeConfigSpec.DoubleValue[] ENCHANT_RARITY=new ForgeConfigSpec.DoubleValue[4];
+    private static final ForgeConfigSpec.BooleanValue ENCHANT_TREASURE,ENCHANT_CURSES;
+    private static final ForgeConfigSpec.ConfigValue<java.util.List<String>> ENCHANT_ITEMS,ENCHANT_ENCHANTMENTS;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -80,6 +85,18 @@ public final class ServerConfig {
         BREWER_EXTRA=builder.comment("Extra price per bottle for every recipe stage beyond two.").defineInRange("cue_per_extra_stage",1000,0,5000);
         BREWER_INTERVAL=builder.defineInRange("stage_interval_ticks",20,20,1200);
         BREWER_BUDGET=builder.defineInRange("machines_per_dimension_tick",8,1,64);
+        builder.pop().push("enchanter");
+        ENCHANT_LEVEL=builder.defineInRange("maximum_level",255,1,255);
+        ENCHANT_XP_BASE=builder.defineInRange("xp_base",25,1,1000);
+        ENCHANT_XP_MULT=builder.defineInRange("xp_multiplier",1.5,.1,10.0);
+        ENCHANT_CUE_BASE=builder.defineInRange("cue_base",25000,1000,100000);
+        ENCHANT_CUE_MIN=builder.defineInRange("cue_minimum",80000,1,2000000);
+        ENCHANT_ADDITIONAL=builder.defineInRange("additional_enchantment_multiplier",.25,0,10.0);
+        for(int i=0;i<4;i++)ENCHANT_RARITY[i]=builder.defineInRange("rarity_"+new String[]{"common","uncommon","rare","very_rare"}[i],new double[]{1,1.5,2,2.5}[i],.1,10.0);
+        ENCHANT_TREASURE=builder.define("allow_treasure",false);ENCHANT_CURSES=builder.define("allow_curses",false);
+        java.util.function.Predicate<Object> ids=value->value instanceof java.util.List<?> list&&list.size()<=128&&list.stream().allMatch(raw->raw instanceof String s&&net.minecraft.resources.ResourceLocation.tryParse(s)!=null);
+        ENCHANT_ITEMS=builder.define("allowed_mod_items",java.util.List.<String>of(),ids);
+        ENCHANT_ENCHANTMENTS=builder.define("allowed_mod_enchantments",java.util.List.<String>of(),ids);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -118,6 +135,17 @@ public final class ServerConfig {
     public static boolean arboristBuildingGuard() { return SPEC.isLoaded()?ARBORIST_BUILDINGS.get():ARBORIST_BUILDINGS.getDefault(); }
     public static int sentinelCost() { return value(SENTINEL_COST); }
     public static int brewerCost(){return value(BREWER_COST);}
+    public static int enchanterMaxLevel(){return value(ENCHANT_LEVEL);}
+    public static int enchanterXpBase(){return value(ENCHANT_XP_BASE);}
+    public static int enchanterCueBase(){return value(ENCHANT_CUE_BASE);}
+    public static int enchanterCueMinimum(){return value(ENCHANT_CUE_MIN);}
+    public static double enchanterXpMultiplier(){return SPEC.isLoaded()?ENCHANT_XP_MULT.get():ENCHANT_XP_MULT.getDefault();}
+    public static double enchanterAdditional(){return SPEC.isLoaded()?ENCHANT_ADDITIONAL.get():ENCHANT_ADDITIONAL.getDefault();}
+    public static double enchanterRarity(int index){var v=ENCHANT_RARITY[index];return SPEC.isLoaded()?v.get():v.getDefault();}
+    public static boolean enchanterTreasure(){return SPEC.isLoaded()?ENCHANT_TREASURE.get():ENCHANT_TREASURE.getDefault();}
+    public static boolean enchanterCurses(){return SPEC.isLoaded()?ENCHANT_CURSES.get():ENCHANT_CURSES.getDefault();}
+    public static java.util.List<String> enchanterItems(){return SPEC.isLoaded()?ENCHANT_ITEMS.get():ENCHANT_ITEMS.getDefault();}
+    public static java.util.List<String> enchanterEnchantments(){return SPEC.isLoaded()?ENCHANT_ENCHANTMENTS.get():ENCHANT_ENCHANTMENTS.getDefault();}
     public static int brewerExtra(){return value(BREWER_EXTRA);}
     public static int brewerInterval(){return value(BREWER_INTERVAL);}
     public static int brewerBudget(){return value(BREWER_BUDGET);}

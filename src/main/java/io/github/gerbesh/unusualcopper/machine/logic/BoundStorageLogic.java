@@ -25,6 +25,7 @@ public final class BoundStorageLogic {
             machine.boundCargo(List.of(extracted)); machine.boundCargoSlot = -1; deliver(machine, endpoint, machine.boundCargo()); return;
         }
         for (int slot = 0; slot <= 1; slot++) {
+            if(machine.kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0)continue;
             final int input = slot;
             var view = endpoint.snapshot(stack -> machine.inventory.isItemValid(input, stack), 32);
             for (var entry : view.entries()) {

@@ -55,6 +55,15 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public final ArboristState arborist;
     public final SentinelState sentinel;
     public final BrewerState brewer;
+    public long enchantmentRevision;
+    public long enchantmentUntil;
+    private boolean localCommit,deferredChange;
+    @Override public void setChanged(){if(localCommit){deferredChange=true;return;}super.setChanged();}
+    /** No neighbor callbacks interleave the local item/XP/energy assignments. */
+    public void commitLocally(Runnable action){
+        if(localCommit)throw new IllegalStateException("Nested machine commit");localCommit=true;
+        try{action.run();}finally{localCommit=false;if(deferredChange){deferredChange=false;try{super.setChanged();}catch(RuntimeException hook){io.github.gerbesh.unusualcopper.UnusualCopper.LOGGER.error("Neighbor notification failed after a completed local machine commit",hook);}}}
+    }
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
@@ -102,10 +111,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         brewer = kind == MachineKind.AETHERIC_BREWER ? new BrewerState() : null;
         energy = new CopperEnergyBuffer(kind.capacity, 256, 256, this::setChanged);
         inventory = new ItemStackHandler(4) {
-            @Override public int getSlotLimit(int slot){return brewer!=null && slot==1?1:super.getSlotLimit(slot);}
-            @Override protected void onContentsChanged(int slot) { setChanged(); }
+            @Override public int getSlotLimit(int slot){return (brewer!=null && slot==1)||(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0)?1:super.getSlotLimit(slot);}
+            @Override protected void onContentsChanged(int slot) { if(slot==0)enchantmentRevision++;setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
                 if (slot >= 2 || !kind.acceptsInputs()) return false;
+                if(kind==MachineKind.ENCHANTMENT_RESONATOR)return slot==0?io.github.gerbesh.unusualcopper.gameplay.EnchantmentPolicy.target(stack):stack.is(net.minecraft.world.item.Items.LAPIS_LAZULI);
                 if(brewer!=null)return slot==0?stack.is(net.minecraft.world.item.Items.GLASS_BOTTLE):io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.ingredient(CopperMachineBlockEntity.this,stack);
                 if(arborist!=null) {
                     if(arborist.job!=null) return false;
@@ -129,6 +139,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case ARBORIST -> new ArboristLogic();
             case COPPER_SENTINEL -> new SentinelLogic();
             case AETHERIC_BREWER -> new BrewerLogic();
+            case ENCHANTMENT_RESONATOR -> (m,level)->m.status(level.getGameTime()<m.enchantmentUntil?MachineStatus.WORKING:MachineStatus.IDLE);
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
@@ -271,7 +282,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 @Override public int getSlots() { return 4; }
                 @Override public ItemStack getStackInSlot(int slot) { return live() ? inventory.getStackInSlot(slot).copy() : ItemStack.EMPTY; }
                 @Override public int getSlotLimit(int slot) { return inventory.getSlotLimit(slot); }
-                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && sideMode(side) == SideMode.ITEM_INPUT && inventory.isItemValid(slot, stack); }
+                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && !(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0) && sideMode(side) == SideMode.ITEM_INPUT && inventory.isItemValid(slot, stack); }
                 @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                     return isItemValid(slot, stack) ? inventory.insertItem(slot, stack, simulate) : stack;
                 }
@@ -333,6 +344,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public void load(CompoundTag tag) {
         super.load(tag);
+        enchantmentRevision++;
         inventory.deserializeNBT(tag.getCompound("Inventory")); energy.restore(tag.getInt("Energy"));
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         redstoneMode = Math.floorMod(tag.getInt("Redstone"), 3); loadSides(tag);
@@ -369,7 +381,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { if (packet.getTag() != null) handleUpdateTag(packet.getTag()); }
     @Override public Component getDisplayName() { return Component.translatable("block.unusualcopper." + kind.id); }
-    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return new CopperMachineMenu(id, playerInventory, this); }
+    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return kind==MachineKind.ENCHANTMENT_RESONATOR?new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(id,playerInventory,this):new CopperMachineMenu(id, playerInventory, this); }
 
     public ContainerData menuData() {
         return new ContainerData() {

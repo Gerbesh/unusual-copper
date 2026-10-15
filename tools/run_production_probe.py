@@ -70,7 +70,8 @@ windup = [line for line in text.splitlines() if "CuE PRODUCTION WINDUP PASS" in 
 arborist = [line for line in text.splitlines() if "CuE PRODUCTION ARBORIST PASS" in line]
 sentinel = [line for line in text.splitlines() if "CuE PRODUCTION SENTINEL PASS" in line]
 brewer = [line for line in text.splitlines() if "CuE PRODUCTION BREWER PASS" in line]
-if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel or not brewer:
+enchanter = [line for line in text.splitlines() if "CuE PRODUCTION ENCHANTER PASS" in line]
+if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel or not brewer or not enchanter:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
@@ -79,7 +80,8 @@ print(windup[-1])
 print(arborist[-1])
 print(sentinel[-1])
 print(brewer[-1])
+print(enchanter[-1])
 for line in text.splitlines():
-    if "CuE PRODUCTION BREWER DISK" in line:
+    if "CuE PRODUCTION BREWER DISK" in line or "CuE PRODUCTION ENCHANTER DISK" in line:
         print(line)
 print("Production server stopped cleanly; log:", log)
