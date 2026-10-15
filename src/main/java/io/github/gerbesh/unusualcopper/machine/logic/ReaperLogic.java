@@ -3,7 +3,7 @@ package io.github.gerbesh.unusualcopper.machine.logic;
 import io.github.gerbesh.unusualcopper.gameplay.*;
 import io.github.gerbesh.unusualcopper.machine.*;
 import io.github.gerbesh.unusualcopper.config.ServerConfig;
-import io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint;
+import io.github.gerbesh.unusualcopper.storage.StorageEndpoint;
 import net.minecraft.server.level.ServerLevel;
 
 public final class ReaperLogic implements MachineLogic {
@@ -33,7 +33,7 @@ public final class ReaperLogic implements MachineLogic {
         if (machine.boundInventory() != null) {
             if (!level.hasChunkAt(machine.boundInventory())) { cancel(machine,level); machine.status(MachineStatus.UNLOADED); return; }
             var space = machine.boundEndpoint(level).space();
-            if (space != HandlerStorageEndpoint.Space.AVAILABLE) { if(space!=HandlerStorageEndpoint.Space.SCANNING) cancel(machine,level); machine.status(space == HandlerStorageEndpoint.Space.SCANNING ? MachineStatus.SCANNING : MachineStatus.OUTPUT_FULL); return; }
+            if (space != StorageEndpoint.Space.AVAILABLE) { if(space!=StorageEndpoint.Space.SCANNING) cancel(machine,level); machine.status(space == StorageEndpoint.Space.SCANNING ? MachineStatus.SCANNING : MachineStatus.OUTPUT_FULL); return; }
         }
         var population = MobPopulations.ledger(level, machine.runtimeIdentity, machine.getBlockPos(), area, state.rule);
         machine.inspected = population.step(ServerConfig.reaperCandidates() - 1);

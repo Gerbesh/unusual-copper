@@ -13,7 +13,7 @@ public final class BoundStorageLogic {
     public static void tick(CopperMachineBlockEntity machine, ServerLevel level) {
         if (!machine.kind.hasInventory() || machine.boundFaulted || !ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) return;
         var pos = machine.boundInventory();
-        HandlerStorageEndpoint endpoint = pos == null || machine.getBlockPos().distSqr(pos) > 32 * 32 ? null : machine.boundEndpoint(level);
+        StorageEndpoint endpoint = pos == null || machine.getBlockPos().distSqr(pos) > 32 * 32 ? null : machine.boundEndpoint(level);
         var cargo = machine.boundCargo();
         if (!cargo.isEmpty()) { deliver(machine, endpoint, cargo); return; }
         if (endpoint == null || !endpoint.isAvailable()) return;
@@ -42,7 +42,7 @@ public final class BoundStorageLogic {
             }
         }
     }
-    private static void deliver(CopperMachineBlockEntity machine, HandlerStorageEndpoint endpoint, List<ItemStack> cargo) {
+    private static void deliver(CopperMachineBlockEntity machine, StorageEndpoint endpoint, List<ItemStack> cargo) {
         var stack = cargo.get(0); int count = Math.min(8, Math.min(stack.getCount(), stack.getMaxStackSize())); var offered = stack.copyWithCount(count);
         ItemStack rest;
         if (machine.boundCargoSlot >= 0) rest = machine.inventory.insertItem(machine.boundCargoSlot, offered, false);

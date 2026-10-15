@@ -1,0 +1,75 @@
+Unusual Copper 0.9.1-alpha.1 — bounded inventory census, 2026-10-15
+Windows / Temurin 17.0.19+10 / dev Forge 47.4.10 / official 1.20.1.
+Ignored raw logs, caches and repo-owned isolated fixture worlds only.
+
+Prior enchanter baseline: GitHub Actions 38734180342, commit 5217c02,
+success after allowing 800 ticks for the existing cold-region GLM fixture.
+Linux passed all 111 required GameTests. Its downloaded ordinary JAR SHA256
+matches the Windows 0.9.0-alpha.1 artifact exactly:
+928D8484F6BC58463FDCEF4B3D88237B315826B763B3048A479C1227F14A39D8.
+
+.codex-tmp/verify-inventory-census-final.log
+Command: gradlew --no-daemon build productionProbeJar runGameTestServer
+[15:35:04] All 114 required tests passed :)
+BUILD SUCCESSFUL in 1m 2s
+JUnit: AccountingTest 5, WorkAreaTest 3, XpWalletTest 5; zero failures/errors.
+
+Three added GameTests use actual loaded BlockEntities and Forge handlers:
+- A 512-slot physical fixture: exactly 256 slot reads per world tick, twenty
+  additional same-tick calls for two different keys add zero reads. Counts
+  distinguish custom names/NBT (77 versus 9). The second page completes the
+  total. A real setChanged hook invalidates it immediately; subsequent fresh
+  pages count 71 after a mutation, retaining the per-tick budget.
+- Replacing the BlockEntity invalidates a completed twelve-diamond count;
+  the new inventory's census contains only its three real diamonds.
+- An actual barrel snapshot cached by one endpoint observes a second
+  endpoint's real withdrawal within the same tick (8 -> 6).
+
+.codex-tmp/client-inventory-census.log
+Command: gradlew --no-daemon runClient -PsmokeClient -PsmokeClientRu
+Existing machine/menu/effects checks pass in the native Russian client.
+[15:36:40] CuE BREWER CLIENT PASS: actual C2S lingering/long fire resistance,
+stock three/priority seven, paused reagent, exact three potions and 24000 CuE
+[15:36:44] CuE ENCHANTER CLIENT PASS: real C2S quote/nonce confirmation,
+Efficiency V, 235 XP, 156250 CuE, 64 lapis, metadata and client XP preserved
+BUILD SUCCESSFUL in 1m 23s
+
+.codex-tmp/production-inventory-census-final.log
+Command: python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.9.1-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.9.1-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Actual isolated Forge 47.4.20 and ordinary reobfuscated artifacts.
+[15:37:24] CuE PRODUCTION INVENTORY INDEX PASS: SRG vanilla dirty hook
+invalidates watched revisions; replacement invalidates old identity
+This validates the pinned SRG Mixin on a real vanilla barrel. The large-slot
+page-budget/count scenarios are GameTests; the production barrel has 27 slots.
+Existing population/reaper/windup/arborist/sentinel/brewer/enchanter probes,
+normal checkpoint reads and clean server stop pass, persistence round 15.
+
+.codex-tmp/opac-inventory-census-r2.log
+Command: gradlew --no-daemon runServer -PopacTests
+Actual Open Parties and Claims 0.30.1, isolated dedicated server.
+[15:41:04] CuE OPENPAC INVENTORY INDEX PASS: cached owner snapshot and count
+denied immediately after claim revocation; restored rights extracted exactly
+eight real ingots
+All existing machine permission checks pass in the same process.
+BUILD SUCCESSFUL in 28s
+Initial .codex-tmp/opac-inventory-census.log passed the new cached-permission
+case but failed the later collector check on the reused scene. Setup now
+discards loose items in its known fixture area after replacing the previous
+enchanter, which drops its actual inventory. The rerun passes with an explicit
+iron-ingot identity check. No production collector behavior was changed.
+
+Final JAR: build/libs/unusualcopper-0.9.1-alpha.1.jar
+SHA256: 0ED84B8FF5DFA34BBA2E74545F8878570E5B62BF526F943284AFF6AEFE298687
+136 JSON entries parsed. Required inventory Mixin and census classes present;
+GameTests, probe/smoke scenes and fixture loot modifiers absent.
+
+Limits: one census per endpoint, up to 8192 keys / 1000000 slots; completion
+requires a stable dirty revision. At most 256 large-inventory slot reads per
+world tick, shared across queried keys on that endpoint. Small handlers count
+directly. Completed census refreshes after 20 ticks. Arbitrary providers must
+honor inventory-change notifications; this does not supply crash atomicity.
+SSN Bridge itself remains unimplemented. JEI, guide, full modpack/adapters,
+upgrades, art, performance, licenses, D11 and T01–T36 acceptance remain open.

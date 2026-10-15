@@ -66,10 +66,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
-    private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
-    public io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint(ServerLevel level) {
+    private io.github.gerbesh.unusualcopper.storage.StorageEndpoint boundEndpoint;
+    public io.github.gerbesh.unusualcopper.storage.StorageEndpoint boundEndpoint(ServerLevel level) {
         if (boundInventory == null) return null;
-        if (boundEndpoint == null) boundEndpoint = new io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint(level, boundInventory, boundSide, owner);
+        if (boundEndpoint == null) boundEndpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(level, boundInventory, boundSide, owner);
         return boundEndpoint;
     }
     private final java.util.List<ItemStack> boundCargo = new java.util.ArrayList<>();
@@ -87,7 +87,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if(brewer!=null && brewer.job!=null)return false;
         if (!kind.hasInventory() || !canAccess(player) || !boundCargo.isEmpty() || !(level instanceof ServerLevel server) || pos.equals(worldPosition)
                 || worldPosition.distSqr(pos) > 32 * 32 || !server.hasChunkAt(pos) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server, worldPosition, player.getUUID())) return false;
-        var endpoint = new io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint(server, pos, side, owner == null ? player.getUUID() : owner);
+        var endpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(server, pos, side, owner == null ? player.getUUID() : owner);
         if (!endpoint.isAvailable()) return false;
         if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundSide = side; boundEndpoint = null; if(brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); return true;
     }

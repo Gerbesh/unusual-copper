@@ -31,7 +31,7 @@ public final class ItemNetworks {
     private static ItemPipeBlockEntity pipe(ServerLevel level, BlockPos pos) {
         return level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof ItemPipeBlockEntity entity && !entity.isRemoved() ? entity : null;
     }
-    private record Port(BlockPos pipe, Direction side, HandlerStorageEndpoint inventory) {}
+    private record Port(BlockPos pipe, Direction side, StorageEndpoint inventory) {}
     private record Route(BlockPos from, BlockPos to) {}
     private static final class Component {
         final Set<BlockPos> nodes = new HashSet<>();
@@ -87,7 +87,7 @@ public final class ItemNetworks {
                     if (!level.hasChunkAt(next) || current.nodes.size() > ServerConfig.networkLimit() || level.getBlockEntity(next) == null) continue;
                     var mode = entity.effective(side);
                     if (mode != PipeMode.EXTRACT && mode != PipeMode.INSERT) continue;
-                    var port = new Port(pos, side, new HandlerStorageEndpoint(level, next, side.getOpposite(), owner));
+                    var port = new Port(pos, side, StorageEndpoints.at(level, next, side.getOpposite(), owner));
                     if (mode == PipeMode.EXTRACT) current.sources.computeIfAbsent(pos, ignored -> new ArrayList<>()).add(port); else current.targets.add(port);
                 }
             }

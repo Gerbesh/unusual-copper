@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public interface StorageEndpoint {
+    enum Space { AVAILABLE, FULL, SCANNING, UNAVAILABLE }
     record Entry(ItemKey key, int count, int slot) {}
     record View(List<Entry> entries, int nextSlot, boolean complete) {
         public View { entries = List.copyOf(entries); }
@@ -17,5 +18,6 @@ public interface StorageEndpoint {
     ItemStack insert(ItemStack stack, boolean simulate);
     Count count(ItemKey key);
     boolean isAvailable();
+    Space space();
     StorageIdentity identity();
 }

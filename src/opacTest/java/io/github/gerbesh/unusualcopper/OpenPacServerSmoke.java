@@ -45,8 +45,15 @@ public final class OpenPacServerSmoke {
             var denied = new HandlerStorageEndpoint(level, pos, Direction.UP, stranger); var key = ItemKey.of(new ItemStack(Items.COPPER_INGOT));
             check(!denied.isAvailable() && denied.simulateExtract(key, 8) == 0 && denied.extract(key, 8).isEmpty() && barrel.getItem(0).getCount() == 8, "Denied endpoint modified inventory");
             var allowed = new HandlerStorageEndpoint(level, pos, Direction.UP, owner);
+            check(allowed.snapshot(stack->true,32).entries().size()==1,"Owner could not cache the real inventory view");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),stranger,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            check(allowed.snapshot(stack->true,32).entries().isEmpty()&&!allowed.count(key).complete()&&allowed.simulateExtract(key,8)==0&&barrel.getItem(0).getCount()==8,"Revoked claim leaked a cached inventory view or allowed extraction");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),owner,-1,pos.getX()>>4,pos.getZ()>>4,false);
             check(allowed.extract(key, 8).stream().mapToInt(ItemStack::getCount).sum() == 8 && barrel.getItem(0).isEmpty(), "Owner endpoint could not perform the real extraction");
             UnusualCopper.LOGGER.info("CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied");
+            UnusualCopper.LOGGER.info("CuE OPENPAC INVENTORY INDEX PASS: cached owner snapshot and count denied immediately after claim revocation; restored rights extracted exactly eight real ingots");
             // The machine itself is outside the claim: this exercises target permission, too.
             var machinePos = pos.offset(-1, 0, 3); var cropPos = pos.offset(1, 0, 3);
             level.getChunkAt(machinePos); level.setDayTime(6000);
@@ -76,12 +83,14 @@ public final class OpenPacServerSmoke {
             var collector = (CopperMachineBlockEntity)level.getBlockEntity(collectorPos);
             actor.setPos(collectorPos.getX() + .5, collectorPos.getY() + .5, collectorPos.getZ() + .5);
             check(collector.setWorkArea(new WorkArea(cropPos, cropPos), actor), "Claim owner could not select collector target");
+            // Replacing the previous run's enchanter drops its real test item here.
+            for(var leftover:level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(cropPos).inflate(4)))leftover.discard();
             var ground = new net.minecraft.world.entity.item.ItemEntity(level, cropPos.getX() + .5, cropPos.getY() + .5, cropPos.getZ() + .5, new ItemStack(Items.IRON_INGOT, 8));
             ground.setNoPickUpDelay(); level.addFreshEntity(ground); collector.energy.add(100, false); collector.setOwner(stranger);
             io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
             check(ground.isAlive() && collector.energy.stored() == 100 && collector.status() == MachineStatus.PROTECTED, "Collector took a foreign claimed item");
             collector.setOwner(owner); io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
-            check(ground.isRemoved() && collector.inventory.getStackInSlot(2).getCount() == 8 && collector.energy.stored() < 100, "Claim owner could not collect the real stack");
+            check(ground.isRemoved() && collector.inventory.getStackInSlot(2).is(Items.IRON_INGOT) && collector.inventory.getStackInSlot(2).getCount() == 8 && collector.energy.stored() < 100, "Claim owner could not collect the real stack: status="+collector.status()+", output="+collector.inventory.getStackInSlot(2)+", energy="+collector.energy.stored()+", fixtureRemoved="+ground.isRemoved());
             UnusualCopper.LOGGER.info("CuE OPENPAC COLLECTOR PASS: foreign target access denied without charge; owner collected eight real ingots");
             var shepherdPos = machinePos.north(); level.setBlock(shepherdPos, Blocks.AIR.defaultBlockState(), 3);
             level.setBlock(shepherdPos, ModContent.MACHINES.get(MachineKind.GROWTH_SHEPHERD).get().defaultBlockState(), 3);

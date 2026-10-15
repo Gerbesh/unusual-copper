@@ -96,6 +96,7 @@ public final class ProductionProbe {
         verifySentinel();
         verifyBrewer();
         verifyEnchanter();
+        verifyInventoryChanges();
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -117,6 +118,16 @@ public final class ProductionProbe {
         phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);
+    }
+    private static void verifyInventoryChanges(){
+        var pos=TARGET.above(12);level.setBlock(pos,net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState(),3);
+        var barrel=(net.minecraft.world.level.block.entity.BarrelBlockEntity)level.getBlockEntity(pos);
+        var token=io.github.gerbesh.unusualcopper.storage.InventoryChanges.watch(level,barrel);long before=token.revision();
+        barrel.setItem(0,new ItemStack(Items.DIAMOND,7));barrel.setChanged();check(token.revision()>before,"SRG vanilla inventory dirty notification did not invalidate the watched revision");
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);level.setBlock(pos,net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState(),3);
+        var replacement=io.github.gerbesh.unusualcopper.storage.InventoryChanges.watch(level,level.getBlockEntity(pos));check(replacement!=token&&!token.valid(),"Replacement reused a previous inventory revision token");
+        level.setBlock(pos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        LogUtils.getLogger().info("CuE PRODUCTION INVENTORY INDEX PASS: SRG vanilla dirty hook invalidates watched revisions; replacement invalidates old identity");
     }
     private static void verifyEnchanter(){
         var pos=TARGET.west(8).north(10);var owner=UUID.fromString("f78455cc-b7e7-488c-bf47-e47f38410be4");level.setChunkForced(pos.getX()>>4,pos.getZ()>>4,true);EXTRA_CHUNKS.add(net.minecraft.world.level.ChunkPos.asLong(pos.getX()>>4,pos.getZ()>>4));level.getChunkAt(pos);

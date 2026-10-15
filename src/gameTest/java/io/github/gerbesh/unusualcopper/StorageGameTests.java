@@ -43,7 +43,9 @@ public final class StorageGameTests {
     private static net.minecraft.world.level.block.state.BlockBehaviour.Properties BlockBehaviourProperties() { return net.minecraft.world.level.block.state.BlockBehaviour.Properties.of().strength(1); }
     public static final class Fixture extends BlockEntity {
         public boolean rejectActual;
+        public int reads;
         public final ItemStackHandler inventory = new ItemStackHandler(512) {
+            @Override public ItemStack getStackInSlot(int slot){reads++;return super.getStackInSlot(slot);}
             @Override protected void onContentsChanged(int slot) { setChanged(); }
             @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) { return rejectActual && !simulate ? stack : super.insertItem(slot, stack, simulate); }
         };
@@ -58,6 +60,43 @@ public final class StorageGameTests {
     private static ItemPipeBlockEntity pipe(GameTestHelper h, BlockPos pos) { h.setBlock(pos, ModContent.ITEM_PIPE.get()); return (ItemPipeBlockEntity)h.getBlockEntity(pos); }
     private static ItemStack named(int count, String name) { var stack = new ItemStack(Items.COPPER_INGOT, count); stack.setHoverName(Component.literal(name)); return stack; }
     private static int count(BarrelBlockEntity barrel) { int count = 0; for (int i = 0; i < barrel.getContainerSize(); i++) count += barrel.getItem(i).getCount(); return count; }
+
+    @GameTest(template="empty",timeoutTicks=60)
+    public static void largeInventoryCensusIsBoundedSharedAndInvalidatedByRealDirtyHook(GameTestHelper h){
+        var p=new BlockPos(1,2,1);h.setBlock(p,BLOCK.get());var fixture=(Fixture)h.getBlockEntity(p);var target=named(64,"Census exact");var key=ItemKey.of(target);var other=ItemKey.of(named(1,"Other NBT"));
+        fixture.inventory.setStackInSlot(0,target);fixture.inventory.setStackInSlot(511,named(13,"Census exact"));fixture.inventory.setStackInSlot(400,named(9,"Other NBT"));fixture.reads=0;
+        var endpoint=StorageEndpoints.at(h.getLevel(),h.absolutePos(p),Direction.UP,null);var before=InventoryChanges.watch(h.getLevel(),fixture);long revision=before.revision();
+        h.startSequence().thenExecute(()->{
+            var first=endpoint.count(key);h.assertTrue(!first.complete()&&first.amount()==64&&fixture.reads==256,"First census page is bounded to 256 slots");
+            for(int i=0;i<20;i++)endpoint.count(i%2==0?key:other);
+            h.assertTrue(fixture.reads==256,"Different callers and item keys share one page budget in the same tick");
+        }).thenExecuteAfter(1,()->{
+            var total=endpoint.count(key);h.assertTrue(total.complete()&&total.amount()==77&&fixture.reads==512,"Second page completes the exact physical count");var alternate=endpoint.count(other);h.assertTrue(alternate.complete()&&alternate.amount()==9&&fixture.reads==512,"Cached count preserves exact item NBT and avoids another scan");
+            fixture.inventory.setStackInSlot(511,named(7,"Census exact"));h.assertTrue(before.revision()>revision,"Real BlockEntity dirty notification reached the watched token");
+            h.assertTrue(!endpoint.count(key).complete()&&fixture.reads==512,"Mutation immediately invalidates completion without exceeding this tick's budget");
+        }).thenExecuteAfter(1,()->h.assertTrue(!endpoint.count(key).complete()&&fixture.reads==768,"Changed census restarts from its first page"))
+          .thenExecuteAfter(1,()->{var total=endpoint.count(key);h.assertTrue(total.complete()&&total.amount()==71&&fixture.reads==1024,"Only fresh pages produce the new exact count");})
+          .thenSucceed();
+    }
+
+    @GameTest(template="empty",timeoutTicks=60)
+    public static void largeCensusNeverSurvivesInventoryReplacement(GameTestHelper h){
+        var p=new BlockPos(1,2,1);h.setBlock(p,BLOCK.get());var fixture=(Fixture)h.getBlockEntity(p);fixture.inventory.setStackInSlot(511,new ItemStack(Items.DIAMOND,12));var key=ItemKey.of(new ItemStack(Items.DIAMOND));var endpoint=StorageEndpoints.at(h.getLevel(),h.absolutePos(p),Direction.UP,null);
+        h.startSequence().thenExecute(()->h.assertTrue(!endpoint.count(key).complete(),"Initial census needs two pages"))
+          .thenExecuteAfter(1,()->{h.assertTrue(endpoint.count(key).complete()&&endpoint.count(key).amount()==12,"Original inventory counted");h.setBlock(p,Blocks.AIR);h.setBlock(p,BLOCK.get());var replacement=(Fixture)h.getBlockEntity(p);replacement.inventory.setStackInSlot(0,new ItemStack(Items.DIAMOND,3));h.assertTrue(!endpoint.count(key).complete(),"Replacement cannot reuse a completed count");})
+          .thenExecuteAfter(1,()->{endpoint.count(key);})
+          .thenExecuteAfter(1,()->{var result=endpoint.count(key);h.assertTrue(result.complete()&&result.amount()==3,"Replacement count contains no previous physical stock");})
+          .thenSucceed();
+    }
+
+    @GameTest(template="empty")
+    public static void sameTickSnapshotObservesAnotherEndpointMutation(GameTestHelper h){
+        var p=new BlockPos(1,2,1);var inventory=barrel(h,p);inventory.setItem(0,new ItemStack(Items.DIAMOND,8));var pos=h.absolutePos(p);var key=ItemKey.of(new ItemStack(Items.DIAMOND));
+        var reader=StorageEndpoints.at(h.getLevel(),pos,Direction.UP,null);var writer=StorageEndpoints.at(h.getLevel(),pos,Direction.UP,null);
+        h.assertTrue(reader.snapshot(stack->true,32).entries().get(0).count()==8,"Initial snapshot cached eight physical items");
+        h.assertTrue(writer.extract(key,2).stream().mapToInt(ItemStack::getCount).sum()==2,"Second endpoint withdraws two actual items");
+        var refreshed=reader.snapshot(stack->true,32);h.assertTrue(refreshed.complete()&&refreshed.entries().size()==1&&refreshed.entries().get(0).count()==6,"Dirty notification invalidates the other endpoint's snapshot in the same tick");h.succeed();
+    }
 
     @GameTest(template = "empty", timeoutTicks = 55)
     public static void foreignPipeOwnerCannotDrainMachineOutputs(GameTestHelper h) {

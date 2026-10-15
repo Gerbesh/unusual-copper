@@ -25,11 +25,13 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
     private int scanCursor, extractCursor, insertCursor;
     private int simulatedInsertion = -1;
     private int spaceCursor, spaceVisited;
-    public enum Space { AVAILABLE, FULL, SCANNING, UNAVAILABLE }
     private long snapshotTick = Long.MIN_VALUE;
     private int snapshotLimit;
     private View rawSnapshot;
     private final Map<ItemKey, Integer> hints = new LinkedHashMap<>();
+    private final InventoryCensus census=new InventoryCensus();
+    private InventoryChanges.Token primaryToken,partnerToken;
+    private long primaryRevision,partnerRevision;
     public HandlerStorageEndpoint(ServerLevel level, BlockPos pos, Direction side, UUID owner) {
         this.level = level; this.pos = pos.immutable(); this.side = side; this.owner = owner;
     }
@@ -46,7 +48,11 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
         if (entity == null || entity.isRemoved()) return null;
         if (entity instanceof CopperMachineBlockEntity machine && !machine.allowsAutomation(owner)) return null;
         IItemHandler handler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null);
-        if (previous.get() != handler) { previous = new WeakReference<>(handler); hints.clear(); scanCursor = extractCursor = insertCursor = spaceCursor = spaceVisited = 0; simulatedInsertion = -1; rawSnapshot = null; }
+        if (previous.get() != handler) { previous = new WeakReference<>(handler); hints.clear(); scanCursor = extractCursor = insertCursor = spaceCursor = spaceVisited = 0; simulatedInsertion = -1; rawSnapshot = null; census.reset(); }
+        var other=level.getBlockEntity(partner);if(other==null)return null;
+        var a=InventoryChanges.watch(level,entity);var b=InventoryChanges.watch(level,other);
+        if(primaryToken!=a||partnerToken!=b||primaryRevision!=a.revision()||partnerRevision!=b.revision())rawSnapshot=null;
+        primaryToken=a;partnerToken=b;primaryRevision=a.revision();partnerRevision=b.revision();
         return handler;
     }
     @Override public boolean isAvailable() { return resolve() != null; }
@@ -160,6 +166,9 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
         var handler = resolve();
         if (handler == null) return new Count(0, false);
         long count = 0; int slots = Math.max(0, handler.getSlots());
+        if(slots>SLOT_BUDGET){
+            return census.count(handler,key,primaryToken,partnerToken,level.getGameTime());
+        }
         for (int i = 0; i < Math.min(slots, SLOT_BUDGET); i++) {
             var stack = handler.getStackInSlot(i);
             if (key.matches(stack)) count += stack.getCount();

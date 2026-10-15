@@ -71,7 +71,8 @@ arborist = [line for line in text.splitlines() if "CuE PRODUCTION ARBORIST PASS"
 sentinel = [line for line in text.splitlines() if "CuE PRODUCTION SENTINEL PASS" in line]
 brewer = [line for line in text.splitlines() if "CuE PRODUCTION BREWER PASS" in line]
 enchanter = [line for line in text.splitlines() if "CuE PRODUCTION ENCHANTER PASS" in line]
-if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel or not brewer or not enchanter:
+inventory_index = [line for line in text.splitlines() if "CuE PRODUCTION INVENTORY INDEX PASS" in line]
+if process.returncode or not passed or not reaper or not windup or not arborist or not sentinel or not brewer or not enchanter or not inventory_index:
     print("\n".join(text.splitlines()[-45:]))
     raise SystemExit("Production probe failed; Java exit " + str(process.returncode))
 print(passed[-1])
@@ -81,6 +82,7 @@ print(arborist[-1])
 print(sentinel[-1])
 print(brewer[-1])
 print(enchanter[-1])
+print(inventory_index[-1])
 for line in text.splitlines():
     if "CuE PRODUCTION BREWER DISK" in line or "CuE PRODUCTION ENCHANTER DISK" in line:
         print(line)
