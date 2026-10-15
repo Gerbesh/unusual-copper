@@ -83,7 +83,10 @@ public final class EnergyNetworks {
             while (!unseen.isEmpty()) {
                 BlockPos start = unseen.iterator().next(); ArrayDeque<BlockPos> queue = new ArrayDeque<>(); Set<BlockPos> group = new HashSet<>(); queue.add(start); unseen.remove(start);
                 while (!queue.isEmpty()) { BlockPos pos = queue.remove(); group.add(pos); for (Direction side : Direction.values()) { BlockPos neighbor = pos.relative(side); if (unseen.remove(neighbor)) queue.add(neighbor); } }
-                if (group.size() > ServerConfig.networkLimit()) continue;
+                if (group.size() > ServerConfig.networkLimit()) {
+                    for(var node:group)if(level.getBlockEntity(node) instanceof EnergyPipeBlockEntity pipe)pipe.clearAppearance();
+                    continue;
+                }
                 Map<BlockPos, Integer> tiers = new HashMap<>();
                 for (BlockPos pipe : group) tiers.put(pipe, ((EnergyPipeBlock)level.getBlockState(pipe).getBlock()).tier());
                 Component component = new Component(Set.copyOf(group), tiers);
@@ -103,6 +106,17 @@ public final class EnergyNetworks {
         private boolean live(Port port,ServerLevel level){return !port.machine.isRemoved()&&level.hasChunkAt(port.pos)&&level.getBlockEntity(port.pos)==port.machine&&port.machine.energyEnabled();}
         void tick(ServerLevel level) {
             if (dirty) rebuild(level);
+            // Sample the previous ten ticks even when the transfer budget stops routing early.
+            // No graph invalidation, persistent writes or per-tick packets for animation.
+            if (level.getGameTime() % 10 == 0) for (var component : components) {
+                int charge = 0;
+                for (var port : component.ports) if (live(port, level) && port.machine.kind.produces()
+                        && port.machine.sideMode(port.side) == SideMode.ENERGY_OUTPUT && port.machine.energyFaceLimit(port.side) > 0
+                        && port.machine.energy.stored() > 0) {
+                    charge = Math.max(charge, 5 + (int)(10L * port.machine.energy.stored() / Math.max(1, port.machine.energy.capacity())));
+                }
+                for (var node : component.pipes) if (level.hasChunkAt(node) && level.getBlockEntity(node) instanceof EnergyPipeBlockEntity pipe) pipe.sampleAppearance(charge);
+            }
             Map<BlockPos, Integer> used = new HashMap<>(),received=new HashMap<>(),extractedBy=new HashMap<>();Map<Face,Integer> faces=new HashMap<>();int attempts = 0; cursor++;
             List<Source> sources=new ArrayList<>();Map<Component,List<Port>> receivers=new IdentityHashMap<>();
             Map<CopperMachineBlockEntity,Integer> inputLimits=new IdentityHashMap<>();
@@ -151,7 +165,14 @@ public final class EnergyNetworks {
                     used.merge(source.pos,accepted,Integer::sum);used.merge(sink.pos,accepted,Integer::sum);
                     extractedBy.merge(source.pos,accepted,Integer::sum);received.merge(sink.pos,accepted,Integer::sum);
                     faces.merge(out,accepted,Integer::sum);faces.merge(in,accepted,Integer::sum);
-                    for(BlockPos node:path)used.merge(node,accepted,Integer::sum);
+                    for(int i=0;i<path.size();i++) {
+                        BlockPos node=path.get(i); used.merge(node,accepted,Integer::sum);
+                        if(level.getBlockEntity(node) instanceof EnergyPipeBlockEntity pipe) {
+                            Direction entry=i+1<path.size()?Direction.fromDelta(path.get(i+1).getX()-node.getX(),path.get(i+1).getY()-node.getY(),path.get(i+1).getZ()-node.getZ()):source.side.getOpposite();
+                            Direction exit=i>0?Direction.fromDelta(path.get(i-1).getX()-node.getX(),path.get(i-1).getY()-node.getY(),path.get(i-1).getZ()-node.getZ()):sink.side.getOpposite();
+                            pipe.transferred(entry,exit);
+                        }
+                    }
                     component.transferred+=accepted;flows.computeIfAbsent(sink.machine,ignored->new Flow()).delivered+=accepted;
                 }
             }

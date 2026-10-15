@@ -6,73 +6,100 @@
     "patina": "unusualcopper:block/patina",
     "aqua": "unusualcopper:block/aqua",
     "fire": "unusualcopper:block/fire",
-    "glass": "unusualcopper:block/glass"
+    "solar": "unusualcopper:block/solar",
+    "gauge": "unusualcopper:block/gauge",
+    "glass": "unusualcopper:block/glass",
+    "particle": "unusualcopper:block/copper"
   },
   "elements": [
     {
       "from": [
-        3,
+        4,
         4,
         3
       ],
       "to": [
+        12,
         13,
-        13,
-        13
+        3
       ],
       "faces": {
         "north": {
           "texture": "#glass",
           "uv": [
-            0,
-            0,
-            10,
-            9
+            1.0,
+            0.0,
+            9.0,
+            9.0
           ]
-        },
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        4,
+        13
+      ],
+      "to": [
+        12,
+        13,
+        13
+      ],
+      "faces": {
         "south": {
           "texture": "#glass",
           "uv": [
-            0,
-            0,
-            10,
-            9
+            1.0,
+            0.0,
+            9.0,
+            9.0
           ]
-        },
+        }
+      }
+    },
+    {
+      "from": [
+        13,
+        4,
+        4
+      ],
+      "to": [
+        13,
+        13,
+        12
+      ],
+      "faces": {
         "east": {
           "texture": "#glass",
           "uv": [
-            0,
-            0,
-            10,
-            9
+            1.0,
+            0.0,
+            9.0,
+            9.0
           ]
-        },
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        4,
+        4
+      ],
+      "to": [
+        3,
+        13,
+        12
+      ],
+      "faces": {
         "west": {
           "texture": "#glass",
           "uv": [
-            0,
-            0,
-            10,
-            9
-          ]
-        },
-        "up": {
-          "texture": "#glass",
-          "uv": [
-            0,
-            0,
-            10,
-            10
-          ]
-        },
-        "down": {
-          "texture": "#glass",
-          "uv": [
-            0,
-            0,
-            10,
-            10
+            1.0,
+            0.0,
+            9.0,
+            9.0
           ]
         }
       }

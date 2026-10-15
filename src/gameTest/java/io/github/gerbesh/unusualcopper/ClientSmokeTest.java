@@ -103,6 +103,7 @@ public final class ClientSmokeTest {
         if (mc.player == null || mc.level == null || mc.getSingleplayerServer() == null) return;
         if (!requested) {
             requested = true;
+            mc.options.pauseOnLostFocus = false;
             if (Boolean.getBoolean("unusualcopper.smokeClientRu")) {
                 mc.options.languageCode = "ru_ru"; mc.getLanguageManager().setSelected("ru_ru"); mc.reloadResourcePacks();
             }

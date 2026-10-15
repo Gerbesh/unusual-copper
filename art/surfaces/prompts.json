@@ -1,0 +1,34 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-10-15",
+  "common": "Use case: stylized-concept. Asset type: one Minecraft block material texture tile. Create a perfectly square flat front-facing seamless pixel-art material texture. Strict logical 32x32 pixel art enlarged to 1024px, crisp square pixel clusters, limited 10-14 colors, no anti-aliasing, no smooth gradients, no directional cast shadows, no 3D perspective, no objects, no text, no transparent areas. Match a copper and aquamarine magical industrial Minecraft machine mod. Entire square is material, to all edges. Subject: ",
+  "surfaces": [
+    {
+      "name": "copper",
+      "subject": "warm orange hammered copper plating, medium-value base, clustered dark brown pits and soft irregular oxide marks, sparse pale orange upper-left chips, subtle narrow bevel at tile edges. No rivets (geometry supplies those), no isolated shapes.",
+      "source": "sources/copper.png",
+      "gameResolution": [
+        32,
+        32
+      ]
+    },
+    {
+      "name": "patina",
+      "subject": "aged green copper plating with large coherent desaturated green patina patches, darker forest teal recesses, a few surviving warm copper edge flecks. Muted copper industrial material, irregular natural oxidation pattern, limited palette.",
+      "source": "sources/patina.png",
+      "gameResolution": [
+        32,
+        32
+      ]
+    },
+    {
+      "name": "dark",
+      "subject": "dark charcoal iron machine casing, muted desaturated olive-gray, staggered pixel clusters of wear and small fine horizontal grooves, copper-colored very sparse scratches, subtle broad edge highlighting. Dark enough to contrast copper trim.",
+      "source": "sources/dark.png",
+      "gameResolution": [
+        32,
+        32
+      ]
+    }
+  ]
+}

@@ -57,6 +57,11 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('visualClient')) {
+                property 'unusualcopper.visualClient', 'true'
+                args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1600', '--height', '900'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
             if (project.hasProperty('jeiSmoke')) {
                 workingDirectory project.file('run-jei-smoke')
                 property 'unusualcopper.jeiSmoke', 'true'

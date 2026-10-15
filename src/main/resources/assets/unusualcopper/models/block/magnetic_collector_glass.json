@@ -6,7 +6,10 @@
     "patina": "unusualcopper:block/patina",
     "aqua": "unusualcopper:block/aqua",
     "fire": "unusualcopper:block/fire",
-    "glass": "unusualcopper:block/glass"
+    "solar": "unusualcopper:block/solar",
+    "gauge": "unusualcopper:block/gauge",
+    "glass": "unusualcopper:block/glass",
+    "particle": "unusualcopper:block/copper"
   },
   "elements": []
 }

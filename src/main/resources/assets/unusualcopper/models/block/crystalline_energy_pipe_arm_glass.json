@@ -6,46 +6,31 @@
     "patina": "unusualcopper:block/patina",
     "aqua": "unusualcopper:block/aqua",
     "fire": "unusualcopper:block/fire",
-    "glass": "unusualcopper:block/glass"
+    "solar": "unusualcopper:block/solar",
+    "gauge": "unusualcopper:block/gauge",
+    "glass": "unusualcopper:block/glass",
+    "particle": "unusualcopper:block/copper"
   },
   "elements": [
     {
       "from": [
-        6,
-        6,
-        1
+        5.5,
+        5.5,
+        0
       ],
       "to": [
-        10,
-        10,
-        4
+        10.5,
+        10.5,
+        5.5
       ],
       "faces": {
-        "north": {
-          "texture": "#glass",
-          "uv": [
-            0,
-            0,
-            4,
-            4
-          ]
-        },
-        "south": {
-          "texture": "#glass",
-          "uv": [
-            0,
-            0,
-            4,
-            4
-          ]
-        },
         "east": {
           "texture": "#glass",
           "uv": [
             0,
             0,
-            3,
-            4
+            5.5,
+            5.0
           ]
         },
         "west": {
@@ -53,8 +38,8 @@
           "uv": [
             0,
             0,
-            3,
-            4
+            5.5,
+            5.0
           ]
         },
         "up": {
@@ -62,8 +47,8 @@
           "uv": [
             0,
             0,
-            4,
-            3
+            5.0,
+            5.5
           ]
         },
         "down": {
@@ -71,8 +56,8 @@
           "uv": [
             0,
             0,
-            4,
-            3
+            5.0,
+            5.5
           ]
         }
       }

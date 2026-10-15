@@ -16,7 +16,7 @@ ASSETS = ROOT / "src/main/resources/assets/unusualcopper"
 DATA = ROOT / "src/main/resources/data"
 ART = ROOT / "art"
 FACES = ("north", "south", "east", "west", "up", "down")
-PALETTE = {"copper": (182, 107, 66), "dark": (39, 46, 44), "patina": (49, 91, 80), "aqua": (55, 214, 211), "fire": (246, 156, 53)}
+PALETTE = {"copper": (182, 107, 66), "dark": (39, 46, 44), "patina": (49, 91, 80), "aqua": (55, 214, 211), "fire": (246, 156, 53), "solar": (21, 88, 97), "gauge": (53, 58, 50)}
 
 
 def write_json(path, value):
@@ -30,6 +30,10 @@ def stable_id(value):
 
 def textures():
     for name, color in PALETTE.items():
+        authored = ART / f"surfaces/sources/{name}.png"
+        if authored.exists():
+            save_texture(name, Image.open(authored).convert("RGBA").resize((32,32),Image.Resampling.NEAREST))
+            continue
         rng = random.Random(name)
         image = Image.new("RGBA", (32, 32))
         pixels = image.load()
@@ -54,18 +58,32 @@ def textures():
             for _ in range(11):
                 x, y = rng.randrange(2, 28), rng.randrange(2, 28)
                 d.rectangle((x, y, x + 2, y + 2), fill=(170, 249, 235) if name == "aqua" else (255, 232, 153))
+        if name == "solar":
+            for x in range(0,32,8): d.line((x,0,x,31),fill=(83,168,165))
+            for y in range(0,32,8): d.line((0,y,31,y),fill=(62,137,140))
+            d.line((2,13,13,2),fill=(124,204,196));d.line((18,29,29,18),fill=(86,169,171))
+        if name == "gauge":
+            d.ellipse((1,1,30,30),fill=(184,111,64),outline=(238,171,108),width=2)
+            d.ellipse((5,5,26,26),fill=(216,211,180),outline=(53,58,50),width=2)
+            for x,y in ((9,10),(15,7),(22,10),(8,17),(23,17)):d.rectangle((x,y,x+1,y+2),fill=(53,58,50))
+            d.ellipse((14,16,17,19),fill=(70,58,48))
         save_texture(name, image)
-    glass = Image.new("RGBA", (32, 128), (26, 108, 108, 40))
+    # Glass has reflections only. Energy and moving motes are rendered from live CuE state.
+    glass = Image.new("RGBA", (32, 32), (116, 158, 157, 19))
     d = ImageDraw.Draw(glass)
-    for frame in range(4):
-        offset = 32 * frame
-        d.rectangle((0, offset, 31, offset + 31), outline=(104, 226, 220, 200), width=1)
-        d.line((3, offset + 6, 8, offset + 1), fill=(174, 247, 239, 170), width=1)
-        for x, y in ((7, 11), (19, 25), (25, 8), (13, 19)):
-            y = (y - frame * 3) % 28 + 2
-            d.rectangle((x, offset + y, x + 1, offset + y + 1), fill=(100, 233, 225, 190))
+    d.rectangle((0, 0, 31, 31), outline=(183, 220, 217, 95))
+    d.line((3, 12, 12, 3), fill=(223, 244, 240, 122), width=1)
+    d.line((21, 28, 28, 21), fill=(183, 220, 217, 65), width=1)
     save_texture("glass", glass)
-    write_json(ASSETS / "textures/block/glass.png.mcmeta", {"animation": {"frametime": 5, "interpolate": False}})
+    # An explicit single frame also replaces old four-frame metadata in upgraded packs.
+    write_json(ASSETS / "textures/block/glass.png.mcmeta", {"animation": {"frames": [0], "frametime": 1}})
+    energy = Image.new("RGBA", (32, 32), (26, 164, 167, 220))
+    d = ImageDraw.Draw(energy)
+    for y in range(32):
+        for x in range(32):
+            if (x * 3 + y * 2) % 17 < 3:
+                d.point((x, y), fill=(76, 223, 207, 185))
+    save_texture("energy", energy)
 
 
 def save_texture(name, image):
@@ -95,9 +113,90 @@ def tank_windows():
     return [part([3, 3, 1.5], [13, 13, 2], "glass"), part([3, 3, 14], [13, 13, 14.5], "glass"), part([1.5, 3, 3], [2, 13, 13], "glass"), part([14, 3, 3], [14.5, 13, 13], "glass")]
 
 
+def clean_surfaces(parts, opaque=()):
+    """Clip hidden and duplicate coplanar rectangles; later cuboids own overlaps.
+
+    Separate face elements keep UV scale intact. Rotated cuboids remain editable cubes.
+    Transparent windows are clipped against metal, never against each other.
+    """
+    result = []
+    axes = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
+    for i, cube in enumerate(parts):
+        if "rotation" in cube:
+            result.append(cube); continue
+        for face, spec in cube["faces"].items():
+            axis, sign = axes[face]; u,v = (2,1) if axis == 0 else (0,2) if axis == 1 else (0,1)
+            plane = cube["to" if sign > 0 else "from"][axis]
+            rectangles = [(cube["from"][u], cube["from"][v], cube["to"][u], cube["to"][v])]
+            for j, other in enumerate([*parts, *opaque]):
+                if j == i or "rotation" in other: continue
+                lo, hi = other["from"][axis], other["to"][axis]
+                blocks = (lo <= plane + 1e-6 and hi > plane + 1e-6) if sign > 0 else (lo < plane - 1e-6 and hi >= plane - 1e-6)
+                same = abs((hi if sign > 0 else lo) - plane) < 1e-6 and j > i
+                if not (blocks or same): continue
+                next_rectangles = []
+                for x0,y0,x1,y1 in rectangles:
+                    a,b = max(x0,other["from"][u]),max(y0,other["from"][v])
+                    c,d = min(x1,other["to"][u]),min(y1,other["to"][v])
+                    if a >= c or b >= d: next_rectangles.append((x0,y0,x1,y1)); continue
+                    for rect in ((x0,y0,a,y1),(c,y0,x1,y1),(a,y0,c,b),(a,d,c,y1)):
+                        if rect[2]-rect[0]>1e-6 and rect[3]-rect[1]>1e-6: next_rectangles.append(rect)
+                rectangles = next_rectangles
+            for x0,y0,x1,y1 in rectangles:
+                low, high = list(cube["from"]), list(cube["to"])
+                low[axis] = high[axis] = plane
+                low[u],low[v],high[u],high[v]=x0,y0,x1,y1
+                face_data=copy.deepcopy(spec)
+                a,b,c,d=spec["uv"];du=cube["to"][u]-cube["from"][u];dv=cube["to"][v]-cube["from"][v]
+                face_data["uv"]=[a+(x0-cube["from"][u])/du*(c-a),b+(y0-cube["from"][v])/dv*(d-b),a+(x1-cube["from"][u])/du*(c-a),b+(y1-cube["from"][v])/dv*(d-b)]
+                result.append({"from":low,"to":high,"faces":{face:face_data}})
+    return result
+
+
 def export_model(name, body, windows):
     materials = list(PALETTE) + ["glass"]
     texture_refs = {m: f"unusualcopper:block/{m}" for m in materials}
+    texture_refs["particle"]="unusualcopper:block/copper"
+    for p in body:
+        if p["from"]==[0,0,0] and p["to"]==[16,2,16]:
+            p["from"]=[.8,0,.8];p["to"]=[15.2,1.8,15.2]
+    # Baked tank interiors are empty. Their contents and moving parts belong to the BER.
+    if name in ("copper_cell", "copper_cell_ii", "copper_cell_iii", "essence_splitter", "aura_cultivator"):
+        body = [p for p in body if not any(f["texture"] == "#aqua" for f in p["faces"].values())]
+    if name == "resonance_smelter":
+        body = [json.loads(json.dumps(p).replace('"#fire"','"#dark"')) for p in body]
+        gauge=part([11.9,8.1,0],[14.9,11.1,.3],"gauge")
+        for face in gauge["faces"].values():face["uv"]=[0,0,16,16]
+        body.append(gauge)
+    if name == "aetheric_brewer":
+        body = [p for p in body if not (p["from"][1] == 5 and any(f["texture"] == "#aqua" for f in p["faces"].values()))]
+        for x,z in ((5,5),(9,5),(7,9)):
+            windows += [part([x-.2,4.9,z-.2],[x+2.2,9.1,z+2.2],"glass"),part([x+.6,9.1,z+.6],[x+1.4,10,z+1.4],"glass")]
+    low = name in ("solar_infuser","aura_cultivator","growth_shepherd")
+    front = 0 if name in ("resonance_smelter","mob_reaper","arboreal_reconstructor") else 2 if name == "aetheric_brewer" else 1
+    ys = (3.6,5.3) if low else (4.5,7.5) if name == "copper_sentinel" else (3.6,9.9) if name == "resonance_smelter" else (4.2,11.5)
+    # Flush dark rivet heads own their panel pixels, with no coplanar duplicate faces.
+    for x in (1.7,13.3):
+        for y in ys:
+            if name=="resonance_smelter" and x==13.3 and y==9.9:continue
+            body.append(part([x,y,front],[x+.7,y+.7,front+.3],"dark"))
+    if name in ("solar_infuser","resonance_smelter","aura_cultivator","magnetic_collector","growth_shepherd","mob_reaper","arboreal_reconstructor","energy_monitor","energy_distributor"):
+        top = 5.8 if low else 8.8
+        body += [part([14.85,3.1,4],[15.15,top,12],"dark"),part([15.15,3.1,4],[15.45,top,4.6],"copper"),part([15.15,3.1,11.4],[15.45,top,12],"copper")]
+        y=3.6
+        while y<top-.4:
+            body.append(part([15.15,y,5],[15.4,y+.35,11],"patina")); y+=1.2
+    for x in (.3,13.7):
+        for z in (.3,13.7):
+            body.append(part([x,.1,z],[x+2,1.7,z+2],"copper"))
+    # Shift the two crossing front strips so their surfaces never fight each other.
+    if name in ("mob_reaper", "arboreal_reconstructor"):
+        for p in body:
+            if p["from"][2] <= .3 and p["to"][0]-p["from"][0] > p["to"][1]-p["from"][1]:
+                p["from"][2] -= .025; p["to"][2] -= .025
+    source_body, source_windows = body, windows
+    body = clean_surfaces(body)
+    windows = clean_surfaces(windows, source_body)
     write_json(ASSETS / f"models/block/{name}.json", {"render_type": "minecraft:cutout", "textures": texture_refs, "elements": body})
     write_json(ASSETS / f"models/block/{name}_glass.json", {"render_type": "minecraft:translucent", "textures": texture_refs, "elements": windows})
     display = {"gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [.62, .62, .62]}, "ground": {"translation": [0, 3, 0], "scale": [.25, .25, .25]}, "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [.375, .375, .375]}}
@@ -107,7 +206,7 @@ def export_model(name, body, windows):
         for suffix in ("", "_glass"):
             multipart.append({"when": {"facing": facing}, "apply": {"model": f"unusualcopper:block/{name}{suffix}", "y": angle}})
     write_json(ASSETS / f"blockstates/{name}.json", {"multipart": multipart})
-    write_bbmodel(name, body + windows, materials)
+    write_bbmodel(name, source_body + source_windows, materials)
 
 
 def write_bbmodel(name, parts, materials):
@@ -125,7 +224,7 @@ def write_bbmodel(name, parts, materials):
         elements.append(element)
     textures_data = []
     for i, material in enumerate(materials):
-        textures_data.append({"name": material + ".png", "id": str(i), "uuid": stable_id("texture:" + material), "mode": "bitmap", "relative_path": "../textures/" + material + ".png", "width": 32, "height": 128 if material == "glass" else 32, "uv_width": 32, "uv_height": 32, "source": "data:image/png;base64," + base64.b64encode((ART / f"textures/{material}.png").read_bytes()).decode()})
+        textures_data.append({"name": material + ".png", "id": str(i), "uuid": stable_id("texture:" + material), "mode": "bitmap", "relative_path": "../textures/" + material + ".png", "width": 32, "height": 32, "uv_width": 32, "uv_height": 32, "source": "data:image/png;base64," + base64.b64encode((ART / f"textures/{material}.png").read_bytes()).decode()})
     write_json(ART / f"blockbench/{name}.bbmodel", {"meta": {"format_version": "4.10", "model_format": "java_block", "box_uv": False}, "name": name, "resolution": {"width": 32, "height": 32}, "elements": elements, "outliner": [e["uuid"] for e in elements], "textures": textures_data})
 
 
@@ -150,7 +249,10 @@ def models():
                     part([4,6,0],[5,8,.2],"aqua"),part([7,6,0],[8,10,.2],"aqua"),part([10,6,0],[11,9,.2],"aqua")]
     export_model("energy_monitor",monitor,[])
     tilt = {"origin": [8, 10, 8], "axis": "x", "angle": -22.5}
-    solar = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 7, 15], "patina"), part([0, 6, 0], [16, 8, 16], "copper"), part([6, 8, 6], [10, 11, 10], "dark"), part([1, 10, 1], [15, 11, 15], "copper", tilt), part([2, 11, 2], [14, 11.5, 14], "aqua", tilt), part([7.5, 11.5, 2], [8.5, 12, 14], "copper", tilt), part([2, 11.5, 7.5], [14, 12, 8.5], "copper", tilt), part([4, 3, .5], [12, 5, 1], "aqua")]
+    solar = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 7, 15], "patina"), part([0, 6, 0], [16, 8, 16], "copper"), part([6, 8, 6], [10, 11, 10], "dark"), part([1, 10, 1], [15, 11, 15], "copper", tilt), part([2, 11, 2], [14, 11.5, 14], "aqua", tilt), part([7.5, 11.5, 2], [8.5, 12, 14], "copper", tilt), part([2, 11.5, 7.5], [7.5, 12, 8.5], "copper", tilt), part([8.5, 11.5, 7.5], [14, 12, 8.5], "copper", tilt), part([4, 3, .5], [12, 5, 1], "aqua")]
+    for piece in solar:
+        if piece["from"] == [2,11,2]:
+            for face in piece["faces"].values():face["texture"]="#solar"
     export_model("solar_infuser", solar, [])
     smelter = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 2], [15, 13, 15], "patina"), part([0, 11, 1], [16, 14, 16], "copper"), part([1, 2, 0], [4, 11, 2], "copper"), part([12, 2, 0], [15, 11, 2], "copper"), part([4, 2, 0], [12, 4, 2], "dark"), part([4, 9, 0], [12, 11, 2], "copper"), part([4, 4, 1], [12, 9, 2], "fire"), part([10, 14, 10], [14, 16, 14], "dark"), part([9, 14, 9], [15, 15, 15], "copper"), part([15, 4, 5], [16, 9, 11], "dark")]
     export_model("resonance_smelter", smelter, [part([4, 4, .5], [12, 9, 1], "glass")])
@@ -203,62 +305,52 @@ def models():
     for facing, rotation in (("north",{}),("east",{"y":90}),("south",{"y":180}),("west",{"y":270}),("up",{"x":270}),("down",{"x":90})):
         bridge_states.append({"when":{"facing":facing},"apply":{"model":"unusualcopper:block/ssn_bridge",**rotation}})
     write_json(ASSETS / "blockstates/ssn_bridge.json",{"multipart":bridge_states})
-    pipe_materials = list(PALETTE) + ["glass"]
-    refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
-    center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
-    arm = [part([5, 5, 0], [11, 11, 1], "copper"), part([5, 5, 4], [11, 11, 5], "patina"), part([7, 7, 1], [9, 9, 4], "aqua")]
-    glass = [part([6, 6, 1], [10, 10, 4], "glass")]
-    for name, parts, layer in (("pipe_center", center, "cutout"), ("pipe_arm", arm, "cutout"), ("pipe_arm_glass", glass, "translucent")):
-        write_json(ASSETS / f"models/block/{name}.json", {"render_type": "minecraft:" + layer, "textures": refs, "elements": parts})
-    multipart = [{"apply": {"model": "unusualcopper:block/pipe_center"}}]
-    for side, rotations in (("north", {}), ("east", {"y": 90}), ("south", {"y": 180}), ("west", {"y": 270}), ("up", {"x": 270}), ("down", {"x": 90})):
-        for suffix in ("", "_glass"):
-            multipart.append({"when": {side: "true"}, "apply": {"model": f"unusualcopper:block/pipe_arm{suffix}", **rotations}})
-    write_json(ASSETS / "blockstates/copper_energy_pipe.json", {"multipart": multipart})
-    write_json(ASSETS / "models/item/copper_energy_pipe.json", {"parent": "unusualcopper:block/pipe_center"})
-    write_bbmodel("copper_energy_pipe", center + arm + glass, pipe_materials)
-    for name, bands in (("reinforced_energy_pipe", 1), ("crystalline_energy_pipe", 2)):
-        tier_center = copy.deepcopy(center) + [part([4, 4, 4], [12, 5, 12], "patina"), part([4, 11, 4], [12, 12, 12], "patina")]
-        tier_arm = copy.deepcopy(arm)
-        for band in range(bands):
-            z = 1 + band * 2
-            tier_arm += [part([5, 5, z], [11, 6, z + .5], "copper"), part([5, 10, z], [11, 11, z + .5], "copper")]
-        if bands == 2:
-            tier_center += [part([6, 6, 4], [10, 10, 4.5], "aqua"), part([6, 12, 6], [10, 13, 10], "aqua")]
-        for suffix, parts, layer in (("center", tier_center, "cutout"), ("arm", tier_arm, "cutout"), ("arm_glass", glass, "translucent")):
-            write_json(ASSETS / f"models/block/{name}_{suffix}.json", {"render_type": "minecraft:" + layer, "textures": refs, "elements": parts})
-        tier_states = json.loads(json.dumps(multipart).replace("unusualcopper:block/pipe_", f"unusualcopper:block/{name}_"))
-        write_json(ASSETS / f"blockstates/{name}.json", {"multipart": tier_states})
-        write_json(ASSETS / f"models/item/{name}.json", {"parent": f"unusualcopper:block/{name}_center"})
-        write_bbmodel(name, tier_center + tier_arm + glass, pipe_materials)
-    item_center = json.loads(json.dumps(center).replace('"#aqua"', '"#fire"'))
-    item_arm = json.loads(json.dumps(arm).replace('"#aqua"', '"#fire"'))
-    for name, parts in (("item_pipe_center", item_center), ("item_pipe_arm", item_arm)):
-        write_json(ASSETS / f"models/block/{name}.json", {"render_type": "minecraft:cutout", "textures": refs, "elements": parts})
-    item_parts = [{"apply": {"model": "unusualcopper:block/item_pipe_center"}}]
-    for side, rotations in (("north", {}), ("east", {"y": 90}), ("south", {"y": 180}), ("west", {"y": 270}), ("up", {"x": 270}), ("down", {"x": 90})):
-        item_parts.append({"when": {side: "true"}, "apply": {"model": "unusualcopper:block/item_pipe_arm", **rotations}})
-    write_json(ASSETS / "blockstates/copper_item_pipe.json", {"multipart": item_parts})
-    write_json(ASSETS / "models/item/copper_item_pipe.json", {"parent": "unusualcopper:block/item_pipe_center"})
-    write_bbmodel("copper_item_pipe", item_center + item_arm, pipe_materials)
-    for name, color in (("resonant_enchantment_core", "aqua"), ("sentinel_range_focus", "aqua"), ("diamond_solar_lens", "aqua"), ("saturated_copper_essence", "aqua"), ("copper_frame", "copper"), ("copper_core", "copper"), ("face_selector", "copper"), ("cargo_bundle", "dark"), ("area_wand", "aqua")):
-        img = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
-        if name == "diamond_solar_lens":
-            d.ellipse((3, 3, 28, 28), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.ellipse((7, 7, 24, 24), fill=(43, 169, 175)); d.line((10, 13, 16, 7), fill=(170, 249, 239), width=3)
-        elif name == "saturated_copper_essence":
-            d.polygon([(16, 2), (25, 10), (25, 22), (16, 29), (7, 22), (7, 10)], fill=(44, 199, 192), outline=(186, 249, 238)); d.line((16, 3, 12, 18, 16, 28), fill=(99, 237, 224), width=2)
-        elif name == "area_wand":
-            d.line((6, 28, 22, 9), fill=(111, 64, 42), width=5); d.line((6, 28, 22, 9), fill=(222, 148, 91), width=2)
-            d.polygon([(23, 1), (30, 8), (23, 15), (16, 8)], fill=(55, 214, 211), outline=(190, 251, 237)); d.line((23, 3, 20, 8, 23, 13), fill=(220, 255, 249), width=2)
-        elif name == "face_selector":
-            d.line((8, 25, 22, 10), fill=(115, 65, 42), width=7); d.line((8, 25, 22, 10), fill=(215, 141, 86), width=3)
-            d.rectangle((16, 3, 28, 14), fill=(182, 107, 66), outline=(234, 159, 103), width=2); d.rectangle((20, 6, 26, 10), fill=(55, 214, 211))
-        elif name == "cargo_bundle":
-            d.polygon([(8, 7), (24, 7), (28, 26), (4, 26)], fill=(92, 69, 48), outline=(192, 126, 76)); d.rectangle((13, 6, 18, 28), fill=(40, 48, 44)); d.rectangle((11, 13, 21, 20), fill=(192, 126, 76)); d.rectangle((14, 15, 18, 18), fill=(55, 214, 211))
-        else:
-            d.rectangle((4, 4, 27, 27), fill=(87, 50, 36), outline=(215, 141, 86), width=3); d.rectangle((8, 8, 23, 23), fill=(0, 0, 0, 0) if name == "copper_frame" else (47, 206, 193))
-        path = ASSETS / f"textures/item/{name}.png"; path.parent.mkdir(parents=True, exist_ok=True); img.save(path)
-        write_json(ASSETS / f"models/item/{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"unusualcopper:item/{name}"}})
+    for name in ("resonant_enchantment_core", "sentinel_range_focus", "diamond_solar_lens", "saturated_copper_essence", "copper_frame", "copper_core", "face_selector", "cargo_bundle", "area_wand"):
+        authored = ART / f"sprites/{name}.png"
+        if not authored.exists():
+            raise FileNotFoundError(f"Authored sprite missing: {authored}. Run tools/import_item_sprites.py; placeholders are not a fallback.")
+        target = ASSETS / f"textures/item/{name}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(authored.read_bytes())
+        write_json(ASSETS / f"models/item/{name}.json", {"parent":"minecraft:item/generated","textures":{"layer0":f"unusualcopper:item/{name}"}})
+
+
+
+def pipes():
+    """Glass junctions and open-ended sleeves: no permanent luminous core."""
+    materials = list(PALETTE) + ["glass"]
+    refs = {m: f"unusualcopper:block/{m}" for m in materials}
+    refs["particle"]="unusualcopper:block/copper"
+    rotations = (("north",{}),("east",{"y":90}),("south",{"y":180}),("west",{"y":270}),("up",{"x":270}),("down",{"x":90}))
+    def ring(z, width, material):
+        return [part([4.8,4.8,z],[6,11.2,z+width],material),part([10,4.8,z],[11.2,11.2,z+width],material),
+                part([6,4.8,z],[10,6,z+width],material),part([6,10,z],[10,11.2,z+width],material)]
+    for name,tier in (("copper_energy_pipe",0),("reinforced_energy_pipe",1),("crystalline_energy_pipe",2),("copper_item_pipe",-1)):
+        center = [part([x,y,z],[x+1,y+1,z+1],"copper" if tier<2 else "patina") for x in (5,10) for y in (5,10) for z in (5,10)]
+        arm = ring(.04,.85,"copper")
+        if tier>0: arm += ring(3.2,.45,"patina" if tier==1 else "copper")
+        sleeve = part([5.5,5.5,0],[10.5,10.5,5.5],"glass")
+        sleeve["faces"]={f:s for f,s in sleeve["faces"].items() if f not in ("north","south")}
+        # Individual junction faces disappear where an arm is connected, avoiding internal panes.
+        caps = part([5.5,5.5,5.5],[10.5,10.5,10.5],"glass")
+        write_json(ASSETS/f"models/block/{name}_center.json",{"render_type":"minecraft:cutout","textures":refs,"elements":clean_surfaces(center)})
+        write_json(ASSETS/f"models/block/{name}_arm.json",{"render_type":"minecraft:cutout","textures":refs,"elements":clean_surfaces(arm)})
+        write_json(ASSETS/f"models/block/{name}_arm_glass.json",{"render_type":"minecraft:translucent","textures":refs,"elements":[sleeve]})
+        states=[{"apply":{"model":f"unusualcopper:block/{name}_center"}}]
+        for side,rotation in rotations:
+            for suffix in ("arm","arm_glass"):
+                states.append({"when":{side:"true"},"apply":{"model":f"unusualcopper:block/{name}_{suffix}",**rotation}})
+            cap=copy.deepcopy(caps);cap["faces"]={side:cap["faces"][side]}
+            write_json(ASSETS/f"models/block/{name}_cap_{side}.json",{"render_type":"minecraft:translucent","textures":refs,"elements":[cap]})
+            states.append({"when":{side:"false"},"apply":{"model":f"unusualcopper:block/{name}_cap_{side}"}})
+        write_json(ASSETS/f"blockstates/{name}.json",{"multipart":states})
+        # Inventory preview is a full horizontal glass section, including both real collars.
+        back=copy.deepcopy(arm+[sleeve])
+        for p in back:
+            old=copy.deepcopy(p);p["from"][2]=16-old["to"][2];p["to"][2]=16-old["from"][2]
+        display={"gui":{"rotation":[30,225,0],"scale":[.8,.8,.8]},"ground":{"scale":[.4,.4,.4]}}
+        write_json(ASSETS/f"models/item/{name}.json",{"render_type":"minecraft:translucent","textures":refs,"elements":center+arm+[sleeve]+back+[caps],"display":display})
+        write_bbmodel(name,center+arm+[sleeve]+back+[caps],materials)
 
 
 def data():
@@ -463,5 +555,5 @@ def languages():
 
 
 if __name__ == "__main__":
-    textures(); models(); data(); languages()
-    print("Generated original textures, 14 editable Blockbench projects, models, item tags and RU/EN.")
+    textures(); models(); pipes(); data(); languages()
+    print("Generated textures, editable Blockbench projects, hollow glass pipes, models, item tags and RU/EN.")

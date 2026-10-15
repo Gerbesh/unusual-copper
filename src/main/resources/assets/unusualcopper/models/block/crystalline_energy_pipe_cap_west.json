@@ -1,0 +1,39 @@
+{
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "copper": "unusualcopper:block/copper",
+    "dark": "unusualcopper:block/dark",
+    "patina": "unusualcopper:block/patina",
+    "aqua": "unusualcopper:block/aqua",
+    "fire": "unusualcopper:block/fire",
+    "solar": "unusualcopper:block/solar",
+    "gauge": "unusualcopper:block/gauge",
+    "glass": "unusualcopper:block/glass",
+    "particle": "unusualcopper:block/copper"
+  },
+  "elements": [
+    {
+      "from": [
+        5.5,
+        5.5,
+        5.5
+      ],
+      "to": [
+        10.5,
+        10.5,
+        10.5
+      ],
+      "faces": {
+        "west": {
+          "texture": "#glass",
+          "uv": [
+            0,
+            0,
+            5.0,
+            5.0
+          ]
+        }
+      }
+    }
+  ]
+}

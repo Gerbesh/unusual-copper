@@ -38,6 +38,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     private UUID owner;
     private long capabilityEpoch;
     private MachineStatus status = MachineStatus.IDLE;
+    private float previousVisualEnergy;
+    private long visualEnergyChanged;
+    public float visualEnergy(float partial) {
+        float blend=level==null?1:Math.min(1,(level.getGameTime()-visualEnergyChanged+partial)/8F);
+        return previousVisualEnergy+(energy.stored()-previousVisualEnergy)*blend;
+    }
     public int redstoneMode;
     public String recipeId = "";
     public ItemStack source = ItemStack.EMPTY;
@@ -395,6 +401,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal()); if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
     }
     @Override public void handleUpdateTag(CompoundTag tag) {
+        previousVisualEnergy=visualEnergy(0);visualEnergyChanged=level==null?0:level.getGameTime();
         energy.restore(tag.getInt("Energy")); status = MachineStatus.values()[Math.floorMod(tag.getInt("Status"), MachineStatus.values().length)]; loadSides(tag);
         if(sentinel!=null) { sentinel.active=tag.getBoolean("SentinelActive"); sentinel.focused=tag.getBoolean("SentinelFocused"); }
     }

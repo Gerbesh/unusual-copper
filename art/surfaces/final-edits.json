@@ -1,0 +1,14 @@
+{
+  "tool": "built-in image_gen",
+  "note": "Final edits of the first generated copper/patina material tiles. Selected outputs replace sources/copper.png and sources/patina.png.",
+  "edits": [
+    {
+      "name": "copper",
+      "prompt": "Refine this Minecraft material texture for subtle readable machine trim. Keep square fully opaque flat material image, copper plating theme and coarse crisp pixel clusters. Change the surface to mostly clean WARM BROWN COPPER, 90 percent broad uninterrupted medium copper, base approximately #AD6B45, lit #BC7B50, shadow #955536. Greatly reduce pattern density and contrast. Remove all green/turquoise patina and all rivets. Only a few restrained clustered scratches. Narrow subtle bevel at edges, no strong light border. The output must read as manufactured warm copper plate, not noisy camouflage or ore. Strict logical 32x32 pixel tile enlarged, nearest-neighbor look, no text, no objects, no perspective."
+    },
+    {
+      "name": "patina",
+      "prompt": "Refine this Minecraft material texture for a dark subdued machine housing. Keep square fully opaque flat material image and crisp coarse pixel clusters. Change to DARK DESATURATED GREEN PATINATED METAL: base approximately #304D43, lit #3B5D50, shadow #253C36, 90 percent broad uninterrupted plate. Greatly reduce pattern density and contrast. Remove all bright aqua, orange and copper patches. A few restrained small worn clusters only; no rivets, no broad mottled camouflage, no rocks or ore, no border. Strict logical 32x32 pixel tile enlarged, nearest-neighbor look, no text, no objects, no perspective."
+    }
+  ]
+}

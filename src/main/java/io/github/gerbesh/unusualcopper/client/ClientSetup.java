@@ -10,7 +10,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = UnusualCopper.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientSetup {
-    @SubscribeEvent public static void renderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) { event.registerBlockEntityRenderer(ModContent.MACHINE_ENTITY.get(),SentinelRenderer::new); }
+    @SubscribeEvent public static void renderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModContent.MACHINE_ENTITY.get(),CopperMachineRenderer::new);
+        event.registerBlockEntityRenderer(ModContent.PIPE_ENTITY.get(),EnergyPipeRenderer::new);
+    }
     @SubscribeEvent public static void setup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);

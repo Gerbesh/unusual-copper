@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "unusualcopper:block/item_pipe_center"
+        "model": "unusualcopper:block/copper_item_pipe_center"
       }
     },
     {
@@ -10,7 +10,23 @@
         "north": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm"
+        "model": "unusualcopper:block/copper_item_pipe_arm"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass"
+      }
+    },
+    {
+      "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_north"
       }
     },
     {
@@ -18,8 +34,25 @@
         "east": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm",
+        "model": "unusualcopper:block/copper_item_pipe_arm",
         "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_east"
       }
     },
     {
@@ -27,8 +60,25 @@
         "south": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm",
+        "model": "unusualcopper:block/copper_item_pipe_arm",
         "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_south"
       }
     },
     {
@@ -36,8 +86,25 @@
         "west": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm",
+        "model": "unusualcopper:block/copper_item_pipe_arm",
         "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_west"
       }
     },
     {
@@ -45,8 +112,25 @@
         "up": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm",
+        "model": "unusualcopper:block/copper_item_pipe_arm",
         "x": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "up": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_up"
       }
     },
     {
@@ -54,8 +138,25 @@
         "down": "true"
       },
       "apply": {
-        "model": "unusualcopper:block/item_pipe_arm",
+        "model": "unusualcopper:block/copper_item_pipe_arm",
         "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_arm_glass",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_item_pipe_cap_down"
       }
     }
   ]

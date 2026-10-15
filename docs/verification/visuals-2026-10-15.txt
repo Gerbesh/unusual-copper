@@ -1,0 +1,71 @@
+Unusual Copper — visual pass 0.13.0-alpha.1
+Date: 2026-10-15, Europe/Moscow. Owned development fixtures only.
+Final ordinary mod JAR: build/libs/unusualcopper-0.13.0-alpha.1.jar
+SHA-256: 43A924112D6618EAEE91A2E9928D78E63FBF860F48E5049349CEC8FF0521679A
+
+Assets
+  Built-in image_gen: nine independent transparent item sprites; three material tiles.
+  Final copper/patina edits reduce pattern density and contrast.
+  art/sprites/prompts.json; art/surfaces/prompts.json; art/surfaces/final-edits.json
+  Originals preserved in the corresponding sources/ directories.
+  Build conversion: nearest-neighbor only, original alpha retained.
+  import_item_sprites.py + generate_assets.py + check_visual_assets.py passed.
+  70 block JSONs: no overlapping co-directed coplanar faces, valid UV/texture paths.
+  All nine authored sprites are RGBA 64x64 with transparent backgrounds.
+  No opaque aqua core in the three energy-pipe model families.
+  21 editable Blockbench source projects.
+
+Server regression — .codex-tmp/verify-0.13-core-final.log
+  JDK 17.0.19; development Forge 47.4.10 / official Minecraft 1.20.1.
+  gradlew --no-daemon build productionProbeJar runGameTestServer
+  21:45:46: All 131 required tests passed.
+  BUILD SUCCESSFUL in 1m 2s.
+  JUnit: Accounting 6, WorkArea 3, XpWallet 5; zero failures/errors.
+  New tests: accepted transfer direction/drain/conservation/no saved visual fields;
+             charged idle network without invented flow or energy fees.
+  Subsequent changes were renderer/asset/test-harness only; shared server behavior
+  is unchanged. GitHub Actions reruns the complete suite for the published commit.
+
+Native visual client — .codex-tmp/verify-0.13-visual-final.log
+  gradlew --no-daemon build productionProbeJar runClient -PvisualClient
+  21:49:03–21:49:20: ten actual Minecraft frames, not external renders.
+  21:49:20: CuE VISUAL CLIENT PASS
+  Empty/charged/directed flow, actual reverse entry/exit tags, drained network,
+  charged idle network, low body docking, all 16 machine kinds, six port axes,
+  all nine actual inventory sprites.
+  Renderer branches: empty=36123, charged=9080, flow=7125;
+                     machine ports=41216, working=5709.
+  BUILD SUCCESSFUL in 59s. Frames preserved under art/previews/visual-*.png.
+
+Complete native client — .codex-tmp/verify-0.13-client-final-r2.log
+  gradlew --no-daemon runClient -PsmokeClient -PsmokeClientRu
+  21:52:47: COLLECTOR CLIENT PASS
+  21:52:52: SHEPHERD CLIENT PASS
+  21:52:54–58: REAPER CLIENT / FX / BUDGET PASS
+  21:53:00: ARBORIST CLIENT PASS — seven real spruce logs, exact wear/payment/replant.
+  21:53:02: SENTINEL CLIENT PASS — actual queued beam, 10 HP and paid upkeep.
+  21:53:18: BREWER CLIENT PASS — three real long-fire-resistance lingering potions.
+  21:53:22: ENCHANTER CLIENT PASS — Efficiency V, 235 XP, 156250 CuE, preserved NBT.
+  21:53:24: SSN BRIDGE CLIENT PASS — models without SSN installed.
+  21:53:27: ENERGY CONTROL CLIENT PASS / ENERGY MONITOR CLIENT PASS.
+  BUILD SUCCESSFUL in 1m 36s. Test profiles disable pause-on-lost-focus.
+  Earlier smoke run paused when its window lost focus; final rerun exited cleanly.
+
+Ordinary reobfuscated JAR in Forge 47.4.20
+  .codex-tmp/verify-0.13-production-1.log / verify-0.13-production-2.log
+  Owned run-production, loopback 127.0.0.1:25587, two ordinary JVM launches.
+  21:50:29 and 21:50:47: energy controls and region restores passed;
+  256/3840 branch split, total conserved CuE, passive monitor accounting,
+  distributor owner/buffer/private rules/redstone reloaded from region data.
+  Prior machine, tree, brewing, enchantment and tier checkpoints also passed.
+  Both helper processes reported a clean server stop. JAR SHA unchanged.
+
+Packaging
+  214 JSON/mcmeta parsed; previous RU/EN translation keys retained.
+  No Smoke/GameTests/probe classes or obsolete solid-core pipe templates in JAR.
+  Final SHA unchanged by the client and production probes.
+
+Limits
+  Actual user client/server/worlds were never opened or modified.
+  Native visual runs use the ordinary renderer; this is not proof of the entire
+  Better MC shader/modpack matrix or of release 1.0 readiness.

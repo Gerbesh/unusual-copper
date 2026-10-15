@@ -23,6 +23,14 @@
     },
     {
       "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_north"
+      }
+    },
+    {
+      "when": {
         "east": "true"
       },
       "apply": {
@@ -37,6 +45,14 @@
       "apply": {
         "model": "unusualcopper:block/crystalline_energy_pipe_arm_glass",
         "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_east"
       }
     },
     {
@@ -59,6 +75,14 @@
     },
     {
       "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_south"
+      }
+    },
+    {
+      "when": {
         "west": "true"
       },
       "apply": {
@@ -73,6 +97,14 @@
       "apply": {
         "model": "unusualcopper:block/crystalline_energy_pipe_arm_glass",
         "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_west"
       }
     },
     {
@@ -95,6 +127,14 @@
     },
     {
       "when": {
+        "up": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_up"
+      }
+    },
+    {
+      "when": {
         "down": "true"
       },
       "apply": {
@@ -109,6 +149,14 @@
       "apply": {
         "model": "unusualcopper:block/crystalline_energy_pipe_arm_glass",
         "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "unusualcopper:block/crystalline_energy_pipe_cap_down"
       }
     }
   ]

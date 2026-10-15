@@ -1,0 +1,89 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-10-15",
+  "assetType": "Minecraft inventory sprites",
+  "common": "Use case: stylized-concept. Asset type: finished Minecraft mod inventory item sprite for Unusual Copper. Create ONE isolated item. Art style: expert hand-pixelled 32x32 game sprite enlarged to 1024x1024 with nearest-neighbor crisp square pixels; strictly 32x32 logical pixel grid, no fine subpixel detail, no anti-aliasing, no smooth gradients, no text, no labels, no border, no background shadow. Palette: warm hammered copper orange highlights, deep brown outlines, desaturated dark green patina, luminous aquamarine and pale mint highlights. Strong distinct silhouette, limited 14-20 color palette, readable at 32 pixels; subtle upper-left lighting and clustered pixel shading. Item occupies central 26x28 logical pixels with generous transparent margins. Background genuinely transparent. Subject: ",
+  "sprites": [
+    {
+      "name": "saturated_copper_essence",
+      "subject": "An asymmetrical cluster of three faceted aquamarine energy crystals, with warm raw copper roots and a few tiny detached crystal grains; clear angular diamond facets, pale mint sharp highlights, teal shadow faces.",
+      "source": "sources/saturated_copper_essence.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "resonant_enchantment_core",
+      "subject": "An intricate copper gyroscopic resonator core: angular three-quarter copper ring enclosing a floating aquamarine diamond crystal, dark patinated brackets, two tiny violet enchanted glints. Distinctive hollow ring silhouette.",
+      "source": "sources/resonant_enchantment_core.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "sentinel_range_focus",
+      "subject": "A long pointed aquamarine optical focusing crystal mounted in a short hexagonal copper collet at the bottom; two tiny copper prongs at sides, sharp clear facets, very distinct from the ring core.",
+      "source": "sources/sentinel_range_focus.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "diamond_solar_lens",
+      "subject": "A circular diamond glass solar lens in a thick riveted copper rim, viewed three-quarter tilted with thickness visible, four patinated small mounting lugs; translucent teal lens with crisp diagonal pale reflections.",
+      "source": "sources/diamond_solar_lens.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "copper_frame",
+      "subject": "An empty hollow square machine frame viewed isometrically, riveted copper corner joints and dark patina side rails, unmistakable open transparent center, chunky Minecraft craft component.",
+      "source": "sources/copper_frame.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "copper_core",
+      "subject": "A squat cylindrical electromagnetic copper coil core viewed three-quarter: tightly wound orange copper coil wrapped around dark iron spindle, teal tiny center aperture, patina base.",
+      "source": "sources/copper_core.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "face_selector",
+      "subject": "A diagonal mechanical configuration wrench: long dark patinated handle, copper open-ended wrench jaws at upper right, small teal adjustment screw at neck, small copper grip bands. Recognizable functional hand tool.",
+      "source": "sources/face_selector.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "cargo_bundle",
+      "subject": "A tied dark brown canvas cargo bundle with leather straps, copper buckle containing a small teal light, square bulky full bag three-quarter view, two angular folds and top tied knot.",
+      "source": "sources/cargo_bundle.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    },
+    {
+      "name": "area_wand",
+      "subject": "A diagonal copper surveying wand, long slender copper and dark patina handle extending bottom left to top right, small aquamarine diamond at tip held by two copper prongs, clear crystalline facets, two small separated teal sparks.",
+      "source": "sources/area_wand.png",
+      "gameResolution": [
+        64,
+        64
+      ]
+    }
+  ]
+}
