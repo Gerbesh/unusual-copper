@@ -69,3 +69,9 @@ Only repo-owned isolated fixture runtimes were launched; user's client and
 server were not launched or modified. Stable 1.0 acceptance remains open:
 SSN Bridge, JEI/guide, full modpack adapters, upgrades/art/performance,
 licenses, D11 crash consistency and the rest of T01–T36.
+
+GitHub Actions run 38733220323: build and all enchanter cases passed, but
+the existing realGlmAndLateListenerLootHaveNoPlayerCreditLootingOrXp case
+expired while waiting for its cold entity region to load (200-tick timeout).
+Its timeout is now 800 ticks, retaining the same readiness and real loot/XP
+assertions. No production code or gameplay deadline changed.

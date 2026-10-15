@@ -78,7 +78,8 @@ public final class ReaperGameTests {
             h.assertTrue(restored!=null && restored.reaper.active && restored.reaper.trigger==20 && restored.reaper.keep==12 && restored.reaper.rule.equals(cows()) && !m.getUpdateTag().contains("Reaper"), "Thresholds and latch persist without broadcasting private loot/settings");
         });
     }
-    @GameTest(template = "empty", timeoutTicks = 200)
+    // Cold CI region I/O may outlast 200 ticks; gameplay assertions run only after entity readiness.
+    @GameTest(template = "empty", timeoutTicks = 800)
     public static void realGlmAndLateListenerLootHaveNoPlayerCreditLootingOrXp(GameTestHelper h) {
         var level=h.getLevel(); var base=new BlockPos(45008,70,45008); var target=base.east(2); var area=new WorkArea(target,target);
         loaded(h,area,()->{
