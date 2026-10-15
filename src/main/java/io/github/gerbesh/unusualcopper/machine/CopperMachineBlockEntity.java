@@ -49,6 +49,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public final UUID runtimeIdentity = UUID.randomUUID();
     private io.github.gerbesh.unusualcopper.gameplay.WorkArea workArea;
     public int scanCursor, growthMode, inspected, grown;
+    public long nextWaveTick;
+    public boolean allowOwnTamed;
     private net.minecraft.core.BlockPos boundInventory;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.HandlerStorageEndpoint boundEndpoint;
@@ -107,9 +109,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case COPPER_CELL -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
+            case GROWTH_SHEPHERD -> new ShepherdLogic();
         };
         for (Direction side : Direction.values()) {
-            SideMode mode = kind == MachineKind.AURA_CULTIVATOR ? SideMode.ENERGY_INPUT
+            SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
                     : kind == MachineKind.COPPER_CELL ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
                     : side == Direction.UP && kind.acceptsInputs() ? SideMode.ITEM_INPUT : side == Direction.DOWN && kind.hasInventory() ? SideMode.ITEM_OUTPUT
                     : kind.produces() ? SideMode.ENERGY_OUTPUT : kind.consumes() ? SideMode.ENERGY_INPUT : SideMode.DISABLED;
@@ -272,6 +275,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("Cost", operationCost);
         if (workArea != null) tag.put("WorkArea", workArea.save());
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
+        tag.putLong("NextWaveTick", nextWaveTick); tag.putBoolean("AllowOwnTamed", allowOwnTamed);
         if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
@@ -289,6 +293,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         workArea = null;
         if (tag.contains("WorkArea")) try { workArea = io.github.gerbesh.unusualcopper.gameplay.WorkArea.load(tag.getCompound("WorkArea")); } catch (IllegalArgumentException ignored) {}
         scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 2);
+        nextWaveTick = Math.max(0, tag.getLong("NextWaveTick")); allowOwnTamed = tag.getBoolean("AllowOwnTamed");
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
@@ -322,7 +327,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 10 -> progress >>> 16; case 11 -> duration >>> 16;
                     case 12 -> operationCost & 0xffff; case 13 -> operationCost >>> 16;
                     case 14 -> growthMode; case 15 -> workArea == null ? 0 : workArea.volume(); case 16 -> scanCursor; case 17 -> inspected; case 18 -> grown;
-                    case 19 -> boundInventory == null ? 0 : 1; case 20 -> boundCargoCount() & 0xffff; case 21 -> boundCargoCount() >>> 16; default -> 0;
+                    case 19 -> boundInventory == null ? 0 : 1; case 20 -> boundCargoCount() & 0xffff; case 21 -> boundCargoCount() >>> 16;
+                    case 22 -> allowOwnTamed ? 1 : 0; case 23 -> level == null ? 0 : (int)Math.max(0, Math.min(32767, nextWaveTick - level.getGameTime()));
+                    case 24 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdCost() & 0xffff;
+                    case 25 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdCost() >>> 16;
+                    case 26 -> io.github.gerbesh.unusualcopper.config.ServerConfig.shepherdAdvance(); default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}

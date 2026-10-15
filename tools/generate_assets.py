@@ -148,6 +148,11 @@ def models():
                  part([4, 10, 4], [12, 11, 12], "dark"), part([3, 10, 5], [6, 16, 11], "copper"), part([10, 10, 5], [13, 16, 11], "copper"),
                  part([3, 14, 5], [6, 16, 11], "aqua"), part([10, 14, 5], [13, 16, 11], "aqua"), part([4, 3, .5], [12, 5, 1], "aqua")]
     export_model("magnetic_collector", collector, [])
+    shepherd = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 7, 15], "patina"), part([0, 6, 0], [16, 8, 16], "copper"),
+                part([7, 8, 7], [9, 13, 9], "copper"), part([3, 13, 3], [13, 14, 4], "copper"), part([3, 13, 12], [13, 14, 13], "copper"),
+                part([3, 13, 4], [4, 14, 12], "copper"), part([12, 13, 4], [13, 14, 12], "copper"),
+                part([6, 14, 6], [10, 16, 10], "aqua"), part([4, 3, .5], [12, 5, 1], "aqua")]
+    export_model("growth_shepherd", shepherd, [])
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -205,6 +210,11 @@ def languages():
     en["gui.unusualcopper.cancel_hint"] = "Cancel the operation. Input remains; spent CuE is not refunded."
     ru["gui.unusualcopper.cancel_hint"] = "Отменить операцию. Вход остаётся; потраченные CuE не возвращаются."
     additions = {
+        "block.unusualcopper.growth_shepherd": ("Growth Shepherd", "Пастырь роста"),
+        "gui.unusualcopper.own_pets.0": ("Own pets: excluded", "Свои питомцы: выкл."), "gui.unusualcopper.own_pets.1": ("Own pets: allowed", "Свои питомцы: вкл."),
+        "gui.unusualcopper.shepherd_stats": ("Grown: %s · next: %s s", "Рост: %s · волна: %s с"),
+        "gui.unusualcopper.shepherd_hint": ("%s CuE per animal; advance age by up to %s ticks. Pet permission applies only to the machine owner's animals.", "%s CuE за особь; взросление до %s тиков. Разрешение действует только на животных владельца машины."),
+        "status.unusualcopper.no_babies": ("No eligible babies", "Нет подходящих детёнышей"), "status.unusualcopper.unsupported_animal": ("Species needs an adapter", "Виду нужен адаптер"),
         "block.unusualcopper.magnetic_collector": ("Magnetic Collector", "Магнитный коллектор"),
         "gui.unusualcopper.collection_checked": ("Checked: %s", "Проверено: %s"), "gui.unusualcopper.collection_taken": ("Stacks: %s", "Подобрано: %s"),
         "block.unusualcopper.aura_cultivator": ("Aura Cultivator", "Культиватор ауры"), "item.unusualcopper.area_wand": ("Copper Configuration Wand", "Медный жезл настройки"),
@@ -247,4 +257,4 @@ def languages():
 
 if __name__ == "__main__":
     textures(); models(); data(); languages()
-    print("Generated original textures, 8 editable Blockbench projects, models, item tags and RU/EN.")
+    print("Generated original textures, 9 editable Blockbench projects, models, item tags and RU/EN.")

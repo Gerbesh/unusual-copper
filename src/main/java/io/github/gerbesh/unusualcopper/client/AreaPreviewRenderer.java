@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class AreaPreviewRenderer {
     private static AreaNetwork.Preview preview;
     private static long expires;
+    public static void clear() { preview = null; }
     public static void accept(AreaNetwork.Preview value) {
         var level = Minecraft.getInstance().level; if (level == null || !level.dimension().location().equals(value.dimension())) return;
         preview = value; expires = level.getGameTime() + 240;

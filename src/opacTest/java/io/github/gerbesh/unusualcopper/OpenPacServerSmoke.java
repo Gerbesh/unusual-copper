@@ -79,6 +79,19 @@ public final class OpenPacServerSmoke {
             collector.setOwner(owner); io.github.gerbesh.unusualcopper.machine.logic.CollectorLogic.process(collector, level);
             check(ground.isRemoved() && collector.inventory.getStackInSlot(2).getCount() == 8 && collector.energy.stored() < 100, "Claim owner could not collect the real stack");
             UnusualCopper.LOGGER.info("CuE OPENPAC COLLECTOR PASS: foreign target access denied without charge; owner collected eight real ingots");
+            var shepherdPos = machinePos.north(); level.setBlock(shepherdPos, Blocks.AIR.defaultBlockState(), 3);
+            level.setBlock(shepherdPos, ModContent.MACHINES.get(MachineKind.GROWTH_SHEPHERD).get().defaultBlockState(), 3);
+            var shepherd = (CopperMachineBlockEntity)level.getBlockEntity(shepherdPos);
+            actor.setPos(shepherdPos.getX() + .5, shepherdPos.getY() + .5, shepherdPos.getZ() + .5);
+            check(shepherd.setWorkArea(new WorkArea(cropPos, cropPos), actor), "Claim owner could not select the shepherd area");
+            var calf = net.minecraft.world.entity.EntityType.COW.create(level); calf.setPos(cropPos.getX() + .5, cropPos.getY() + .1, cropPos.getZ() + .5); calf.setNoAi(true); calf.setNoGravity(true); calf.setAge(-5000); level.addFreshEntity(calf);
+            shepherd.energy.add(400, false); shepherd.setOwner(stranger);
+            io.github.gerbesh.unusualcopper.machine.logic.ShepherdLogic.process(shepherd, level);
+            check(calf.getAge() == -5000 && shepherd.energy.stored() == 400 && shepherd.status() == MachineStatus.PROTECTED, "Foreign shepherd changed a claimed calf or charged energy");
+            shepherd.setOwner(owner); shepherd.nextWaveTick = 0; io.github.gerbesh.unusualcopper.machine.logic.ShepherdLogic.process(shepherd, level);
+            check(calf.getAge() == -2600 && shepherd.energy.stored() == 0 && shepherd.grown == 1, "Claim owner could not pay for exactly 2400 ticks of calf growth");
+            calf.discard();
+            UnusualCopper.LOGGER.info("CuE OPENPAC SHEPHERD PASS: foreign calf access denied without charge; owner advanced age by 2400 for exactly 400 CuE");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException("OpenPAC fixture API failed", error); }
         finally {
             if (manager != null) try { Class.forName("xaero.pac.common.server.claims.api.IServerClaimsManagerAPI").getMethod("unclaim", ResourceLocation.class, int.class, int.class).invoke(manager, level.dimension().location(), pos.getX() >> 4, pos.getZ() >> 4); }

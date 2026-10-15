@@ -30,7 +30,8 @@ public final class ClientSmokeTest {
     private static final AtomicBoolean saved = new AtomicBoolean();
     private static int ticks;
     private static int stage;
-    private static BlockPos menuPos, pipeMenuPos, cultivatorPos;
+    private static BlockPos menuPos, pipeMenuPos, cultivatorPos, shepherdPos;
+    private static final java.util.List<java.util.UUID> shepherdAnimals = new java.util.ArrayList<>();
     private static boolean settingsSent;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !Boolean.getBoolean("unusualcopper.smokeClient")) return;
@@ -86,7 +87,7 @@ public final class ClientSmokeTest {
                 ready.set(true);
             });
         }
-        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6) && mc.screen instanceof CopperMachineScreen) || ((stage == 2 || stage == 5) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
+        if (ready.get() && (stage == 0 || ((stage == 1 || stage == 4 || stage == 6 || stage == 7) && mc.screen instanceof CopperMachineScreen) || ((stage == 2 || stage == 5 || stage == 8) && mc.screen == null) || (stage == 3 && mc.screen instanceof io.github.gerbesh.unusualcopper.client.ItemPipeScreen))) ticks++;
         if (stage == 0 && ticks == 140) mc.options.hideGui = true;
         if (stage == 0 && ready.get() && ticks >= 160 && !captured) {
             captured = true;
@@ -136,6 +137,25 @@ public final class ClientSmokeTest {
             Screenshot.grab(mc.gameDirectory, "cue-collector-menu.png", mc.getMainRenderTarget(), text -> {
                 UnusualCopper.LOGGER.info("CuE collector menu screenshot: {}", text.getString()); saved.set(true);
             });
+        }
+        if (stage == 7 && ticks == 5) {
+            mc.getToasts().clear(); mc.gui.getChat().clearMessages(true);
+            mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId, 6);
+        }
+        if (stage == 7 && ticks >= 25 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-shepherd-menu.png", mc.getMainRenderTarget(), text -> { UnusualCopper.LOGGER.info("CuE shepherd menu screenshot: {}", text.getString()); saved.set(true); });
+        }
+        if (stage == 8 && ticks == 10) mc.getSingleplayerServer().execute(() -> {
+            var level = serverLevel(mc); var shepherd = (CopperMachineBlockEntity)level.getBlockEntity(shepherdPos);
+            for (var id : shepherdAnimals) if (level.getEntity(id) instanceof net.minecraft.world.entity.AgeableMob baby) baby.setAge(-5000);
+            shepherd.energy.add(1200, false); shepherd.nextWaveTick = 0; io.github.gerbesh.unusualcopper.machine.logic.ShepherdLogic.process(shepherd, level);
+            if (!shepherd.allowOwnTamed || shepherd.grown != 3 || shepherd.energy.stored() != 0) throw new IllegalStateException("Shepherd GUI permission or repeated client wave failed");
+            UnusualCopper.LOGGER.info("CuE SHEPHERD CLIENT PASS: three calves each advanced 2400 ticks, paid 1200 CuE; real menu enabled own pets");
+        });
+        if (stage == 8 && ticks >= 20 && !captured) {
+            captured = true;
+            Screenshot.grab(mc.gameDirectory, "cue-shepherd-wave.png", mc.getMainRenderTarget(), text -> { UnusualCopper.LOGGER.info("CuE shepherd wave screenshot: {}", text.getString()); saved.set(true); });
         }
         if (saved.get()) {
             if (stage == 0) {
@@ -217,6 +237,29 @@ public final class ClientSmokeTest {
                     NetworkHooks.openScreen(player, collector, pos);
                     UnusualCopper.LOGGER.info("CuE COLLECTOR CLIENT PASS: real sixteen-ingot entity became one output stack; {} CuE remain", collector.energy.stored());
                 });
+            } else if (stage == 6) {
+                stage = 7; captured = false; saved.set(false); ticks = 0;
+                mc.getSingleplayerServer().execute(() -> {
+                    var level = serverLevel(mc); var player = level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); int y = cultivatorPos.getY(); shepherdPos = new BlockPos(42, y, 45);
+                    for (int x = 39; x <= 45; x++) for (int z = 45; z <= 50; z++) { level.setBlock(new BlockPos(x, y - 1, z), Blocks.STONE_BRICKS.defaultBlockState(), 3); level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), 3); }
+                    for (var mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(39, y, 45, 46, y + 2, 51))) mob.discard();
+                    level.setBlock(shepherdPos, ModContent.MACHINES.get(MachineKind.GROWTH_SHEPHERD).get().defaultBlockState(), 3); var shepherd = (CopperMachineBlockEntity)level.getBlockEntity(shepherdPos); shepherd.setOwner(player.getUUID()); shepherd.energy.add(1200, false);
+                    player.teleportTo(level, 42.5, y + 1.8, 42, 0, 20);
+                    if (!shepherd.setWorkArea(new io.github.gerbesh.unusualcopper.gameplay.WorkArea(new BlockPos(40, y, 48), new BlockPos(44, y + 1, 49)), player)) throw new IllegalStateException("Shepherd client area failed");
+                    shepherdAnimals.clear();
+                    for (int x : new int[]{40,42,44}) {
+                        var calf = net.minecraft.world.entity.EntityType.COW.create(level); calf.setPos(x + .5, y + .1, 48.5); calf.setNoAi(true); calf.setNoGravity(true); calf.setAge(-5000); level.addFreshEntity(calf); shepherdAnimals.add(calf.getUUID());
+                    }
+                    for (var dropped : level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(38, y - 2, 33, 55, y + 3, 52))) dropped.discard();
+                    player.getInventory().clearContent(); player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(ModContent.AREA_WAND.get()));
+                    io.github.gerbesh.unusualcopper.machine.logic.ShepherdLogic.process(shepherd, level);
+                    if (shepherd.grown != 3 || shepherd.energy.stored() != 0) throw new IllegalStateException("Shepherd client initial wave failed");
+                    NetworkHooks.openScreen(player, shepherd, shepherdPos);
+                });
+            } else if (stage == 7) {
+                stage = 8; captured = false; saved.set(false); ticks = 0; mc.options.hideGui = true;
+                io.github.gerbesh.unusualcopper.client.AreaPreviewRenderer.clear();
+                mc.getSingleplayerServer().execute(() -> { var level = serverLevel(mc); var player = level.getServer().getPlayerList().getPlayer(mc.player.getUUID()); player.closeContainer(); player.teleportTo(level, 42.5, shepherdPos.getY() + 2.2, 42, 0, 34); });
             } else { mc.options.hideGui = false; mc.stop(); }
         }
     }

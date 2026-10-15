@@ -15,6 +15,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
     private static final ForgeConfigSpec.IntValue CULTIVATOR_COST, CULTIVATOR_INTERVAL, CULTIVATOR_CHECKS, AREA_BUDGET;
     private static final ForgeConfigSpec.IntValue COLLECTOR_BASE_COST, COLLECTOR_DISTANCE_COST, COLLECTOR_CANDIDATES, ENTITY_BUDGET;
+    private static final ForgeConfigSpec.IntValue SHEPHERD_COST, SHEPHERD_INTERVAL, SHEPHERD_ADVANCE, SHEPHERD_CANDIDATES;
     static {
         var builder = new ForgeConfigSpec.Builder();
         builder.push("copper_economy");
@@ -41,6 +42,10 @@ public final class ServerConfig {
         COLLECTOR_DISTANCE_COST = builder.comment("Additional CuE at distance 32; linear and rounded upward.").defineInRange("collector_distance_cue", 70, 0, 1000);
         COLLECTOR_CANDIDATES = builder.defineInRange("collector_candidates_per_wave", 16, 1, 64);
         ENTITY_BUDGET = builder.defineInRange("entity_candidates_per_dimension_tick", 256, 64, 4096);
+        SHEPHERD_COST = builder.defineInRange("shepherd_cue_per_animal", 400, 1, 50_000);
+        SHEPHERD_INTERVAL = builder.defineInRange("shepherd_interval_ticks", 200, 200, 24_000);
+        SHEPHERD_ADVANCE = builder.defineInRange("shepherd_age_ticks", 2400, 1, 24_000);
+        SHEPHERD_CANDIDATES = builder.defineInRange("shepherd_candidates_per_wave", 16, 1, 64);
         builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
@@ -64,4 +69,8 @@ public final class ServerConfig {
     public static int collectorDistanceCost() { return value(COLLECTOR_DISTANCE_COST); }
     public static int collectorCandidates() { return value(COLLECTOR_CANDIDATES); }
     public static int entityBudget() { return value(ENTITY_BUDGET); }
+    public static int shepherdCost() { return value(SHEPHERD_COST); }
+    public static int shepherdInterval() { return value(SHEPHERD_INTERVAL); }
+    public static int shepherdAdvance() { return value(SHEPHERD_ADVANCE); }
+    public static int shepherdCandidates() { return value(SHEPHERD_CANDIDATES); }
 }

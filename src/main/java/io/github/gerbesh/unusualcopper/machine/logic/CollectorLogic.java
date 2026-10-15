@@ -22,7 +22,7 @@ public final class CollectorLogic implements MachineLogic {
         var area = machine.workArea();
         if (area == null || !AreaAccess.geometryValid(level, machine.getBlockPos(), area)) { machine.status(MachineStatus.NO_AREA); return; }
         if (!ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) { machine.status(MachineStatus.PROTECTED); return; }
-        var candidates = ItemEntityIndex.sample(level, machine, ServerConfig.collectorCandidates());
+        var candidates = EntityIndexes.items(level, machine, ServerConfig.collectorCandidates());
         MachineStatus reason = MachineStatus.NO_TARGETS;
         for (var entity : candidates) {
             machine.inspected++;

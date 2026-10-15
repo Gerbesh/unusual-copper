@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:golden_apple"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    " G ",
+    "FAF",
+    " R "
+  ],
+  "result": {
+    "item": "unusualcopper:growth_shepherd"
+  },
+  "show_notification": true
+}
