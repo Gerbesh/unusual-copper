@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:comparator"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FGF",
+    "RCR",
+    "FFF"
+  ],
+  "result": {
+    "item": "unusualcopper:energy_monitor"
+  },
+  "show_notification": true
+}

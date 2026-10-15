@@ -16,6 +16,8 @@ public final class ClientSetup {
             MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);
             MenuScreens.register(ModContent.BREWER_MENU.get(),BrewerScreen::new);
             MenuScreens.register(ModContent.ENCHANTER_MENU.get(),EnchanterScreen::new);
+            MenuScreens.register(ModContent.ENERGY_MENU.get(),EnergyControlScreen::new);
+            io.github.gerbesh.unusualcopper.network.EnergyControlNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnergyControlMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.EnchanterNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.BrewerNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.ReaperNetwork.clientReceiver(message -> {

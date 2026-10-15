@@ -54,6 +54,19 @@ public final class OpenPacServerSmoke {
             check(allowed.extract(key, 8).stream().mapToInt(ItemStack::getCount).sum() == 8 && barrel.getItem(0).isEmpty(), "Owner endpoint could not perform the real extraction");
             UnusualCopper.LOGGER.info("CuE OPENPAC CLAIM PASS: actual 0.30.1 owner allowed, foreign and null-owner inventory automation denied");
             UnusualCopper.LOGGER.info("CuE OPENPAC INVENTORY INDEX PASS: cached owner snapshot and count denied immediately after claim revocation; restored rights extracted exactly eight real ingots");
+            var energyPos=pos.offset(5,0,8);level.setBlock(energyPos,Blocks.AIR.defaultBlockState(),3);level.setBlock(energyPos,ModContent.MACHINES.get(MachineKind.ENERGY_DISTRIBUTOR).get().defaultBlockState(),3);
+            var energyMachine=(CopperMachineBlockEntity)level.getBlockEntity(energyPos);energyMachine.setOwner(owner);energyMachine.branchLimit(Direction.EAST,256);
+            var energyActor=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(owner,"CuEOwner"));energyActor.setPos(energyPos.getX()+.5,energyPos.getY()+.5,energyPos.getZ()+.5);
+            var energyMenu=new io.github.gerbesh.unusualcopper.menu.EnergyControlMenu(17,energyActor.getInventory(),energyMachine);
+            check(energyMenu.stillValid(energyActor)&&energyMenu.clickMenuButton(energyActor,20+Direction.EAST.ordinal())&&energyMachine.branchLimit(Direction.EAST)==1024,"Actual claim owner could not configure an energy branch");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),stranger,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            check(!energyMenu.stillValid(energyActor)&&!energyMenu.clickMenuButton(energyActor,20+Direction.EAST.ordinal())&&energyMachine.branchLimit(Direction.EAST)==1024,"Revoked claim left an existing energy menu authorized");
+            managerType.getMethod("unclaim",ResourceLocation.class,int.class,int.class).invoke(manager,level.dimension().location(),pos.getX()>>4,pos.getZ()>>4);
+            managerType.getMethod("claim",ResourceLocation.class,UUID.class,int.class,int.class,int.class,boolean.class).invoke(manager,level.dimension().location(),owner,-1,pos.getX()>>4,pos.getZ()>>4,false);
+            check(energyMenu.stillValid(energyActor)&&energyMenu.clickMenuButton(energyActor,0)&&energyMachine.energyPriority()==2,"Restored claim did not restore the owner's energy controls");
+            level.setBlock(energyPos,Blocks.AIR.defaultBlockState(),3);
+            UnusualCopper.LOGGER.info("CuE OPENPAC ENERGY CONTROL PASS: actual 0.30.1 existing-menu revocation denies validity and branch mutation; restored owner can configure again");
             // The machine itself is outside the claim: this exercises target permission, too.
             var machinePos = pos.offset(-1, 0, 3); var cropPos = pos.offset(1, 0, 3);
             level.getChunkAt(machinePos); level.setDayTime(6000);

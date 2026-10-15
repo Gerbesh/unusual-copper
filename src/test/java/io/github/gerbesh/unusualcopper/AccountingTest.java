@@ -7,6 +7,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AccountingTest {
+    @Test void monitorSeparatesProductionConsumptionTransfersAndRefunds(){
+        var energy=new CopperEnergyBuffer(50_000,4096,4096,()->{});
+        energy.add(1000,false);energy.receive(2000,false);energy.receive(500,true);
+        energy.extract(400,false);energy.refund(100);energy.spend(250);
+        assertEquals(1000,energy.produced());assertEquals(250,energy.consumed());assertEquals(2450,energy.stored());
+        energy.spend(50_000);energy.add(1000,true);assertEquals(250,energy.consumed());assertEquals(1000,energy.produced());
+        energy.refundSpent(50);assertEquals(200,energy.consumed());assertEquals(1000,energy.produced());assertEquals(2500,energy.stored());
+    }
     @Test void sunPolicyUsesDaytimeRatherThanWeatherDarkness() {
         assertEquals(4, SolarPolicy.rate(6000, true, true, false, false));
         assertEquals(2, SolarPolicy.rate(6000, true, true, true, false));

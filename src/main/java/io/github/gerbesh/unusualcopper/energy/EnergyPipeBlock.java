@@ -22,6 +22,7 @@ public final class EnergyPipeBlock extends AbstractPipeBlock {
         if (!level.hasChunkAt(other)) return false;
         if (level.getBlockState(other).getBlock() instanceof EnergyPipeBlock) return true;
         if (level.getBlockEntity(other) instanceof CopperMachineBlockEntity machine) {
+            if (machine.kind == io.github.gerbesh.unusualcopper.machine.MachineKind.ENERGY_MONITOR) return true;
             SideMode mode = machine.sideMode(side.getOpposite());
             return mode == SideMode.ENERGY_INPUT || mode == SideMode.ENERGY_OUTPUT;
         }

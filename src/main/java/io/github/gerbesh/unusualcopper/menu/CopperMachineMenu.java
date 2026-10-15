@@ -43,6 +43,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (machine == null || !stillValid(player)) return false;
+        if(button==10&&player instanceof net.minecraft.server.level.ServerPlayer server&&(machine.kind.capacity>0||machine.kind.energyControl())){EnergyControlMenu.open(server,machine);return true;}
         if (button == 0) { machine.redstoneMode = (machine.redstoneMode + 1) % 3; machine.setChanged(); return true; }
         if (button == 1) { if(machine.arborist!=null) machine.arborist.cancel(); if(machine.brewer!=null)machine.brewer.cancel(); machine.cancelOperation(); machine.setChanged(); return true; }
         if (button == 2 && machine.kind == MachineKind.AURA_CULTIVATOR) { machine.growthMode = (machine.growthMode + 1) % 2; machine.setChanged(); return true; }

@@ -25,6 +25,7 @@ public final class UnusualCopper {
         io.github.gerbesh.unusualcopper.network.ReaperNetwork.register();
         io.github.gerbesh.unusualcopper.network.BrewerNetwork.register();
         io.github.gerbesh.unusualcopper.network.EnchanterNetwork.register();
+        io.github.gerbesh.unusualcopper.network.EnergyControlNetwork.register();
         io.github.gerbesh.unusualcopper.network.MachineEffects.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         bus.addListener(CopperCapabilities::register);

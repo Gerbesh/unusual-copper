@@ -17,6 +17,11 @@ import io.github.gerbesh.unusualcopper.config.ServerConfig;
 public final class EnergyNetworks {
     private static final Map<ServerLevel, WorldNetwork> WORLDS = new IdentityHashMap<>();
     private EnergyNetworks() {}
+    public record Sample(long epoch,long stored,long capacity,long produced,long consumed,long transferred,long demand,long delivered,int nodes,int devices) {}
+    public static Sample inspect(ServerLevel level,CopperMachineBlockEntity observer) {
+        var world=WORLDS.get(level);
+        return world==null?new Sample(0,observer.energy.stored(),observer.energy.capacity(),observer.energy.produced(),observer.energy.consumed(),0,0,0,0,1):world.inspect(observer);
+    }
     public static void add(LevelAccessor level, BlockPos pos) {
         if (level instanceof ServerLevel server) { var world = WORLDS.computeIfAbsent(server, ignored -> new WorldNetwork()); world.pipes.add(pos.immutable()); world.dirty = true; }
     }
@@ -34,11 +39,20 @@ public final class EnergyNetworks {
     }
     private record Port(BlockPos pipe, BlockPos pos, Direction side, CopperMachineBlockEntity machine) {}
     private record PathKey(BlockPos from, BlockPos to) {}
+    private record Face(BlockPos pos,Direction side) {}
+    private record Source(Component component,Port port) {}
+    private static final class Flow { long demand,delivered; }
+    private record Observation(Set<Component> components,long epoch) {}
+    private static <T> void prioritize(List<T> values,java.util.function.ToIntFunction<T> priority,int cursor){
+        values.sort(Comparator.comparingInt(priority).reversed());
+        for(int first=0;first<values.size();){int end=first+1;while(end<values.size()&&priority.applyAsInt(values.get(end))==priority.applyAsInt(values.get(first)))end++;Collections.rotate(values.subList(first,end),-Math.floorMod(cursor,end-first));first=end;}
+    }
     private static final class Component {
         final Set<BlockPos> pipes;
         final Map<BlockPos, Integer> tiers;
         final List<Port> ports = new ArrayList<>();
         final Map<PathKey, List<BlockPos>> paths = new HashMap<>();
+        long transferred;
         Component(Set<BlockPos> pipes, Map<BlockPos, Integer> tiers) { this.pipes = pipes; this.tiers = Map.copyOf(tiers); }
         List<BlockPos> path(BlockPos from, BlockPos to) {
             return paths.computeIfAbsent(new PathKey(from, to), key -> {
@@ -59,7 +73,11 @@ public final class EnergyNetworks {
         List<Component> components = List.of();
         boolean dirty = true;
         int cursor;
+        long epoch;
+        final Map<CopperMachineBlockEntity,Flow> flows=new IdentityHashMap<>();
+        final Map<CopperMachineBlockEntity,Observation> observations=new IdentityHashMap<>();
         void rebuild(ServerLevel level) {
+            Map<BlockPos,Component> previous=new HashMap<>();for(var component:components)for(var node:component.pipes)previous.put(node,component);
             pipes.removeIf(pos -> !level.hasChunkAt(pos) || !(level.getBlockEntity(pos) instanceof EnergyPipeBlockEntity));
             Set<BlockPos> unseen = new HashSet<>(pipes); List<Component> built = new ArrayList<>();
             while (!unseen.isEmpty()) {
@@ -73,38 +91,86 @@ public final class EnergyNetworks {
                     BlockPos pos = pipe.relative(side);
                     if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) component.ports.add(new Port(pipe, pos, side.getOpposite(), machine));
                 }
-                component.ports.sort(Comparator.comparingLong(port -> port.pos.asLong())); built.add(component);
+                component.ports.sort(Comparator.comparingLong(port -> port.pos.asLong()));
+                var old=previous.get(start);
+                built.add(old!=null&&old.pipes.equals(component.pipes)&&old.tiers.equals(component.tiers)&&old.ports.equals(component.ports)?old:component);
             }
             components = built; dirty = false;
+            Set<CopperMachineBlockEntity> active=Collections.newSetFromMap(new IdentityHashMap<>());for(var component:built)for(var port:component.ports)active.add(port.machine);
+            flows.keySet().retainAll(active);
+            observations.keySet().removeIf(machine->machine.isRemoved()||!level.hasChunkAt(machine.getBlockPos())||level.getBlockEntity(machine.getBlockPos())!=machine);
         }
+        private boolean live(Port port,ServerLevel level){return !port.machine.isRemoved()&&level.hasChunkAt(port.pos)&&level.getBlockEntity(port.pos)==port.machine&&port.machine.energyEnabled();}
         void tick(ServerLevel level) {
             if (dirty) rebuild(level);
-            Map<BlockPos, Integer> used = new HashMap<>(); int attempts = 0; cursor++;
+            Map<BlockPos, Integer> used = new HashMap<>(),received=new HashMap<>(),extractedBy=new HashMap<>();Map<Face,Integer> faces=new HashMap<>();int attempts = 0; cursor++;
+            List<Source> sources=new ArrayList<>();Map<Component,List<Port>> receivers=new IdentityHashMap<>();
+            Map<CopperMachineBlockEntity,Integer> inputLimits=new IdentityHashMap<>();
             for (int networkIndex = 0; networkIndex < components.size(); networkIndex++) {
-                Component component = components.get(Math.floorMod(networkIndex + cursor, components.size()));
-                List<Port> sources = component.ports.stream().filter(port -> port.machine.energyEnabled() && port.machine.sideMode(port.side) == SideMode.ENERGY_OUTPUT && port.machine.kind.produces()).toList();
-                List<Port> sinks = component.ports.stream().filter(port -> port.machine.energyEnabled() && port.machine.sideMode(port.side) == SideMode.ENERGY_INPUT && port.machine.kind.consumes()).toList();
-                for (int sourceIndex = 0; sourceIndex < sources.size(); sourceIndex++) {
-                    Port source = sources.get(Math.floorMod(sourceIndex + cursor, sources.size()));
-                    for (int sinkIndex = 0; sinkIndex < sinks.size(); sinkIndex++) {
-                        Port sink = sinks.get(Math.floorMod(sinkIndex + cursor, sinks.size()));
-                        if (source.pos.equals(sink.pos) || (source.machine.kind.isCell() && sink.machine.kind.isCell())) continue;
-                        if (++attempts > ServerConfig.transferBudget()) return;
-                        List<BlockPos> path = component.path(source.pipe, sink.pipe); if (path.isEmpty()) continue;
-                        int amount = Math.min(source.machine.energyTransferRate() - used.getOrDefault(source.pos, 0), sink.machine.energyTransferRate() - used.getOrDefault(sink.pos, 0));
-                        for (BlockPos node : path) amount = Math.min(amount, ServerConfig.pipeRate(component.tiers.get(node)) - used.getOrDefault(node, 0));
-                        amount = Math.min(amount, source.machine.energy.extract(amount, true));
-                        amount = Math.min(amount, sink.machine.energy.receive(amount, true));
-                        if (amount <= 0) continue;
-                        int extracted = source.machine.energy.extract(amount, false);
-                        int accepted = sink.machine.energy.receive(extracted, false);
-                        if (accepted < extracted) source.machine.energy.add(extracted - accepted, false);
-                        if (accepted == 0) continue;
-                        used.merge(source.pos, accepted, Integer::sum); used.merge(sink.pos, accepted, Integer::sum);
-                        for (BlockPos node : path) used.merge(node, accepted, Integer::sum);
+                Component component = components.get(networkIndex);
+                List<Port> sinks=new ArrayList<>();
+                for(int i=0;i<component.ports.size();i++){
+                    Port port=component.ports.get(i);if(!live(port,level))continue;
+                    if(port.machine.sideMode(port.side)==SideMode.ENERGY_OUTPUT&&port.machine.kind.produces()&&(port.machine.energy.stored()>0||port.machine.kind==MachineKind.ENERGY_DISTRIBUTOR)&&port.machine.energyFaceLimit(port.side)>0)sources.add(new Source(component,port));
+                    if(port.machine.sideMode(port.side)==SideMode.ENERGY_INPUT&&port.machine.kind.consumes()){
+                        sinks.add(port);inputLimits.merge(port.machine,port.machine.energyFaceLimit(port.side),Integer::sum);
                     }
                 }
+                // Rotate devices, rather than ports: attaching more input faces must not buy a larger share.
+                Map<BlockPos,List<Port>> grouped=new LinkedHashMap<>();for(var sink:sinks)grouped.computeIfAbsent(sink.pos,ignored->new ArrayList<>()).add(sink);
+                var groups=new ArrayList<>(grouped.values());prioritize(groups,group->group.get(0).machine.energyPriority(),cursor);
+                receivers.put(component,groups.stream().flatMap(Collection::stream).toList());
             }
+            for(var entry:inputLimits.entrySet()){
+                var machine=entry.getKey();int request=Math.min(entry.getValue(),Math.min(machine.energyTransferRate(),machine.energy.capacity()-machine.energy.stored()));
+                flows.computeIfAbsent(machine,ignored->new Flow()).demand+=Math.max(0,request);
+            }
+            // A distributor's high-priority face is serviced before its other components.
+            // Ordinary sources retain equal priority and rotate with the existing cursor.
+            prioritize(sources,source->source.port.machine.energyOutputPriority(source.port.side),cursor);
+            for(var route:sources){
+                var source=route.port;var component=route.component;
+                for(Port sink:receivers.get(component)){
+                    if(source.pos.equals(sink.pos)||(source.machine.kind.isCell()&&sink.machine.kind.isCell()))continue;
+                    if(source.machine.energy.stored()==0||sink.machine.energy.stored()==sink.machine.energy.capacity()||sink.machine.energyFaceLimit(sink.side)==0)continue;
+                    if(++attempts>ServerConfig.transferBudget())return;
+                    List<BlockPos> path=component.path(source.pipe,sink.pipe);if(path.isEmpty())continue;
+                    var out=new Face(source.pos,source.side);var in=new Face(sink.pos,sink.side);
+                    // A relay has independent intake/output budgets; passing one CuE is not charged twice.
+                    int outputUsed=(source.machine.kind==MachineKind.ENERGY_DISTRIBUTOR?extractedBy:used).getOrDefault(source.pos,0);
+                    int inputUsed=(sink.machine.kind==MachineKind.ENERGY_DISTRIBUTOR?received:used).getOrDefault(sink.pos,0);
+                    int amount=Math.min(source.machine.energyTransferRate()-outputUsed,sink.machine.energyTransferRate()-inputUsed);
+                    amount=Math.min(amount,source.machine.energyFaceLimit(source.side)-faces.getOrDefault(out,0));
+                    amount=Math.min(amount,sink.machine.energyFaceLimit(sink.side)-faces.getOrDefault(in,0));
+                    for(BlockPos node:path)amount=Math.min(amount,ServerConfig.pipeRate(component.tiers.get(node))-used.getOrDefault(node,0));
+                    amount=Math.min(amount,source.machine.energy.extract(amount,true));amount=Math.min(amount,sink.machine.energy.receive(amount,true));
+                    if(amount<=0)continue;
+                    int extracted=source.machine.energy.extract(amount,false);int accepted=sink.machine.energy.receive(extracted,false);
+                    if(accepted<extracted)source.machine.energy.refund(extracted-accepted);
+                    if(accepted==0)continue;
+                    used.merge(source.pos,accepted,Integer::sum);used.merge(sink.pos,accepted,Integer::sum);
+                    extractedBy.merge(source.pos,accepted,Integer::sum);received.merge(sink.pos,accepted,Integer::sum);
+                    faces.merge(out,accepted,Integer::sum);faces.merge(in,accepted,Integer::sum);
+                    for(BlockPos node:path)used.merge(node,accepted,Integer::sum);
+                    component.transferred+=accepted;flows.computeIfAbsent(sink.machine,ignored->new Flow()).delivered+=accepted;
+                }
+            }
+        }
+        Sample inspect(CopperMachineBlockEntity observer){
+            Set<CopperMachineBlockEntity> machines=Collections.newSetFromMap(new IdentityHashMap<>());
+            machines.add(observer);
+            Set<Component> seen=Collections.newSetFromMap(new IdentityHashMap<>());
+            long moved=0;int nodes=0;
+            for(var component:components){
+                if(component.ports.stream().noneMatch(port->port.machine==observer))continue;
+                seen.add(component);
+                nodes+=component.pipes.size();moved+=component.transferred;
+                for(var port:component.ports)if(!port.machine.isRemoved()&&port.machine.getLevel() instanceof ServerLevel level&&level.hasChunkAt(port.pos)&&level.getBlockEntity(port.pos)==port.machine)machines.add(port.machine);
+            }
+            long stored=0,capacity=0,produced=0,consumed=0,demand=0,delivered=0;
+            for(var machine:machines){stored+=machine.energy.stored();capacity+=machine.energy.capacity();produced+=machine.energy.produced();consumed+=machine.energy.consumed();var flow=flows.get(machine);if(flow!=null){demand+=flow.demand;delivered+=flow.delivered;}}
+            var observation=observations.get(observer);if(observation==null||!observation.components.equals(seen)){observation=new Observation(Set.copyOf(seen),++epoch);observations.put(observer,observation);}
+            return new Sample(observation.epoch,stored,capacity,produced,consumed,moved,demand,delivered,nodes,machines.size());
         }
     }
 }

@@ -133,7 +133,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case SOLAR_INFUSER -> new SolarLogic();
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
-            case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III -> (m, level) -> m.status(MachineStatus.IDLE);
+            case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
             case GROWTH_SHEPHERD -> new ShepherdLogic();
@@ -145,6 +145,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
+                    : kind == MachineKind.ENERGY_DISTRIBUTOR ? (side == Direction.WEST ? SideMode.ENERGY_INPUT : SideMode.ENERGY_OUTPUT)
                     : kind.isCell() ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
                     : side == Direction.UP && kind.acceptsInputs() ? SideMode.ITEM_INPUT : side == Direction.DOWN && kind.hasInventory() ? SideMode.ITEM_OUTPUT
                     : kind.produces() ? SideMode.ENERGY_OUTPUT : kind.consumes() ? SideMode.ENERGY_INPUT : SideMode.DISABLED;
@@ -153,7 +154,18 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         rebuildCaps();
     }
 
+    private int energyPriority = 1;
+    private final int[] branchLimits = {4096,4096,4096,4096,4096,4096};
+    private final int[] branchPriorities = {1,1,1,1,1,1};
+    public int energyPriority() { return energyPriority; }
+    public void energyPriority(int value) { energyPriority = Math.max(0,Math.min(2,value)); setChanged(); }
+    public int branchLimit(Direction side) { return branchLimits[side.ordinal()]; }
+    public int branchPriority(Direction side) { return branchPriorities[side.ordinal()]; }
+    public void branchLimit(Direction side,int limit) { if(kind==MachineKind.ENERGY_DISTRIBUTOR){branchLimits[side.ordinal()]=Math.max(0,Math.min(65536,limit));setChanged();} }
+    public void branchPriority(Direction side,int priority) { if(kind==MachineKind.ENERGY_DISTRIBUTOR){branchPriorities[side.ordinal()]=Math.max(0,Math.min(2,priority));setChanged();} }
     public int energyTransferRate() { return io.github.gerbesh.unusualcopper.config.ServerConfig.pipeRate(kind.energyTier()); }
+    public int energyFaceLimit(Direction side) { return kind==MachineKind.ENERGY_DISTRIBUTOR?Math.min(energyTransferRate(),branchLimit(side)):energyTransferRate(); }
+    public int energyOutputPriority(Direction side) { return kind==MachineKind.ENERGY_DISTRIBUTOR?branchPriority(side):1; }
     public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged(); }
     public boolean togglePlantation(BlockPos pos,Player player) {
         if(arborist==null || !canAccess(player) || !(level instanceof ServerLevel server)) return false;
@@ -299,10 +311,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 @Override public int stored() { return live() ? energy.stored() : 0; }
                 @Override public int capacity() { return energy.capacity(); }
                 @Override public int receive(int amount, boolean simulate) {
-                    return live() && energyEnabled() && kind.consumes() && sideMode(side) == SideMode.ENERGY_INPUT ? energy.receive(amount, simulate) : 0;
+                    return live() && energyEnabled() && kind.consumes() && sideMode(side) == SideMode.ENERGY_INPUT ? energy.receive(Math.min(amount,energyFaceLimit(side)), simulate) : 0;
                 }
                 @Override public int extract(int amount, boolean simulate) {
-                    return live() && energyEnabled() && kind.produces() && sideMode(side) == SideMode.ENERGY_OUTPUT ? energy.extract(amount, simulate) : 0;
+                    return live() && energyEnabled() && kind.produces() && sideMode(side) == SideMode.ENERGY_OUTPUT ? energy.extract(Math.min(amount,energyFaceLimit(side)), simulate) : 0;
                 }
             }));
         }
@@ -328,6 +340,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("DataVersion", 2); tag.put("Inventory", inventory.serializeNBT()); tag.putInt("Energy", energy.stored());
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putInt("Redstone", redstoneMode); saveSides(tag);
+        tag.putInt("EnergyPriority",energyPriority);
+        if(kind==MachineKind.ENERGY_DISTRIBUTOR){tag.putIntArray("BranchLimits",branchLimits);tag.putIntArray("BranchPriorities",branchPriorities);}
         tag.putString("Recipe", recipeId); tag.put("Source", source.save(new CompoundTag()));
         // ItemStack's vanilla Count is a signed byte: a solar batch can produce 128.
         tag.put("Result", (result.isEmpty() ? ItemStack.EMPTY : result.copyWithCount(1)).save(new CompoundTag()));
@@ -351,6 +365,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         inventory.deserializeNBT(tag.getCompound("Inventory")); energy.restore(tag.getInt("Energy"));
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         redstoneMode = Math.floorMod(tag.getInt("Redstone"), 3); loadSides(tag);
+        energyPriority=tag.contains("EnergyPriority")?Math.max(0,Math.min(2,tag.getInt("EnergyPriority"))):1;
+        var limits=tag.getIntArray("BranchLimits");var priorities=tag.getIntArray("BranchPriorities");
+        for(int i=0;i<6;i++){branchLimits[i]=i<limits.length?Math.max(0,Math.min(65536,limits[i])):4096;branchPriorities[i]=i<priorities.length?Math.max(0,Math.min(2,priorities[i])):1;}
         recipeId = tag.getString("Recipe"); source = ItemStack.of(tag.getCompound("Source")); result = ItemStack.of(tag.getCompound("Result"));
         if (!result.isEmpty()) result.setCount(Math.max(1, Math.min(128, tag.getInt("ResultCount"))));
         duration = Math.max(0, tag.getInt("Duration")); progress = Math.max(0, Math.min(duration, tag.getInt("Progress"))); paid = Math.max(0, tag.getInt("Paid"));
@@ -384,7 +401,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { if (packet.getTag() != null) handleUpdateTag(packet.getTag()); }
     @Override public Component getDisplayName() { return Component.translatable("block.unusualcopper." + kind.id); }
-    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return kind==MachineKind.ENCHANTMENT_RESONATOR?new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(id,playerInventory,this):new CopperMachineMenu(id, playerInventory, this); }
+    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return kind.energyControl()?new io.github.gerbesh.unusualcopper.menu.EnergyControlMenu(id,playerInventory,this):kind==MachineKind.ENCHANTMENT_RESONATOR?new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(id,playerInventory,this):new CopperMachineMenu(id, playerInventory, this); }
 
     public ContainerData menuData() {
         return new ContainerData() {

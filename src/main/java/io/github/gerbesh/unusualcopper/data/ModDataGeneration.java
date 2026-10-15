@@ -54,6 +54,10 @@ public final class ModDataGeneration {
                     .define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE_BLOCK).define('D', Items.DIAMOND).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.COPPER_CELL_III).get()).pattern("FDF").pattern("DSD").pattern("FDF")
                     .define('F', ModContent.FRAME.get()).define('D', Items.DIAMOND_BLOCK).define('S', Items.NETHER_STAR).unlockedBy("has_star", has(Items.NETHER_STAR)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ENERGY_DISTRIBUTOR).get()).pattern("FPF").pattern("RKR").pattern("FPF")
+                    .define('F',ModContent.FRAME.get()).define('P',ModContent.REINFORCED_ENERGY_PIPE.get()).define('R',Items.REDSTONE).define('K',ModContent.CORE.get()).unlockedBy("has_pipe",has(ModContent.REINFORCED_ENERGY_PIPE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ENERGY_MONITOR).get()).pattern("FGF").pattern("RCR").pattern("FFF")
+                    .define('F',ModContent.FRAME.get()).define('G',Items.GLASS).define('R',Items.REDSTONE).define('C',Items.COMPARATOR).unlockedBy("has_core",has(ModContent.CORE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.ITEM_PIPE.get(), 8).pattern("CIC").pattern("CIC").pattern("CC ")
                     .define('C', Items.COPPER_INGOT).define('I', Items.IRON_NUGGET).unlockedBy("has_copper", has(Items.COPPER_INGOT)).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModContent.FACE_SELECTOR.get()).pattern(" C").pattern("IR")

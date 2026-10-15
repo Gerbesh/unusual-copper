@@ -21,6 +21,7 @@ public final class FaceSelectorItem extends Item {
             level.setBlock(pos,bridge.getBlockState().setValue(io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlock.FACING,side),3);bridge.invalidateStorage();bridge.setChanged();return InteractionResult.SUCCESS;
         }
         if (entity instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) {
+            if(player.isShiftKeyDown()&&player instanceof net.minecraft.server.level.ServerPlayer serverPlayer&&(machine.kind.capacity>0||machine.kind.energyControl())){io.github.gerbesh.unusualcopper.menu.EnergyControlMenu.open(serverPlayer,machine);return InteractionResult.SUCCESS;}
             machine.cycleSide(side); player.displayClientMessage(Component.translatable(machine.sideMode(side).translationKey()), true); return InteractionResult.SUCCESS;
         }
         if (entity instanceof ItemPipeBlockEntity pipe && pipe.canAccess(player)) {

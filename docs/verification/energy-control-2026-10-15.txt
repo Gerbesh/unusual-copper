@@ -1,0 +1,126 @@
+Unusual Copper 0.12.0-alpha.1 — energy control, 2026-10-15
+
+Final ordinary artifact: build/libs/unusualcopper-0.12.0-alpha.1.jar
+SHA256: D1666377D4F907728ACE90DB8B505648DE80A1F47F85914767A351DD0E8E8555
+JDK 17, Gradle 8.8, ForgeGradle 6.0.54, official mappings 1.20.1.
+Development Forge 47.4.10; ordinary dedicated runtime Forge 47.4.20.
+Fixtures only inside the repository; original user client/server untouched.
+
+Implemented scope: GDD 6.2 consumer priority (high/normal/low), buffered
+energy distributor with six per-face limits/modes/output priorities, passive
+energy monitor. Consumer fairness rotates devices, not their input ports.
+Branch priority works across separate wire components. Relay intake/output
+budgets are independent, each capped by the crystalline rate. Face totals
+and downstream path bottlenecks remain shared across all relevant transfers.
+Network observations update at most every ten ticks and separate production,
+consumption, physical moves and unmet active buffer requests. Cancelled
+operation refunds do not report either production or consumption.
+
+Final default build and GameTests, no optional runtime dependencies
+.codex-tmp/verify-0.12-core-final.log
+gradlew.bat --no-daemon build productionProbeJar runGameTestServer
+[20:50:23] All 129 required tests passed :)
+BUILD SUCCESSFUL in 1m17s
+JUnit XML: AccountingTest 6, WorkAreaTest 3, XpWalletTest 5;
+14 tests, zero failures/errors. New unit case separates generation, transfer,
+simulation, refunds and net operation payments.
+
+Six new EnergyControlGameTests cover actual world ticks:
+- a high-priority receiver gets scarce power before a low-priority receiver,
+  but a full high-priority buffer yields;
+- two equal high-priority devices remain within one basic-wire quantum
+  despite extra input faces and another lower-priority device;
+- 256 CuE to a capped high branch, remaining 3840 to a low branch;
+  closing the first with limit 0 leaves exactly 4096 for the other;
+- one face's 256 limit is shared by multiple receivers, with fair progress;
+- passive monitor distinguishes 500 generated, 125 spent, 4096 moved,
+  and the later unmet 4096 request; multiply-connected devices count once;
+- NBT, foreign/stale owner menu rejection, invalid buttons and owner changes.
+The first core run failed the monitor delta after an unrelated graph rebuild.
+Unchanged components now retain identity/counters; demand histories survive
+unrelated changes. Observations reset only when their actual component set
+changes. Rerun .codex-tmp/verify-0.12-core-r2.log and the final run pass.
+
+Actual Russian client, native menus and protocol
+.codex-tmp/verify-0.12-client-final.log
+gradlew.bat --no-daemon build productionProbeJar runClient
+  -PsmokeClient -PsmokeClientRu
+[20:48:17] ENERGY CONTROL CLIENT PASS: actual vanilla C2S buttons set
+high device priority, east limit 256 and high east output priority; actual
+S2C values confirm settings plus a ten-tick observation window.
+[20:48:18] ENERGY MONITOR CLIENT PASS: live smelter consumption displayed
+separately from wire moves and buffer deficit; passive observer costs zero.
+BUILD SUCCESSFUL in 1m44s, clean shutdown; all earlier client scenes pass.
+Screenshots visually inspected:
+- run/screenshots/cue-energy-distributor-menu.png: six directional rules,
+  confirmed east 256/high, separate production/consumption/flow/deficit.
+  Cursor tooltip overlays part of the table; it is not a geometry defect.
+- run/screenshots/cue-energy-monitor-menu.png: actual numeric rates, compact
+  charge and explanatory text inside the GUI; no stale warm-up dashes.
+- run/screenshots/cue-energy-controls.png: actual distributor/monitor,
+  connected wires and smelter models without missing-texture placeholders.
+The screenshot gate waits after the ready snapshot so pixels represent
+rendered data. The final operation-refund bookkeeping change was then verified
+by the final unit/GameTests and ordinary server runs; it changes no GUI layout.
+Initial client attempt failed to compile due to a missing Direction import;
+that test-only import was fixed before the successful runs.
+
+Ordinary reobfuscated artifacts, no optional mods
+.codex-tmp/verify-0.12-production-r2-1.log
+.codex-tmp/verify-0.12-production-r2-2.log
+python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.12.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.12.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+Both processes pass every mandatory marker, helper exit 0 and clean shutdown.
+[20:50:51, 20:51:09] ENERGY CONTROL PASS: actual high east branch 256,
+low south branch 3840, conserved 54096 CuE, real owner menu buttons and
+passive monitor observing a move without inventing generation/consumption.
+[20:51:09] ENERGY CONTROL DISK RESTORE PASS: actual region-file distributor
+preserves 4095 CuE, owner, high receiver priority, north limit 65536,
+low south output priority and redstone pause after a normal server stop.
+All previous machine, cell-tier, region/player-NBT checkpoint probes pass.
+Initial ordinary run failed in the test-only probe's inherited
+clickMenuButton call. Declaring the receiver as AbstractContainerMenu fixes
+its SRG mapping. The helper rejected the failed run despite Java exit 0.
+
+Actual OpenPAC claim revocation
+.codex-tmp/verify-0.12-opac.log
+gradlew.bat --no-daemon runServer -PopacTests
+Open Parties and Claims 0.30.1; separate fixture and real claim API.
+An already-created owner energy menu becomes invalid immediately after
+the chunk is transferred to another owner; the branch button returns false
+and leaves its 1024 limit unchanged. Restoring the claim restores access.
+This exercises server menu validation, not a real multiplayer client login.
+All prior permission checks pass in the same process; BUILD SUCCESSFUL 31s.
+
+SSN + Progressive + OpenPAC regression on the final ordinary artifact
+.codex-tmp/verify-0.12-ssn-production.log
+gradlew.bat --no-daemon ssnProbeJar -PssnTests
+python tools/run_ssn_probe.py run-ssn-production
+  --jar build/libs/unusualcopper-0.12.0-alpha.1.jar
+  --probe .codex-tmp/ssn-probe/unusualcopper-ssn-probe-0.12.0-alpha.1.jar
+  --progressive .codex-tmp/compat/ssn_progressive-1.2.4.jar
+  --opac .codex-tmp/compat/open-parties-and-claims-forge-1.20.1-0.30.1.jar
+  --java <JDK 17>/bin/java.exe
+Native connection, NBT/priority, sided inventory, far insertion, filters,
+double-chest deduplication and paid-stage disk restore markers pass.
+[20:55:54] STOCK PASS: two bridges/brewers, nineteen physical storages,
+sixteen real fire-resistance potions, six reagent batches and 80000 CuE.
+[20:55:54] CLAIMS PASS: source/master/bridge revocation prevents access.
+[20:56:00] PROGRESSIVE PROFILE PASS: actual recursive two-sword craft while
+the smelter returns three iron ingots for 720 CuE. Clean server shutdown,
+helper exit 0; main artifact checksum unchanged by the probe build.
+
+Artifact inspection
+189 JSON/mcmeta entries parse. Both new Blockbench projects, blockstates,
+models, recipes/advancements and block loot exist. Both locales retain all
+old keys and add 21 new keys. No GameTests, smoke/probe classes or nested
+dependency JARs are shipped in the ordinary main artifact.
+
+Limits
+Default local fixtures are not the full target modpack or 50–100-machine /
+~1000-node benchmark. Shortest BFS routes, no alternative-path optimization.
+Normal restart is verified; cross-chunk crash atomicity D11 is not. Guide,
+remaining JEI/categories/adapters, full shaders/modpack, balance/art/licenses
+and complete T01–T36 acceptance remain open. This is an alpha checkpoint.

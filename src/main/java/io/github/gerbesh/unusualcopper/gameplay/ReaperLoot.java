@@ -44,7 +44,7 @@ public final class ReaperLoot {
             killed = access.unusualcopper$deathCommitted() && action.deathSource;
             if (!killed) {
                 if (!victim.isRemoved() && !access.unusualcopper$deathCommitted()) victim.setHealth(health);
-                access.unusualcopper$restoreCredit(credit); machine.energy.add(price, false);
+                access.unusualcopper$restoreCredit(credit); machine.energy.refundSpent(price);
             }
             if (killed) io.github.gerbesh.unusualcopper.network.MachineEffects.reaperStrike(level,machine,victim,action.id,action.icons.stream().mapToInt(Integer::intValue).toArray());
             else io.github.gerbesh.unusualcopper.network.MachineEffects.reaperCancel(level,machine,action.id);

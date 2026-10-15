@@ -32,7 +32,7 @@ public final class ShepherdLogic implements MachineLogic {
             int next = (int)Math.min(0L, (long)before + ServerConfig.shepherdAdvance());
             adapter.setAge(animal, next);
             if (adapter.age(animal) > before) { machine.grown++; affected.add(animal.getId()); }
-            else { machine.energy.add(cost, false); reason = MachineStatus.NO_GROWTH; }
+            else { machine.energy.refundSpent(cost); reason = MachineStatus.NO_GROWTH; }
         }
         machine.status(machine.grown > 0 ? MachineStatus.WORKING : reason);
         if (!affected.isEmpty()) io.github.gerbesh.unusualcopper.network.MachineEffects.shepherd(level, machine, affected);

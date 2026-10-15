@@ -7,6 +7,7 @@ import io.github.gerbesh.unusualcopper.registry.ModContent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -55,6 +56,9 @@ public final class ClientSmokeTest {
     private static BlockPos enchanterPos;
     private static BlockPos bridgePreview;
     private static BlockPos tierPreview;
+    private static BlockPos energyControlPos;
+    private static boolean energySettingsSent;
+    private static int energyControlFrames,energyMonitorFrames;
     private static boolean enchanterSelected;
     private static int enchanterPriceFrames,enchanterAppliedFrames;
     private static java.util.UUID enchanterNonce;
@@ -304,6 +308,14 @@ public final class ClientSmokeTest {
         if(stage==28&&!captured&&ticks>=20&&mc.screen==null&&bridgePreview!=null&&mc.level.getBlockState(bridgePreview).is(ModContent.SSN_BRIDGE.get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-ssn-bridge-ports.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE SSN BRIDGE CLIENT PASS: six rendered port directions, actual bridge models and base client running without SSN; {}",text.getString());saved.set(true);});}
         if(stage==29&&!captured&&ticks>=20&&mc.screen==null&&tierPreview!=null&&mc.level.getBlockState(tierPreview.east(2)).is(ModContent.MACHINES.get(MachineKind.COPPER_CELL_III).get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-energy-tiers.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY TIERS CLIENT MODELS PASS: three cell tiers and three connected wire tiers rendered; {}",text.getString());saved.set(true);});}
         if(stage==30&&!captured&&ticks>=10&&mc.screen instanceof io.github.gerbesh.unusualcopper.client.CopperMachineScreen&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.CopperMachineMenu menu&&menu.kind()==MachineKind.COPPER_CELL_III&&menu.energy()==15_999_999&&menu.capacity()==16_000_000){captured=true;Screenshot.grab(mc.gameDirectory,"cue-cell-iii-menu.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY TIERS CLIENT MENU PASS: real server menu synchronized exactly 15999999 / 16000000 CuE; {}",text.getString());saved.set(true);});}
+        if(stage==31&&mc.screen instanceof io.github.gerbesh.unusualcopper.client.EnergyControlScreen&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnergyControlMenu menu&&menu.view!=null){
+            int face=Direction.EAST.ordinal();
+            if(!energySettingsSent){energySettingsSent=true;org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(),1,1);mc.gameMode.handleInventoryButtonClick(menu.containerId,20+face);mc.gameMode.handleInventoryButtonClick(menu.containerId,20+face);mc.gameMode.handleInventoryButtonClick(menu.containerId,30+face);mc.gameMode.handleInventoryButtonClick(menu.containerId,0);}
+            var v=menu.view;
+            if(!captured&&v.priority()==2&&v.limits()[face]==256&&v.priorities()[face]==2&&v.ticks()==10&&v.consumed()>0&&v.transferred()>0&&++energyControlFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-energy-distributor-menu.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY CONTROL CLIENT PASS: actual vanilla C2S container buttons configured high priority and 256 CuE east branch; real 10-tick S2C production/consumption/flow snapshot; {}",text.getString());saved.set(true);});}
+        }
+        if(stage==32&&!captured&&mc.screen instanceof io.github.gerbesh.unusualcopper.client.EnergyControlScreen&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnergyControlMenu menu&&menu.view!=null&&menu.view.kind()==MachineKind.ENERGY_MONITOR.ordinal()&&menu.view.ticks()==10&&menu.view.consumed()>0&&menu.view.transferred()>0&&++energyMonitorFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-energy-monitor-menu.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE ENERGY MONITOR CLIENT PASS: passive actual monitor shows physical smelter consumption separately from transfers and buffer deficit; {}",text.getString());saved.set(true);});}
+        if(stage==33&&!captured&&ticks>=20&&mc.screen==null&&energyControlPos!=null&&mc.level.getBlockState(energyControlPos).is(ModContent.MACHINES.get(MachineKind.ENERGY_DISTRIBUTOR).get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-energy-controls.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE energy control models screenshot: {}",text.getString());saved.set(true);});}
         if(stage==21&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&!menu.options.isEmpty()){
             if(!brewerSettingsSent){brewerSettingsSent=true;io.github.gerbesh.unusualcopper.network.BrewerNetwork.configure(menu.containerId,menu.snapshot.runtime(),new io.github.gerbesh.unusualcopper.network.BrewerNetwork.Settings(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2,3,true,7));}
             if(!brewerEnabled&&menu.snapshot.result()==1&&menu.snapshot.settings().vessel()==2){brewerEnabled=true;mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(brewerPos)).redstoneMode=0);}
@@ -526,6 +538,21 @@ public final class ClientSmokeTest {
             else if(stage==29){stage=30;captured=false;saved.set(false);ticks=0;mc.options.hideGui=false;mc.getSingleplayerServer().execute(()->{
                 var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());var cell=(CopperMachineBlockEntity)level.getBlockEntity(tierPreview.east(2));player.teleportTo(level,cell.getBlockPos().getX()+.5,cell.getBlockPos().getY()+1,cell.getBlockPos().getZ()-2,0,18);net.minecraftforge.network.NetworkHooks.openScreen(player,cell,cell.getBlockPos());
             });}
+            else if(stage==30){stage=31;captured=false;saved.set(false);ticks=0;mc.options.hideGui=false;mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();energyControlPos=tierPreview.south(10);
+                for(int x=-4;x<=4;x++)for(int z=-4;z<=4;z++){for(int y=0;y<5;y++)level.setBlock(energyControlPos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);level.setBlock(energyControlPos.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3);}
+                level.setBlock(energyControlPos.west(2),ModContent.MACHINES.get(MachineKind.ESSENCE_SPLITTER).get().defaultBlockState(),3);var source=(CopperMachineBlockEntity)level.getBlockEntity(energyControlPos.west(2));source.setOwner(player.getUUID());source.energy.add(50_000,false);source.inventory.setStackInSlot(0,new ItemStack(ModContent.ESSENCE.get(),64));
+                level.setBlock(energyControlPos,ModContent.MACHINES.get(MachineKind.ENERGY_DISTRIBUTOR).get().defaultBlockState(),3);var router=(CopperMachineBlockEntity)level.getBlockEntity(energyControlPos);router.setOwner(player.getUUID());router.branchLimit(Direction.EAST,0);
+                level.setBlock(energyControlPos.west(),ModContent.CRYSTALLINE_ENERGY_PIPE.get().defaultBlockState(),3);level.setBlock(energyControlPos.east(),ModContent.CRYSTALLINE_ENERGY_PIPE.get().defaultBlockState(),3);
+                level.setBlock(energyControlPos.east(2),ModContent.MACHINES.get(MachineKind.RESONANCE_SMELTER).get().defaultBlockState(),3);var smelter=(CopperMachineBlockEntity)level.getBlockEntity(energyControlPos.east(2));smelter.setOwner(player.getUUID());smelter.inventory.setStackInSlot(0,new ItemStack(Items.RAW_IRON,8));
+                var monitorPos=energyControlPos.east().south();level.setBlock(monitorPos,ModContent.MACHINES.get(MachineKind.ENERGY_MONITOR).get().defaultBlockState(),3);((CopperMachineBlockEntity)level.getBlockEntity(monitorPos)).setOwner(player.getUUID());
+                player.teleportTo(level,energyControlPos.getX()+.5,energyControlPos.getY()+1,energyControlPos.getZ()-2,0,12);io.github.gerbesh.unusualcopper.menu.EnergyControlMenu.open(player,router);
+            });}
+            else if(stage==31){stage=32;captured=false;saved.set(false);ticks=0;mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());var router=(CopperMachineBlockEntity)level.getBlockEntity(energyControlPos);if(router.energyPriority()!=2||router.branchLimit(Direction.EAST)!=256||router.branchPriority(Direction.EAST)!=2)throw new IllegalStateException("Real C2S energy controls did not reach the server");
+                var monitor=(CopperMachineBlockEntity)level.getBlockEntity(energyControlPos.east().south());if(monitor.energy.consumed()!=0||monitor.energy.capacity()!=0)throw new IllegalStateException("Passive monitor charged CuE");player.closeContainer();io.github.gerbesh.unusualcopper.menu.EnergyControlMenu.open(player,monitor);
+            });}
+            else if(stage==32){stage=33;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.teleportTo(level,energyControlPos.getX()+.5,energyControlPos.getY()+3,energyControlPos.getZ()-7,0,18);});}
             else { mc.options.hideGui = false; mc.stop(); }
         }
     }

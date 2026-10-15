@@ -71,7 +71,7 @@ public final class SentinelLogic implements MachineLogic {
         if(committed) {
             m.sentinel.nextShot=level.getGameTime()+ServerConfig.sentinelInterval(); SentinelScheduler.lock(level,m,target.getUUID()); m.grown++; m.status(MachineStatus.WORKING);
             io.github.gerbesh.unusualcopper.network.MachineEffects.sentinel(level,m,target.getBoundingBox().getCenter());
-        } else { m.energy.add(cost,false); m.status(MachineStatus.SHOT_DENIED); }
+        } else { m.energy.refundSpent(cost); m.status(MachineStatus.SHOT_DENIED); }
         m.setChanged();
     }
 }

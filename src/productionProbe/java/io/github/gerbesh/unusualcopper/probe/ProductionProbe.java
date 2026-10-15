@@ -98,6 +98,7 @@ public final class ProductionProbe {
         verifyEnchanter();
         verifyInventoryChanges();
         EnergyTierProbe.start(level, TARGET.offset(0, 10, 5));
+        EnergyControlProbe.start(level,TARGET.offset(0,20,5));
         var phasePos=TARGET.west(2).south(3); var phaseTarget=TARGET.south(3);
         for(var old:level.getEntitiesOfClass(Mob.class,new net.minecraft.world.phys.AABB(phaseTarget).inflate(1))) old.discard();
         level.setBlock(phasePos,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -110,6 +111,7 @@ public final class ProductionProbe {
     }
     private static void phaseTick() {
         EnergyTierProbe.tick();
+        EnergyControlProbe.tick();
         if(phaseMachine==null) return;
         long now=level.getGameTime(); check(now-phaseStarted<120,"Production windup ticker timed out");
         var pending=phaseMachine.reaper.windup;
@@ -118,6 +120,7 @@ public final class ProductionProbe {
         if(phaseVictim.isAlive()) return;
         check(phaseDeadline>0 && now>=phaseDeadline && phaseMachine.energy.stored()==0 && !phaseMachine.inventory.getStackInSlot(2).isEmpty(),"Production prepared strike did not commit real paid loot: deadline="+phaseDeadline+", now="+now+", removed="+phaseVictim.isRemoved()+", hp="+phaseVictim.getHealth()+", energy="+phaseMachine.energy.stored());
         check(EnergyTierProbe.ready(),"Production energy tier probe did not finish");
+        check(EnergyControlProbe.ready(),"Production energy control probe did not finish");
         phaseVictim.discard(); phaseMachine.redstoneMode=1; phaseMachine=null;
         LogUtils.getLogger().info("CuE PRODUCTION WINDUP PASS: actual twelve-tick preparation, no early damage/fee, real paid strike and loot");
         level.setChunkForced(TARGET.getX()>>4,TARGET.getZ()>>4,false); level.getServer().halt(false);

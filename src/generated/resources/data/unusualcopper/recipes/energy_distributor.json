@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "K": {
+      "item": "unusualcopper:copper_core"
+    },
+    "P": {
+      "item": "unusualcopper:reinforced_energy_pipe"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FPF",
+    "RKR",
+    "FPF"
+  ],
+  "result": {
+    "item": "unusualcopper:energy_distributor"
+  },
+  "show_notification": true
+}

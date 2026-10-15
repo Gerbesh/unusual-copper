@@ -141,6 +141,14 @@ def models():
         export_model(name, body, tank_windows())
     splitter = frame() + [part([6, 4, 6], [10, 10, 10], "aqua"), part([4, 14, 4], [12, 16, 12], "patina"), part([5, 12, 5], [11, 14, 11], "dark"), part([3, 4, .5], [6, 8, 1.5], "patina")]
     export_model("essence_splitter", splitter, tank_windows())
+    distributor=frame()+[part([3,3,3],[13,13,13],"patina"),part([4,5,0],[12,11,3],"copper"),part([6,7,0],[10,9,.5],"aqua"),
+                        part([4,5,13],[12,11,16],"copper"),part([6,7,15.5],[10,9,16],"aqua"),part([0,5,4],[3,11,12],"copper"),
+                        part([0,7,6],[.5,9,10],"aqua"),part([13,5,4],[16,11,12],"copper"),part([15.5,7,6],[16,9,10],"aqua"),
+                        part([4,13,4],[12,16,12],"dark"),part([6,15.5,6],[10,16,10],"aqua")]
+    export_model("energy_distributor",distributor,[])
+    monitor=frame()+[part([2,3,2],[14,13,14],"patina"),part([2,4,.5],[14,12,2],"copper"),part([3,5,.2],[13,11,.5],"dark"),
+                    part([4,6,0],[5,8,.2],"aqua"),part([7,6,0],[8,10,.2],"aqua"),part([10,6,0],[11,9,.2],"aqua")]
+    export_model("energy_monitor",monitor,[])
     tilt = {"origin": [8, 10, 8], "axis": "x", "angle": -22.5}
     solar = [part([0, 0, 0], [16, 2, 16], "dark"), part([1, 2, 1], [15, 7, 15], "patina"), part([0, 6, 0], [16, 8, 16], "copper"), part([6, 8, 6], [10, 11, 10], "dark"), part([1, 10, 1], [15, 11, 15], "copper", tilt), part([2, 11, 2], [14, 11.5, 14], "aqua", tilt), part([7.5, 11.5, 2], [8.5, 12, 14], "copper", tilt), part([2, 11.5, 7.5], [14, 12, 8.5], "copper", tilt), part([4, 3, .5], [12, 5, 1], "aqua")]
     export_model("solar_infuser", solar, [])
@@ -425,6 +433,27 @@ def languages():
         ("block.unusualcopper.copper_cell_iii", "Copper Cell III", "Медная ячейка III"),
         ("block.unusualcopper.reinforced_energy_pipe", "Reinforced Energy Pipe", "Укреплённый энергопровод"),
         ("block.unusualcopper.crystalline_energy_pipe", "Crystalline Energy Pipe", "Кристаллический энергопровод"),
+        ("block.unusualcopper.energy_distributor", "Energy Distributor", "Энергетический разветвитель"),
+        ("block.unusualcopper.energy_monitor", "Energy Monitor", "Энергетический монитор"),
+        ("energy.unusualcopper.settings", "Energy priority and network", "Приоритет энергии и сеть"),
+        ("energy.unusualcopper.priority_hint", "Priority when this device requests power.", "Приоритет заполнения буфера этого устройства."),
+        ("energy.unusualcopper.branch_priority_hint", "Priority of this output branch. Configure the face as Output to use it.", "Приоритет этой выходной ветви. Для работы выберите режим «выход»."),
+        ("energy.unusualcopper.priority.0", "Low", "Низкий"),
+        ("energy.unusualcopper.priority.1", "Normal", "Обычный"),
+        ("energy.unusualcopper.priority.2", "High", "Высокий"),
+        ("energy.unusualcopper.mode.disabled", "Off", "выкл."),
+        ("energy.unusualcopper.mode.energy_input", "Input", "вход"),
+        ("energy.unusualcopper.mode.energy_output", "Output", "выход"),
+        ("energy.unusualcopper.limit_hint", "Shared face limit in CuE/t. Click to cycle; 0 closes the branch.", "Общий лимит грани в CuE/тик. Нажмите для смены; 0 закрывает ветвь."),
+        ("energy.unusualcopper.buffer", "Stored: %s / %s CuE", "Буфер: %s / %s CuE"),
+        ("energy.unusualcopper.nodes", "%s wires, %s devices", "Проводов: %s; устройств: %s"),
+        ("energy.unusualcopper.produced", "Generated: %s", "Производство: %s"),
+        ("energy.unusualcopper.consumed", "Consumed: %s", "Расход: %s"),
+        ("energy.unusualcopper.transferred", "Moved: %s", "Перенос: %s"),
+        ("energy.unusualcopper.deficit", "Deficit: %s", "Дефицит: %s"),
+        ("energy.unusualcopper.units", "CuE/t; updated every 10 ticks", "CuE/тик; обновление раз в 10 тиков"),
+        ("energy.unusualcopper.deficit_hint", "Deficit is unmet receiver buffer demand within its port limits. It is not a prediction of future recipe costs. Moving CuE is separate from consuming it.", "Дефицит — непокрытый запрос заполнения буферов в пределах лимитов портов. Это не прогноз цены будущих рецептов. Перенос CuE показан отдельно от расхода."),
+        ("energy.unusualcopper.open_hint", "Shift-right-click a machine with the Face Selector to open its energy controls. Equal priorities rotate; high priority is served first.", "Shift + ПКМ селектором граней по машине открывает управление энергией. Равные приоритеты чередуются; высокий обслуживается первым."),
         ("jei.unusualcopper.solar_infusion", "Solar Infusion", "Солнечное насыщение"),
         ("jei.unusualcopper.essence_info", "1 essence provides 500 CuE by default (configurable on the server). The Essence Splitter needs buffer space.", "1 эссенция даёт 500 CuE по умолчанию (меняется в настройках сервера). Требуется место в расщепителе."),
         ("jei.unusualcopper.lens_info", "Reusable solar lens: 16,384 input copper units of durability. Infusion needs open daytime sky.", "Многоразовая солнечная линза: ресурс 16 384 единицы входной меди. Насыщение требует открытого дневного неба."),
