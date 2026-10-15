@@ -70,6 +70,8 @@ public final class ModDataGeneration {
                     .define('F',ModContent.FRAME.get()).define('G',Items.GLASS).define('C',Items.CAULDRON).define('B',Items.BREWING_STAND).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.ENCHANTMENT_CORE.get()).pattern("OLO").pattern("ATA").pattern("OLO")
                     .define('O',Items.OBSIDIAN).define('L',Items.LAPIS_LAZULI).define('A',Items.AMETHYST_SHARD).define('T',Items.ENCHANTING_TABLE).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.SSN_BRIDGE.get()).pattern("FQF").pattern("RER").pattern("FQF")
+                    .define('F',ModContent.FRAME.get()).define('Q',Items.QUARTZ).define('R',Items.REDSTONE).define('E',Items.ENDER_PEARL).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ENCHANTMENT_RESONATOR).get()).pattern("FFF").pattern("FCF").pattern("FFF")
                     .define('F',ModContent.FRAME.get()).define('C',ModContent.ENCHANTMENT_CORE.get()).unlockedBy("has_core",has(ModContent.ENCHANTMENT_CORE.get())).save(out);
             for (var item : new net.minecraft.world.item.Item[]{Items.COPPER_INGOT, Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE}) {

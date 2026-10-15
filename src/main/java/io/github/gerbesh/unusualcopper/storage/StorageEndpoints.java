@@ -8,7 +8,8 @@ import java.util.UUID;
 /** All machine and pipe ports select their server-side storage adapter here. */
 public final class StorageEndpoints {
     public static StorageEndpoint at(ServerLevel level,BlockPos pos,Direction side,UUID owner){
-        return new HandlerStorageEndpoint(level,pos,side,owner);
+        return at(level,pos,side,owner,null);
     }
+    public static StorageEndpoint at(ServerLevel level,BlockPos pos,Direction side,UUID owner,BlockPos identityHint){return new RoutedStorageEndpoint(level,pos,side,owner,identityHint);}
     private StorageEndpoints(){}
 }

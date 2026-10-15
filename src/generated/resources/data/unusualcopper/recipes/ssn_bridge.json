@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "FQF",
+    "RER",
+    "FQF"
+  ],
+  "result": {
+    "item": "unusualcopper:ssn_bridge"
+  },
+  "show_notification": true
+}

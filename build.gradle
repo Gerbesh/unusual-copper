@@ -9,6 +9,15 @@ group = mod_group_id
 base.archivesName = mod_id
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+if (project.hasProperty('jeiSmoke') && !project.hasProperty('jeiClient'))
+    throw new GradleException('JEI client smoke requires -PjeiClient')
+if (project.hasProperty('ssnProgressiveClient') && !project.hasProperty('ssnClient'))
+    throw new GradleException('Progressive client requires -PssnClient')
+
+repositories {
+    maven { url = 'https://maven.blamejared.com' }
+}
+
 sourceSets {
     main.resources {
         srcDir 'src/generated/resources'
@@ -19,6 +28,10 @@ sourceSets {
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
     opacTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    ssnTest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
@@ -44,9 +57,23 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('jeiSmoke')) {
+                workingDirectory project.file('run-jei-smoke')
+                property 'unusualcopper.jeiSmoke', 'true'
+                args '--quickPlaySingleplayer', 'cue-jei-smoke', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
+            if (project.hasProperty('ssnClient') && !project.hasProperty('jeiSmoke')) {
+                // Automated JEI smoke always uses its own disposable world, even with SSN.
+                workingDirectory project.file('run-ssn-client')
+            }
             if (project.hasProperty('smokeClient')) {
                 property 'unusualcopper.smokeClient', 'true'
                 if (project.hasProperty('smokeClientRu')) property 'unusualcopper.smokeClientRu', 'true'
+                args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            } else if (project.hasProperty('smokeShaders')) {
+                property 'unusualcopper.smokeShaders', 'true'
                 args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
                 mods { "${mod_id}" { source sourceSets.gameTest } }
             }
@@ -58,10 +85,16 @@ minecraft {
                 property 'unusualcopper.smokeServer', 'true'
                 mods { "${mod_id}" { source sourceSets.gameTest } }
             }
-            if (project.hasProperty('opacTests')) {
+            if (project.hasProperty('opacTests') && !project.hasProperty('ssnTests')) {
                 workingDirectory project.file('run-opac-server')
                 property 'unusualcopper.opacSmoke', 'true'
                 mods { "${mod_id}" { source sourceSets.gameTest; source sourceSets.opacTest } }
+            }
+            if (project.hasProperty('ssnTests')) {
+                workingDirectory project.file('run-ssn-server')
+                property 'unusualcopper.ssnSmoke', 'true'
+                property 'unusualcopper.opacSmoke', 'false'
+                mods { unusualcopper_ssn_probe { source sourceSets.ssnTest } }
             }
         }
         gameTestServer {
@@ -83,11 +116,45 @@ tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer', 'run
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    // API-only compile dependency. The release JAR must never require JEI to launch.
+    compileOnly fg.deobf('mezz.jei:jei-1.20.1-forge-api:15.21.0.138')
+    compileOnly fg.deobf('mezz.jei:jei-1.20.1-common-api:15.21.0.138')
 }
 if (project.hasProperty('opacTests')) {
     repositories { flatDir { dirs '.codex-tmp/compat' } }
     dependencies { runtimeOnly fg.deobf('local:open-parties-and-claims-forge-1.20.1:0.30.1') }
     tasks.matching { it.name == 'runServer' }.configureEach { dependsOn 'createSrgToMcp' }
+}
+if (project.hasProperty('ssnTests')) {
+    repositories { flatDir { dirs '.codex-tmp/compat' } }
+    dependencies {
+        implementation fg.deobf('local:SimpleStorageNetwork-1.20.1:1.13.2')
+        implementation fg.deobf('local:flib-1.20.1:0.0.16')
+        if (project.hasProperty('ssnProgressiveTests')) runtimeOnly fg.deobf('local:ssn_progressive:1.2.4')
+    }
+}
+if (project.hasProperty('ssnClient')) {
+    repositories { flatDir { dirs '.codex-tmp/compat' } }
+    dependencies {
+        runtimeOnly fg.deobf('local:SimpleStorageNetwork-1.20.1:1.13.2')
+        runtimeOnly fg.deobf('local:flib-1.20.1:0.0.16')
+        if (project.hasProperty('ssnProgressiveClient')) runtimeOnly fg.deobf('local:ssn_progressive:1.2.4')
+        if (project.hasProperty('opacClient')) runtimeOnly fg.deobf('local:open-parties-and-claims-forge-1.20.1:0.30.1')
+    }
+}
+if (project.hasProperty('jeiClient')) {
+    dependencies { runtimeOnly fg.deobf('mezz.jei:jei-1.20.1-forge:15.21.0.138') }
+}
+if (project.hasProperty('smokeShaders') || project.hasProperty('shaderClient')) {
+    // The manual shaderClient profile uses remapped shader mods without auto-running or closing the game.
+    // Production Oculus/Xenon jars require FG remapping before loading into the official-mapped MDK client.
+    repositories { flatDir { dirs '.codex-tmp/compat' } }
+    dependencies {
+        runtimeOnly fg.deobf('local:oculus-mc1.20.1:1.8.0')
+        runtimeOnly fg.deobf('local:xenon:0.3.31+mc1.20.1')
+        runtimeOnly fg.deobf('local:EuphoriaPatcher:1.9.3-r5.8.1-forge')
+        runtimeOnly fg.deobf('local:iris_shader_folder:1.4.1-forge')
+    }
 }
 
 tasks.named('test', Test).configure { useJUnitPlatform() }
@@ -117,3 +184,14 @@ tasks.register('productionProbeJar', Jar) {
     finalizedBy 'reobfProductionProbeJar'
 }
 reobf { productionProbeJar {} }
+if (project.hasProperty('ssnTests')) {
+    tasks.register('ssnProbeJar', Jar) {
+        from sourceSets.ssnTest.output
+        archiveBaseName = 'unusualcopper-ssn-probe'
+        destinationDirectory = file('.codex-tmp/ssn-probe')
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
+        finalizedBy 'reobfSsnProbeJar'
+    }
+    reobf { ssnProbeJar {} }
+}

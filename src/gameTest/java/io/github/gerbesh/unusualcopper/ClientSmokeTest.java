@@ -53,6 +53,7 @@ public final class ClientSmokeTest {
     private static int brewerMissingFrames;
     private static final AtomicBoolean brewerVerified=new AtomicBoolean();
     private static BlockPos enchanterPos;
+    private static BlockPos bridgePreview;
     private static boolean enchanterSelected;
     private static int enchanterPriceFrames,enchanterAppliedFrames;
     private static java.util.UUID enchanterNonce;
@@ -299,6 +300,7 @@ public final class ClientSmokeTest {
         }
         if(stage==26&&!captured&&enchanterVerified.get()&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu&&menu.snapshot!=null&&menu.snapshot.result()==io.github.gerbesh.unusualcopper.network.EnchanterNetwork.Result.APPLIED&&Math.abs(io.github.gerbesh.unusualcopper.gameplay.XpWallet.points(mc.player)-765)<.0001&&net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY,menu.slots.get(0).getItem())==5&&++enchanterAppliedFrames>=3){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-applied.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter applied screenshot: {}",text.getString());saved.set(true);});}
         if(stage==27&&!captured&&ticks>=5&&mc.screen==null){captured=true;Screenshot.grab(mc.gameDirectory,"cue-enchanter-machine.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE enchanter machine screenshot: {}",text.getString());saved.set(true);});}
+        if(stage==28&&!captured&&ticks>=20&&mc.screen==null&&bridgePreview!=null&&mc.level.getBlockState(bridgePreview).is(ModContent.SSN_BRIDGE.get())){captured=true;Screenshot.grab(mc.gameDirectory,"cue-ssn-bridge-ports.png",mc.getMainRenderTarget(),text->{UnusualCopper.LOGGER.info("CuE SSN BRIDGE CLIENT PASS: six rendered port directions, actual bridge models and base client running without SSN; {}",text.getString());saved.set(true);});}
         if(stage==21&&mc.player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.BrewerMenu menu&&menu.snapshot!=null&&!menu.options.isEmpty()){
             if(!brewerSettingsSent){brewerSettingsSent=true;io.github.gerbesh.unusualcopper.network.BrewerNetwork.configure(menu.containerId,menu.snapshot.runtime(),new io.github.gerbesh.unusualcopper.network.BrewerNetwork.Settings(new net.minecraft.resources.ResourceLocation("minecraft","long_fire_resistance"),2,3,true,7));}
             if(!brewerEnabled&&menu.snapshot.result()==1&&menu.snapshot.settings().vessel()==2){brewerEnabled=true;mc.getSingleplayerServer().execute(()->((CopperMachineBlockEntity)serverLevel(mc).getBlockEntity(brewerPos)).redstoneMode=0);}
@@ -503,6 +505,13 @@ public final class ClientSmokeTest {
             });}
             else if(stage==25){stage=26;captured=false;saved.set(false);ticks=0;var menu=(io.github.gerbesh.unusualcopper.menu.EnchanterMenu)mc.player.containerMenu;io.github.gerbesh.unusualcopper.network.EnchanterNetwork.confirm(menu.containerId,menu.snapshot.runtime(),enchanterNonce);}
             else if(stage==26){stage=27;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());player.closeContainer();player.teleportTo(level,enchanterPos.getX()+1.5,enchanterPos.getY()+2,enchanterPos.getZ()-5,0,12);});}
+            else if(stage==27){stage=28;captured=false;saved.set(false);ticks=0;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{
+                var level=serverLevel(mc);var player=level.getServer().getPlayerList().getPlayer(mc.player.getUUID());bridgePreview=enchanterPos.south(10);
+                for(int x=-4;x<=4;x++)for(int z=-3;z<=4;z++){for(int y=0;y<5;y++)level.setBlock(bridgePreview.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);level.setBlock(bridgePreview.offset(x,-1,z),Blocks.STONE_BRICKS.defaultBlockState(),3);}
+                var directions=net.minecraft.core.Direction.values();for(int i=0;i<6;i++){var pos=bridgePreview.offset((i%3-1)*2,0,i/3*2);level.setBlock(pos,ModContent.SSN_BRIDGE.get().defaultBlockState().setValue(io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlock.FACING,directions[i]),3);((io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlockEntity)level.getBlockEntity(pos)).owner(player.getUUID());}
+                // The center front model is also the client chunk-readiness witness.
+                player.teleportTo(level,bridgePreview.getX()+.5,bridgePreview.getY()+3,bridgePreview.getZ()-6,0,18);
+            });}
             else { mc.options.hideGui = false; mc.stop(); }
         }
     }

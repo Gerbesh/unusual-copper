@@ -180,6 +180,14 @@ def models():
                  part([1,13,1],[3,16,3],"aqua"),part([13,13,1],[15,16,3],"aqua"),part([1,13,13],[3,16,15],"aqua"),
                  part([13,13,13],[15,16,15],"aqua"),part([6,4,.3],[10,7,.7],"aqua")]
     export_model("enchantment_resonator",enchanter,[])
+    bridge = frame() + [part([3,3,3],[13,12,13],"patina"),part([3,4,1],[13,12,3],"copper"),
+                        part([4,5,.5],[12,11,1],"dark"),part([6,7,0],[10,9,.4],"aqua"),
+                        part([5,7,13],[11,9,16],"dark"),part([6,7.5,15],[10,8.5,16],"aqua")]
+    export_model("ssn_bridge",bridge,[])
+    bridge_states = []
+    for facing, rotation in (("north",{}),("east",{"y":90}),("south",{"y":180}),("west",{"y":270}),("up",{"x":270}),("down",{"x":90})):
+        bridge_states.append({"when":{"facing":facing},"apply":{"model":"unusualcopper:block/ssn_bridge",**rotation}})
+    write_json(ASSETS / "blockstates/ssn_bridge.json",{"multipart":bridge_states})
     pipe_materials = list(PALETTE) + ["glass"]
     refs = {m: f"unusualcopper:block/{m}" for m in pipe_materials}
     center = [part([5, 5, 5], [11, 11, 11], "copper"), part([6, 6, 4.5], [10, 10, 5], "aqua")]
@@ -242,6 +250,10 @@ def languages():
         "block.unusualcopper.copper_sentinel": ("Copper Sentinel", "Медный часовой"),
         "block.unusualcopper.aetheric_brewer": ("Aetheric Brewer", "Эфирный автоклав"),
         "block.unusualcopper.enchantment_resonator": ("Enchantment Resonator", "Резонатор зачарований"),
+        "block.unusualcopper.ssn_bridge": ("SSN Bridge", "Мост SSN"),
+        "bridge.unusualcopper.connected": ("Connected to storage network", "Подключён к сети хранения"),
+        "bridge.unusualcopper.disconnected": ("Point the marked port at a loaded SSN cable or master", "Направьте отмеченный порт на загруженный кабель или контроллер SSN"),
+        "bridge.unusualcopper.unsupported": ("Requires supported SSN 1.13.2; Progressive 1.2.4 if installed", "Нужна поддерживаемая SSN 1.13.2; Progressive 1.2.4, если установлен"),
         "item.unusualcopper.resonant_enchantment_core": ("Resonant Enchantment Core", "Ядро резонатора зачарований"),
         "enchanter.unusualcopper.search": ("Find an applicable enchantment", "Найти подходящее зачарование"),
         "enchanter.unusualcopper.item": ("Item", "Предмет"),

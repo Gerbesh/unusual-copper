@@ -43,6 +43,9 @@ public final class ModContent {
     public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
     public static final RegistryObject<Item> SENTINEL_FOCUS = ITEMS.register("sentinel_range_focus", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FRAME = ITEMS.register("copper_frame", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Block> SSN_BRIDGE=BLOCKS.register("ssn_bridge",io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlock::new);
+    public static final RegistryObject<Item> SSN_BRIDGE_ITEM=ITEMS.register("ssn_bridge",()->new BlockItem(SSN_BRIDGE.get(),new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlockEntity>> SSN_BRIDGE_ENTITY=ENTITIES.register("ssn_bridge",()->BlockEntityType.Builder.of(io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlockEntity::new,SSN_BRIDGE.get()).build(null));
     public static final RegistryObject<Item> CORE = ITEMS.register("copper_core", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ENCHANTMENT_CORE = ITEMS.register("resonant_enchantment_core",()->new Item(new Item.Properties()));
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);

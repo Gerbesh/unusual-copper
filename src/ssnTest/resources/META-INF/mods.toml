@@ -1,0 +1,19 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="unusualcopper_ssn_probe"
+version="1"
+displayName="Unusual Copper SSN verification probe"
+[[dependencies.unusualcopper_ssn_probe]]
+modId="unusualcopper"
+mandatory=true
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.unusualcopper_ssn_probe]]
+modId="storagenetwork"
+mandatory=true
+versionRange="[1.13.2]"
+ordering="AFTER"
+side="BOTH"

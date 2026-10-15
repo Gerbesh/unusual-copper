@@ -65,11 +65,13 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         try{action.run();}finally{localCommit=false;if(deferredChange){deferredChange=false;try{super.setChanged();}catch(RuntimeException hook){io.github.gerbesh.unusualcopper.UnusualCopper.LOGGER.error("Neighbor notification failed after a completed local machine commit",hook);}}}
     }
     private net.minecraft.core.BlockPos boundInventory;
+    private net.minecraft.core.BlockPos boundIdentity;
     private Direction boundSide = Direction.UP;
     private io.github.gerbesh.unusualcopper.storage.StorageEndpoint boundEndpoint;
     public io.github.gerbesh.unusualcopper.storage.StorageEndpoint boundEndpoint(ServerLevel level) {
         if (boundInventory == null) return null;
-        if (boundEndpoint == null) boundEndpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(level, boundInventory, boundSide, owner);
+        if (boundEndpoint == null) boundEndpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(level, boundInventory, boundSide, owner,boundIdentity);
+        var identity=boundEndpoint.identity().pos();if(!java.util.Objects.equals(boundIdentity,identity)){boundIdentity=identity;setChanged();}
         return boundEndpoint;
     }
     private final java.util.List<ItemStack> boundCargo = new java.util.ArrayList<>();
@@ -89,9 +91,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 || worldPosition.distSqr(pos) > 32 * 32 || !server.hasChunkAt(pos) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server, worldPosition, player.getUUID())) return false;
         var endpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(server, pos, side, owner == null ? player.getUUID() : owner);
         if (!endpoint.isAvailable()) return false;
-        if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundSide = side; boundEndpoint = null; if(brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); return true;
+        if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundIdentity=endpoint.identity().pos(); boundSide = side; boundEndpoint = null; if(brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); return true;
     }
-    public void clearBinding() { if(brewer!=null && brewer.job!=null)return; boundInventory = null; boundEndpoint = null; if(brewer!=null&&level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); }
+    public void clearBinding() { if(brewer!=null && brewer.job!=null)return; boundInventory = null; boundIdentity=null; boundEndpoint = null; if(brewer!=null&&level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); }
     public void recoverBinding(Player player) {
         if (!canAccess(player)) return;
         var remainder = new java.util.ArrayList<ItemStack>();
@@ -338,7 +340,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (arborist != null) tag.put("Arborist", arborist.save());
         if (sentinel != null) tag.put("Sentinel",sentinel.save());
         if (brewer != null) tag.put("Brewer",brewer.save());
-        if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
+        if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); if(boundIdentity!=null)tag.putLong("BoundIdentity",boundIdentity.asLong());tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
     }
@@ -361,7 +363,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (arborist != null) arborist.load(tag.getCompound("Arborist"));
         if (sentinel != null) sentinel.load(tag.getCompound("Sentinel"));
         if (brewer != null) {brewer.load(tag.getCompound("Brewer"));if(brewer.job!=null){progress=brewer.job.stage;duration=brewer.job.plan.stages();operationCost=brewer.job.price();}}
-        boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
+        boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundIdentity=tag.contains("BoundIdentity")?BlockPos.of(tag.getLong("BoundIdentity")):null;boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
     }

@@ -4,6 +4,6 @@
   "package": "io.github.gerbesh.unusualcopper.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "unusualcopper.refmap.json",
-  "mixins": ["EntityPopulationMixin", "EntityDataPopulationMixin", "HorsePopulationMixin", "MobLeashPopulationMixin", "ReaperVictimMixin", "InventoryChangesMixin"],
+  "mixins": ["EntityPopulationMixin", "EntityDataPopulationMixin", "HorsePopulationMixin", "MobLeashPopulationMixin", "ReaperVictimMixin", "InventoryChangesMixin", "SsnNetworkMixin"],
   "injectors": {"defaultRequire": 1}
 }

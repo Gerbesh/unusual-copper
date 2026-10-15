@@ -17,6 +17,9 @@ public final class FaceSelectorItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(level instanceof ServerLevel server) || !ProtectionPolicy.allowed(server, pos, player.getUUID())) return InteractionResult.FAIL;
         var entity = level.getBlockEntity(pos);
+        if(entity instanceof io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlockEntity bridge&&bridge.canAccess(player)){
+            level.setBlock(pos,bridge.getBlockState().setValue(io.github.gerbesh.unusualcopper.compat.ssn.SsnBridgeBlock.FACING,side),3);bridge.invalidateStorage();bridge.setChanged();return InteractionResult.SUCCESS;
+        }
         if (entity instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) {
             machine.cycleSide(side); player.displayClientMessage(Component.translatable(machine.sideMode(side).translationKey()), true); return InteractionResult.SUCCESS;
         }

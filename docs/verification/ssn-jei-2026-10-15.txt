@@ -1,0 +1,100 @@
+Unusual Copper 0.10.0-alpha.1 — verification, 2026-10-15
+
+Main artifact: build/libs/unusualcopper-0.10.0-alpha.1.jar
+SHA256: ADCB0F7E4875A93DAD983C8865695A95F499D72315D84A4F6CF8C047D22B2372
+Java 17; ForgeGradle 6.0.54 / Gradle 8.8; official mappings 1.20.1.
+Development Forge 47.4.10; ordinary dedicated server Forge 47.4.20.
+All fixtures are inside the repository. User client/server worlds untouched.
+
+Final default build, no optional runtime mods
+.codex-tmp/verify-0.10-final.log
+gradlew.bat --no-daemon build productionProbeJar runGameTestServer
+[19:44:22] All 117 required tests passed :)
+BUILD SUCCESSFUL in 59s
+JUnit XML: AccountingTest 5, WorkAreaTest 3, XpWalletTest 5;
+13 tests, zero failures/errors. Some GameTests deliberately inject failing
+listeners/providers and log handled errors; the required test report passes.
+Artifact inspection: 145 JSON/mcmeta entries parse; optional integration
+classes present; GameTests, smoke/probe fixtures and nested JARs absent.
+
+Final ordinary artifact WITHOUT SSN or JEI
+.codex-tmp/verify-0.10-production-final.log
+python tools/run_production_probe.py run-production
+  --jar build/libs/unusualcopper-0.10.0-alpha.1.jar
+  --probe .codex-tmp/production-probe/unusualcopper-probe-0.10.0-alpha.1.jar
+  --java <JDK 17>/bin/java.exe
+[19:53:02] Population, reaper, arborist, sentinel, brewer, enchanter and
+inventory-index PASS; [19:53:03] twelve-tick windup PASS.
+Normal brewer region-file restore and enchanter region/player-NBT restore
+PASS; persistence round 16. Server stops cleanly, helper exit 0.
+
+Final ordinary artifact WITH SSN + Progressive + OpenPAC
+.codex-tmp/verify-0.10-ssn-production-final.log
+gradlew.bat --no-daemon ssnProbeJar -PssnTests
+python tools/run_ssn_probe.py run-ssn-production
+  --jar build/libs/unusualcopper-0.10.0-alpha.1.jar
+  --probe .codex-tmp/ssn-probe/unusualcopper-ssn-probe-0.10.0-alpha.1.jar
+  --progressive .codex-tmp/compat/ssn_progressive-1.2.4.jar
+  --opac .codex-tmp/compat/open-parties-and-claims-forge-1.20.1-0.30.1.jar
+  --java <JDK 17>/bin/java.exe
+Native SSN 1.13.2 SHA256:
+1DB6F5595E5EDC255DB6800DE9E0E1AA8E01E10D79D1784D549D70EB2CF53012
+FLib 0.0.16 SHA256:
+5736FD8A36FB3C69F99BAE3127FB3743B68C801FFBAB71A876C2A203A2C19E0E
+[19:49:31] DISK RESTORE PASS: paid awkward stage from actual region files,
+original owner/bridge/master, three fire-resistance potions, 15000 total CuE.
+[19:49:31–32] CONNECTED, EXACT, SIDED INDEX, FAR INSERT, FILTER,
+DOUBLE CHEST PASS. Nineteen real storages, exact NBT/priority, north-only
+512-slot handler, real insert into nineteenth storage, native allowlist/OUT,
+twelve items counted once through duplicate double-chest links, then nine
+after a partner mutation. Paused bridge retains its shared master identity.
+[19:49:56] STOCK PASS: two brewers through distinct bridges, sixteen actual
+fire-resistance potions, six reagent batches, 80000 CuE; 473 world ticks
+including stability wait. This is scenario timing, not a performance benchmark.
+[19:49:56] CLAIMS PASS: actual OpenPAC 0.30.1 claim revocation on source,
+master and bridge prevents reads/transfers/fees, even after cached counts.
+[19:50:01] PROGRESSIVE PROFILE PASS: actual Progressive 1.2.4 terminal and
+server request recursively craft two iron swords while a CuE smelter returns
+three real iron ingots for 720 CuE. Server gateway test, not client C2S/UI.
+[19:50:01] DISK CHECKPOINT: next paid stage, owner/binding and pause saved.
+Helper exit 0; native server stops cleanly.
+Earlier SSN-only profile without Progressive also passes (.codex-tmp/ssn-run.out,
+17:46:55; .codex-tmp/ssn-production.log at 18:11 before its later replacement).
+That earlier binary preceded the JEI addition; final optional-absence evidence
+above uses the current artifact with neither optional mod installed.
+
+Client without optional mods, Russian UI
+.codex-tmp/verify-0.10-client-final.log
+gradlew.bat --no-daemon runClient -PsmokeClient -PsmokeClientRu
+[19:54:30] BREWER CLIENT PASS: actual C2S settings, missing-reagent pause,
+three exact lingering/long fire-resistance potions, 24000 CuE, no excess order.
+[19:54:34] ENCHANTER CLIENT PASS: actual quote/nonce confirmation,
+Efficiency V, 235 XP, 156250 CuE, 64 lapis, original metadata and client XP.
+[19:54:36] SSN BRIDGE CLIENT PASS: six orientations rendered without SSN.
+run/screenshots/cue-ssn-bridge-ports.png visually inspected: six complete
+bridge models, ports/glass and no missing-texture placeholders.
+Existing machine/menu/effect checks pass; clean stop, BUILD SUCCESSFUL 1m26s.
+
+JEI development clients, no shaders
+Three profiles completed: JEI; JEI+SSN+Progressive;
+JEI+SSN+Progressive+OpenPAC. Commands in docs/TEST_CLIENT.md.
+Latest full profile: run-jei-smoke/logs/latest.log (19:15).
+[19:15:22] JEI SOLAR RECIPES REGISTERED: 4 from the active world.
+[19:15:23] JEI CLIENT REGISTRY PASS: real multipliers and infuser catalyst.
+[19:15:25] JEI CLIENT PASS: rendered screenshot and clean GUI teardown.
+run-jei-smoke/screenshots/cue-jei-solar.png visually inspected: real JEI
+category, reusable lens and one/two essence outputs. These are development
+client tests; no claim of full modpack or every machine's recipe category.
+
+Shaders
+See docs/SHADER_COMPAT.md for exact versions, commands and failure scope.
+Control Complementary Reimagined r5.8.1 ZIP is active and renders day/night.
+Exact Better MC Medium fails final.fsh compilation in isolated tests on both
+Forge versions: undefined variable _10. Original user's log differs; the
+environment difference remains unresolved. Medium compatibility is OPEN.
+
+Remaining release work
+Full T01–T36 audit, guide/advancements/remaining JEI categories, upgrades,
+tree/storage adapters, full target modpack, balance/art/licenses and measured
+50–100-machine / ~1000-node stress remain open. Normal restart is verified;
+cross-chunk crash atomicity D11 is not. This is an alpha checkpoint, not 1.0.
