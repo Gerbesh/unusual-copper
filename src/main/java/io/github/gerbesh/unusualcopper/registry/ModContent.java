@@ -70,6 +70,9 @@ public final class ModContent {
     public static final RegistryObject<Item> RESONANT_COIL = ITEMS.register("resonant_coil", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> REINFORCED_FRAME = ITEMS.register("reinforced_frame", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> CIRCUIT_BLANK = ITEMS.register("circuit_blank", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> RESONANT_CRYSTAL = ITEMS.register("resonant_crystal", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ETCHING_REAGENT = ITEMS.register("etching_reagent", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ETCHED_CIRCUIT = ITEMS.register("etched_circuit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ENCHANTMENT_CORE = ITEMS.register("resonant_enchantment_core",()->new Item(new Item.Properties()));
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);
     public static final RegistryObject<Item> ITEM_PIPE_ITEM = ITEMS.register("copper_item_pipe", () -> new BlockItem(ITEM_PIPE.get(), new Item.Properties()));
