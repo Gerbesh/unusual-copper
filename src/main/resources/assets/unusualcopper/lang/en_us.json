@@ -365,5 +365,10 @@
   "mining.unusualcopper.output_at": "Output: %s %s %s. Click to rebind.",
   "mining.unusualcopper.energy": "%s CuE · %s/ore",
   "wand.unusualcopper.mining_too_large": "Select up to 128×128; corners must be within 128 blocks on each horizontal axis.",
-  "mining.unusualcopper.energy_wait": "Need %s more CuE to mine"
+  "mining.unusualcopper.energy_wait": "Need %s more CuE to mine",
+  "block.unusualcopper.resonance_crusher": "Resonance Crusher",
+  "item.unusualcopper.copper_grit": "Copper Grit",
+  "item.unusualcopper.iron_grit": "Iron Grit",
+  "item.unusualcopper.gold_grit": "Gold Grit",
+  "gui.unusualcopper.industrial_recipe": "Recipe: %s"
 }

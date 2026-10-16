@@ -365,5 +365,10 @@
   "mining.unusualcopper.output_at": "Вывод: %s %s %s. Нажми для смены.",
   "mining.unusualcopper.energy": "%s CuE · %s/руда",
   "wand.unusualcopper.mining_too_large": "Для станции выбери участок до 128×128; углы должны быть не дальше 128 блоков по X и Z.",
-  "mining.unusualcopper.energy_wait": "Для добычи нужно ещё %s CuE"
+  "mining.unusualcopper.energy_wait": "Для добычи нужно ещё %s CuE",
+  "block.unusualcopper.resonance_crusher": "Резонансная дробилка",
+  "item.unusualcopper.copper_grit": "Медная крошка",
+  "item.unusualcopper.iron_grit": "Железная крошка",
+  "item.unusualcopper.gold_grit": "Золотая крошка",
+  "gui.unusualcopper.industrial_recipe": "Рецепт: %s"
 }

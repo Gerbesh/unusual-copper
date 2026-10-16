@@ -55,6 +55,11 @@ public final class ModDataGeneration {
                     .define('G', Items.GLASS).define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE).unlockedBy("has_frame", has(ModContent.FRAME.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.ESSENCE_SPLITTER).get()).pattern("FRF").pattern("IEI").pattern("RRR")
                     .define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE).define('I', Items.IRON_INGOT).define('E', ModContent.ESSENCE.get()).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.RESONANCE_CRUSHER).get())
+                    .pattern("IFI").pattern("RCR").pattern("IDI")
+                    .define('I', Items.IRON_BLOCK).define('F', ModContent.FRAME.get())
+                    .define('R', Items.REDSTONE).define('C', ModContent.CORE.get())
+                    .define('D', Items.DIAMOND).unlockedBy("has_core", has(ModContent.CORE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.RESONANCE_SMELTER).get()).pattern("FQF").pattern("IPI").pattern("RFR")
                     .define('F', ModContent.FRAME.get()).define('Q', Items.QUARTZ).define('I', Items.IRON_INGOT).define('P', Items.FURNACE).define('R', Items.REDSTONE).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.COPPER_CELL).get()).pattern("FQF").pattern("QKQ").pattern("RRR")

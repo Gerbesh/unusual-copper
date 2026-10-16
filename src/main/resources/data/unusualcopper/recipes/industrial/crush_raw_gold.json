@@ -1,0 +1,14 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "resonance_crusher",
+  "ingredient": {
+    "item": "minecraft:raw_gold"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:gold_grit",
+    "count": 2
+  },
+  "ticks": 60,
+  "cue": 180
+}
