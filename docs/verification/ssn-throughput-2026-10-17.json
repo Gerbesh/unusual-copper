@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.7-alpha.1",
+  "artifact": "dist/unusualcopper-0.20.7-alpha.1.jar",
+  "size": 1021950,
+  "sha256": "0d606163600876bebf609a6740d0d4c6c5664b36df8f77c4678d70577c536103",
+  "junit_tests": 54,
+  "failures": 0,
+  "errors": 0,
+  "game_tests": "compiled only; not executed",
+  "minecraft_launched": false,
+  "installed": false,
+  "change": "Bridge version gate accepts SSN Progressive 1.4.1",
+  "companion": "ssn_progressive 1.4.1",
+  "previous_installed_version": "0.20.6-alpha.1"
+}
