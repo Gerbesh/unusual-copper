@@ -33,6 +33,8 @@
 
 ## Документация
 
+**Следующий этап разработки:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Это **проектные спецификации**, а не функции релиза 0.20.6.
+
 - [Экстрактор и сфера](docs/RESONANT_EXTRACTOR.md) — кирка, энергия, область, руды, очередь и визуальные эффекты.
 - [Батареи](docs/BATTERIES.md), [предметные трубы](docs/ITEM_PIPES.md), [SSN Bridge](docs/SSN_BRIDGE.md).
 - [Культиватор](docs/CULTIVATOR_HARVEST.md), [Жнец](docs/MOB_REAPER.md), [автоклав](docs/AETHERIC_BREWER.md), [починятор](docs/REPAIR_CRYSTAL.md).
