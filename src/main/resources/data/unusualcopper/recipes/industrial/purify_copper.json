@@ -1,0 +1,19 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "vortex_purifier",
+  "ingredient": {
+    "item": "unusualcopper:copper_grit"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:washed_copper_dust",
+    "count": 1
+  },
+  "secondary": {
+    "item": "unusualcopper:inert_tailings",
+    "count": 1
+  },
+  "ticks": 80,
+  "cue": 300,
+  "water_mb": 250
+}

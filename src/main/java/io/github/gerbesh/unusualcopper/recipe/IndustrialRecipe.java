@@ -29,21 +29,28 @@ public final class IndustrialRecipe implements Recipe<Container> {
     private final ItemStack result;
     private final int ticks;
     private final int cost;
+    private final int water;
+    private final ItemStack secondary;
 
     public IndustrialRecipe(ResourceLocation id, MachineKind machine, Ingredient ingredient, Ingredient mold,
-                            int inputCount, ItemStack result, int ticks, int cost) {
-        if ((machine != MachineKind.RESONANCE_CRUSHER && machine != MachineKind.COPPER_PRESS) || inputCount < 1 || inputCount > 64
+                            int inputCount, ItemStack result, int ticks, int cost, int water, ItemStack secondary) {
+        if ((machine != MachineKind.RESONANCE_CRUSHER && machine != MachineKind.COPPER_PRESS && machine != MachineKind.VORTEX_PURIFIER) || inputCount < 1 || inputCount > 64
                 || result.isEmpty() || result.getCount() > 64 || ticks < 1 || ticks > 12000
-                || cost < 0 || cost > 1_000_000 || ingredient.isEmpty()) {
+                || cost < 0 || cost > 1_000_000 || water < 0 || water > 4000 || ingredient.isEmpty()
+                || (machine != MachineKind.VORTEX_PURIFIER && (water>0 || !secondary.isEmpty()))
+                || (!secondary.isEmpty() && secondary.getCount()>64)) {
             throw new IllegalArgumentException("Invalid industrial processing recipe: " + id);
         }
         this.id=id; this.machine=machine; this.ingredient=ingredient; this.mold=mold;
         this.inputCount=inputCount; this.result=result.copy(); this.ticks=ticks; this.cost=cost;
+        this.water=water; this.secondary=secondary.copy();
     }
     public MachineKind machine() { return machine; }
     public int inputCount() { return inputCount; }
     public int ticks() { return ticks; }
     public int cost() { return cost; }
+    public int waterMb() { return water; }
+    public ItemStack secondary() { return secondary.copy(); }
     @Override public boolean matches(Container items, Level level) {
         ItemStack in=items.getItem(0);
         ItemStack form=items.getContainerSize()>1 ? items.getItem(1) : ItemStack.EMPTY;
@@ -73,9 +80,11 @@ public final class IndustrialRecipe implements Recipe<Container> {
             Ingredient input=Ingredient.fromJson(GsonHelper.getAsJsonObject(json,"ingredient"));
             Ingredient mold=json.has("mold") ? Ingredient.fromJson(json.get("mold")) : Ingredient.EMPTY;
             ItemStack result=ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json,"result"));
+            ItemStack byproduct=json.has("secondary") ? ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json,"secondary")) : ItemStack.EMPTY;
             try {
                 return new IndustrialRecipe(id,machine,input,mold,GsonHelper.getAsInt(json,"input_count",1),
-                        result,GsonHelper.getAsInt(json,"ticks"),GsonHelper.getAsInt(json,"cue"));
+                        result,GsonHelper.getAsInt(json,"ticks"),GsonHelper.getAsInt(json,"cue"),
+                        GsonHelper.getAsInt(json,"water_mb",0),byproduct);
             } catch (IllegalArgumentException ex) { throw new JsonParseException(ex.getMessage(),ex); }
         }
         @Override public @Nullable IndustrialRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
@@ -85,7 +94,9 @@ public final class IndustrialRecipe implements Recipe<Container> {
             int count=buf.readVarInt();
             ItemStack result=buf.readItem();
             int ticks=buf.readVarInt(), cost=buf.readVarInt();
-            return new IndustrialRecipe(id,machine,ingredient,mold,count,result,ticks,cost);
+            int water=buf.readVarInt();
+            ItemStack secondary=buf.readItem();
+            return new IndustrialRecipe(id,machine,ingredient,mold,count,result,ticks,cost,water,secondary);
         }
         @Override public void toNetwork(FriendlyByteBuf buf, IndustrialRecipe recipe) {
             buf.writeEnum(recipe.machine);
@@ -95,6 +106,8 @@ public final class IndustrialRecipe implements Recipe<Container> {
             buf.writeItem(recipe.result);
             buf.writeVarInt(recipe.ticks);
             buf.writeVarInt(recipe.cost);
+            buf.writeVarInt(recipe.water);
+            buf.writeItem(recipe.secondary);
         }
     }
 }

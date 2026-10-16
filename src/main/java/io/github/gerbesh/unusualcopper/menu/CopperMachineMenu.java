@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 47;
+    public static final int DATA_COUNT = 48;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -30,7 +30,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
-                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
+                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
                 @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
             });
         }

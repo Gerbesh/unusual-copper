@@ -70,10 +70,15 @@ public final class ModDataGeneration {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.WIRE_DIE.get()).pattern("III").pattern("SPS").pattern("III")
                     .define('I',Items.IRON_INGOT).define('P',ModContent.COPPER_PLATE.get()).define('S',Items.SMOOTH_STONE)
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.VORTEX_PURIFIER).get())
+                    .pattern("GCG").pattern("PFP").pattern("GQG")
+                    .define('G',Items.GLASS).define('C',ModContent.RESONANT_COIL.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('F',ModContent.FRAME.get()).define('Q',Items.QUARTZ)
+                    .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_PRESS).get())
-                    .pattern("PCP").pattern("AFP").pattern("PRP")
+                    .pattern("PCP").pattern("AFS").pattern("PRP")
                     .define('P',ModContent.COPPER_PLATE.get()).define('C',ModContent.RESONANT_COIL.get())
-                    .define('A',Items.ANVIL).define('F',ModContent.FRAME.get()).define('R',Items.REDSTONE)
+                    .define('A',Items.ANVIL).define('F',ModContent.FRAME.get()).define('S',Items.PISTON).define('R',Items.REDSTONE)
                     .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.REINFORCED_FRAME.get()).pattern("PIP").pattern("OFO").pattern("PIP")
                     .define('P',ModContent.COPPER_PLATE.get()).define('I',Items.IRON_INGOT)

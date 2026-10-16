@@ -379,5 +379,12 @@
   "item.unusualcopper.resonant_coil": "Резонансная катушка",
   "item.unusualcopper.reinforced_frame": "Усиленная рама",
   "item.unusualcopper.circuit_blank": "Заготовка схемы",
-  "gui.unusualcopper.industrial_die": "Вложите форму во второй вход пресса"
+  "gui.unusualcopper.industrial_die": "Вложите форму во второй вход пресса",
+  "block.unusualcopper.vortex_purifier": "Вихревой очиститель",
+  "item.unusualcopper.washed_copper_dust": "Очищенная медная пыль",
+  "item.unusualcopper.washed_iron_dust": "Очищенная железная пыль",
+  "item.unusualcopper.washed_gold_dust": "Очищенная золотая пыль",
+  "item.unusualcopper.inert_tailings": "Инертные отходы",
+  "gui.unusualcopper.water_tank": "Вода: %s / 4000 мБ",
+  "status.unusualcopper.no_water": "Нет воды"
 }

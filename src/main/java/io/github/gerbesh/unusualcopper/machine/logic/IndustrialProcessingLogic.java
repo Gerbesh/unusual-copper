@@ -13,6 +13,16 @@ import net.minecraft.world.item.ItemStack;
 /** Purely server-authoritative operation, persisted in the existing machine NBT. */
 public final class IndustrialProcessingLogic implements MachineLogic {
     @Override public void tick(CopperMachineBlockEntity m, ServerLevel level) {
+        if(m.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.VORTEX_PURIFIER) {
+            ItemStack bucket=m.inventory.getStackInSlot(1);
+            if(bucket.is(net.minecraft.world.item.Items.WATER_BUCKET) && m.water.getFluidAmount()<=3000) {
+                m.commitLocally(() -> {
+                    m.water.fill(new net.minecraftforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
+                            net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                    m.inventory.setStackInSlot(1,new ItemStack(net.minecraft.world.item.Items.BUCKET));
+                });
+            }
+        }
         ItemStack input=m.inventory.getStackInSlot(0);
         if (input.isEmpty()) { m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.IDLE); return; }
         var container=new SimpleContainer(input,m.inventory.getStackInSlot(1));
@@ -27,14 +37,20 @@ public final class IndustrialProcessingLogic implements MachineLogic {
         if (recipe==null) { m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.INVALID_INPUT); return; }
         ItemStack result=recipe.assemble(container,level.registryAccess());
         if (m.hasOperation() && (!m.inputMatches() || m.duration!=recipe.ticks()
-                || m.operationCost!=recipe.cost() || !ItemStack.matches(m.result,result))) {
+                || m.operationCost!=recipe.cost() || m.operationWater!=recipe.waterMb()
+                || !ItemStack.matches(m.secondaryResult,recipe.secondary())
+                || !ItemStack.matches(m.result,result))) {
             m.status(MachineStatus.RECIPE_CHANGED); return;
         }
         if (!m.hasOperation()) {
-            if (!m.canFitOutput(result)) { m.status(MachineStatus.OUTPUT_FULL); return; }
+            if (!m.canFitOutputs(result,recipe.secondary())) { m.status(MachineStatus.OUTPUT_FULL); return; }
             m.begin(recipe.getId().toString(),input.copyWithCount(recipe.inputCount()),result,recipe.ticks(),recipe.cost());
+            m.secondaryResult=recipe.secondary();
+            m.operationWater=recipe.waterMb();
+            m.setChanged();
         }
-        if (!m.canFitOutput(m.result)) { m.status(MachineStatus.OUTPUT_FULL); return; }
+        if (!m.canFitOutputs(m.result,m.secondaryResult)) { m.status(MachineStatus.OUTPUT_FULL); return; }
+        if (m.operationWater>0 && m.water.getFluidAmount()<m.operationWater) { m.status(MachineStatus.NO_WATER); return; }
         if (m.progress>=m.duration) { m.finish(); return; }
         int due=OperationMath.payment(m.operationCost,m.progress+1,m.duration);
         if (!m.energy.spend(due)) { m.status(MachineStatus.NO_ENERGY); return; }

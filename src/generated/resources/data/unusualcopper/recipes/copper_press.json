@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "PCP",
-    "AFP",
+    "AFS",
     "PRP"
   ],
   "key": {
@@ -21,6 +21,9 @@
     },
     "R": {
       "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:piston"
     }
   },
   "result": {

@@ -36,3 +36,17 @@
 3. Remove die mid-operation, restore it; verify payment is not repeated, and 120 CuE total.
 4. Pipe input and output using external chest; test full output, redstone pause, reload, old worlds.
 5. Craft 16 coils from 16 ingots + 16 redstone: expect 16 plate cycles, 16 wire cycles and 3 840 CuE spent in presses, excluding other systems.
+
+## E3A: Water purifier, dust and tailings (2026-10-17)
+- Added `vortex_purifier` with a 4 000 mB water-only Forge fluid tank and persisted water state. A physical water bucket in the second input slot fills 1 000 mB and becomes an empty bucket; fluid pipes may fill via Forge capability.
+- Each 1 grit + 250 mB + 300 CuE over 80 ticks produces 1 washed dust and 1 inert tailings. Both outputs are planned together before spending energy or consuming water. Output capacity pauses processing with no loss.
+- Water cost and secondary result are saved in the shared block entity's optional NBT. Existing old-world data without these fields stays valid.
+- Washed copper/iron/gold dust smelts through vanilla SMELTING recipes already consumed by the existing Resonance Smelter. Copper remains capped at 1 ingot per raw copper; iron and gold permit a paid 2× route.
+- This completes the basic purification vertical slice, **not** the later crystallizer or etcher.
+
+### Manual E3A checks
+1. Insert a water bucket in slot 1 or fill through Forge fluid pipe. Tank should gain exactly 1 000 mB and leave an empty bucket.
+2. Process 16 grit against a full 4 000 mB tank; 17th operation pauses. Verify 16 dust + 16 tailings, 4 800 CuE spent, 1 280 machine ticks per slot sequence.
+3. Fill output slots, suspend CuE, restart, `/reload` and vary redstone. Assert no duplicate tailings/dust and no lost water.
+4. Smelt washed copper dust in existing smelter to a single ingot. Verify iron/gold 2 dust from 1 raw via crusher.
+5. Test fluid capability, item output pipe/chest and SSN bridge with the standard permission and protection rules.

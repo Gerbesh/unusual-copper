@@ -24,6 +24,11 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.Items;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -31,6 +36,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public final MachineKind kind;
     public final CopperEnergyBuffer energy;
     public final ItemStackHandler inventory;
+    /** Optional secondary product, so a purifier cannot silently drop its tailings. */
+    public ItemStack secondaryResult = ItemStack.EMPTY;
+    public int operationWater;
+    public final FluidTank water = new FluidTank(4000, stack -> stack.getFluid() == Fluids.WATER) {
+        @Override protected void onContentsChanged() { setChanged(); }
+    };
+    private LazyOptional<IFluidHandler> fluidCap = LazyOptional.empty();
+    public boolean canFitOutputs(ItemStack first,ItemStack second) { return outputPlan(first,second)!=null; }
     public final ItemStackHandler battery = new ItemStackHandler(1) {
         @Override public int getSlotLimit(int slot) { return 1; }
         @Override public boolean isItemValid(int slot,ItemStack stack) { return kind.isCell() && stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem; }
@@ -144,6 +157,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     if(arborist.job!=null) return false;
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
                 }
+                if(kind==MachineKind.VORTEX_PURIFIER) return slot==0 ? !stack.hasTag()
+                        && (stack.is(ModContent.COPPER_GRIT.get()) || stack.is(ModContent.IRON_GRIT.get()) || stack.is(ModContent.GOLD_GRIT.get()))
+                        : stack.is(Items.WATER_BUCKET) && !stack.hasTag();
                 if(kind==MachineKind.COPPER_PRESS) return !stack.hasTag() && (slot==0
                         ? stack.is(net.minecraft.world.item.Items.COPPER_INGOT) || stack.is(ModContent.COPPER_PLATE.get())
                         : stack.is(ModContent.PLATE_DIE.get()) || stack.is(ModContent.WIRE_DIE.get()));
@@ -161,7 +177,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case SOLAR_INFUSER -> new SolarLogic();
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
-            case RESONANCE_CRUSHER, COPPER_PRESS -> new IndustrialProcessingLogic();
+            case RESONANCE_CRUSHER, COPPER_PRESS, VORTEX_PURIFIER -> new IndustrialProcessingLogic();
             case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
@@ -267,6 +283,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         recipeId = id; source = input.copy(); result = output.copy(); duration = ticks; progress = 0; paid = 0; operationCost = cost; setChanged();
     }
     public void cancelOperation() {
+        secondaryResult = ItemStack.EMPTY; operationWater = 0;
         recipeId = ""; source = ItemStack.EMPTY; result = ItemStack.EMPTY; progress = 0; duration = 0; paid = 0; operationCost = 0; setChanged();
     }
     public boolean canFitOutput(ItemStack stack) { return outputPlan(stack) != null; }
@@ -280,26 +297,34 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         }
         return rest;
     }
-    private ItemStack[] outputPlan(ItemStack stack) {
-        if (stack.isEmpty()) return null;
-        ItemStack remaining = stack.copy();
-        ItemStack[] plan = {inventory.getStackInSlot(2).copy(), inventory.getStackInSlot(3).copy()};
-        for (int i = 0; i < plan.length && !remaining.isEmpty(); i++) {
-            if (!plan[i].isEmpty() && !ItemStack.isSameItemSameTags(plan[i], remaining)) continue;
-            int space = Math.min(inventory.getSlotLimit(i + 2), remaining.getMaxStackSize()) - plan[i].getCount();
-            int moved = Math.min(space, remaining.getCount());
-            if (moved <= 0) continue;
-            if (plan[i].isEmpty()) plan[i] = remaining.copyWithCount(moved); else plan[i].grow(moved);
-            remaining.shrink(moved);
+    private ItemStack[] outputPlan(ItemStack stack) { return outputPlan(stack,ItemStack.EMPTY); }
+    private ItemStack[] outputPlan(ItemStack first, ItemStack second) {
+        ItemStack[] planned={inventory.getStackInSlot(2).copy(),inventory.getStackInSlot(3).copy()};
+        if (first.isEmpty()) return null;
+        for (ItemStack requested : new ItemStack[]{first,second}) {
+            ItemStack rest=requested.copy();
+            for(int i=0;i<2&&!rest.isEmpty();i++) {
+                ItemStack stored=planned[i];
+                if(!stored.isEmpty()&&!ItemStack.isSameItemSameTags(stored,rest))continue;
+                int capacity=Math.min(inventory.getSlotLimit(i+2),rest.getMaxStackSize())-stored.getCount();
+                int accepted=Math.min(capacity,rest.getCount());
+                if(accepted<=0)continue;
+                if(stored.isEmpty())planned[i]=rest.copyWithCount(accepted);else stored.grow(accepted);
+                rest.shrink(accepted);
+            }
+            if(!rest.isEmpty())return null;
         }
-        return remaining.isEmpty() ? plan : null;
+        return planned;
     }
     public boolean finish() {
-        ItemStack[] outputs = outputPlan(result);
-        if (outputs == null || !inputMatches()) return false;
-        inventory.getStackInSlot(0).shrink(source.getCount());
-        inventory.setStackInSlot(2, outputs[0]); inventory.setStackInSlot(3, outputs[1]);
-        cancelOperation();
+        ItemStack[] outputs=outputPlan(result,secondaryResult);
+        if(outputs==null||!inputMatches()||(operationWater>0 && water.getFluidAmount()<operationWater))return false;
+        commitLocally(() -> {
+            if(operationWater>0)water.drain(operationWater,IFluidHandler.FluidAction.EXECUTE);
+            inventory.getStackInSlot(0).shrink(source.getCount());
+            inventory.setStackInSlot(2,outputs[0]);inventory.setStackInSlot(3,outputs[1]);
+            cancelOperation();
+        });
         return true;
     }
 
@@ -338,6 +363,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
 
     private void rebuildCaps() {
+        fluidCap=LazyOptional.of(() -> water);
         for (Direction side : Direction.values()) {
             itemCaps.put(side, LazyOptional.of(() -> new IItemHandler() {
                 private final long epoch = capabilityEpoch;
@@ -369,6 +395,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
         if (side != null && !isRemoved()) {
+            if(cap==ForgeCapabilities.FLUID_HANDLER && kind==MachineKind.VORTEX_PURIFIER
+                    && sideMode(side)!=SideMode.DISABLED) return fluidCap.cast();
             if (cap == ForgeCapabilities.ITEM_HANDLER && (sideMode(side) == SideMode.ITEM_INPUT || sideMode(side) == SideMode.ITEM_OUTPUT)) return itemCaps.get(side).cast();
             if (cap == CopperCapabilities.ENERGY && energy.capacity() > 0 && (sideMode(side) == SideMode.ENERGY_INPUT || sideMode(side) == SideMode.ENERGY_OUTPUT)) return energyCaps.get(side).cast();
         }
@@ -376,7 +404,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public void invalidateCaps() {
         capabilityEpoch++;
-        super.invalidateCaps(); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
+        super.invalidateCaps(); fluidCap.invalidate(); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
     @Override public void onLoad() { super.onLoad();if(mining!=null&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
@@ -397,6 +425,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("ResultCount", result.getCount());
         tag.putInt("Progress", progress); tag.putInt("Duration", duration); tag.putInt("Paid", paid);
         tag.putInt("Cost", operationCost);
+        if (kind==MachineKind.VORTEX_PURIFIER) {
+            tag.put("WaterTank",water.writeToNBT(new CompoundTag()));
+            tag.put("SecondaryResult",secondaryResult.save(new CompoundTag()));
+            tag.putInt("WaterCost",operationWater);
+        }
         if (workArea != null) tag.put("WorkArea", workArea.save());
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
         if(kind==MachineKind.AURA_CULTIVATOR)tag.put("Harvest",harvest.save());
@@ -426,6 +459,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (!result.isEmpty()) result.setCount(Math.max(1, Math.min(128, tag.getInt("ResultCount"))));
         duration = Math.max(0, tag.getInt("Duration")); progress = Math.max(0, Math.min(duration, tag.getInt("Progress"))); paid = Math.max(0, tag.getInt("Paid"));
         operationCost = tag.contains("Cost") ? Math.max(0, tag.getInt("Cost")) : kind == MachineKind.RESONANCE_SMELTER ? 240 : 0;
+        if(kind==MachineKind.VORTEX_PURIFIER) {
+            water.readFromNBT(tag.getCompound("WaterTank"));
+            secondaryResult=ItemStack.of(tag.getCompound("SecondaryResult"));
+            operationWater=Math.max(0,Math.min(4000,tag.getInt("WaterCost")));
+        } else { secondaryResult=ItemStack.EMPTY; operationWater=0; }
         if (source.isEmpty() || result.isEmpty() || duration == 0) cancelOperation();
         workArea = null;
         if(cultivation!=null)cultivation.reset();
@@ -494,7 +532,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 41 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost() & 0xffff; case 42 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelUpkeep();
                     case 43 -> sentinel!=null && sentinel.active?1:0;
                     case 44 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost()>>>16;
-                    case 45 -> batteryMode; case 46 -> harvested; default -> 0;
+                    case 45 -> batteryMode; case 46 -> harvested;
+                    case 47 -> kind==MachineKind.VORTEX_PURIFIER ? water.getFluidAmount() : 0;
+                    default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "unusualcopper:washed_copper_dust"
+  },
+  "result": "minecraft:copper_ingot",
+  "experience": 0.2,
+  "cookingtime": 200
+}

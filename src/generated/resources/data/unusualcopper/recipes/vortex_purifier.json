@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GCG",
+    "PFP",
+    "GQG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:vortex_purifier",
+    "count": 1
+  }
+}

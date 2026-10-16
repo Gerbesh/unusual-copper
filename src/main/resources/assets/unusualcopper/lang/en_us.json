@@ -379,5 +379,12 @@
   "item.unusualcopper.resonant_coil": "Resonant Coil",
   "item.unusualcopper.reinforced_frame": "Reinforced Frame",
   "item.unusualcopper.circuit_blank": "Blank Circuit Board",
-  "gui.unusualcopper.industrial_die": "Insert the required press die in the second input slot"
+  "gui.unusualcopper.industrial_die": "Insert the required press die in the second input slot",
+  "block.unusualcopper.vortex_purifier": "Vortex Purifier",
+  "item.unusualcopper.washed_copper_dust": "Washed Copper Dust",
+  "item.unusualcopper.washed_iron_dust": "Washed Iron Dust",
+  "item.unusualcopper.washed_gold_dust": "Washed Gold Dust",
+  "item.unusualcopper.inert_tailings": "Inert Tailings",
+  "gui.unusualcopper.water_tank": "Water: %s / 4000 mB",
+  "status.unusualcopper.no_water": "Requires water"
 }

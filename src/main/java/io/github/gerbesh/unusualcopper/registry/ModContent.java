@@ -59,6 +59,10 @@ public final class ModContent {
     public static final RegistryObject<Item> COPPER_GRIT = ITEMS.register("copper_grit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> IRON_GRIT = ITEMS.register("iron_grit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GOLD_GRIT = ITEMS.register("gold_grit", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> COPPER_DUST = ITEMS.register("washed_copper_dust", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> IRON_DUST = ITEMS.register("washed_iron_dust", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> GOLD_DUST = ITEMS.register("washed_gold_dust", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> INERT_TAILINGS = ITEMS.register("inert_tailings", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> COPPER_PLATE = ITEMS.register("copper_plate", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> COPPER_WIRE = ITEMS.register("copper_wire_spool", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> PLATE_DIE = ITEMS.register("plate_die", () -> new Item(new Item.Properties().stacksTo(1)));
