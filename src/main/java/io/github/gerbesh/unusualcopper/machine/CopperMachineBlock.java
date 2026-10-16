@@ -61,9 +61,12 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!state.is(replacement.getBlock()) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) {
             if(machine.brewer!=null){var held=new java.util.ArrayList<>(machine.brewer.recovery.items());var job=machine.brewer.job;if(job!=null&&!job.current.isEmpty())for(int i=0;i<job.batch;i++)held.add(job.current.copyWithCount(1));if(!held.isEmpty())popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(held));}
+            if(machine.mining!=null&&level instanceof ServerLevel miningLevel&&machine.mining.experience>0){popExperience(miningLevel,pos,machine.mining.experience);machine.mining.experience=0;}
+            if(machine.mining!=null&&!machine.mining.recovery.empty())popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.mining.recovery.items()));
             if(machine.sentinel!=null && machine.sentinel.focused) popResource(level,pos,new ItemStack(ModContent.SENTINEL_FOCUS.get()));
             if (machine.boundCargoCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.boundCargo()));
             if (machine.reaper != null && machine.reaper.lootCount() > 0) popResource(level, pos, io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.reaper.loot()));
+            if(!machine.harvest.empty())popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.harvest.items()));
             if(machine.arborist!=null) {
                 var held=new java.util.ArrayList<>(machine.arborist.recovery.items()); var job=machine.arborist.job;
                 if(job!=null) { if(!job.tool.isEmpty()) held.add(job.tool); if(!job.saplings.isEmpty()) held.add(job.saplings); }
@@ -72,6 +75,10 @@ public final class CopperMachineBlock extends BaseEntityBlock {
             ItemStack[] contents = new ItemStack[4];
             for (int i = 0; i < 4; i++) contents[i] = machine.inventory.getStackInSlot(i).copy();
             Containers.dropContents(level, pos, new SimpleContainer(contents));
+            if(!machine.battery.getStackInSlot(0).isEmpty()) {
+                var portable=machine.battery.getStackInSlot(0).copy();machine.battery.setStackInSlot(0,ItemStack.EMPTY);
+                Containers.dropContents(level,pos,new SimpleContainer(portable));
+            }
         }
         super.onRemove(state, level, pos, replacement, moving);
     }

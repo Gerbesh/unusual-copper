@@ -14,7 +14,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue NETWORK_LIMIT;
     private static final ForgeConfigSpec.IntValue TRANSFER_BUDGET;
     private static final ForgeConfigSpec.IntValue ITEM_RATE, ITEM_INTERVAL, ITEM_BUDGET, ITEM_REBUILD;
-    private static final ForgeConfigSpec.IntValue CULTIVATOR_COST, CULTIVATOR_INTERVAL, CULTIVATOR_CHECKS, AREA_BUDGET;
+    private static final ForgeConfigSpec.IntValue CULTIVATOR_COST, CULTIVATOR_HARVEST_COST, CULTIVATOR_INTERVAL, CULTIVATOR_CHECKS, AREA_BUDGET;
     private static final ForgeConfigSpec.IntValue COLLECTOR_BASE_COST, COLLECTOR_DISTANCE_COST, COLLECTOR_CANDIDATES, ENTITY_BUDGET;
     private static final ForgeConfigSpec.IntValue SHEPHERD_COST, SHEPHERD_INTERVAL, SHEPHERD_ADVANCE, SHEPHERD_CANDIDATES;
     private static final ForgeConfigSpec.IntValue REAPER_COST, REAPER_INTERVAL, REAPER_CANDIDATES;
@@ -25,6 +25,8 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.BooleanValue SENTINEL_LOS;
     private static final ForgeConfigSpec.IntValue BREWER_COST,BREWER_EXTRA,BREWER_INTERVAL,BREWER_BUDGET;
     private static final ForgeConfigSpec.IntValue ENCHANT_LEVEL,ENCHANT_XP_BASE,ENCHANT_CUE_BASE,ENCHANT_CUE_MIN;
+    private static final ForgeConfigSpec.IntValue MINING_COST;
+    private static final ForgeConfigSpec.IntValue REPAIR_CUE,REPAIR_PER_XP;
     private static final ForgeConfigSpec.DoubleValue ENCHANT_XP_MULT,ENCHANT_ADDITIONAL;
     private static final ForgeConfigSpec.DoubleValue[] ENCHANT_RARITY=new ForgeConfigSpec.DoubleValue[4];
     private static final ForgeConfigSpec.BooleanValue ENCHANT_TREASURE,ENCHANT_CURSES;
@@ -50,8 +52,9 @@ public final class ServerConfig {
         ITEM_REBUILD = builder.comment("Graph nodes visited per tick while rebuilding item networks.").defineInRange("rebuild_nodes_per_tick", 128, 8, 4096);
         builder.pop().push("area_machines");
         CULTIVATOR_COST = builder.defineInRange("cultivator_cue_per_growth", 140, 1, 50_000);
-        CULTIVATOR_INTERVAL = builder.defineInRange("cultivator_interval_ticks", 20, 20, 200);
-        CULTIVATOR_CHECKS = builder.defineInRange("cultivator_checks_per_wave", 8, 1, 8);
+        CULTIVATOR_HARVEST_COST = builder.defineInRange("cultivator_cue_per_harvest",140,1,50_000);
+        CULTIVATOR_INTERVAL = builder.comment("Cooldown after a complete cultivation sweep, or before retrying a blocked sweep.").defineInRange("cultivator_interval_ticks", 20, 20, 200);
+        CULTIVATOR_CHECKS = builder.comment("Coordinates per scheduled tick of an outward sweep; also bounded by the shared dimension budget. Legacy key retained.").defineInRange("cultivator_checks_per_wave", 8, 1, 8);
         AREA_BUDGET = builder.comment("Global coordinate-check budget per dimension and tick, shared by queued machines.").defineInRange("checks_per_dimension_tick", 128, 8, 4096);
         COLLECTOR_BASE_COST = builder.defineInRange("collector_stack_base_cue", 30, 1, 1000);
         COLLECTOR_DISTANCE_COST = builder.comment("Additional CuE at distance 32; linear and rounded upward.").defineInRange("collector_distance_cue", 70, 0, 1000);
@@ -100,7 +103,10 @@ public final class ServerConfig {
         java.util.function.Predicate<Object> ids=value->value instanceof java.util.List<?> list&&list.size()<=128&&list.stream().allMatch(raw->raw instanceof String s&&net.minecraft.resources.ResourceLocation.tryParse(s)!=null);
         ENCHANT_ITEMS=builder.define("allowed_mod_items",java.util.List.<String>of(),ids);
         ENCHANT_ENCHANTMENTS=builder.define("allowed_mod_enchantments",java.util.List.<String>of(),ids);
-        builder.pop(); SPEC = builder.build();
+        builder.pop().push("repair");
+        REPAIR_CUE=builder.comment("CuE per restored durability point. No copper items are consumed.").defineInRange("cue_per_durability",100,1,10000);
+        REPAIR_PER_XP=builder.comment("Restored durability per player XP point; cost rounds up per confirmed repair.").defineInRange("durability_per_xp",4,1,128);
+        builder.pop().push("mining");MINING_COST=builder.comment("Legacy base CuE per ore before the global 0.25 mining discount; footprint, depth and hardness multiply this cost.").defineInRange("ore_base_cue",1200,1,100000);builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
     public static int solarTicks() { return value(SOLAR_TICKS); }
@@ -117,6 +123,7 @@ public final class ServerConfig {
     public static int itemTransferBudget() { return value(ITEM_BUDGET); }
     public static int itemRebuildBudget() { return value(ITEM_REBUILD); }
     public static int cultivatorCost() { return value(CULTIVATOR_COST); }
+    public static int cultivatorHarvestCost() { return value(CULTIVATOR_HARVEST_COST); }
     public static int cultivatorInterval() { return value(CULTIVATOR_INTERVAL); }
     public static int cultivatorChecks() { return value(CULTIVATOR_CHECKS); }
     public static int areaBudget() { return value(AREA_BUDGET); }
@@ -139,6 +146,9 @@ public final class ServerConfig {
     public static boolean arboristBuildingGuard() { return SPEC.isLoaded()?ARBORIST_BUILDINGS.get():ARBORIST_BUILDINGS.getDefault(); }
     public static int sentinelCost() { return value(SENTINEL_COST); }
     public static int brewerCost(){return value(BREWER_COST);}
+    public static int miningCost(){return value(MINING_COST);}
+    public static int repairCue(){return value(REPAIR_CUE);}
+    public static int repairDurabilityPerXp(){return value(REPAIR_PER_XP);}
     public static int enchanterMaxLevel(){return value(ENCHANT_LEVEL);}
     public static int enchanterXpBase(){return value(ENCHANT_XP_BASE);}
     public static int enchanterCueBase(){return value(ENCHANT_CUE_BASE);}

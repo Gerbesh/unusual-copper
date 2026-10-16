@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.2-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.20.2-alpha.1.jar",
+  "sha256": "e53eba09962c50bf9b9f0d444a5dd60f4766faebfc54bc573ec1131c0eef7b53",
+  "size": 1010101,
+  "junit_tests": 44,
+  "failures": 0,
+  "errors": 0,
+  "build": "gradlew.bat build compileGameTestJava --offline --console=plain",
+  "build_log": "D:\\Unusual copper\\.codex-tmp\\verify-0202-build.log",
+  "gametest": "8 mining scenarios compiled only; no game/client/server launched",
+  "visual_assets": "74 block models; geometry/UV/texture checks passed; 13 existing sprites checked",
+  "package": "New classes, model, recipe, loot, advancement, pickaxe tag, RU/EN placeholders checked; no test fixtures/probes",
+  "installed": false,
+  "ssn_progressive": "1.3.0 retained; UC bridge still supports 1.2.4/1.3.0",
+  "flight_ticks": 60,
+  "preparation": "Separate pickaxe-speed preparation, not part of beam flight",
+  "area_limit": [
+    128,
+    128
+  ],
+  "deployment": "Waiting for client and server to stop"
+}

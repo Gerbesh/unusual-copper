@@ -1,0 +1,26 @@
+Unusual Copper 0.13.1-alpha.1 — item pipe menu UX
+
+Changes:
+- Default face selects an adjacent inventory, preferring an existing extraction rule.
+- Manual face selection persists in ConfiguredFace independently of routing rules.
+- Visible localized neighbor and transfer direction, selected-face underline, mode/filter help.
+- Original 300x236 GUI bounds retained: verified at 1280x720, GUI scale 3, Russian.
+
+Verification:
+- gradlew build runGameTestServer: BUILD SUCCESSFUL; all 133 required GameTests passed.
+  Evidence: .codex-tmp/verify-pipe-ui.log
+  New coverage: actual east chest -> item pipes -> solar input, empty filter,
+  real menu buttons, reopening, independent per-face rules, saved focus and old/invalid NBT.
+- JUnit: 14 tests, zero failures/errors.
+- Final layout: gradlew build runClient -PpipeUiClient: BUILD SUCCESSFUL.
+  Evidence: .codex-tmp/verify-pipe-ui-client-final.log
+  CuE PIPE UI CLIENT PASS: fresh east chest default; actual C2S face/mode buttons;
+  close/reopen retains east extraction. Screenshot visually inspected:
+  art/previews/item-pipe-menu-ru.png
+- Ordinary production JAR contains all nine new keys in both RU/EN;
+  no GameTests, Smoke or probe classes included. git diff --check passed.
+
+Artifact: dist/unusualcopper-0.13.1-alpha.1.jar
+SHA256: EB7CBE6A3C1DAD46B6C4FEF49FDA2E330AFA33E63EC41A9A4B2FE79E813BCBCA
+Built from the current workspace, including its pending energy-network performance changes.
+No installation into the user's client/server profiles was performed.

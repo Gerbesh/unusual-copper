@@ -1,0 +1,65 @@
+Unusual Copper 0.16.0-alpha.1 — cultivation waves and item effects
+
+Behavior:
+- Cached near-to-far horizontal column order (at most 256 sorted columns).
+- Up to eight positions per scheduled batch, continued next tick until the
+  whole selected volume has been visited, without revisiting its first batch.
+- Existing FIFO dimension budget retained (128 checks/tick by default).
+- Normal/harvest mode: normal interval after completing a pass.
+- To-maturity mode: repeated whole-field passes, not one-plant focus.
+- Successful operations retain their configured energy price (140 CuE default).
+- Compatible harvest stacks can share the two output slots; owned harvest
+  buffer drains up to eight stacks per attempt. Bound export checks every four
+  ticks for cultivators, offering at most eight items per operation.
+- Full/unavailable outputs retain cargo and pause. No new crash-atomicity claim.
+
+Visuals:
+- Expanding aqua front clipped to the selection; rising growth spirals.
+- Golden harvest/cut flash; public item icon flies from plant to machine.
+- Actual accepted bound delivery produces a subsequent machine->storage flight.
+  Client-only delay coordinates the two cosmetic paths.
+- Cultivator crystal pulse and rotating emitter.
+- Flight renderer reused from ReaperEffects; cosmetic pickups do not replace
+  every waiting flight when the client is saturated.
+- Global bounds: 12 fronts, 48 crop flashes, 512 line-segment attempts/frame,
+  64 crop particles/tick. Existing shared reaper bounds: 16 flight/action events,
+  8 admitted messages/tick, 24 item models/frame, 16 trail particles/tick.
+- Client world changes clear transient effects; no ItemEntity spawn or inventory
+  authority on the client, no private stack NBT/counts in new packets.
+- machine_effects protocol 5 requires matching client/server versions.
+
+Verification (NO game or server launches):
+- gradlew build compileGameTestJava: BUILD SUCCESSFUL in 35 s.
+  .codex-tmp/verify-0160-build-final.log
+- 20 JUnit tests passed, zero failures/errors, including six new executed tests:
+  4096-coordinate coverage/outward order; save-cursor geometry/batch coverage;
+  changed-selection reset; crop packet codec; invalid/bounded crop packets;
+  delivery codec and invalid destination/icon rejection.
+- Two new GameTests compiled, not run: full 16-crop growth pass continuation
+  without first-batch repeats; eight-crop harvest/replant/export/accounting.
+- Existing to-maturity GameTest updated and compiled for repeated whole-field
+  waves, both crops growing on the first pass, and NBT/accounting preservation.
+- Existing permissions, rejected storage, persistence, battery and smelting
+  GameTest sources compiled. Their in-game execution remains with the user.
+- Release package: 226 JSON/mcmeta parsed; lifecycle mixin/refmap retained;
+  ordinary JAR contains no probe/GameTests/ClientSmoke classes.
+- git diff --check passed for touched tracked implementation files.
+- Visual acceptance in the actual client, full modpack load and MSPT/FPS
+  measurements were NOT performed. No performance-threshold pass is claimed.
+
+Artifact: dist/unusualcopper-0.16.0-alpha.1.jar
+SHA256: def47670590fc0eb0be73adef57bdf668cededf94e39d7b0eb29c5cd426202bf
+Includes the 0.15.2 empty-battery SSN autocrafting fix and prior changes already
+present in the workspace; the SSN Progressive repository was read only.
+
+Deployment: deliberately deferred per the user's latest instruction. No live
+client/server JAR replacements and no running processes stopped in this change.
+
+Subsequent authorized deployment, 2026-10-16T15:13:55Z:
+- User closed the client/server and explicitly requested installing updates.
+- Installed the above 0.16.0-alpha.1 release in both real mods directories;
+  SHA256 verified, exactly one Unusual Copper JAR in each installation.
+- Previous 0.15.1-alpha.1 JARs backed up and checksum-verified under
+  .codex-tmp/installs/20261016T151355Z/{client,server}/.
+- Receipt: .codex-tmp/cue-install-20261016T151355Z.json.
+- No world-save changes, no game/server launches or process termination.

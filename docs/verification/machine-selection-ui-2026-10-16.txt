@@ -1,0 +1,17 @@
+Unusual Copper 0.17.0-alpha.1 — machine selection UI
+Date: 2026-10-16
+Command: gradlew.bat build compileGameTestJava --console=plain
+Result: BUILD SUCCESSFUL; log: .codex-tmp/verify-017-build-final.log
+JUnit: 27 tests; zero failures/errors. Four new packet tests cover round trips, page/vessel/count limits, exact area/runtime and malformed selections.
+GameTest sources compiled only: new creature catalogue age/name/movement/isolation scenario and brewer read-only/stale-preview assertions were NOT executed.
+Minecraft client, live server and GameTest server were NOT launched. No native screenshots or runtime visual acceptance claimed.
+Reaper: new machines wait for explicit targets; area wand handoff, area-bound species choices, separate bounded population catalogue, no raw tag/category inputs.
+Brewer: icon grid/search/vessel filters, exact-NBT finished stock for visible recipes, read-only ingredient preview, explicit order submission.
+Packet protocols: reaper=2, brewer=2; update client/server together.
+Static package checks: JSON/mcmeta parse, matching RU/EN keys and placeholders, expected menu classes, existing lifecycle refmap pinned mappings, no probe/test classes.
+Deployment explicitly deferred by user; no client/server JAR replacement.
+client: unusualcopper-0.16.1-alpha.1.jar, SHA256 1bbfc57636ca5ddb7677799e384e720949a34415757dc5ef11d9bc7f5dcb2824
+server: unusualcopper-0.16.1-alpha.1.jar, SHA256 1bbfc57636ca5ddb7677799e384e720949a34415757dc5ef11d9bc7f5dcb2824
+Artifact: dist/unusualcopper-0.17.0-alpha.1.jar
+Size: 896135 bytes
+SHA256: 045031c22a78cd9b423b060327f10d01a59e75e9cf6c6249301e29b981ac576a

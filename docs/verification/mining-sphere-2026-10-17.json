@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.3-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.20.3-alpha.1.jar",
+  "sha256": "432328b8ea338d18d28de89a13bf97e506c5dc0d92f6137627e0327d78c59816",
+  "size": 1017436,
+  "junit_tests": 47,
+  "failures": 0,
+  "errors": 0,
+  "build": "gradlew.bat build compileGameTestJava --offline --console=plain",
+  "build_log": "D:\\Unusual copper\\.codex-tmp\\verify-0203-final.log",
+  "gametest": "8 mining scenarios compiled only; no game/client/server launched",
+  "visual_assets": "74 block models; geometry/UV/texture checks passed; 13 existing sprites checked",
+  "package": "New classes, model, recipe, loot, advancement, pickaxe tag, RU/EN placeholders checked; no test fixtures/probes",
+  "installed": true,
+  "ssn_progressive": "1.3.0 retained; UC bridge still supports 1.2.4/1.3.0",
+  "flight_ticks": 60,
+  "area_limit": [
+    128,
+    128
+  ],
+  "sphere_diameter": 5,
+  "field_visibility": "Configured loaded station, independent of energy/status; separate world pass and own buffers",
+  "cache_limits": {
+    "weak_station_refs": 128,
+    "rendered_fields": 16
+  },
+  "night_lighting": "Emissive shell and full-bright copper/halo; shader runtime verification left to user",
+  "deployment": "Installed and verified in client and server; prior JARs backed up; no game launch",
+  "installation_receipt": "D:\\Unusual copper\\.codex-tmp\\cue-install-20261016T212604Z.json"
+}

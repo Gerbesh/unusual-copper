@@ -4,6 +4,7 @@ import io.github.gerbesh.unusualcopper.machine.*;
 import io.github.gerbesh.unusualcopper.machine.logic.SmelterLogic;
 import io.github.gerbesh.unusualcopper.registry.ModContent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
@@ -25,6 +26,16 @@ import java.util.ArrayList;
 @PrefixGameTestTemplate(false)
 @Mod.EventBusSubscriber(modid = UnusualCopper.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class SmeltingIntegrationGameTests {
+    @GameTest(template="empty",timeoutTicks=55)
+    public static void potatoesEnterThroughTheRealInputAndCook(GameTestHelper h) {
+        var pos=new BlockPos(1,1,1);h.setBlock(pos,ModContent.MACHINES.get(MachineKind.RESONANCE_SMELTER).get());
+        var machine=(CopperMachineBlockEntity)h.getBlockEntity(pos);
+        var input=machine.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER,Direction.UP).orElseThrow(IllegalStateException::new);
+        h.assertTrue(input.insertItem(0,new ItemStack(Items.POTATO),false).isEmpty(),"Real input port rejected a furnace recipe outside the ore tag");
+        h.assertTrue(!input.insertItem(0,new ItemStack(Items.POISONOUS_POTATO),true).isEmpty(),"Uncookable poisonous potatoes entered the recipe input");
+        machine.energy.add(240,false);
+        h.runAtTickTime(35,()->{h.assertTrue(machine.inventory.getStackInSlot(0).isEmpty() && machine.inventory.getStackInSlot(2).is(Items.BAKED_POTATO) && machine.inventory.getStackInSlot(2).getCount()==1 && machine.energy.stored()==0,"Potato did not cook with one real input and exactly 240 CuE");h.succeed();});
+    }
     @SubscribeEvent public static void registerFixtures(RegisterEvent event) {
         event.register(Registries.ITEM, id("fixture_ore"), () -> new Item(new Item.Properties()));
         event.register(Registries.ITEM, id("fixture_reload_ore"), () -> new Item(new Item.Properties()));

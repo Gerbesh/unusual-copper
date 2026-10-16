@@ -57,6 +57,21 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('harvestClient')) {
+                property 'unusualcopper.harvestClient', 'true'
+                args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
+            if (project.hasProperty('batteryClient')) {
+                property 'unusualcopper.batteryClient', 'true'
+                args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
+            if (project.hasProperty('pipeUiClient')) {
+                property 'unusualcopper.pipeUiClient', 'true'
+                args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
             if (project.hasProperty('visualClient')) {
                 property 'unusualcopper.visualClient', 'true'
                 args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1600', '--height', '900'
@@ -182,6 +197,7 @@ tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 
 tasks.register('productionProbeJar', Jar) {
     from sourceSets.productionProbe.output
+    manifest.attributes('MixinConfigs': 'unusualcopper_probe.mixins.json')
     archiveBaseName = 'unusualcopper-probe'
     destinationDirectory = file('.codex-tmp/production-probe')
     preserveFileTimestamps = false

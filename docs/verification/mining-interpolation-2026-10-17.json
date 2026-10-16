@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.4-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.20.4-alpha.1.jar",
+  "size": 1021670,
+  "sha256": "5bd36e09d115ce4b20d1e725b0d4c6d8eb503656110d66fedfe3c2876ee6466b",
+  "junit_tests": 54,
+  "failures": 0,
+  "errors": 0,
+  "build_log": "D:\\Unusual copper\\.codex-tmp\\verify-0204-final.log",
+  "game_tests": "compiled only; not executed",
+  "minecraft_launched": false,
+  "installed": true,
+  "mining_cost_multiplier": 0.25,
+  "holding_fractional_remainder_saved": true,
+  "server_flight_ticks": 60,
+  "cosmetic_clock": "monotonic client time; pause-aware; reset on world change",
+  "interpolation": "frame prediction with smooth snapshot corrections, 10 tick prediction limit, 4 tick arrival reconciliation",
+  "visual_assets": "74 block models / 13 sprites passed static geometry, UV, references and alpha checks",
+  "ssn_progressive_compatible": [
+    "1.2.4",
+    "1.3.0",
+    "1.3.1"
+  ],
+  "installation_receipt": "D:\\Unusual copper\\.codex-tmp\\paired-install-20261016T221757Z.json"
+}

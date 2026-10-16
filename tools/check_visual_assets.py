@@ -28,7 +28,8 @@ def main():
                     assert (ASSETS/'textures'/f'{texture.split(":",1)[1]}.png').is_file(),(path,texture)
                 assert len(data['uv'])==4 and all(-.001<=c<=16.001 for c in data['uv']),(path,'invalid UV',data['uv'])
         checked+=1
-    for entry in json.loads((ROOT/'art/sprites/prompts.json').read_text(encoding='utf-8'))['sprites']:
+    sprites=json.loads((ROOT/'art/sprites/prompts.json').read_text(encoding='utf-8'))['sprites']+json.loads((ROOT/'art/batteries/prompts.json').read_text(encoding='utf-8'))['sprites']
+    for entry in sprites:
         icon=Image.open(ASSETS/'textures/item'/f'{entry["name"]}.png')
         assert icon.size==(64,64) and icon.mode=='RGBA' and icon.getextrema()[3][0]==0,entry['name']
         assert (ROOT/'art/sprites'/f'{entry["name"]}.png').read_bytes()==(ASSETS/'textures/item'/f'{entry["name"]}.png').read_bytes(),entry['name']
@@ -36,6 +37,15 @@ def main():
         for path in (ASSETS/'models/block').glob(f'{name}_*.json'):
             model=json.loads(path.read_text(encoding='utf-8'))
             assert all(face['texture']!='#aqua' for part in model['elements'] for face in part['faces'].values()),'Permanent opaque energy core'
-    print(f'PASS: {checked} block models; no overlapping coplanar quads, valid UV/texture paths; nine transparent authored sprites; no baked energy cores.')
+    bridge=json.loads((ASSETS/'blockstates/ssn_bridge.json').read_text(encoding='utf-8'))['multipart']
+    sockets=[part for part in bridge if part['apply']['model']=='unusualcopper:block/ssn_bridge_socket']
+    assert len(sockets)==6 and {part['when']['facing'] for part in sockets}=={'north','south','east','west','up','down'}
+    assert all(part['when']['attached']=='true' for part in sockets),'SSN socket visible without cable'
+    assert next(part for part in sockets if part['when']['facing']=='up')['apply']['x']==270
+    assert next(part for part in sockets if part['when']['facing']=='down')['apply']['x']==90
+    socket=json.loads((ASSETS/'models/block/ssn_bridge_socket.json').read_text(encoding='utf-8'))
+    # SSN's native small cable core occupies 6..10: in the neighboring north block, z=-10..-6.
+    assert min(cube['from'][2] for cube in socket['elements']) < -6,'Socket leaves an air gap to SSN cable core'
+    print(f'PASS: {checked} block models; no overlapping coplanar quads, valid UV/texture paths; {len(sprites)} transparent authored sprites; no baked energy cores.')
 
 if __name__=='__main__':main()

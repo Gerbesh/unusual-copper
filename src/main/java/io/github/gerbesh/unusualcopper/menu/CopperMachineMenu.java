@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 45;
+    public static final int DATA_COUNT = 47;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -36,6 +36,13 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         }
         for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++) addSlot(new Slot(playerInventory, col + row * 9 + 9, 31 + col * 18, 130 + row * 18));
         for (int col = 0; col < 9; col++) addSlot(new Slot(playerInventory, col, 31 + col * 18, 188));
+        var dock=machine==null?new ItemStackHandler(1) {
+            @Override public int getSlotLimit(int slot) { return 1; }
+            @Override public boolean isItemValid(int slot,ItemStack stack) { return stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem; }
+        }:machine.battery;
+        addSlot(new SlotItemHandler(dock,0,13,64) {
+            @Override public boolean isActive() { return kind().isCell(); }
+        });
         addDataSlots(data);
     }
     @Override public boolean stillValid(Player player) {
@@ -43,10 +50,11 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (machine == null || !stillValid(player)) return false;
+        if(button==11 && machine.kind.isCell()) { machine.batteryMode=(machine.batteryMode+1)%3;machine.setChanged();return true; }
         if(button==10&&player instanceof net.minecraft.server.level.ServerPlayer server&&(machine.kind.capacity>0||machine.kind.energyControl())){EnergyControlMenu.open(server,machine);return true;}
         if (button == 0) { machine.redstoneMode = (machine.redstoneMode + 1) % 3; machine.setChanged(); return true; }
         if (button == 1) { if(machine.arborist!=null) machine.arborist.cancel(); if(machine.brewer!=null)machine.brewer.cancel(); machine.cancelOperation(); machine.setChanged(); return true; }
-        if (button == 2 && machine.kind == MachineKind.AURA_CULTIVATOR) { machine.growthMode = (machine.growthMode + 1) % 2; machine.setChanged(); return true; }
+        if (button == 2 && machine.kind == MachineKind.AURA_CULTIVATOR) { machine.growthMode = (machine.growthMode + 1) % 3; machine.setChanged(); return true; }
         if (button == 3 && machine.workArea() != null && player instanceof net.minecraft.server.level.ServerPlayer server) { io.github.gerbesh.unusualcopper.network.AreaNetwork.preview(server, machine.workArea().min(), machine.workArea().max(), true); return true; }
         if (button == 4) { machine.clearBinding(); return true; }
         if (button == 5) { machine.recoverBinding(player); return true; }
@@ -65,7 +73,8 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         Slot slot = slots.get(index);
         if (!slot.isActive() || !slot.hasItem() || !slot.mayPickup(player) || !stillValid(player)) return ItemStack.EMPTY;
         ItemStack current = slot.getItem(); ItemStack original = current.copy();
-        if (index < 4) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
+        if (index < 4 || index==40) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
+        else if(kind().isCell()) { if(!moveItemStackTo(current,40,41,false))return ItemStack.EMPTY; }
         else if (!moveItemStackTo(current, 0, 2, false)) return ItemStack.EMPTY;
         if (current.isEmpty()) slot.set(ItemStack.EMPTY); else slot.setChanged();
         slot.onTake(player, current); return original;

@@ -76,36 +76,72 @@ public final class EnergyNetworks {
         long epoch;
         final Map<CopperMachineBlockEntity,Flow> flows=new IdentityHashMap<>();
         final Map<CopperMachineBlockEntity,Observation> observations=new IdentityHashMap<>();
-        void rebuild(ServerLevel level) {
-            Map<BlockPos,Component> previous=new HashMap<>();for(var component:components)for(var node:component.pipes)previous.put(node,component);
-            pipes.removeIf(pos -> !level.hasChunkAt(pos) || !(level.getBlockEntity(pos) instanceof EnergyPipeBlockEntity));
-            Set<BlockPos> unseen = new HashSet<>(pipes); List<Component> built = new ArrayList<>();
-            while (!unseen.isEmpty()) {
-                BlockPos start = unseen.iterator().next(); ArrayDeque<BlockPos> queue = new ArrayDeque<>(); Set<BlockPos> group = new HashSet<>(); queue.add(start); unseen.remove(start);
-                while (!queue.isEmpty()) { BlockPos pos = queue.remove(); group.add(pos); for (Direction side : Direction.values()) { BlockPos neighbor = pos.relative(side); if (unseen.remove(neighbor)) queue.add(neighbor); } }
-                if (group.size() > ServerConfig.networkLimit()) {
-                    for(var node:group)if(level.getBlockEntity(node) instanceof EnergyPipeBlockEntity pipe)pipe.clearAppearance();
-                    continue;
-                }
-                Map<BlockPos, Integer> tiers = new HashMap<>();
-                for (BlockPos pipe : group) tiers.put(pipe, ((EnergyPipeBlock)level.getBlockState(pipe).getBlock()).tier());
-                Component component = new Component(Set.copyOf(group), tiers);
-                for (BlockPos pipe : group) for (Direction side : Direction.values()) {
-                    BlockPos pos = pipe.relative(side);
-                    if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) component.ports.add(new Port(pipe, pos, side.getOpposite(), machine));
-                }
-                component.ports.sort(Comparator.comparingLong(port -> port.pos.asLong()));
-                var old=previous.get(start);
-                built.add(old!=null&&old.pipes.equals(component.pipes)&&old.tiers.equals(component.tiers)&&old.ports.equals(component.ports)?old:component);
+        // Incremental topology builder is introduced below.
+        private static final int REBUILD_BUDGET = 96;
+        private Build building;
+        private final class Build {
+            final Set<BlockPos> unseen = new HashSet<>(pipes);
+            final Map<BlockPos,Component> previous = new HashMap<>();
+            final ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+            final List<Component> built = new ArrayList<>();
+            Set<BlockPos> group;
+            Map<BlockPos,Integer> tiers;
+            List<Port> ports;
+            Build() { for(var c:components)for(var p:c.pipes)previous.put(p,c); }
+            boolean valid(ServerLevel level,BlockPos pos) {
+                return level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof EnergyPipeBlockEntity;
             }
-            components = built; dirty = false;
-            Set<CopperMachineBlockEntity> active=Collections.newSetFromMap(new IdentityHashMap<>());for(var component:built)for(var port:component.ports)active.add(port.machine);
+            void finish(ServerLevel level) {
+                if(group==null)return;
+                if(group.size()>ServerConfig.networkLimit()) {
+                    for(var p:group)if(level.getBlockEntity(p) instanceof EnergyPipeBlockEntity pipe)pipe.clearAppearance();
+                } else {
+                    Component next=new Component(Set.copyOf(group),tiers);
+                    next.ports.addAll(ports);
+                    next.ports.sort(Comparator.comparingLong(port->port.pos.asLong()));
+                    Component old=previous.get(group.iterator().next());
+                    built.add(old!=null&&old.pipes.equals(next.pipes)&&old.tiers.equals(next.tiers)&&old.ports.equals(next.ports)?old:next);
+                }
+                group=null;tiers=null;ports=null;
+            }
+            boolean step(ServerLevel level) {
+                for(int work=0;work<REBUILD_BUDGET;) {
+                    if(queue.isEmpty()) {
+                        finish(level);
+                        if(unseen.isEmpty())return true;
+                        BlockPos p=unseen.iterator().next();unseen.remove(p);work++;
+                        if(!valid(level,p)){pipes.remove(p);continue;}
+                        group=new HashSet<>();tiers=new HashMap<>();ports=new ArrayList<>();
+                        queue.add(p);
+                    }
+                    BlockPos p=queue.removeFirst();work++;
+                    if(!valid(level,p)){pipes.remove(p);continue;}
+                    group.add(p);
+                    tiers.put(p,((EnergyPipeBlock)level.getBlockState(p).getBlock()).tier());
+                    for(Direction d:Direction.values()){
+                        BlockPos next=p.relative(d);
+                        if(unseen.remove(next)){
+                            if(valid(level,next))queue.addLast(next);
+                            else pipes.remove(next);
+                        }
+                        if(level.hasChunkAt(next)&&level.getBlockEntity(next) instanceof CopperMachineBlockEntity m)
+                            ports.add(new Port(p,next,d.getOpposite(),m));
+                    }
+                }
+                return false;
+            }
+        }
+        private void finishBuild(ServerLevel level) {
+            components=List.copyOf(building.built);building=null;
+            Set<CopperMachineBlockEntity> active=Collections.newSetFromMap(new IdentityHashMap<>());
+            for(var c:components)for(var port:c.ports)active.add(port.machine);
             flows.keySet().retainAll(active);
-            observations.keySet().removeIf(machine->machine.isRemoved()||!level.hasChunkAt(machine.getBlockPos())||level.getBlockEntity(machine.getBlockPos())!=machine);
+            observations.keySet().removeIf(m->m.isRemoved()||!level.hasChunkAt(m.getBlockPos())||level.getBlockEntity(m.getBlockPos())!=m);
         }
         private boolean live(Port port,ServerLevel level){return !port.machine.isRemoved()&&level.hasChunkAt(port.pos)&&level.getBlockEntity(port.pos)==port.machine&&port.machine.energyEnabled();}
         void tick(ServerLevel level) {
-            if (dirty) rebuild(level);
+            if(dirty){building=new Build();dirty=false;}
+            if(building!=null){if(!building.step(level))return;finishBuild(level);}
             // Sample the previous ten ticks even when the transfer budget stops routing early.
             // No graph invalidation, persistent writes or per-tick packets for animation.
             if (level.getGameTime() % 10 == 0) for (var component : components) {

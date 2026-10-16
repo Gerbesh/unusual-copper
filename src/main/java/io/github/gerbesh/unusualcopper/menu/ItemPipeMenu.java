@@ -30,6 +30,7 @@ public final class ItemPipeMenu extends AbstractContainerMenu {
     public ItemPipeMenu(int id, Inventory inventory, ItemPipeBlockEntity pipe) { this(id, inventory, pipe, pipe.getBlockPos()); }
     private ItemPipeMenu(int id, Inventory inventory, ItemPipeBlockEntity pipe, BlockPos pos) {
         super(ModContent.PIPE_MENU.get(), id); this.pipe = pipe; this.pos = pos; this.player = inventory.player;
+        if(pipe!=null)selected=pipe.configuredFace();
         data = pipe == null ? new SimpleContainerData(DATA_COUNT) : new ContainerData() {
             @Override public int getCount() { return DATA_COUNT; }
             @Override public void set(int index, int value) {}
@@ -42,12 +43,12 @@ public final class ItemPipeMenu extends AbstractContainerMenu {
                 };
             }
         };
-        for (int slot = 0; slot < 8; slot++) addSlot(new Slot(ghosts, slot, 10 + slot * 18, 66) {
+        for (int slot = 0; slot < 8; slot++) addSlot(new Slot(ghosts, slot, 10 + slot * 18, 70) {
             @Override public boolean mayPickup(Player player) { return false; }
             @Override public boolean mayPlace(ItemStack stack) { return false; }
         });
-        for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, row * 9 + col + 9, 69 + col * 18, 155 + row * 18));
-        for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 69 + col * 18, 213));
+        for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, row * 9 + col + 9, 69 + col * 18, 153 + row * 18));
+        for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 69 + col * 18, 211));
         refreshGhosts(); addDataSlots(data);
     }
     public Direction selected() { return Direction.values()[Math.floorMod(data.get(0), 6)]; }
@@ -63,7 +64,7 @@ public final class ItemPipeMenu extends AbstractContainerMenu {
     }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (pipe == null || !stillValid(player)) return false;
-        if (button >= 0 && button < 6) { selected = Direction.values()[button]; refreshGhosts(); return true; }
+        if (button >= 0 && button < 6) { selected = Direction.values()[button]; pipe.configuredFace(selected); refreshGhosts(); return true; }
         var rule = pipe.rule(selected);
         switch (button) {
             case 10 -> rule.mode = rule.mode.next();

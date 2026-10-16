@@ -1,0 +1,39 @@
+Unusual Copper 0.15.2-alpha.1 — empty battery upgrade / SSN compatibility
+
+Cause established from the local source of both mods:
+- BatteryUpgradeRecipe.assemble copies input metadata, then calls
+  CopperBatteryItem.stored(result, stored(input)). The old setter always wrote
+  CuE:0 even when both recipe preview and input were ordinary untagged batteries.
+- D:\SSN Progressive\src\main\java\ru\pashvera\ssn\RecipeData.java
+  key() includes the stack's exact serialized NBT.
+- ServerManager.verify compares assemble() against the planned exact output;
+  error.dynamic_recipe aborts mismatches. The catalogue discards that plan.
+  Hence battery I can craft, while empty upgrades II-IV fail validation.
+
+Fix:
+- Zero/nonpositive charge removes only CuE and clears the tag only if empty.
+- Positive charge remains clamped and stored. Names/other metadata survive.
+- Old CuE:0 inputs are normalized on the new crafting result, without mutation
+  of the input. No SSN source or installation changes.
+
+Verification:
+- gradlew build compileGameTestJava: BUILD SUCCESSFUL in 52 s.
+  Log: .codex-tmp/verify-0152-build.log.
+- Existing JUnit suite: 14 tests, 0 failures/errors.
+- Added and COMPILED (not run) GameTest
+  emptyUpgradeChainMatchesSsnPlannedResultsAndNormalizesLegacyZero:
+  all three exact result comparisons, old CuE:0, pristine zero write,
+  full discharge, name and other metadata retention.
+- Existing charged upgrade/network codec test retained.
+- Ordinary JAR: 226 JSON/mcmeta valid; lifecycle mixin/refmap retained;
+  no probe, GameTests or ClientSmoke classes packaged.
+- No Minecraft client/server or GameTest server launched.
+- Manual in-game acceptance remains with the user, including the actual SSN UI.
+
+Artifact: dist/unusualcopper-0.15.2-alpha.1.jar
+SHA256: 8878002a7a3738847af65d3aaca3a6ed3d790aedcd484a279481e51b29dc28fe
+
+Deployment status: NOT INSTALLED.
+Installer dry run correctly blocked replacement while the server and client
+were running. The user explicitly chose to defer installation. No live JAR
+was replaced and no process was stopped.

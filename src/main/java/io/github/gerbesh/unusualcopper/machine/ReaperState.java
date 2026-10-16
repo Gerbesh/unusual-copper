@@ -15,7 +15,7 @@ public final class ReaperState {
     /** Transient intent, never an owned resource or permission to skip a fresh server check. */
     public record Windup(UUID action, UUID target, long strikeAt, Plan plan) {}
     public Windup windup;
-    public ReaperRule rule = ReaperRule.defaults();
+    public ReaperRule rule = new ReaperRule(true,true,Set.of(),Set.of(),Set.of());
     public int trigger, keep, population;
     public boolean active;
     private final List<ItemStack> loot = new ArrayList<>();
@@ -41,7 +41,7 @@ public final class ReaperState {
     }
     public void load(CompoundTag data) {
         windup = null;
-        rule = data.contains("Rule") ? ReaperRule.load(data.getCompound("Rule")) : ReaperRule.defaults(); trigger = Math.max(0, Math.min(1_000_000, data.getInt("Trigger"))); keep = Math.max(0, Math.min(trigger, data.getInt("Keep"))); active = data.getBoolean("Active"); loot.clear();
+        rule = data.contains("Rule") ? ReaperRule.load(data.getCompound("Rule")) : new ReaperRule(true,true,Set.of(),Set.of(),Set.of()); trigger = Math.max(0, Math.min(1_000_000, data.getInt("Trigger"))); keep = Math.max(0, Math.min(trigger, data.getInt("Keep"))); active = data.getBoolean("Active"); loot.clear();
         for (var raw : data.getList("Loot", Tag.TAG_COMPOUND)) { var item = (CompoundTag)raw; var stack = ItemStack.of(item.getCompound("Stack")); stack.setCount(Math.max(0, item.getInt("Count"))); if (!stack.isEmpty()) loot.add(stack); }
     }
 }

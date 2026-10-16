@@ -17,6 +17,8 @@ public interface StorageEndpoint {
     List<ItemStack> extract(ItemKey key, int amount);
     ItemStack insert(ItemStack stack, boolean simulate);
     Count count(ItemKey key);
+    /** Count all NBT variants accepted by the caller, using a full bounded census. */
+    default Count countItem(net.minecraft.world.item.Item item, Predicate<ItemStack> accepted){return new Count(0,false);}
     boolean isAvailable();
     Space space();
     StorageIdentity identity();

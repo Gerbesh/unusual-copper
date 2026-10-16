@@ -228,6 +228,31 @@ def write_bbmodel(name, parts, materials):
     write_json(ART / f"blockbench/{name}.bbmodel", {"meta": {"format_version": "4.10", "model_format": "java_block", "box_uv": False}, "name": name, "resolution": {"width": 32, "height": 32}, "elements": elements, "outliner": [e["uuid"] for e in elements], "textures": textures_data})
 
 
+def repair_model():
+    body=frame()+[part([3,3,3],[13,4,13],"patina"),part([4,4,4],[12,5,12],"dark"),part([4,12,4],[12,13,12],"patina")]
+    windows=tank_windows()
+    export_model("repair_crystal",body,windows)
+    crystal=part([6,6,6],[10,11,10],"aqua",{"origin":[8,8.5,8],"axis":"y","angle":45})
+    model=json.loads((ASSETS/'models/item/repair_crystal.json').read_text())
+    model['elements'].append(crystal)
+    write_json(ASSETS/'models/item/repair_crystal.json',model)
+    write_bbmodel("repair_crystal",body+windows+[crystal],list(PALETTE)+["glass"])
+
+
+def bridge_model():
+    body=frame()+[part([3,3,3],[13,12,13],"patina"),part([3,4,1],[13,12,3],"copper"),part([4,5,.5],[12,11,1],"dark"),part([6,7,0],[10,9,.4],"aqua"),part([5,7,13],[11,9,16],"dark"),part([6,7.5,15],[10,8.5,16],"aqua")]
+    export_model("ssn_bridge",body,[])
+    arm=[part([6,6,-7],[10,10,-.9],"patina"),part([5,5,-1],[11,11,1.2],"copper")]
+    textures={m:f'unusualcopper:block/{m}' for m in PALETTE}
+    write_json(ASSETS/'models/block/ssn_bridge_socket.json',{'render_type':'minecraft:cutout','textures':textures,'elements':clean_surfaces(arm,body)})
+    multipart=[]
+    for facing,rotation in [('north',{}),('east',{'y':90}),('south',{'y':180}),('west',{'y':270}),('up',{'x':270}),('down',{'x':90})]:
+        for suffix in ('','_glass'):
+            multipart.append({'when':{'facing':facing},'apply':{'model':'unusualcopper:block/ssn_bridge'+suffix,**rotation}})
+        multipart.append({'when':{'facing':facing,'attached':'true'},'apply':{'model':'unusualcopper:block/ssn_bridge_socket',**rotation}})
+    write_json(ASSETS/'blockstates/ssn_bridge.json',{'multipart':multipart})
+
+
 def models():
     copper_cell = frame() + [part([5, 3, 5], [11, 12, 11], "aqua"), part([4, 14, 4], [12, 16, 12], "patina")]
     export_model("copper_cell", copper_cell, tank_windows())
@@ -297,15 +322,16 @@ def models():
                  part([1,13,1],[3,16,3],"aqua"),part([13,13,1],[15,16,3],"aqua"),part([1,13,13],[3,16,15],"aqua"),
                  part([13,13,13],[15,16,15],"aqua"),part([6,4,.3],[10,7,.7],"aqua")]
     export_model("enchantment_resonator",enchanter,[])
+    repair_model()
     bridge = frame() + [part([3,3,3],[13,12,13],"patina"),part([3,4,1],[13,12,3],"copper"),
                         part([4,5,.5],[12,11,1],"dark"),part([6,7,0],[10,9,.4],"aqua"),
                         part([5,7,13],[11,9,16],"dark"),part([6,7.5,15],[10,8.5,16],"aqua")]
-    export_model("ssn_bridge",bridge,[])
+    bridge_model()
     bridge_states = []
     for facing, rotation in (("north",{}),("east",{"y":90}),("south",{"y":180}),("west",{"y":270}),("up",{"x":270}),("down",{"x":90})):
         bridge_states.append({"when":{"facing":facing},"apply":{"model":"unusualcopper:block/ssn_bridge",**rotation}})
     write_json(ASSETS / "blockstates/ssn_bridge.json",{"multipart":bridge_states})
-    for name in ("resonant_enchantment_core", "sentinel_range_focus", "diamond_solar_lens", "saturated_copper_essence", "copper_frame", "copper_core", "face_selector", "cargo_bundle", "area_wand"):
+    for name in ("resonant_enchantment_core", "sentinel_range_focus", "diamond_solar_lens", "saturated_copper_essence", "copper_frame", "copper_core", "face_selector", "cargo_bundle", "area_wand", "copper_battery", "reinforced_battery", "resonant_battery", "aetheric_battery"):
         authored = ART / f"sprites/{name}.png"
         if not authored.exists():
             raise FileNotFoundError(f"Authored sprite missing: {authored}. Run tools/import_item_sprites.py; placeholders are not a fallback.")
@@ -503,6 +529,15 @@ def languages():
         "pipe.unusualcopper.whitelist": ("Whitelist", "Разрешённые"), "pipe.unusualcopper.blacklist": ("Blacklist", "Запрещённые"),
         "pipe.unusualcopper.exact_on": ("All item data", "Все данные"), "pipe.unusualcopper.exact_off": ("Item type", "Тип предмета"),
         "pipe.unusualcopper.exact_hint": ("Include durability, names, enchantments and other item data in the filter.", "Учитывать прочность, имя, чары и остальные данные предмета."),
+        "pipe.unusualcopper.face_target": ("Pipe face: %s → %s", "Грань трубы: %s → %s"),
+        "pipe.unusualcopper.binding.auto": ("%s: %s (automatic)", "%s: %s (автонастройка)"),
+        "pipe.unusualcopper.binding.extract": ("%s: %s → pipe network", "%s: %s → сеть труб"),
+        "pipe.unusualcopper.binding.insert": ("%s: pipe network → %s", "%s: сеть труб → %s"),
+        "pipe.unusualcopper.binding.disabled": ("%s: %s (disabled)", "%s: %s (отключено)"),
+        "pipe.unusualcopper.mode_hint": ("This face connects to: %s. Extract takes items from that block into the network; Insert sends items to it. Auto follows machine ports and inserts into chests; choose Extract on the chest-facing side to take items out. Each face has separate settings. Buttons apply immediately; Set applies only the numeric fields.", "Эта грань обращена к блоку: %s. Извлекать — забирать из него в сеть; Вставлять — отправлять в него. Авто учитывает порты машин, а сундуки заполняет. Чтобы забирать из сундука, выберите Извлекать на грани со стороны сундука. У каждой грани свои настройки. Кнопки применяются сразу; OK сохраняет только числовые поля."),
+        "pipe.unusualcopper.filter_hint": ("An empty filter allows all items. Place sample items here or Shift-click your inventory to copy a sample without consuming it. Filters belong to the selected pipe face.", "Пустой фильтр пропускает все предметы. Положите сюда образец или нажмите Shift + клик по предмету в инвентаре: образец копируется без расхода предмета. Фильтр относится к выбранной грани трубы."),
+        "pipe.unusualcopper.neighbor_empty": ("No block", "Нет блока"),
+        "pipe.unusualcopper.neighbor_unloaded": ("Chunk unloaded", "Чанк не загружен"),
         "pipe.unusualcopper.priority": ("Priority", "Приоритет"), "pipe.unusualcopper.minimum": ("Min.", "Ниже"), "pipe.unusualcopper.maximum": ("Max.", "До"), "pipe.unusualcopper.reserve": ("Keep", "Резерв"),
         "pipe.unusualcopper.minimum_hint": ("Start replenishing below this stock; 0 keeps replenishment enabled.", "Начинать пополнение ниже этого запаса. 0 — пополнять постоянно."),
         "pipe.unusualcopper.maximum_hint": ("Stop at this stock. * means unlimited. Each item variant is counted separately.", "Остановиться на этом запасе. * — без предела. Варианты предмета считаются отдельно."),
@@ -511,6 +546,32 @@ def languages():
         "pipe.unusualcopper.tags_hint": ("Tags on this face: %s", "Теги этой грани: %s"), "pipe.unusualcopper.invalid_settings": ("Invalid settings", "Неверные значения"),
     }
     for name, values in additions.items(): en[name], ru[name] = values
+    for name, english, russian in (
+        ("gui.unusualcopper.growth_mode.2", "Grow + harvest", "Рост и сбор"),
+        ("status.unusualcopper.need_seeds", "Need planting material", "Нет материала для посадки"),
+        ("cultivator.unusualcopper.stats", "Checked %s; grew %s; harvested %s", "Проверено %s; рост %s; сбор %s"),
+        ("cultivator.unusualcopper.harvest_hint", "Grow + harvest: harvest mature crops and replant using one real seed, carrot, potato, wart or cocoa bean. Reserve comes from the harvest or the bound inventory. Bind a chest with the Copper Configuration Wand. Full storage pauses harvesting; unsupported plants stay intact.", "Рост и сбор: собирать зрелые растения и пересаживать, расходуя семя, морковь, картофель, нарост или какао-боб. Материал берётся из урожая или привязанного хранилища. Привяжите сундук медным жезлом настройки. При заполнении сбор останавливается; неподдерживаемые растения остаются целыми."),
+    ):
+        en[name], ru[name] = english, russian
+    for name, english, russian in (
+        ("copper_battery", "Copper Battery I", "Медная батарея I"),
+        ("reinforced_battery", "Reinforced Battery II", "Усиленная батарея II"),
+        ("resonant_battery", "Resonant Battery III", "Резонансная батарея III"),
+        ("aetheric_battery", "Aetheric Battery IV", "Эфирная батарея IV"),
+    ):
+        en["item.unusualcopper."+name], ru["item.unusualcopper."+name] = english, russian
+    for name, english, russian in (
+        ("charge", "%s / %s CuE", "%s / %s CuE"),
+        ("hint", "Insert into a Copper Cell I, II or III. Select a transfer direction in the cell menu. Upgrading retains charge.", "Вставьте в медную ячейку I, II или III и выберите направление переноса. Улучшение сохраняет заряд."),
+        ("slot", "Battery", "Батарея"),
+        ("transferring", "Transferring CuE", "Перенос CuE"),
+        ("empty", "Insert a battery", "Вставьте батарею"),
+        ("mode.0", "Cell → battery", "Ячейка → батарея"),
+        ("mode.1", "Battery → cell", "Батарея → ячейка"),
+        ("mode.2", "Transfer paused", "Перенос выключен"),
+        ("dock_hint", "Click to switch: charge the battery, discharge into the cell, pause. Applies immediately. All battery grades fit any cell. Redstone control pauses battery transfer too.", "Нажмите: зарядить батарею, разрядить в ячейку, выключить перенос. Применяется сразу. Любой грейд подходит ко всем ячейкам. Управление редстоуном также останавливает перенос."),
+    ):
+        en["battery.unusualcopper."+name], ru["battery.unusualcopper."+name] = english, russian
     for name, english, russian in (("down", "Down", "Низ"), ("up", "Up", "Верх"), ("north", "North", "Север"), ("south", "South", "Юг"), ("west", "West", "Запад"), ("east", "East", "Восток")):
         en["direction.unusualcopper." + name] = english; ru["direction.unusualcopper." + name] = russian
     for name, english, russian in (("idle", "Idle", "Ожидание"), ("transferring", "Moving", "Перенос"), ("buffered", "Buffered", "В буфере"), ("no_route", "No route", "Нет маршрута"), ("paused", "Paused", "Пауза"), ("denied", "Access denied", "Нет доступа"), ("fault", "Handler error", "Ошибка порта")):
@@ -551,6 +612,8 @@ def languages():
         ("jei.unusualcopper.lens_info", "Reusable solar lens: 16,384 input copper units of durability. Infusion needs open daytime sky.", "Многоразовая солнечная линза: ресурс 16 384 единицы входной меди. Насыщение требует открытого дневного неба."),
     ):
         en[key], ru[key] = english, russian
+    for key,(english,russian) in json.loads((ROOT/'tools/repair_translations.json').read_text(encoding='utf-8')).items():
+        en[key],ru[key]=english,russian
     write_json(ASSETS / "lang/en_us.json", en); write_json(ASSETS / "lang/ru_ru.json", ru)
 
 

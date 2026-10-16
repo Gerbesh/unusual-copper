@@ -9,11 +9,15 @@ import net.minecraft.world.item.ItemStack;
 import io.github.gerbesh.unusualcopper.config.ServerConfig;
 
 public final class SmelterLogic implements MachineLogic {
+    public static boolean accepts(net.minecraft.world.level.Level level,ItemStack stack) {
+        return level!=null && !stack.isEmpty() && !stack.is(ModContent.SMELTING_BLACKLIST)
+                && level.getRecipeManager().getRecipeFor(RecipeType.SMELTING,new SimpleContainer(stack),level).isPresent();
+    }
     @Override public void tick(CopperMachineBlockEntity m, ServerLevel level) {
         ItemStack input = m.inventory.getStackInSlot(0);
         if (m.hasOperation() && !m.inputMatches()) m.cancelOperation();
         if (input.isEmpty()) { m.status(MachineStatus.IDLE); return; }
-        if (!input.is(ModContent.SMELTABLE_ORES) || input.is(ModContent.SMELTING_BLACKLIST)) { m.status(MachineStatus.INVALID_INPUT); return; }
+        if (input.is(ModContent.SMELTING_BLACKLIST)) { m.status(MachineStatus.INVALID_INPUT); return; }
         var container = new SimpleContainer(input);
         var recipe = level.getRecipeManager().getRecipeFor(RecipeType.SMELTING, container, level);
         if (recipe.isEmpty()) { m.status(m.hasOperation() ? MachineStatus.RECIPE_CHANGED : MachineStatus.INVALID_INPUT); return; }

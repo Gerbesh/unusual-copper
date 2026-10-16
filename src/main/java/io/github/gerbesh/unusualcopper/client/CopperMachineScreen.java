@@ -11,13 +11,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
-    private Button cancelButton, redstoneButton,brewerButton,energyButton;
+    private Button cancelButton, redstoneButton,brewerButton,energyButton,batteryButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
     }
     @Override protected void init() {
         super.init();
+        batteryButton=addRenderableWidget(Button.builder(Component.empty(),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,11)).bounds(leftPos+40,topPos+61,172,18).tooltip(Tooltip.create(Component.translatable("battery.unusualcopper.dock_hint"))).build());
         energyButton=addRenderableWidget(Button.builder(Component.literal("E"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,10)).bounds(leftPos+188,topPos+21,28,18).tooltip(Tooltip.create(Component.translatable("energy.unusualcopper.settings"))).build());
         brewerButton=addRenderableWidget(Button.builder(Component.literal("B"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,9)).bounds(leftPos+184,topPos+63,28,18).tooltip(Tooltip.create(Component.translatable("brewer.unusualcopper.settings"))).build());
         plantationButton=addRenderableWidget(Button.builder(Component.literal("P"),b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId,8)).bounds(leftPos+184,topPos+63,28,18).tooltip(Tooltip.create(Component.translatable("arborist.unusualcopper.hint"))).build());
@@ -25,7 +26,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         redstoneButton=addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.redstone"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0)).bounds(leftPos + 88, topPos + 91, 98, 18).build());
         cancelButton = addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.cancel"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 1))
                 .tooltip(Tooltip.create(Component.translatable("gui.unusualcopper.cancel_hint"))).bounds(leftPos + 188, topPos + 91, 28, 18).build());
-        growthButton = addRenderableWidget(Button.builder(Component.empty(), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 2)).bounds(leftPos + 13, topPos + 61, 198, 18).build());
+        growthButton = addRenderableWidget(Button.builder(Component.empty(), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 2)).bounds(leftPos + 13, topPos + 61, 112, 18).tooltip(Tooltip.create(Component.translatable("cultivator.unusualcopper.harvest_hint"))).build());
         petButton = addRenderableWidget(Button.builder(Component.empty(), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 6)).bounds(leftPos + 13, topPos + 61, 198, 18).build());
         areaButton = addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.preview"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 3)).bounds(leftPos + 13, topPos + 91, 70, 18).build());
         clearBinding = addRenderableWidget(Button.builder(Component.literal("×"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 4)).tooltip(Tooltip.create(Component.translatable("gui.unusualcopper.unbind"))).bounds(leftPos + 184, topPos + 51, 28, 10).build());
@@ -49,7 +50,8 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
     @Override protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, 8, 7, 0xff201b15, false);
         MachineStatus status = MachineStatus.values()[Math.floorMod(menu.data.get(6), MachineStatus.values().length)];
-        g.drawString(font, Component.translatable(status.translationKey()), 13, 24, 0xffb8efdf, false);
+        String statusKey=menu.kind().isCell() && status==MachineStatus.CHARGING?"battery.unusualcopper.transferring":status.translationKey();
+        g.drawString(font, Component.translatable(statusKey), 13, 24, 0xffb8efdf, false);
         g.drawString(font, menu.energy() + " / " + menu.capacity() + " CuE", 13, 33, 0xffe6f5ee, false);
         if (menu.kind().acceptsInputs()) {
             g.drawString(font, Component.translatable("gui.unusualcopper.input"), 26, 52, 0xffe6f5ee, false);
@@ -63,7 +65,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         }
         if (menu.kind().usesArea()) {
             g.drawString(font, Component.translatable("gui.unusualcopper.area_size", menu.data.get(15)), 13, 52, 0xffe6f5ee, false);
-            if (menu.kind() == MachineKind.AURA_CULTIVATOR) g.drawString(font, Component.translatable("gui.unusualcopper.growth_stats", menu.data.get(17), menu.data.get(18)), 13, 81, 0xffe6f5ee, false);
+            if (menu.kind() == MachineKind.AURA_CULTIVATOR) g.drawString(font, Component.translatable("cultivator.unusualcopper.stats", menu.data.get(17), menu.data.get(18),menu.data.get(46)), 13, 81, 0xffe6f5ee, false);
             else if (menu.kind() == MachineKind.GROWTH_SHEPHERD) g.drawString(font, Component.translatable("gui.unusualcopper.shepherd_stats", menu.data.get(18), (menu.data.get(23) + 19) / 20), 13, 81, 0xffe6f5ee, false);
             else if (menu.kind() == MachineKind.MOB_REAPER) {
                 int population=(menu.data.get(27)&0xffff)|((menu.data.get(28)&0xffff)<<16);
@@ -74,10 +76,18 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
                 g.drawString(font, Component.translatable("gui.unusualcopper.collection_taken", menu.data.get(18)), 13, 78, 0xffe6f5ee, false);
             }
         }
-        if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
+        if(menu.kind().isCell()) {
+            g.drawString(font,Component.translatable("battery.unusualcopper.slot"),13,52,0xffe6f5ee,false);
+            var portable=menu.slots.get(40).getItem();
+            var charge=portable.isEmpty()?Component.translatable("battery.unusualcopper.empty"):Component.translatable("battery.unusualcopper.charge",io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(portable)),io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.capacity(portable)));
+            g.drawString(font,charge,40,81,0xffe6f5ee,false);
+        }
+        if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST && !menu.kind().isCell()) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        batteryButton.visible=menu.kind().isCell();
+        batteryButton.setMessage(Component.translatable("battery.unusualcopper.mode."+Math.floorMod(menu.data.get(45),3)));
         energyButton.visible=menu.kind().capacity>0;
         brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
         cancelButton.visible = menu.kind().acceptsInputs();

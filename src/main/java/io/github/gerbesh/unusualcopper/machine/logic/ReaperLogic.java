@@ -27,6 +27,7 @@ public final class ReaperLogic implements MachineLogic {
         if (area == null || !AreaAccess.geometryValid(level, machine.getBlockPos(), area)) { cancel(machine,level); machine.status(MachineStatus.NO_AREA); return; }
         if (!ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) { cancel(machine,level); machine.status(MachineStatus.PROTECTED); return; }
         state.drain(machine);
+        if(state.rule.types().isEmpty()&&state.rule.tags().isEmpty()&&state.rule.categories().isEmpty()){state.population=0;state.active=false;cancel(machine,level);machine.status(MachineStatus.NO_TARGETS);return;}
         if (state.lootCount() > 0 || machine.boundCargoCount() > 0 || (machine.boundInventory() != null && (!machine.inventory.getStackInSlot(2).isEmpty() || !machine.inventory.getStackInSlot(3).isEmpty()))) { cancel(machine,level); machine.status(MachineStatus.OUTPUT_FULL); return; }
         boolean room = false; for (int slot = 2; slot <= 3; slot++) { var stack = machine.inventory.getStackInSlot(slot); if (stack.isEmpty() || stack.getCount() < Math.min(stack.getMaxStackSize(), machine.inventory.getSlotLimit(slot))) room = true; }
         if (!room) { cancel(machine,level); machine.status(MachineStatus.OUTPUT_FULL); return; }

@@ -32,7 +32,7 @@ public final class ProductionProbe {
         static Checkpoint load(net.minecraft.nbt.CompoundTag tag) { var value = new Checkpoint(); value.animal = tag.hasUUID("Animal") ? tag.getUUID("Animal") : null; value.round = tag.getInt("Round"); value.emergency=tag.getInt("Emergency"); return value; }
         @Override public net.minecraft.nbt.CompoundTag save(net.minecraft.nbt.CompoundTag tag) { if (animal != null) tag.putUUID("Animal", animal); tag.putInt("Round",round); tag.putInt("Emergency",emergency); return tag; }
     }
-    public ProductionProbe() { MinecraftForge.EVENT_BUS.register(ProductionProbe.class); }
+    public ProductionProbe() { MinecraftForge.EVENT_BUS.register(ProductionProbe.class); MinecraftForge.EVENT_BUS.register(PerformanceProbe.class); }
     private static void check(boolean condition, String reason) { if (!condition) throw new IllegalStateException(reason); }
     private static <T extends Mob> T spawn(EntityType<T> type, BlockPos pos) {
         var mob = type.create(level); mob.setPos(pos.getX() + .5, pos.getY() + .1, pos.getZ() + .5); mob.setNoAi(true); mob.setNoGravity(true); mob.setInvulnerable(true); check(level.addFreshEntity(mob), "Probe mob spawn rejected"); return mob;

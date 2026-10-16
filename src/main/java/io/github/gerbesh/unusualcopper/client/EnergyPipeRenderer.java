@@ -20,7 +20,7 @@ public final class EnergyPipeRenderer implements BlockEntityRenderer<EnergyPipeB
         int connected=0;
         for(var side:Direction.values())if(pipe.getBlockState().getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side)))connected|=1<<side.ordinal();
         VisualGeometry.box(pose,liquid,5.8F,5.8F,5.8F,10.2F,top,10.2F,.65F,1,1,.62F,0xf000f0,connected);
-        float time=pipe.getLevel().getGameTime()+partial;
+        float time=(float)(AnimationClock.now()%72000);
         for(var side:Direction.values()) if(pipe.getBlockState().getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side))) {
             int ends=(1<<side.ordinal())|(1<<side.getOpposite().ordinal());
             // Horizontal liquid has a flat free surface. Vertical arms visibly rise from below.

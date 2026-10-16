@@ -1,0 +1,27 @@
+{
+  "type": "unusualcopper:battery_upgrade",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "unusualcopper:resonant_battery"
+    },
+    "C": {
+      "item": "minecraft:obsidian"
+    },
+    "M": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "R": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "pattern": [
+    "CMC",
+    "RBR",
+    "CMC"
+  ],
+  "result": {
+    "item": "unusualcopper:aetheric_battery"
+  },
+  "show_notification": true
+}

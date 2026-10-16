@@ -1,0 +1,36 @@
+Unusual Copper 0.14.0-alpha.1 — portable CuE batteries
+
+Approved capacities: 10000 / 100000 / 1000000 / 10000000 CuE.
+All four item grades fit the dedicated dock in Copper Cells I, II and III.
+Charge, discharge and pause are explicit persistent modes. Redstone pause applies.
+Ordinary shaped upgrades retain item charge and name. Empty base recipe creates no CuE.
+Items remain unstackable; transfer changes neither produced nor consumed accounting.
+Authored image_gen sources/prompts: art/batteries/; transparent game sprites 64x64.
+
+Checks:
+- gradlew compileJava runData: BUILD SUCCESSFUL; four recipes and unlock advancements.
+  Evidence: .codex-tmp/battery-data.log
+- gradlew build runGameTestServer: BUILD SUCCESSFUL; 139 required GameTests passed.
+  Six new battery cases: capacities/all 12 grade combinations and NBT; bidirectional
+  capacity/accounting; rate/pause/redstone; real menu Shift-click/stale buttons;
+  physical charged drop on removal; actual recipes and serializer wire roundtrip.
+  Evidence: .codex-tmp/verify-batteries.log
+- JUnit: 14 tests, zero failures/errors.
+- gradlew runClient -PbatteryClient: BUILD SUCCESSFUL; real shift-click C2S and
+  discharge/pause/charge, >65535 menu values, conserved 10000000 total CuE.
+  Evidence: .codex-tmp/verify-battery-client.log
+- Final status label and JEI:
+  gradlew build runClient -PbatteryClient -PjeiClient: BUILD SUCCESSFUL.
+  CuE BATTERY JEI PASS: four recipes in the real crafting registry.
+  CuE BATTERY CLIENT PASS: same physical transfer and client synchronization checks.
+  Evidence: .codex-tmp/verify-battery-jei-client.log
+  Russian 1280x720 screenshots visually inspected; no overlaps/clipping:
+  art/previews/battery-charge-ru.png, art/previews/battery-discharge-ru.png
+- tools/check_visual_assets.py: 70 block models, 13 transparent authored item sprites.
+- Production JAR checked: no tests/Smoke/probe classes, JSON/mcmeta parse successfully,
+  all four battery recipes, models and textures present; git diff --check passed.
+
+Artifact: dist/unusualcopper-0.14.0-alpha.1.jar
+SHA256: 405D84D353E4F1F5E17172C65B23AF5231C41C09403A91AF2509C4EC420CC35A
+Built from the current workspace, including pending pipe UI and energy performance changes.
+No installation into the user's client/server profiles was performed.

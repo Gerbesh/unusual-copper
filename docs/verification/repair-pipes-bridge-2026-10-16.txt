@@ -1,0 +1,18 @@
+Unusual Copper 0.18.0-alpha.1 — repair / SSN socket / item transit visuals
+Date: 2026-10-16
+Build command: gradlew.bat build compileGameTestJava --console=plain
+BUILD SUCCESSFUL; log: .codex-tmp/verify-018-build-final.log
+JUnit: 34 tests; zero failures/errors. Added repair-price actual-damage/rounding/overflow bounds and cosmetic-route round-trip/contiguity/immutable nodes/lifetime limits.
+GameTest sources compiled only, NOT executed: repair NBT preservation, Unbreakable refusal, exact CuE/XP debit, replay refusal, missing currencies, replaced item, cancelled XP and stale/foreign context.
+No Minecraft client/server/GameTest launch. No runtime visual, shader, optional-mod durability or performance certification claimed.
+Static art: check_visual_assets.py passes 73 block models / 13 sprites; valid UV/texture references, no same-facing coplanar overlap; SSN socket conditional for all six directions, extends to native 6..10 cable core. Native core bounds read from installed SSN 1.13.2 cable_small asset.
+Package: all JSON/mcmeta parsed, RU/EN keys/placeholders match, repair recipe/model/loot/menu and transit classes present, existing lifecycle refmap verified, no probe/test classes.
+Repair: 100 CuE per restored durability and ceil(points/4) personal XP by default; no copper consumed; standard Damage only with complete serialized-data preservation checks.
+Item sprites: committed inserts only; at most 1 per source/20 ticks, 8 per dimension/tick; 256-pipe routes; client 64 flights, 32 sprites/frame, 8 messages/tick, lifetime 20..160 ticks; no item counts/NBT or ItemEntities.
+SSN socket is visual attachment to the facing cable, not a new native network node. Native SSN JAR unchanged. Existing bridges refresh attachment within 20 ticks.
+Deployment remains explicitly deferred by user; no installed JARs replaced:
+client: unusualcopper-0.16.1-alpha.1.jar, SHA256 1bbfc57636ca5ddb7677799e384e720949a34415757dc5ef11d9bc7f5dcb2824
+server: unusualcopper-0.16.1-alpha.1.jar, SHA256 1bbfc57636ca5ddb7677799e384e720949a34415757dc5ef11d9bc7f5dcb2824
+Artifact: dist/unusualcopper-0.18.0-alpha.1.jar
+Size: 944127
+SHA256: f0f0de2c7902a78df97e991cca5abb9c79c444bfbb23b9c184adb4a9e3a8d160

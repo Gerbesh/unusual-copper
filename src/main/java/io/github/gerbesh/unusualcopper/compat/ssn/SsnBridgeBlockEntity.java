@@ -36,7 +36,7 @@ public final class SsnBridgeBlockEntity extends BlockEntity {
         if(!(level instanceof ServerLevel server))return;UUID actor=bridge.state==null?bridge.owner:bridge.stateOwner;
         boolean allowed=bridge.enabled()&&io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server,pos,actor);
         if(allowed&&bridge.state!=null)bridge.state.advance();
-        if(server.getGameTime()%20==0){boolean connected=allowed&&bridge.storage(actor).isAvailable();if(block.getValue(SsnBridgeBlock.ACTIVE)!=connected)server.setBlock(pos,block.setValue(SsnBridgeBlock.ACTIVE,connected),2);}
+        if(server.getGameTime()%20==0){boolean connected=allowed&&bridge.storage(actor).isAvailable();boolean attached=SsnBridgeBlock.attached(server,pos,block.getValue(SsnBridgeBlock.FACING));if(block.getValue(SsnBridgeBlock.ACTIVE)!=connected||block.getValue(SsnBridgeBlock.ATTACHED)!=attached)server.setBlock(pos,block.setValue(SsnBridgeBlock.ACTIVE,connected).setValue(SsnBridgeBlock.ATTACHED,attached),2);}
     }
     @Override protected void saveAdditional(CompoundTag tag){super.saveAdditional(tag);if(owner!=null)tag.putUUID("Owner",owner);tag.putInt("Redstone",redstoneMode);if(knownMain()!=null)tag.putLong("KnownMain",knownMain().asLong());}
     @Override public void load(CompoundTag tag){super.load(tag);owner=tag.hasUUID("Owner")?tag.getUUID("Owner"):null;redstoneMode=Math.floorMod(tag.getInt("Redstone"),3);knownMain=tag.contains("KnownMain")?BlockPos.of(tag.getLong("KnownMain")):null;state=null;}

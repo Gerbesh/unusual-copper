@@ -1,0 +1,52 @@
+Unusual Copper 0.15.0-alpha.1
+
+Changes:
+- Opt-in third cultivator mode: grow, harvest mature vanilla plants, reserve one
+  real planting item, reset the plant and export through existing bound storage.
+- Wheat, carrot, potato, beetroot, nether wart, cocoa, sweet berries, glow berries.
+- Two visible output slots, private persistent harvest overflow and cargo recovery.
+- Full output pauses work; failed harvest retains the scan cursor.
+- Bound-storage input scans skipped for output-only machines.
+- Smelter input and processing accept actual normal-furnace recipes beyond ores.
+  Explicit blacklist and quoted recipe/cost/progress behavior retained.
+
+Checks completed before the user's request to leave in-game checking to them:
+- .codex-tmp/verify-cultivator-harvest-final.log:
+  gradlew build runGameTestServer: BUILD SUCCESSFUL; 145 required tests passed.
+  New tests cover scheduled wheat export/replant, all eight adapters, full/missing
+  storage, no energy, redstone, Forge break/place cancellation, refused insertion
+  and NBT resume, actual potato insertion/cooking with 240 CuE.
+- Initial client fixture failed to switch the wand's crouching pose correctly.
+  It did not demonstrate a production binding failure. Pose setup and an explicit
+  binding assertion were corrected in the development fixture.
+- The running development client was terminated when the user requested manual
+  in-game verification. No successful 0.15 client smoke is claimed.
+
+After that request:
+- Only compilation, build, JUnit/static checks and offline deployment were used.
+- .codex-tmp/verify-015-build.log:
+  gradlew build compileGameTestJava: BUILD SUCCESSFUL.
+- JAR JSON/mcmeta parsed; no probe, Smoke or GameTests classes in the release JAR.
+- git diff --check passed.
+
+Artifact: dist/unusualcopper-0.15.0-alpha.1.jar, 838103 bytes
+SHA256: 19f8eef0811e402ec8d3e57d1a11e009485a91dd5a0e54fd0d3f919cc70271e5
+Offline installation into both user-specified client and server mods folders:
+.codex-tmp/cue-install-20261015T231953Z.json
+Both installed SHA256 values match. Previous 0.13.0 JARs preserved with checksums in
+.codex-tmp/installs/20261015T231953Z/{client,server}/
+Installer touches no world saves and starts neither game nor server.
+Built from the current workspace, including pending earlier pipe UI/performance changes.
+
+Separate live-server shutdown investigation:
+- 2026-10-16-2.log.gz line 7996: 01:55:41.590, "Выключение сервера".
+- 2026-10-16-1.log.gz line 6268: 02:01:52.033, "Выключение сервера".
+- Both proceed through normal world-saving shutdown. No fresh crash-report or
+  OutOfMemory/watchdog failure identified for these two terminations.
+- Distant Horizons errors shown at the end occur after shutdown was initiated.
+- The user reports they did not request either stop. The historical launcher did
+  not record the initiating command source, so the exact origin is unresolved.
+- Server launcher now appends stop-request origins, actual stop sends, observed
+  Java shutdown and exit information to control/lifecycle-audit.jsonl.
+  Syntax and audit writer verified without launching the server.
+  Original/updated launcher preserved in .codex-tmp/deploy-015/.

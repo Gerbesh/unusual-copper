@@ -24,8 +24,10 @@ public final class BoundStorageLogic {
             var extracted = machine.inventory.extractItem(slot, count, false);
             machine.boundCargo(List.of(extracted)); machine.boundCargoSlot = -1; deliver(machine, endpoint, machine.boundCargo()); return;
         }
+        if(!machine.kind.acceptsInputs())return;
         for (int slot = 0; slot <= 1; slot++) {
-            if(machine.kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0)continue;
+            if(machine.mining!=null)continue;
+            if((machine.kind==MachineKind.ENCHANTMENT_RESONATOR||machine.kind==MachineKind.REPAIR_CRYSTAL)&&slot==0)continue;
             final int input = slot;
             var view = endpoint.snapshot(stack -> machine.inventory.isItemValid(input, stack), 32);
             for (var entry : view.entries()) {
@@ -49,11 +51,14 @@ public final class BoundStorageLogic {
         else if (endpoint != null && endpoint.isAvailable()) rest = endpoint.insert(offered, false);
         else return;
         int moved=count-rest.getCount();
-        boolean showTransfer=moved>0 && machine.boundCargoSlot<0 && machine.kind==MachineKind.MOB_REAPER && machine.boundInventory()!=null && ItemKey.of(stack).matches(offered) && (rest.isEmpty() || ItemKey.of(stack).matches(rest));
+        boolean showTransfer=moved>0 && machine.boundCargoSlot<0 && (machine.kind==MachineKind.MOB_REAPER || machine.kind==MachineKind.AURA_CULTIVATOR) && machine.boundInventory()!=null && ItemKey.of(stack).matches(offered) && (rest.isEmpty() || ItemKey.of(stack).matches(rest));
         var after = new ArrayList<ItemStack>();
         if (stack.getCount() > count) after.add(stack.copyWithCount(stack.getCount() - count));
         if (!rest.isEmpty()) after.add(rest.copy()); after.addAll(cargo.subList(1, cargo.size())); machine.boundCargo(after);
         if (!rest.isEmpty() && (!ItemKey.of(stack).matches(rest) || rest.getCount() > count)) { machine.boundFaulted = true; machine.setChanged(); }
-        if(showTransfer) io.github.gerbesh.unusualcopper.network.MachineEffects.reaperTransfer((ServerLevel)machine.getLevel(),machine,machine.boundInventory(),stack.copyWithCount(moved));
+        if(showTransfer) {
+            if(machine.kind==MachineKind.AURA_CULTIVATOR)io.github.gerbesh.unusualcopper.network.MachineEffects.cultivatorDelivery((ServerLevel)machine.getLevel(),machine,machine.boundInventory(),stack.copyWithCount(moved));
+            else io.github.gerbesh.unusualcopper.network.MachineEffects.reaperTransfer((ServerLevel)machine.getLevel(),machine,machine.boundInventory(),stack.copyWithCount(moved));
+        }
     }
 }

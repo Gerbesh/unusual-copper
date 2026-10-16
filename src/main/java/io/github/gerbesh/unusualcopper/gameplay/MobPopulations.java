@@ -113,6 +113,14 @@ public final class MobPopulations {
         private final List<Long> sections = new ArrayList<>(8);
         private final LinkedHashMap<UUID, Row> members = new LinkedHashMap<>();
         private final LinkedHashSet<UUID> pending = new LinkedHashSet<>();
+        private boolean catalogueEnabled;
+        private record Kind(EntityType<?> type, boolean adult) {}
+        private final Map<UUID, Kind> kinds = new HashMap<>();
+        private final Map<EntityType<?>, int[]> species = new HashMap<>();
+        public record Species(EntityType<?> type, int total, int adults) {}
+        /** Enable before the first step; UI ledgers use a separate identity from the machine. */
+        public void enableCatalogue() { if (!members.isEmpty() && !catalogueEnabled) throw new IllegalStateException("Catalogue already started"); catalogueEnabled=true; }
+        public List<Species> catalogue() { return species.entrySet().stream().sorted(Comparator.comparing(e -> EntityType.getKey(e.getKey()).toString())).limit(128).map(e -> new Species(e.getKey(),e.getValue()[0],e.getValue()[1])).toList(); }
         private Ledger(State state, UUID machine, BlockPos pos, WorkArea area, ReaperRule rule) {
             this.state = state; this.machine = machine; this.pos = pos.immutable(); this.area = area; this.rule = rule; upper = state.sequence; epoch = tagEpoch;
             for (int x = area.min().getX() >> 4; x <= area.max().getX() >> 4; x++) for (int y = area.min().getY() >> 4; y <= area.max().getY() >> 4; y++) for (int z = area.min().getZ() >> 4; z <= area.max().getZ() >> 4; z++) sections.add(SectionPos.asLong(x,y,z));
@@ -121,6 +129,14 @@ public final class MobPopulations {
             var mob = row.entity.get(); boolean inArea = !row.removed && row.pos != null && area.contains(row.pos);
             if (inArea && row.pending) pending.add(row.id); else pending.remove(row.id);
             if (inArea && !row.pending && mob != null && rule.matches(mob)) members.putIfAbsent(row.id, row); else members.remove(row.id);
+            if (catalogueEnabled) {
+                Kind next=members.containsKey(row.id)?new Kind(mob.getType(),!mob.isBaby()):null;
+                Kind old=kinds.get(row.id);
+                if (!Objects.equals(old,next)) {
+                    if(old!=null){var n=species.get(old.type());n[0]--;if(old.adult())n[1]--;if(n[0]==0)species.remove(old.type());kinds.remove(row.id);}
+                    if(next!=null){kinds.put(row.id,next);var n=species.computeIfAbsent(next.type(),ignored->new int[2]);n[0]++;if(next.adult())n[1]++;}
+                }
+            }
         }
         /** Counts each examined row, including stale ones, against the caller's budget. */
         public int step(int budget) {

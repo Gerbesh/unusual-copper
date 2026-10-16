@@ -1,0 +1,27 @@
+{
+  "type": "unusualcopper:battery_upgrade",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "unusualcopper:reinforced_battery"
+    },
+    "C": {
+      "item": "minecraft:amethyst_block"
+    },
+    "M": {
+      "item": "minecraft:diamond"
+    },
+    "R": {
+      "item": "minecraft:gold_block"
+    }
+  },
+  "pattern": [
+    "CMC",
+    "RBR",
+    "CMC"
+  ],
+  "result": {
+    "item": "unusualcopper:resonant_battery"
+  },
+  "show_notification": true
+}

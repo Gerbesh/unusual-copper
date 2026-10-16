@@ -25,4 +25,6 @@ final class RoutedStorageEndpoint implements StorageEndpoint {
     @Override public ItemStack insert(ItemStack stack,boolean simulate){var current=resolve();return current==null?stack.copy():current.insert(stack,simulate);}
     @Override public Count count(ItemKey key){var current=resolve();return current==null?new Count(0,false):current.count(key);}
     @Override public Space space(){var current=resolve();return current==null?Space.UNAVAILABLE:current.space();}
+    @Override public Count countItem(net.minecraft.world.item.Item item,Predicate<ItemStack> accepted){var current=resolve();return current==null?new Count(0,false):current.countItem(item,accepted);}
+
 }

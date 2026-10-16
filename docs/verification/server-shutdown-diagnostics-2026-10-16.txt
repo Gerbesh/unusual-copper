@@ -1,0 +1,40 @@
+Unusual Copper 0.15.1-alpha.1 — shutdown diagnostics
+
+Historical evidence: docs/SERVER_SHUTDOWN_DIAGNOSTICS.md.
+Overworld -> Twilight Forest preceded shutdown by 11.942 s; reverse transfer by
+9.187 s. This establishes timing, not a root cause. The user's report rules out
+their intentionally issuing stop in those two cases.
+
+Changes:
+- Dedicated-server-only transition log and latest transition timestamp.
+- Caller traces at MinecraftServer.halt(boolean) and stopServer(), without
+  cancellation or changes to shutdown behavior.
+- Explicit pinned official/SRG entries in the existing MC 1.20.1 refmap:
+  halt(Z)V -> m_7570_(Z)V; stopServer()V -> m_7041_()V.
+- Launcher stop-source audit was previously installed in
+  D:\Pash_Ver_minecraft\server_control.py; original retained at
+  .codex-tmp/deploy-015/server_control.before.py.
+
+Verification:
+- gradlew build compileGameTestJava: BUILD SUCCESSFUL, 18 s.
+  Log: .codex-tmp/verify-0151-build-final.log.
+- 14 JUnit tests, 0 failures, 0 errors.
+- Packaged mixin class/config/refmap inspected; both target names matched
+  build/createSrgToMcp/output.srg. 226 JSON/mcmeta parsed.
+- No probe, GameTests or ClientSmoke classes in ordinary release JAR.
+- No game, GameTest server or live server launched. Runtime mixin application
+  and reproduction after teleport remain for the user's manual verification.
+
+Offline deployment:
+- dist/unusualcopper-0.15.1-alpha.1.jar, 842582 bytes.
+- SHA256: 0d4069300c70a8fe646037f162b2d9fc97b5d45b87803217f09ffce3d7653ef1
+- Installed into the actual Better MC BMC4 client and D:\Pash_Ver_minecraft.
+  Both installed checksums verified; no Java process running during replacement.
+- Receipt: .codex-tmp/cue-install-20261016T085042Z.json.
+- Previous 0.15.0-alpha.1 JARs preserved and checksum-verified in
+  .codex-tmp/installs/20261016T085042Z/client and server.
+- World saves untouched. Server/client were not started.
+
+No claim that shutdowns are fixed: the next available caller trace and launcher
+audit are needed to establish the stop initiator. Distant Horizons errors in
+the two historical excerpts occur after shutdown began.

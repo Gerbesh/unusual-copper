@@ -1,0 +1,110 @@
+{
+  "block.unusualcopper.repair_crystal": [
+    "Repair Crystal",
+    "Кристалл ремонта"
+  ],
+  "repair.unusualcopper.small": [
+    "Up to 128",
+    "До 128 прочности"
+  ],
+  "repair.unusualcopper.full": [
+    "Maximum",
+    "Максимум"
+  ],
+  "repair.unusualcopper.full_hint": [
+    "Repairs all missing durability, up to 4096 per confirmation. Price is shown before payment.",
+    "Восстановить всю прочность, до 4096 за подтверждение. Цена показывается до оплаты."
+  ],
+  "repair.unusualcopper.confirm": [
+    "Repair",
+    "Починить"
+  ],
+  "repair.unusualcopper.redstone": [
+    "Redstone mode",
+    "Режим красного камня"
+  ],
+  "repair.unusualcopper.item": [
+    "Item",
+    "Предмет"
+  ],
+  "repair.unusualcopper.preview": [
+    "Result",
+    "Результат"
+  ],
+  "repair.unusualcopper.restored": [
+    "Restores %s durability",
+    "Восстановить: %s прочности"
+  ],
+  "repair.unusualcopper.xp_price": [
+    "%s XP points",
+    "%s очков опыта"
+  ],
+  "repair.unusualcopper.empty": [
+    "Insert a damaged item.",
+    "Положи повреждённый предмет."
+  ],
+  "repair.unusualcopper.whole": [
+    "This item is already repaired.",
+    "Предмет уже целый."
+  ],
+  "repair.unusualcopper.unsupported": [
+    "Unsupported durability format.",
+    "Этот тип прочности не поддержан."
+  ],
+  "repair.unusualcopper.wallet": [
+    "Available: %s XP points · %s CuE",
+    "В наличии: %s очков опыта · %s CuE"
+  ],
+  "repair.unusualcopper.confirm_hint": [
+    "Restore %s durability for %s CuE and %s XP points. No copper is consumed.",
+    "Восстановить %s прочности за %s CuE и %s очков опыта. Медь не расходуется."
+  ],
+  "jei.unusualcopper.repair_info": [
+    "Insert a damaged item and supply CuE. Confirm the repair to spend personal XP points; no copper is consumed. Defaults: 100 CuE per durability, 1 XP per 4 durability (rounded up). Names, enchantments and other item data are preserved.",
+    "Положи повреждённый предмет и подведи CuE. Подтверждение списывает личные очки опыта; медь не расходуется. По умолчанию: 100 CuE за прочность и 1 очко опыта за 4 прочности с округлением вверх. Имя, зачарования и остальные данные сохраняются."
+  ],
+  "repair.unusualcopper.result.none": [
+    "Insert item",
+    "Положи предмет"
+  ],
+  "repair.unusualcopper.result.quoted": [
+    "Ready",
+    "Расчёт готов"
+  ],
+  "repair.unusualcopper.result.applied": [
+    "Repaired",
+    "Починено"
+  ],
+  "repair.unusualcopper.result.stale": [
+    "Quote expired",
+    "Расчёт устарел"
+  ],
+  "repair.unusualcopper.result.invalid": [
+    "Unsupported",
+    "Не подходит"
+  ],
+  "repair.unusualcopper.result.no_xp": [
+    "Not enough XP",
+    "Мало опыта"
+  ],
+  "repair.unusualcopper.result.no_energy": [
+    "Not enough CuE",
+    "Мало CuE"
+  ],
+  "repair.unusualcopper.result.paused": [
+    "Paused",
+    "Пауза"
+  ],
+  "repair.unusualcopper.result.xp_cancelled": [
+    "XP cancelled",
+    "Опыт отменён"
+  ],
+  "repair.unusualcopper.result.xp_changed": [
+    "XP cost changed",
+    "Цена опыта изменена"
+  ],
+  "repair.unusualcopper.result.provider_error": [
+    "Item error",
+    "Ошибка предмета"
+  ]
+}

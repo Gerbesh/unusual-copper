@@ -62,6 +62,16 @@ public final class StorageGameTests {
     private static int count(BarrelBlockEntity barrel) { int count = 0; for (int i = 0; i < barrel.getContainerSize(); i++) count += barrel.getItem(i).getCount(); return count; }
 
     @GameTest(template="empty",timeoutTicks=60)
+    public static void ingredientCountIncludesNamedVariantsAndHonoursFilter(GameTestHelper h){
+        var p=new BlockPos(1,2,1);h.setBlock(p,BLOCK.get());var fixture=(Fixture)h.getBlockEntity(p);
+        fixture.inventory.setStackInSlot(0,new ItemStack(Items.COPPER_INGOT,12));fixture.inventory.setStackInSlot(511,named(7,"Named copper"));
+        var endpoint=StorageEndpoints.at(h.getLevel(),h.absolutePos(p),Direction.UP,null);
+        h.startSequence().thenExecute(()->h.assertTrue(!endpoint.countItem(Items.COPPER_INGOT,stack->true).complete(),"Partial census is never a full ingredient total"))
+          .thenExecuteAfter(1,()->{var total=endpoint.countItem(Items.COPPER_INGOT,stack->true);h.assertTrue(total.complete()&&total.amount()==19,"Plain and named ingredients are counted together");var namedOnly=endpoint.countItem(Items.COPPER_INGOT,ItemStack::hasCustomHoverName);h.assertTrue(namedOnly.complete()&&namedOnly.amount()==7,"Caller filter applies to exact variants");})
+          .thenSucceed();
+    }
+
+    @GameTest(template="empty",timeoutTicks=60)
     public static void largeInventoryCensusIsBoundedSharedAndInvalidatedByRealDirtyHook(GameTestHelper h){
         var p=new BlockPos(1,2,1);h.setBlock(p,BLOCK.get());var fixture=(Fixture)h.getBlockEntity(p);var target=named(64,"Census exact");var key=ItemKey.of(target);var other=ItemKey.of(named(1,"Other NBT"));
         fixture.inventory.setStackInSlot(0,target);fixture.inventory.setStackInSlot(511,named(13,"Census exact"));fixture.inventory.setStackInSlot(400,named(9,"Other NBT"));fixture.reads=0;
@@ -202,6 +212,46 @@ public final class StorageGameTests {
         for (int i = 0; i < 511; i++) target.inventory.setStackInSlot(i, new ItemStack(Items.STONE, 64));
         origin.rule(Direction.WEST).mode = PipeMode.EXTRACT; origin.changed();
         h.runAtTickTime(105, () -> { h.assertTrue(target.inventory.getStackInSlot(511).getCount() == 64 && target.inventory.getStackInSlot(511).is(Items.COPPER_INGOT) && count(source) == 0, "Bounded cursors eventually reach available slots beyond the first page"); h.succeed(); });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 80)
+    public static void eastChestMenuRemembersFaceAndFeedsSolarInput(GameTestHelper h) {
+        var pos = new BlockPos(2, 2, 2);
+        h.setBlock(pos.east(), Blocks.CHEST);
+        var chest = (ChestBlockEntity)h.getBlockEntity(pos.east());
+        chest.setItem(0, new ItemStack(Items.COPPER_INGOT, 8));
+        var origin = pipe(h, pos); pipe(h, pos.west());
+        var targetPos = pos.west(2);
+        h.setBlock(targetPos, ModContent.MACHINES.get(io.github.gerbesh.unusualcopper.machine.MachineKind.SOLAR_INFUSER).get());
+        var target = (io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity)h.getBlockEntity(targetPos);
+        while(target.sideMode(Direction.EAST) != io.github.gerbesh.unusualcopper.machine.SideMode.ITEM_INPUT) target.cycleSide(Direction.EAST);
+        var player = FakePlayerFactory.get(h.getLevel(), new com.mojang.authlib.GameProfile(UUID.randomUUID(), "EastPipe"));
+        player.setPos(origin.getBlockPos().getX()+.5, origin.getBlockPos().getY()+.5, origin.getBlockPos().getZ()+.5);
+        var menu = new ItemPipeMenu(78, player.getInventory(), origin);
+        h.assertTrue(menu.selected()==Direction.EAST,"Fresh menu must select the attached chest, not world north");
+        h.assertTrue(menu.clickMenuButton(player, Direction.EAST.ordinal()) && menu.clickMenuButton(player,10),"Real menu buttons must configure the chest-facing side");
+        var reopened = new ItemPipeMenu(79, player.getInventory(), origin);
+        h.assertTrue(reopened.selected()==Direction.EAST && reopened.data.get(1)==PipeMode.EXTRACT.ordinal() && origin.rule(Direction.NORTH).mode==PipeMode.AUTO,"Reopening must preserve the selected face and its separate extraction rule");
+        h.runAtTickTime(55,()->{
+            h.assertTrue(chest.isEmpty() && target.inventory.getStackInSlot(0).is(Items.COPPER_INGOT) && target.inventory.getStackInSlot(0).getCount()==8 && origin.cargoCount()==0,"Empty filters and the chest-facing menu rule must deliver all eight real items to the solar input");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 30)
+    public static void pipeMenuFocusPersistsWithoutCopyingOtherFaceRules(GameTestHelper h) {
+        var origin = pipe(h,new BlockPos(2,2,2));
+        origin.rule(Direction.EAST).mode=PipeMode.EXTRACT;
+        origin.rule(Direction.NORTH).mode=PipeMode.DISABLED;
+        origin.configuredFace(Direction.WEST);
+        var saved=origin.saveWithoutMetadata();
+        var restored=new ItemPipeBlockEntity(origin.getBlockPos(),origin.getBlockState()); restored.load(saved);
+        h.assertTrue(restored.configuredFace()==Direction.WEST && restored.rule(Direction.EAST).mode==PipeMode.EXTRACT && restored.rule(Direction.NORTH).mode==PipeMode.DISABLED,"Disk data must retain focus independently of every face's routing rule");
+        saved.remove("ConfiguredFace"); restored.load(saved);
+        h.assertTrue(restored.configuredFace()==Direction.NORTH,"Old saves without UI focus must remain readable");
+        saved.putInt("ConfiguredFace",99); restored.load(saved);
+        h.assertTrue(restored.configuredFace()==Direction.NORTH,"Invalid saved focus must fall back safely");
+        h.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 30)

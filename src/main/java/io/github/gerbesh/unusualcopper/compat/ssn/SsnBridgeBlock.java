@@ -20,9 +20,13 @@ import net.minecraft.world.phys.BlockHitResult;
 public final class SsnBridgeBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING=BlockStateProperties.FACING;
     public static final BooleanProperty ACTIVE=BlockStateProperties.LIT;
-    public SsnBridgeBlock(){super(BlockBehaviour.Properties.of().strength(3).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion());registerDefaultState(stateDefinition.any().setValue(FACING,Direction.NORTH).setValue(ACTIVE,false));}
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING,ACTIVE);}
-    @Override public BlockState getStateForPlacement(BlockPlaceContext context){return defaultBlockState().setValue(FACING,context.getClickedFace().getOpposite());}
+    public static final BooleanProperty ATTACHED=BooleanProperty.create("attached");
+    private static final java.util.Set<String> CABLES=java.util.Set.of("kabel","storage_kabel","filter_kabel","import_kabel","import_filter_kabel","export_kabel","process_kabel");
+    static boolean attached(net.minecraft.world.level.LevelAccessor level,BlockPos pos,Direction side){var neighbor=pos.relative(side);if(!level.hasChunkAt(neighbor))return false;var id=net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(level.getBlockState(neighbor).getBlock());return id!=null&&id.getNamespace().equals("storagenetwork")&&CABLES.contains(id.getPath());}
+    public SsnBridgeBlock(){super(BlockBehaviour.Properties.of().strength(3).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion());registerDefaultState(stateDefinition.any().setValue(FACING,Direction.NORTH).setValue(ACTIVE,false).setValue(ATTACHED,false));}
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING,ACTIVE,ATTACHED);}
+    @Override public BlockState getStateForPlacement(BlockPlaceContext context){var side=context.getClickedFace().getOpposite();return defaultBlockState().setValue(FACING,side).setValue(ATTACHED,attached(context.getLevel(),context.getClickedPos(),side));}
+    @Override public BlockState updateShape(BlockState state,Direction side,BlockState neighbor,net.minecraft.world.level.LevelAccessor level,BlockPos pos,BlockPos other){return state.setValue(ATTACHED,attached(level,pos,state.getValue(FACING)));}
     @Override public RenderShape getRenderShape(BlockState state){return RenderShape.MODEL;}
     @Override public BlockState rotate(BlockState state,Rotation rotation){return state.setValue(FACING,rotation.rotate(state.getValue(FACING)));}
     @Override public BlockState mirror(BlockState state,Mirror mirror){return state.rotate(mirror.getRotation(state.getValue(FACING)));}

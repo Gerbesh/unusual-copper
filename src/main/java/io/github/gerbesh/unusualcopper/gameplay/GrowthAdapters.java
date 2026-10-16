@@ -23,6 +23,8 @@ public final class GrowthAdapters {
             var soil = level.getBlockState(pos.below());
             return soil.is(Blocks.FARMLAND) && soil.getValue(FarmBlock.MOISTURE) > 0 && level.getRawBrightness(pos, 0) >= 9 && state.canSurvive(level, pos) ? Result.READY : Result.CONDITIONS;
         }
+        if(type==NetherWartBlock.class)return state.getValue(NetherWartBlock.AGE)==3?Result.MATURE:state.canSurvive(level,pos)?Result.READY:Result.CONDITIONS;
+        if(type==CocoaBlock.class)return state.getValue(CocoaBlock.AGE)==2?Result.MATURE:state.canSurvive(level,pos)?Result.READY:Result.CONDITIONS;
         if (type == SweetBerryBushBlock.class) {
             if (state.getValue(SweetBerryBushBlock.AGE) >= 3) return Result.MATURE;
             return level.getRawBrightness(pos, 0) >= 9 && state.canSurvive(level, pos) ? Result.READY : Result.CONDITIONS;
@@ -32,7 +34,8 @@ public final class GrowthAdapters {
         return Result.UNSUPPORTED;
     }
     public static boolean grow(ServerLevel level, BlockPos pos, BlockState before) {
-        if (before.getBlock().getClass() == StemBlock.class) level.setBlock(pos, before.setValue(StemBlock.AGE, before.getValue(StemBlock.AGE) + 1), 3);
+        if(before.getBlock().getClass()==NetherWartBlock.class)level.setBlock(pos,before.setValue(NetherWartBlock.AGE,before.getValue(NetherWartBlock.AGE)+1),3);
+        else if (before.getBlock().getClass() == StemBlock.class) level.setBlock(pos, before.setValue(StemBlock.AGE, before.getValue(StemBlock.AGE) + 1), 3);
         else ((BonemealableBlock)before.getBlock()).performBonemeal(level, level.random, pos, before);
         return !level.getBlockState(pos).equals(before);
     }

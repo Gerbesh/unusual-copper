@@ -4,6 +4,12 @@
 
 ## Профили
 
+Сбор урожая и картофель в плавильне: `gradlew runClient -PharvestClient`; [режим и правила](CULTIVATOR_HARVEST.md). Маркеры — `CuE HARVEST CLIENT SERVER PASS` и `CuE HARVEST CLIENT PASS`.
+
+Батареи: `gradlew runClient -PbatteryClient`; [правила и ёмкости](BATTERIES.md). Маркер — `CuE BATTERY CLIENT PASS`; проверяются реальные Shift-клик и режимы разрядки, паузы и зарядки.
+
+Проверка понятности привязки труб: `gradlew runClient -PpipeUiClient`; [настройка и ожидаемое поведение](ITEM_PIPES.md). Маркер успеха — `CuE PIPE UI CLIENT PASS`.
+
 | Что проверять | Команда | Миры и настройки |
 |---|---|---|
 | Только Unusual Copper | `.\gradlew.bat runClient` | `run\` |

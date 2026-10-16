@@ -28,11 +28,12 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
     @Override public void render(CopperMachineBlockEntity m,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
         if(m.getLevel()==null)return;
         ports(m,pose,buffers,light);
+        if(m.mining!=null){MiningEffects.track(m);return;}
         if(m.sentinel!=null){sentinel.render(m,partial,pose,buffers,light,overlay);return;}
         boolean working=m.getBlockState().getValue(CopperMachineBlock.ACTIVE);
         if(working)workingFrames++;else idleFrames++;
-        float time=m.getLevel().getGameTime()+partial;
-        float motion=animations.computeIfAbsent(m,key->new Motion()).advance(m.getLevel().getGameTime()+(double)partial,working);
+        double now=AnimationClock.now();float time=(float)(now%72000);
+        float motion=animations.computeIfAbsent(m,key->new Motion()).advance(now,working);
         var copper=VisualGeometry.material(buffers,"copper",false);
         var dark=VisualGeometry.material(buffers,"dark",false);
         var glow=VisualGeometry.material(buffers,"aqua",false);
@@ -53,7 +54,15 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
             }
         }
         switch(m.kind){
-            case AURA_CULTIVATOR -> crystal(pose,glow,8,12.6F+(float)Math.sin(motion*.14)*.65F,8,motion*2,2.2F,working?0xf000f0:light);
+            case REPAIR_CRYSTAL -> {
+                crystal(pose,glow,8,9+(float)Math.sin(time*.08)*.35F,8,time*(working?5:.6F),2.1F,working?0xf000f0:light);
+                if(working){rotor(pose,copper,motion*8,5.5F,3.6F,light);rotor(pose,glow,-motion*8,12.5F,3.6F,0xf000f0);}
+            }
+            case AURA_CULTIVATOR -> {
+                float pulse=CultivatorEffects.activity(m.getBlockPos());
+                crystal(pose,glow,8,12.6F+(float)Math.sin(motion*.14)*.65F+pulse*.4F,8,motion*2+time*pulse*3,2.2F+pulse*.25F,working||pulse>0?0xf000f0:light);
+                if(pulse>0)rotor(pose,glow,time*7,13.4F,3.4F+pulse*.5F,0xf000f0);
+            }
             case ENCHANTMENT_RESONATOR -> {
                 if(working){crystal(pose,glow,8,15.8F+(float)Math.sin(motion*.12)*.45F,8,motion*3,1.1F,0xf000f0);rotor(pose,copper,motion*3,14.2F,4,light);}
             }
@@ -115,6 +124,7 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
         p.pushPose();p.translate(x/16,y/16,z/16);p.mulPose(Axis.YP.rotationDegrees(angle));
         VisualGeometry.crystal(p,out,size/16,light);p.popPose();
     }
-    @Override public boolean shouldRenderOffScreen(CopperMachineBlockEntity m){return m.sentinel!=null;}
+    @Override public boolean shouldRenderOffScreen(CopperMachineBlockEntity m){return m.sentinel!=null||m.mining!=null;}
+    @Override public boolean shouldRender(CopperMachineBlockEntity m,net.minecraft.world.phys.Vec3 camera){return m.mining!=null?net.minecraft.world.phys.Vec3.atCenterOf(m.getBlockPos()).distanceToSqr(camera)<224*224:BlockEntityRenderer.super.shouldRender(m,camera);}
     @Override public int getViewDistance(){return 64;}
 }

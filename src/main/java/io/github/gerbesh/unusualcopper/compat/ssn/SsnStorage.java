@@ -33,6 +33,7 @@ public final class SsnStorage implements StorageEndpoint {
     @Override public List<ItemStack> extract(ItemKey key,int amount){var state=resolve();return state==null?List.of():state.extract(key,amount,false);}
     @Override public ItemStack insert(ItemStack stack,boolean simulate){var state=resolve();return state==null?stack.copy():state.insert(stack,simulate);}
     @Override public Count count(ItemKey key){var state=resolve();return state==null?new Count(0,false):state.count(key);}
+    @Override public Count countItem(net.minecraft.world.item.Item item,Predicate<ItemStack> accepted){var state=resolve();return state==null?new Count(0,false):state.countQuery(null,item,accepted);}
     @Override public Space space(){var state=resolve();return state==null?Space.UNAVAILABLE:state.space();}
 
     static final class Source {
@@ -45,9 +46,10 @@ public final class SsnStorage implements StorageEndpoint {
         boolean same(Stamp other){return other!=null&&link==other.link&&target==other.target&&partner==other.partner&&targetRevision==other.targetRevision&&partnerRevision==other.partnerRevision&&capability.get()!=null&&capability.get()==other.capability.get()&&slots==other.slots&&readable==other.readable;}
     }
     private static final class Total {Stamp stamp;long amount;boolean complete;}
-    private static final class Row {final Total[] totals;boolean complete;int cursor;Row(int size){totals=new Total[size];for(int i=0;i<size;i++)totals[i]=new Total();}}
+    private record ItemQuery(net.minecraft.world.item.Item item,Predicate<ItemStack> accepted){}
+    private static final class Row {final Total[] totals;boolean complete;int cursor;long completedAt;Row(int size){totals=new Total[size];for(int i=0;i<size;i++)totals[i]=new Total();}}
     static final class State {
-        private static final int PORT_BUDGET=8,KEY_LIMIT=16;
+        private static final int PORT_BUDGET=8,KEY_LIMIT=32;
         private final ServerLevel level;private final BlockPos port;private final UUID actor;private final java.util.function.Consumer<BlockPos> connected;
         private WeakReference<Object> network=new WeakReference<>(null);
         private long revision=Long.MIN_VALUE,built=Long.MIN_VALUE,workTick=Long.MIN_VALUE,warned=Long.MIN_VALUE;
@@ -55,7 +57,7 @@ public final class SsnStorage implements StorageEndpoint {
         private ItemKey simulatedKey;private long simulatedTick;
         private final Map<ItemKey,Integer> extractionCursors=new LinkedHashMap<>();
         private final LinkedHashMap<ItemKey,Integer> hints=new LinkedHashMap<>(64,.75F,true);
-        private final LinkedHashMap<ItemKey,Row> rows=new LinkedHashMap<>(16,.75F,true);
+        private final LinkedHashMap<Object,Row> rows=new LinkedHashMap<>(16,.75F,true);
         private List<Source> sources=List.of();private boolean catalogComplete;private BlockPos main;
         State(ServerLevel level,BlockPos port,UUID actor,java.util.function.Consumer<BlockPos> connected){this.level=level;this.port=port.immutable();this.actor=actor;this.connected=connected;}
         private void failed(Exception failure){long tick=level.getGameTime();if(warned==Long.MIN_VALUE||tick-warned>=100){warned=tick;UnusualCopper.LOGGER.warn("Optional SSN bridge operation paused at {}",port,failure);}}
@@ -74,25 +76,28 @@ public final class SsnStorage implements StorageEndpoint {
             var target=source.port.target();var partner=target;var block=level.getBlockState(target);if(block.getBlock() instanceof ChestBlock&&block.getValue(ChestBlock.TYPE)!=ChestType.SINGLE)partner=target.relative(ChestBlock.getConnectedDirection(block));
             if(!level.hasChunkAt(partner)||!ProtectionPolicy.allowed(level,partner,actor))return null;var other=level.getBlockEntity(partner);if(other==null)return null;var cap=live.targetEntity().getCapability(ForgeCapabilities.ITEM_HANDLER,source.port.side()).orElse(null);if(cap==null)return null;
             var a=InventoryChanges.watch(level,live.linkEntity());var b=InventoryChanges.watch(level,live.targetEntity());var c=InventoryChanges.watch(level,other);
-            return new Stamp(a,b,b.revision(),c,c.revision(),new WeakReference<>(cap),cap.getSlots(),SsnAccess.reads(live)&&SsnAccess.accepts(live,key.stack(1)));
+            return new Stamp(a,b,b.revision(),c,c.revision(),new WeakReference<>(cap),cap.getSlots(),SsnAccess.reads(live)&&(key==null||SsnAccess.accepts(live,key.stack(1))));
         }
-        Count count(ItemKey key){
+        Count count(ItemKey key){return countQuery(key,null,stack->true);}
+        Count countQuery(ItemKey key,net.minecraft.world.item.Item item,Predicate<ItemStack> accepted){
             try{
                 var root=prepare();if(root==null)return new Count(0,false);
-                if(!rows.containsKey(key)&&rows.size()>=KEY_LIMIT)rows.remove(rows.keySet().iterator().next());var row=rows.computeIfAbsent(key,ignored->new Row(sources.size()));
+                Object query=key==null?new ItemQuery(item,accepted):key;
+                if(!rows.containsKey(query)&&rows.size()>=KEY_LIMIT)rows.remove(rows.keySet().iterator().next());var row=rows.computeIfAbsent(query,ignored->new Row(sources.size()));
+                if(key==null&&row.complete&&level.getGameTime()-row.completedAt>=20){row.complete=false;for(var total:row.totals)total.complete=false;}
                 long amount=0;boolean complete=catalogComplete;
                 int start=row.cursor;for(int n=0;n<sources.size();n++){
                     int i=(start+n)%sources.size();
                     var source=sources.get(i);var live=live(root,source);var total=row.totals[i];
                     if(live==null){total.complete=false;complete=false;continue;}var before=stamp(source,live,key);if(before==null){total.complete=false;complete=false;continue;}
                     if(!before.same(total.stamp))total.complete=false;
-                    if(!total.complete&&work<PORT_BUDGET){work++;row.cursor=(i+1)%sources.size();var result=before.readable?source.endpoint.count(key):new Count(0,true);var afterLive=live(root,source);var after=afterLive==null?null:stamp(source,afterLive,key);total.stamp=after;total.amount=result.amount();total.complete=result.complete()&&before.same(after);}
+                    if(!total.complete&&work<PORT_BUDGET){work++;row.cursor=(i+1)%sources.size();var result=before.readable?(key!=null?source.endpoint.count(key):source.endpoint.countItem(item,stack->{try{return accepted.test(stack)&&SsnAccess.accepts(live,stack);}catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}})):new Count(0,true);var afterLive=live(root,source);var after=afterLive==null?null:stamp(source,afterLive,key);total.stamp=after;total.amount=result.amount();total.complete=result.complete()&&before.same(after);}
                     if(total.complete)amount+=total.amount;else complete=false;
                 }
-                row.complete=complete;return new Count(amount,complete);
+                if(complete&&!row.complete)row.completedAt=level.getGameTime();row.complete=complete;return new Count(amount,complete);
             }catch(ReflectiveOperationException|RuntimeException failure){failed(failure);return new Count(0,false);}
         }
-        void advance(){if(rows.isEmpty())return;var pending=rows.entrySet().stream().filter(e->!e.getValue().complete).map(Map.Entry::getKey).toList();if(!pending.isEmpty())count(pending.get(Math.floorMod(rowCursor++,pending.size())));}
+        void advance(){if(rows.isEmpty())return;var pending=rows.entrySet().stream().filter(e->!e.getValue().complete).map(Map.Entry::getKey).toList();if(!pending.isEmpty()){var query=pending.get(Math.floorMod(rowCursor++,pending.size()));if(query instanceof ItemKey key)count(key);}}
         View snapshot(Predicate<ItemStack> predicate,int limit){
             try{
                 var root=prepare();int budget=Math.min(32,Math.max(0,limit));if(root==null||sources.isEmpty()||budget==0)return new View(List.of(),0,root!=null&&catalogComplete&&sources.isEmpty());

@@ -100,6 +100,7 @@ public final class ItemNetworks {
         boolean dirty = true;
         Build building;
         int cursor;
+        long visualTick=Long.MIN_VALUE;int visualCount;
         boolean livePath(ServerLevel level, List<BlockPos> path, UUID owner) {
             for (int i = 0; i < path.size(); i++) {
                 var entity = pipe(level, path.get(i));
@@ -204,7 +205,7 @@ public final class ItemNetworks {
         }
         boolean deliver(ServerLevel level, Component component, ItemPipeBlockEntity source, Port target, Map<BlockPos, Integer> used) {
             var cargo = source.cargo(); if (cargo.isEmpty()) return false;
-            var stored = cargo.get(0); var key = ItemKey.of(stored);
+            var stored = cargo.get(0); var key = ItemKey.of(stored);var originSide=source.originSide();
             int offered = room(level, component, source, target, key, stored.getCount(), source.originInventory(), used);
             if (offered <= 0) { source.status = ItemPipeBlockEntity.Status.NO_ROUTE; return false; }
             var remainder = target.inventory.insert(stored.copyWithCount(offered), false);
@@ -221,6 +222,7 @@ public final class ItemNetworks {
             }
             for (var node : component.path(source.getBlockPos(), target.pipe)) used.merge(node, moved, Integer::sum);
             source.status = moved > 0 ? ItemPipeBlockEntity.Status.TRANSFERRING : ItemPipeBlockEntity.Status.BUFFERED;
+            if(moved>0&&originSide!=null){long now=level.getGameTime();if(visualTick!=now){visualTick=now;visualCount=0;}if(now>=source.nextVisualTick&&visualCount<8){source.nextVisualTick=now+20;visualCount++;io.github.gerbesh.unusualcopper.network.ItemTransitNetwork.sent(level,component.path(source.getBlockPos(),target.pipe),source.getBlockPos().relative(originSide),target.pipe.relative(target.side),stored);}}
             return moved > 0;
         }
     }

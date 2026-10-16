@@ -31,6 +31,13 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public final MachineKind kind;
     public final CopperEnergyBuffer energy;
     public final ItemStackHandler inventory;
+    public final ItemStackHandler battery = new ItemStackHandler(1) {
+        @Override public int getSlotLimit(int slot) { return 1; }
+        @Override public boolean isItemValid(int slot,ItemStack stack) { return kind.isCell() && stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem; }
+        @Override protected void onContentsChanged(int slot) { setChanged(); }
+    };
+    /** 0: cell -> battery; 1: battery -> cell; 2: paused. */
+    public int batteryMode;
     private final MachineLogic logic;
     private final EnumMap<Direction, SideMode> sides = new EnumMap<>(Direction.class);
     private final EnumMap<Direction, LazyOptional<IItemHandler>> itemCaps = new EnumMap<>(Direction.class);
@@ -54,15 +61,19 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public int operationCost;
     public final UUID runtimeIdentity = UUID.randomUUID();
     private io.github.gerbesh.unusualcopper.gameplay.WorkArea workArea;
-    public int scanCursor, growthMode, inspected, grown;
+    public int scanCursor, growthMode, inspected, grown, harvested;
+    public final io.github.gerbesh.unusualcopper.storage.OwnedItems harvest=new io.github.gerbesh.unusualcopper.storage.OwnedItems();
+    public final io.github.gerbesh.unusualcopper.gameplay.CultivationSweep cultivation;
     public long nextWaveTick;
     public boolean allowOwnTamed;
     public final ReaperState reaper;
     public final ArboristState arborist;
     public final SentinelState sentinel;
     public final BrewerState brewer;
+    public final MiningState mining;
     public long enchantmentRevision;
     public long enchantmentUntil;
+    public long repairUntil;
     private boolean localCommit,deferredChange;
     @Override public void setChanged(){if(localCommit){deferredChange=true;return;}super.setChanged();}
     /** No neighbor callbacks interleave the local item/XP/energy assignments. */
@@ -113,17 +124,21 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public CopperMachineBlockEntity(BlockPos pos, BlockState state) {
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
         kind = ((CopperMachineBlock)state.getBlock()).kind;
+        cultivation = kind == MachineKind.AURA_CULTIVATOR ? new io.github.gerbesh.unusualcopper.gameplay.CultivationSweep() : null;
         reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
         arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
         sentinel = kind == MachineKind.COPPER_SENTINEL ? new SentinelState() : null;
         brewer = kind == MachineKind.AETHERIC_BREWER ? new BrewerState() : null;
+        mining=kind==MachineKind.RESONANT_EXTRACTOR?new MiningState():null;
         energy = new CopperEnergyBuffer(kind.capacity, this::energyTransferRate, this::energyTransferRate, this::setChanged);
         inventory = new ItemStackHandler(4) {
-            @Override public int getSlotLimit(int slot){return (brewer!=null && slot==1)||(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0)?1:super.getSlotLimit(slot);}
+            @Override public int getSlotLimit(int slot){return (mining!=null&&slot==0)||(brewer!=null && slot==1)||((kind==MachineKind.ENCHANTMENT_RESONATOR||kind==MachineKind.REPAIR_CRYSTAL)&&slot==0)?1:super.getSlotLimit(slot);}
             @Override protected void onContentsChanged(int slot) { if(slot==0)enchantmentRevision++;setChanged(); }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
                 if (slot >= 2 || !kind.acceptsInputs()) return false;
                 if(kind==MachineKind.ENCHANTMENT_RESONATOR)return slot==0?io.github.gerbesh.unusualcopper.gameplay.EnchantmentPolicy.target(stack):stack.is(net.minecraft.world.item.Items.LAPIS_LAZULI);
+                if(mining!=null)return slot==0&&io.github.gerbesh.unusualcopper.gameplay.MiningRules.pickaxe(stack);
+                if(kind==MachineKind.REPAIR_CRYSTAL)return slot==0&&io.github.gerbesh.unusualcopper.gameplay.RepairPolicy.target(stack);
                 if(brewer!=null)return slot==0?stack.is(net.minecraft.world.item.Items.GLASS_BOTTLE):io.github.gerbesh.unusualcopper.machine.logic.BrewerLogic.ingredient(CopperMachineBlockEntity.this,stack);
                 if(arborist!=null) {
                     if(arborist.job!=null) return false;
@@ -131,7 +146,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 }
                 if (slot == 1) return kind == MachineKind.SOLAR_INFUSER && stack.is(ModContent.SOLAR_LENS.get());
                 if (kind == MachineKind.ESSENCE_SPLITTER) return stack.is(ModContent.ESSENCE.get());
-                if (kind == MachineKind.RESONANCE_SMELTER) return stack.is(ModContent.SMELTABLE_ORES) && !stack.is(ModContent.SMELTING_BLACKLIST);
+                if (kind == MachineKind.RESONANCE_SMELTER) return SmelterLogic.accepts(level,stack);
                 return true;
             }
         };
@@ -148,6 +163,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case COPPER_SENTINEL -> new SentinelLogic();
             case AETHERIC_BREWER -> new BrewerLogic();
             case ENCHANTMENT_RESONATOR -> (m,level)->m.status(level.getGameTime()<m.enchantmentUntil?MachineStatus.WORKING:MachineStatus.IDLE);
+            case RESONANT_EXTRACTOR -> new MiningLogic();
+            case REPAIR_CRYSTAL -> (m,level)->m.status(level.getGameTime()<m.repairUntil?MachineStatus.WORKING:MachineStatus.IDLE);
         };
         for (Direction side : Direction.values()) {
             SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
@@ -195,6 +212,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public boolean setWorkArea(io.github.gerbesh.unusualcopper.gameplay.WorkArea area, Player player) {
         if (!kind.usesArea() || !canAccess(player) || !(level instanceof ServerLevel server) || !io.github.gerbesh.unusualcopper.gameplay.AreaAccess.valid(server, worldPosition, area, owner == null ? player.getUUID() : owner)) return false;
         if (owner == null) setOwner(player.getUUID()); workArea = area; scanCursor = 0; inspected = grown = 0; setChanged(); return true;
+    }
+    public boolean setMiningArea(io.github.gerbesh.unusualcopper.gameplay.MiningFootprint area,Player player){
+        if(mining==null||!canAccess(player)||!(level instanceof ServerLevel server)||!io.github.gerbesh.unusualcopper.machine.logic.MiningLogic.geometry(server,worldPosition,area))return false;
+        var actor=owner==null?player.getUUID():owner;for(int x=area.minX()>>4;x<=area.maxX()>>4;x++)for(int z=area.minZ()>>4;z<=area.maxZ()>>4;z++)if(!io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server,new BlockPos(x*16,worldPosition.getY(),z*16),actor))return false;
+        if(owner==null)setOwner(player.getUUID());mining.area=area;mining.rescan();setChanged();return true;
     }
     public MachineStatus status() { return status; }
     public void status(MachineStatus value) { if (status != value) { status = value; setChanged(); } }
@@ -282,6 +304,16 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         entity.setItem(ItemStack.EMPTY); entity.discard(); setChanged(); return true;
     }
 
+    private void transferBattery() {
+        var stack=battery.getStackInSlot(0);
+        if(!(stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem) || stack.getCount()!=1 || batteryMode==2)return;
+        int held=io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(stack);
+        int moved=batteryMode==0?energy.extract(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.capacity(stack)-held,false):energy.receive(held,false);
+        if(moved==0)return;
+        io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(stack,held+(batteryMode==0?moved:-moved));
+        setChanged();status(MachineStatus.CHARGING);
+    }
+
     public static void tick(ServerLevel level, BlockPos pos, BlockState state, CopperMachineBlockEntity machine) {
         boolean signal = level.hasNeighborSignal(pos);
         if(machine.brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(level,machine);
@@ -289,10 +321,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if(machine.sentinel!=null) machine.sentinel.active=false;
         if ((machine.redstoneMode == 1 && !signal) || (machine.redstoneMode == 2 && signal)) { if(machine.reaper!=null) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(machine,level); machine.status(MachineStatus.REDSTONE_PAUSED); }
         else machine.logic.tick(machine, level);
-        if (machine.energyEnabled() && level.getGameTime() % 20 == 0) io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
+        if(machine.mining!=null&&machine.status==MachineStatus.REDSTONE_PAUSED)for(var job:machine.mining.jobs)job.advancedAt=Long.MIN_VALUE;
+        if(machine.kind.isCell() && machine.energyEnabled())machine.transferBattery();
+        if (machine.energyEnabled() && level.getGameTime() % (machine.cultivation!=null||machine.mining!=null?4:20) == 0) io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
         boolean active = machine.status == MachineStatus.WORKING || machine.status == MachineStatus.CHARGING;
         if (state.getValue(CopperMachineBlock.ACTIVE) != active) level.setBlock(pos, state.setValue(CopperMachineBlock.ACTIVE, active), 2);
-        if (level.getGameTime() % 10 == 0 || machine.sentinel!=null && sentinelWasActive!=machine.sentinel.active) level.sendBlockUpdated(pos, machine.getBlockState(), machine.getBlockState(), 2);
+        if (level.getGameTime() % (machine.mining!=null?5:10) == 0 || machine.sentinel!=null && sentinelWasActive!=machine.sentinel.active) level.sendBlockUpdated(pos, machine.getBlockState(), machine.getBlockState(), 2);
     }
 
     private void rebuildCaps() {
@@ -337,13 +371,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         super.invalidateCaps(); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
-    @Override public void onLoad() { super.onLoad(); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
+    @Override public void onLoad() { super.onLoad();if(mining!=null&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
     @Override public void onChunkUnloaded() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
     @Override public void setRemoved() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
 
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("DataVersion", 2); tag.put("Inventory", inventory.serializeNBT()); tag.putInt("Energy", energy.stored());
+        if(kind.isCell()) { tag.put("Battery",battery.getStackInSlot(0).save(new CompoundTag()));tag.putInt("BatteryMode",batteryMode); }
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putInt("Redstone", redstoneMode); saveSides(tag);
         tag.putInt("EnergyPriority",energyPriority);
@@ -356,11 +391,13 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("Cost", operationCost);
         if (workArea != null) tag.put("WorkArea", workArea.save());
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
+        if(kind==MachineKind.AURA_CULTIVATOR)tag.put("Harvest",harvest.save());
         tag.putLong("NextWaveTick", nextWaveTick); tag.putBoolean("AllowOwnTamed", allowOwnTamed);
         if (reaper != null) tag.put("Reaper", reaper.save());
         if (arborist != null) tag.put("Arborist", arborist.save());
         if (sentinel != null) tag.put("Sentinel",sentinel.save());
         if (brewer != null) tag.put("Brewer",brewer.save());
+        if(mining!=null)tag.put("Mining",mining.save());
         if (boundInventory != null) tag.putLong("BoundInventory", boundInventory.asLong()); if(boundIdentity!=null)tag.putLong("BoundIdentity",boundIdentity.asLong());tag.putInt("BoundSide", boundSide.ordinal()); tag.putInt("BoundCargoSlot", boundCargoSlot); tag.putBoolean("BoundFaulted", boundFaulted);
         var cargo = new net.minecraft.nbt.ListTag();
         for (var stack : boundCargo) { var entry = new CompoundTag(); entry.put("Stack", stack.copyWithCount(1).save(new CompoundTag())); entry.putInt("Count", stack.getCount()); cargo.add(entry); } tag.put("BoundCargo", cargo);
@@ -369,6 +406,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         super.load(tag);
         enchantmentRevision++;
         inventory.deserializeNBT(tag.getCompound("Inventory")); energy.restore(tag.getInt("Energy"));
+        var portable=ItemStack.of(tag.getCompound("Battery"));
+        battery.setStackInSlot(0,battery.isItemValid(0,portable)?portable.copyWithCount(1):ItemStack.EMPTY);
+        batteryMode=Math.floorMod(tag.getInt("BatteryMode"),3);
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         redstoneMode = Math.floorMod(tag.getInt("Redstone"), 3); loadSides(tag);
         energyPriority=tag.contains("EnergyPriority")?Math.max(0,Math.min(2,tag.getInt("EnergyPriority"))):1;
@@ -380,11 +420,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         operationCost = tag.contains("Cost") ? Math.max(0, tag.getInt("Cost")) : kind == MachineKind.RESONANCE_SMELTER ? 240 : 0;
         if (source.isEmpty() || result.isEmpty() || duration == 0) cancelOperation();
         workArea = null;
+        if(cultivation!=null)cultivation.reset();
         if (tag.contains("WorkArea")) try { workArea = io.github.gerbesh.unusualcopper.gameplay.WorkArea.load(tag.getCompound("WorkArea")); } catch (IllegalArgumentException ignored) {}
-        scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 2);
+        scanCursor = workArea == null ? 0 : Math.floorMod(tag.getInt("ScanCursor"), workArea.volume()); growthMode = Math.floorMod(tag.getInt("GrowthMode"), 3);
+        if(kind==MachineKind.AURA_CULTIVATOR)harvest.load(tag.getList("Harvest",net.minecraft.nbt.Tag.TAG_COMPOUND));
         nextWaveTick = Math.max(0, tag.getLong("NextWaveTick")); allowOwnTamed = tag.getBoolean("AllowOwnTamed");
         if (reaper != null) reaper.load(tag.getCompound("Reaper"));
         if (arborist != null) arborist.load(tag.getCompound("Arborist"));
+        if(mining!=null)mining.load(tag.getCompound("Mining"));
         if (sentinel != null) sentinel.load(tag.getCompound("Sentinel"));
         if (brewer != null) {brewer.load(tag.getCompound("Brewer"));if(brewer.job!=null){progress=brewer.job.stage;duration=brewer.job.plan.stages();operationCost=brewer.job.price();}}
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundIdentity=tag.contains("BoundIdentity")?BlockPos.of(tag.getLong("BoundIdentity")):null;boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
@@ -398,17 +441,18 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         }
     }
     @Override public CompoundTag getUpdateTag() {
-        CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal()); if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
+        CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal()); if(mining!=null){mining.writeVisual(tag,worldPosition);tag.putUUID("MiningRuntime",runtimeIdentity);} if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
     }
     @Override public void handleUpdateTag(CompoundTag tag) {
         previousVisualEnergy=visualEnergy(0);visualEnergyChanged=level==null?0:level.getGameTime();
         energy.restore(tag.getInt("Energy")); status = MachineStatus.values()[Math.floorMod(tag.getInt("Status"), MachineStatus.values().length)]; loadSides(tag);
+        if(mining!=null){mining.visualIdentity=tag.hasUUID("MiningRuntime")?tag.getUUID("MiningRuntime"):null;var a=tag.getIntArray("MiningArea");mining.area=null;if(a.length==4)try{mining.area=new io.github.gerbesh.unusualcopper.gameplay.MiningFootprint(a[0],a[1],a[2],a[3]);}catch(IllegalArgumentException ignored){}mining.enabled=tag.getBoolean("MiningEnabled");mining.visualTick=level==null?0:level.getGameTime();mining.visualRevision++;mining.jobs.clear();for(var raw:tag.getList("MiningBeams",net.minecraft.nbt.Tag.TAG_COMPOUND)){if(mining.jobs.size()>=5)break;var row=(CompoundTag)raw;var job=new MiningState.Job(BlockPos.of(row.getLong("Pos")),net.minecraft.world.level.block.Block.stateById(row.getInt("StateId")),ItemStack.EMPTY,0,0);job.visualId=row.getLong("Flight");job.progress=Math.max(0,Math.min(job.ticks,row.getInt("Progress")));mining.jobs.add(job);}if(level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this);}
         if(sentinel!=null) { sentinel.active=tag.getBoolean("SentinelActive"); sentinel.focused=tag.getBoolean("SentinelFocused"); }
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { if (packet.getTag() != null) handleUpdateTag(packet.getTag()); }
     @Override public Component getDisplayName() { return Component.translatable("block.unusualcopper." + kind.id); }
-    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return kind.energyControl()?new io.github.gerbesh.unusualcopper.menu.EnergyControlMenu(id,playerInventory,this):kind==MachineKind.ENCHANTMENT_RESONATOR?new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(id,playerInventory,this):new CopperMachineMenu(id, playerInventory, this); }
+    @Override public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) { return mining!=null?new io.github.gerbesh.unusualcopper.menu.MiningMenu(id,playerInventory,this):kind==MachineKind.REPAIR_CRYSTAL?new io.github.gerbesh.unusualcopper.menu.RepairMenu(id,playerInventory,this):kind.energyControl()?new io.github.gerbesh.unusualcopper.menu.EnergyControlMenu(id,playerInventory,this):kind==MachineKind.ENCHANTMENT_RESONATOR?new io.github.gerbesh.unusualcopper.menu.EnchanterMenu(id,playerInventory,this):new CopperMachineMenu(id, playerInventory, this); }
 
     public ContainerData menuData() {
         return new ContainerData() {
@@ -441,7 +485,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 40 -> sentinel==null?0:io.github.gerbesh.unusualcopper.machine.logic.SentinelLogic.radius(CopperMachineBlockEntity.this);
                     case 41 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost() & 0xffff; case 42 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelUpkeep();
                     case 43 -> sentinel!=null && sentinel.active?1:0;
-                    case 44 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost()>>>16; default -> 0;
+                    case 44 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost()>>>16;
+                    case 45 -> batteryMode; case 46 -> harvested; default -> 0;
                 };
             }
             @Override public void set(int index, int value) {}

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "unusualcopper:block/resonant_extractor",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "unusualcopper:block/resonant_extractor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "unusualcopper:block/resonant_extractor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "unusualcopper:block/resonant_extractor",
+      "y": 270
+    }
+  }
+}

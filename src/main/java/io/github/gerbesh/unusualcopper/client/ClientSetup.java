@@ -17,8 +17,15 @@ public final class ClientSetup {
     @SubscribeEvent public static void setup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);
+            MenuScreens.register(ModContent.MINING_MENU.get(),MiningScreen::new);
+            io.github.gerbesh.unusualcopper.network.MiningNetwork.clientReceiver(r->{var p=net.minecraft.client.Minecraft.getInstance().player;if(p!=null&&p.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.MiningMenu menu)menu.receive(r);});
+            io.github.gerbesh.unusualcopper.network.MiningNetwork.effectsReceiver(MiningEffects::accept);
+            io.github.gerbesh.unusualcopper.network.MiningNetwork.fieldReceiver(MiningEffects::track);
             MenuScreens.register(ModContent.BREWER_MENU.get(),BrewerScreen::new);
             MenuScreens.register(ModContent.ENCHANTER_MENU.get(),EnchanterScreen::new);
+            MenuScreens.register(ModContent.REPAIR_MENU.get(),RepairScreen::new);
+            io.github.gerbesh.unusualcopper.network.ItemTransitNetwork.clientReceiver(ItemTransitEffects::accept);
+            io.github.gerbesh.unusualcopper.network.RepairNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.RepairMenu menu)menu.receive(message);});
             MenuScreens.register(ModContent.ENERGY_MENU.get(),EnergyControlScreen::new);
             io.github.gerbesh.unusualcopper.network.EnergyControlNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnergyControlMenu menu)menu.receive(message);});
             io.github.gerbesh.unusualcopper.network.EnchanterNetwork.clientReceiver(message->{var player=net.minecraft.client.Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.EnchanterMenu menu)menu.receive(message);});
@@ -34,6 +41,8 @@ public final class ClientSetup {
             io.github.gerbesh.unusualcopper.network.MachineEffects.reaperReceiver(ReaperEffects::accept);
             io.github.gerbesh.unusualcopper.network.MachineEffects.forestryReceiver(ArboristEffects::accept);
             io.github.gerbesh.unusualcopper.network.MachineEffects.beamReceiver(SentinelEffects::accept);
+            io.github.gerbesh.unusualcopper.network.MachineEffects.cultivatorReceiver(CultivatorEffects::accept);
+            io.github.gerbesh.unusualcopper.network.MachineEffects.cultivationDeliveryReceiver(CultivatorEffects::delivery);
             io.github.gerbesh.unusualcopper.network.PipeNetwork.clientReceiver(message -> {
                 var player = net.minecraft.client.Minecraft.getInstance().player;
                 if (player != null && player.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.ItemPipeMenu menu && menu.containerId == message.menu() && menu.pos.equals(message.pos())) menu.tags(message.face(), message.tags());

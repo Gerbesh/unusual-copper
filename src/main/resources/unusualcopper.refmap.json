@@ -1,5 +1,9 @@
 {
   "mappings": {
+    "io/github/gerbesh/unusualcopper/mixin/ServerLifecycleMixin": {
+      "halt(Z)V": "Lnet/minecraft/server/MinecraftServer;m_7570_(Z)V",
+      "stopServer()V": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"
+    },
     "io/github/gerbesh/unusualcopper/mixin/ReaperVictimMixin": {
       "lastHurtByPlayer": "f_20888_:Lnet/minecraft/world/entity/player/Player;",
       "lastHurtByPlayerTime": "f_20889_:I",
@@ -10,6 +14,10 @@
   },
   "data": {
     "searge": {
+      "io/github/gerbesh/unusualcopper/mixin/ServerLifecycleMixin": {
+        "halt(Z)V": "Lnet/minecraft/server/MinecraftServer;m_7570_(Z)V",
+        "stopServer()V": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"
+      },
       "io/github/gerbesh/unusualcopper/mixin/ReaperVictimMixin": {
         "lastHurtByPlayer": "f_20888_:Lnet/minecraft/world/entity/player/Player;",
         "lastHurtByPlayerTime": "f_20889_:I",

@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FAF",
+    "NCN",
+    "FPF"
+  ],
+  "key": {
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "A": {
+      "item": "minecraft:amethyst_block"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "C": {
+      "item": "unusualcopper:copper_core"
+    },
+    "P": {
+      "item": "minecraft:diamond_pickaxe"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:resonant_extractor"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "generator": "Built-in image_gen",
+  "sprites": [
+    {
+      "name": "copper_battery",
+      "source": "sources/copper_battery.png",
+      "gameResolution": [
+        64,
+        64
+      ],
+      "prompt": "Use case: game-asset. Generate ONE isolated Minecraft inventory item sprite for Unusual Copper, Tier I, small single copper canister, one broad turquoise glass window, simple pair of dark riveted copper bands. Original readable pixel art with crisp chunky pixel clusters, a 64 by 64 pixel aesthetic, three-quarter view, warm copper metal, dark desaturated green patina, clear glass with luminous aqua energy, consistent compact industrial magical Minecraft style. Full item centered with 8 percent transparent margin, square canvas. Transparent background, no cast shadow outside item, no text, no numbers, no logos, no scenery, no panel or grid. Visually polished and recognizable at 16px inventory size. The whole object must fit inside the image."
+    },
+    {
+      "name": "reinforced_battery",
+      "source": "sources/reinforced_battery.png",
+      "gameResolution": [
+        64,
+        64
+      ],
+      "prompt": "Use case: game-asset. Generate ONE isolated Minecraft inventory item sprite for Unusual Copper, Tier II, stout reinforced copper canister, two turquoise glass windows separated by dark metal ribs, heavier copper bands. Original readable pixel art with crisp chunky pixel clusters, a 64 by 64 pixel aesthetic, three-quarter view, warm copper metal, dark desaturated green patina, clear glass with luminous aqua energy, consistent compact industrial magical Minecraft style. Full item centered with 8 percent transparent margin, square canvas. Transparent background, no cast shadow outside item, no text, no numbers, no logos, no scenery, no panel or grid. Visually polished and recognizable at 16px inventory size. The whole object must fit inside the image."
+    },
+    {
+      "name": "resonant_battery",
+      "source": "sources/resonant_battery.png",
+      "gameResolution": [
+        64,
+        64
+      ],
+      "prompt": "Use case: game-asset. Generate ONE isolated Minecraft inventory item sprite for Unusual Copper, Tier III, angular copper energy battery enclosing three visible turquoise crystal cells, dark patina steel cage, distinctive stepped top. Original readable pixel art with crisp chunky pixel clusters, a 64 by 64 pixel aesthetic, three-quarter view, warm copper metal, dark desaturated green patina, clear glass with luminous aqua energy, consistent compact industrial magical Minecraft style. Full item centered with 8 percent transparent margin, square canvas. Transparent background, no cast shadow outside item, no text, no numbers, no logos, no scenery, no panel or grid. Visually polished and recognizable at 16px inventory size. The whole object must fit inside the image."
+    },
+    {
+      "name": "aetheric_battery",
+      "source": "sources/aetheric_battery.png",
+      "gameResolution": [
+        64,
+        64
+      ],
+      "prompt": "Use case: game-asset. Generate ONE isolated Minecraft inventory item sprite for Unusual Copper, Tier IV, elaborate tall copper power battery containing a large faceted turquoise crystal, four glowing window slits, reinforced patina corners, distinctive crown terminal. Original readable pixel art with crisp chunky pixel clusters, a 64 by 64 pixel aesthetic, three-quarter view, warm copper metal, dark desaturated green patina, clear glass with luminous aqua energy, consistent compact industrial magical Minecraft style. Full item centered with 8 percent transparent margin, square canvas. Transparent background, no cast shadow outside item, no text, no numbers, no logos, no scenery, no panel or grid. Visually polished and recognizable at 16px inventory size. The whole object must fit inside the image."
+    }
+  ]
+}

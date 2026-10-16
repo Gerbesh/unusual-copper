@@ -175,4 +175,11 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
         }
         return new Count(count, slots <= SLOT_BUDGET);
     }
+    @Override public Count countItem(net.minecraft.world.item.Item item,Predicate<ItemStack> accepted){
+        var handler=resolve();if(handler==null)return new Count(0,false);int slots=handler.getSlots();
+        if(slots>SLOT_BUDGET)return census.countItem(handler,item,accepted,primaryToken,partnerToken,level.getGameTime());
+        long amount=0;for(int i=0;i<slots;i++){var stack=handler.getStackInSlot(i);if(stack.is(item)&&accepted.test(stack))amount+=stack.getCount();}
+        return new Count(amount,true);
+    }
+
 }

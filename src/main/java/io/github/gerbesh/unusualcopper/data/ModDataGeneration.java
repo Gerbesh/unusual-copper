@@ -30,6 +30,21 @@ public final class ModDataGeneration {
     private static final class Recipes extends RecipeProvider {
         Recipes(PackOutput output) { super(output); }
         @Override protected void buildRecipes(Consumer<FinishedRecipe> out) {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.COPPER_BATTERY.get()).pattern("CGC").pattern("RKR").pattern("CCC")
+                    .define('C',Items.COPPER_INGOT).define('G',Items.GLASS).define('R',Items.REDSTONE).define('K',ModContent.CORE.get()).unlockedBy("has_core",has(ModContent.CORE.get())).save(out);
+            Consumer<FinishedRecipe> batteryUpgrade=recipe->out.accept(new FinishedRecipe() {
+                @Override public void serializeRecipeData(JsonObject json) { recipe.serializeRecipeData(json); }
+                @Override public ResourceLocation getId() { return recipe.getId(); }
+                @Override public RecipeSerializer<?> getType() { return ModContent.BATTERY_UPGRADE_SERIALIZER.get(); }
+                @Override public JsonObject serializeAdvancement() { return recipe.serializeAdvancement(); }
+                @Override public ResourceLocation getAdvancementId() { return recipe.getAdvancementId(); }
+            });
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.REINFORCED_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
+                    .define('C',Items.COPPER_BLOCK).define('M',Items.GLASS).define('R',Items.REDSTONE_BLOCK).define('B',ModContent.COPPER_BATTERY.get()).unlockedBy("has_battery",has(ModContent.COPPER_BATTERY.get())).save(batteryUpgrade);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.RESONANT_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
+                    .define('C',Items.AMETHYST_BLOCK).define('M',Items.DIAMOND).define('R',Items.GOLD_BLOCK).define('B',ModContent.REINFORCED_BATTERY.get()).unlockedBy("has_battery",has(ModContent.REINFORCED_BATTERY.get())).save(batteryUpgrade);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.AETHERIC_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
+                    .define('C',Items.OBSIDIAN).define('M',Items.NETHERITE_INGOT).define('R',Items.NETHER_STAR).define('B',ModContent.RESONANT_BATTERY.get()).unlockedBy("has_battery",has(ModContent.RESONANT_BATTERY.get())).save(batteryUpgrade);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.SOLAR_LENS.get()).pattern("IDI").pattern("DGD").pattern("IDI")
                     .define('I', Items.IRON_NUGGET).define('D', Items.DIAMOND).define('G', Items.GLASS).unlockedBy("has_diamond", has(Items.DIAMOND)).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.FRAME.get()).pattern("CCC").pattern("CIC").pattern("CCC")
@@ -86,6 +101,10 @@ public final class ModDataGeneration {
                     .define('F',ModContent.FRAME.get()).define('Q',Items.QUARTZ).define('R',Items.REDSTONE).define('E',Items.ENDER_PEARL).unlockedBy("has_essence",has(ModContent.ESSENCE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ENCHANTMENT_RESONATOR).get()).pattern("FFF").pattern("FCF").pattern("FFF")
                     .define('F',ModContent.FRAME.get()).define('C',ModContent.ENCHANTMENT_CORE.get()).unlockedBy("has_core",has(ModContent.ENCHANTMENT_CORE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.RESONANT_EXTRACTOR).get()).pattern("FAF").pattern("NCN").pattern("FPF")
+                    .define('F',ModContent.FRAME.get()).define('A',Items.AMETHYST_BLOCK).define('N',Items.NETHERITE_INGOT).define('C',ModContent.CORE.get()).define('P',Items.DIAMOND_PICKAXE).unlockedBy("has_core",has(ModContent.CORE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.REPAIR_CRYSTAL).get()).pattern("FAF").pattern("GNG").pattern("FCF")
+                    .define('F',ModContent.FRAME.get()).define('A',Items.AMETHYST_SHARD).define('G',Items.GLASS).define('N',Items.ANVIL).define('C',ModContent.CORE.get()).unlockedBy("has_core",has(ModContent.CORE.get())).save(out);
             for (var item : new net.minecraft.world.item.Item[]{Items.COPPER_INGOT, Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE}) {
                 var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
                 int multiplier = item == Items.COPPER_INGOT ? 2 : 1;

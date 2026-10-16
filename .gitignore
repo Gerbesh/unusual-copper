@@ -31,3 +31,10 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 .codex-tmp/
+
+# Release binaries are attached to GitHub Releases, not committed to source history.
+dist/
+libs/*.jar
+.verification/
+__pycache__/
+*.py[cod]

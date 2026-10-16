@@ -21,6 +21,8 @@
     "unusualcopper:reinforced_energy_pipe",
     "unusualcopper:crystalline_energy_pipe",
     "unusualcopper:ssn_bridge",
-    "unusualcopper:copper_item_pipe"
+    "unusualcopper:copper_item_pipe",
+    "unusualcopper:repair_crystal",
+    "unusualcopper:resonant_extractor"
   ]
 }

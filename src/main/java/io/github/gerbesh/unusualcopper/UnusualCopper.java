@@ -22,14 +22,18 @@ public final class UnusualCopper {
         ModContent.register(bus);
         io.github.gerbesh.unusualcopper.network.PipeNetwork.register();
         io.github.gerbesh.unusualcopper.network.AreaNetwork.register();
+        io.github.gerbesh.unusualcopper.network.MiningNetwork.register();
         io.github.gerbesh.unusualcopper.network.ReaperNetwork.register();
         io.github.gerbesh.unusualcopper.network.BrewerNetwork.register();
         io.github.gerbesh.unusualcopper.network.EnchanterNetwork.register();
+        io.github.gerbesh.unusualcopper.network.RepairNetwork.register();
+        io.github.gerbesh.unusualcopper.network.ItemTransitNetwork.register();
         io.github.gerbesh.unusualcopper.network.EnergyControlNetwork.register();
         io.github.gerbesh.unusualcopper.network.MachineEffects.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         bus.addListener(CopperCapabilities::register);
         MinecraftForge.EVENT_BUS.register(EnergyNetworks.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MiningScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.AreaWorkScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.EntityIndexes.class);
@@ -38,6 +42,7 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.PotionPlans.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MobPopulations.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.ReaperLoot.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.diagnostics.ServerLifecycleDiagnostics.class);
         LOGGER.info("Unusual Copper: server-authoritative CuE machinery initialized");
     }
 }

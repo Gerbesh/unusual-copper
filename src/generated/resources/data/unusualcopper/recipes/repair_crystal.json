@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FAF",
+    "GNG",
+    "FCF"
+  ],
+  "key": {
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "N": {
+      "item": "minecraft:anvil"
+    },
+    "C": {
+      "item": "unusualcopper:copper_core"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:repair_crystal"
+  },
+  "show_notification": true
+}

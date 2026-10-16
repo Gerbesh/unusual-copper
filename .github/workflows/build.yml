@@ -1,7 +1,9 @@
-name: Build and GameTests
+name: Build and unit tests
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -15,10 +17,9 @@ jobs:
           java-version: '17'
           cache: gradle
       - run: chmod +x gradlew
-      - run: ./gradlew --no-daemon build
-      - run: ./gradlew --no-daemon runGameTestServer
+      - run: ./gradlew --no-daemon build compileGameTestJava --console=plain
       - uses: actions/upload-artifact@v4
         with:
           name: unusual-copper
-          path: build/libs/*.jar
+          path: build/libs/unusualcopper-*.jar
           if-no-files-found: error

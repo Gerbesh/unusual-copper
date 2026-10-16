@@ -42,6 +42,22 @@ public final class PopulationGameTests {
         sequence.thenExecute(() -> clear(level, area)).thenSucceed();
     }
     @GameTest(template = "empty", timeoutTicks = 100)
+    public static void creatureCatalogueTracksAgesProtectedNamesAndMovementWithoutChangingReaperLedger(GameTestHelper h) {
+        var level=h.getLevel();var base=new BlockPos(37008,70,39008);var target=base.east(2);var area=WorkArea.between(target,target.east());
+        loaded(h,area,()->{
+            var adult=spawn(level,EntityType.COW,target);var baby=spawn(level,EntityType.COW,target);baby.setAge(-1000);var sheep=spawn(level,EntityType.SHEEP,target);
+            var machineId=UUID.randomUUID();var working=MobPopulations.ledger(level,machineId,base,area,ReaperRule.defaults());working.step(64);
+            var browser=MobPopulations.ledger(level,UUID.randomUUID(),base,area,new ReaperRule(true,false,Set.of(),Set.of(),EnumSet.allOf(MobCategory.class)));browser.enableCatalogue();
+            for(int i=0;i<8&&!browser.ready();i++)h.assertTrue(browser.step(1)<=1,"Browser cold start remains bounded");
+            var cows=browser.catalogue().stream().filter(s->s.type()==EntityType.COW).findFirst().orElseThrow();
+            h.assertTrue(cows.total()==2&&cows.adults()==1&&working.ready()&&working.count()==0,"Species catalogue includes babies without replacing or broadening the production ledger");
+            baby.setAge(0);cows=browser.catalogue().stream().filter(s->s.type()==EntityType.COW).findFirst().orElseThrow();h.assertTrue(cows.adults()==2,"Growing up updates the species count without a rescan");
+            adult.setCustomName(Component.literal("Protected"));cows=browser.catalogue().stream().filter(s->s.type()==EntityType.COW).findFirst().orElseThrow();h.assertTrue(cows.total()==1&&cows.adults()==1,"Protected mobs disappear from selectable target counts");
+            sheep.setPos(target.getX()+.5,target.getY()+.1,target.getZ()+2.5);h.assertTrue(browser.catalogue().size()==1,"Moving outside the exact area removes a species");
+            baby.discard();h.assertTrue(browser.catalogue().isEmpty(),"Removed final member leaves no stale species");
+        });
+    }
+    @GameTest(template = "empty", timeoutTicks = 100)
     public static void coldLedgerCountsThreeHundredWithBoundedStepsAndConcurrentChanges(GameTestHelper h) {
         var level = h.getLevel(); var base = new BlockPos(33008, 70, 33008); var target = base.east(2); var area = new WorkArea(target, target);
         loaded(h, area, () -> {

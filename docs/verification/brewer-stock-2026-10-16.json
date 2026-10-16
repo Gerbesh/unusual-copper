@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-16",
+  "version": "0.19.0-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.19.0-alpha.1.jar",
+  "sha256": "4d06d7acd90ac60b40eb9664b0a6e17d5d185d2d8f8c7074e7d1850ce29c8873",
+  "size": 948986,
+  "junit_tests": 36,
+  "failures": 0,
+  "errors": 0,
+  "build": "build compileGameTestJava --offline --console=plain",
+  "game_tests": "compiled only; not executed",
+  "minecraft_launched": false,
+  "installed": true,
+  "installation_receipt": "D:\\Unusual copper\\.codex-tmp\\paired-install-20261016T203751Z.json"
+}

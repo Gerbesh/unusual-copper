@@ -34,11 +34,11 @@ public final class ReaperEffects {
     public static Statistics statistics() { return new Statistics(windups,strikes,transfers,runeFrames,iconFrames,compressedModels,ACTIVE.size(),peakIcons); }
     public static int youngestAge(int phase) {
         var level=world(); if(level==null) return -1;
-        return ACTIVE.values().stream().filter(active -> active.event.phase()==phase).mapToInt(active -> (int)(level.getGameTime()-active.start)).min().orElse(-1);
+        return ACTIVE.values().stream().filter(active -> active.event.phase()==phase).mapToInt(active -> (int)(AnimationClock.now()-active.start)).min().orElse(-1);
     }
     private static final class Active {
-        final MachineEffects.Reap event; final long start; final List<ItemStack> icons;
-        Active(MachineEffects.Reap event,long start) {
+        final MachineEffects.Reap event; final double start; final List<ItemStack> icons;
+        Active(MachineEffects.Reap event,double start) {
             this.event=event; this.start=start;
             icons=Arrays.stream(event.icons()).mapToObj(id -> new ItemStack(BuiltInRegistries.ITEM.byId(id))).filter(stack -> !stack.isEmpty()).toList();
         }
@@ -49,6 +49,16 @@ public final class ReaperEffects {
         return current;
     }
     public static void accept(MachineEffects.Reap event) {
+        accept(event,0);
+    }
+    public static void cultivatorPickup(MachineEffects.Reap event) {
+        world();
+        // Keep admitted flights alive through the cut delay instead of replacing them every tick.
+        // Reserve two event slots for delivery effects and the reaper's own actions.
+        if(ACTIVE.size()<MAX_EVENTS-2)accept(event,4);
+    }
+    /** Cosmetic delays coordinate crop -> machine -> storage; real delivery has already committed. */
+    public static void accept(MachineEffects.Reap event,int delay) {
         var level=world(); if(level==null || !level.dimension().location().equals(event.dimension())) return;
         if(event.phase()==MachineEffects.CANCEL) { ACTIVE.remove(event.action()); return; }
         long now=level.getGameTime(); if(now!=messageTick) { messageTick=now; messages=0; }
@@ -56,16 +66,16 @@ public final class ReaperEffects {
         while(ACTIVE.size()>=MAX_EVENTS && !ACTIVE.containsKey(event.action())) ACTIVE.remove(ACTIVE.keySet().iterator().next());
         var previous=ACTIVE.get(event.action());
         if(previous!=null && previous.event.phase()!=MachineEffects.WINDUP && event.phase()==MachineEffects.WINDUP) return;
-        ACTIVE.put(event.action(),new Active(event,now));
+        ACTIVE.put(event.action(),new Active(event,AnimationClock.now()+Math.max(0,Math.min(20,delay))));
         if(event.phase()==MachineEffects.WINDUP) windups++; else if(event.phase()==MachineEffects.STRIKE) strikes++; else transfers++;
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if(event.phase!=TickEvent.Phase.END) return;
         var level=world(); if(level==null) return;
-        ACTIVE.values().removeIf(active -> { long age=level.getGameTime()-active.start; return age<0 || age>=(active.event.phase()==MachineEffects.WINDUP?ReaperState.WINDUP_TICKS:20); });
+        ACTIVE.values().removeIf(active -> { double age=AnimationClock.now()-active.start; return age< -20 || age>=(active.event.phase()==MachineEffects.WINDUP?ReaperState.WINDUP_TICKS:20); });
         int trails=0;
         for(var active:ACTIVE.values()) if(active.event.phase()!=MachineEffects.WINDUP) for(int i=0;i<active.icons.size() && trails<MAX_TRAILS_PER_TICK;i++) {
-            double t=(level.getGameTime()-active.start-i*1.2)/16.0; if(t<0 || t>=1) continue;
+            double t=(AnimationClock.now()-active.start-i*1.2)/16.0; if(t<0 || t>=1) continue;
             var point=active.event.from().lerp(Vec3.atCenterOf(active.event.to()),t).add(0,Math.sin(t*Math.PI)*(1.1+i*.12),0);
             level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,point.x,point.y,point.z,0,.005,0); trails++;
         }
@@ -75,7 +85,7 @@ public final class ReaperEffects {
         for(var active:ACTIVE.values()) {
             boolean preparing=active.event.phase()==MachineEffects.WINDUP;
             if(!preparing && active.event.phase()!=MachineEffects.STRIKE || !active.event.target().equals(event.getEntity().getUUID())) continue;
-            double age=level.getGameTime()-active.start+event.getPartialTick(); if(age<0 || age>=(preparing?ReaperState.WINDUP_TICKS:20)) return;
+            double age=AnimationClock.now()-active.start; if(age<0 || age>=(preparing?ReaperState.WINDUP_TICKS:20)) return;
             // Keep the real corpse visually inside the flash instead of popping back to full size.
             float scale=preparing?(float)(1-.9*age/ReaperState.WINDUP_TICKS):(float)Math.max(.001,.1*(1-Math.min(1,age/4)));
             // EntityRenderDispatcher owns the surrounding push/pop, including cancelled renders.
@@ -99,7 +109,7 @@ public final class ReaperEffects {
         var mc=Minecraft.getInstance(); var camera=event.getCamera().getPosition(); var pose=event.getPoseStack(); var buffers=mc.renderBuffers().bufferSource();
         int iconsRendered=0;
         for(var active:ACTIVE.values()) {
-            var effect=active.event; float age=(float)(level.getGameTime()-active.start)+event.getPartialTick();
+            var effect=active.event; float age=(float)(AnimationClock.now()-active.start);
             boolean charging=effect.phase()==MachineEffects.WINDUP;
             if(age<0 || age>=(charging?ReaperState.WINDUP_TICKS:20)) continue;
             Vec3 source=effect.from(); double radius=.7;

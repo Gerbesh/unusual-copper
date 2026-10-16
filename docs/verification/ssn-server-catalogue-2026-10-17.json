@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.6-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.20.6-alpha.1.jar",
+  "size": 1021938,
+  "sha256": "45b410b73275782aeaccf88af23024013e334e77d7a2e1f0e209e8119a7d72a3",
+  "junit_tests": 54,
+  "failures": 0,
+  "errors": 0,
+  "game_tests": "compiled only; not executed",
+  "minecraft_launched": false,
+  "installed": true,
+  "build_log": "D:\\Unusual copper\\.codex-tmp\\verify-0206-final.log",
+  "ssn_progressive_compatible": [
+    "1.2.4",
+    "1.3.0",
+    "1.3.1",
+    "1.4.0"
+  ],
+  "includes_uninstalled_0205_mining_pipeline_fix": true,
+  "mining_cue_multiplier": 0.25,
+  "previous_installed_version": "0.20.4-alpha.1",
+  "installation_receipt": "D:\\Unusual copper\\.codex-tmp\\paired-install-20261016T225223Z.json"
+}

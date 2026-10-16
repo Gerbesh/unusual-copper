@@ -1,0 +1,46 @@
+Unusual Copper 0.16.1-alpha.1 — Quark feeding-trough food guard
+
+User requested: do not spend food once the animal limit is reached; maximum
+love chance. User agreed to close client/server for installation.
+
+Implementation:
+- Optional @Pseudo HEAD injection into Quark FeedingTroughBlockEntity.
+- Exact installed compatibility target: Quark 4.0-462, Minecraft 1.20.1.
+- Before the first eating side effect, count all Animal entities in Quark's
+  configured AABB and return FeedResult.NONE if population >= Max Animals.
+- Also refuse babies, positive-age parents and animals unable to enter love.
+- Counts and range come from Quark's actual runtime config fields.
+- Full-population refusals use a weak-key retry cache lasting Quark's eating
+  cooldown (30 ticks here), avoiding repeated full queries by hungry animals.
+- No direct Quark classes bundled, compile/runtime dependency not required.
+- Other Quark versions retain their original behavior with a compatibility log.
+- This is a feeding gate, not reservation of future births: already loving pairs
+  can finish breeding and overshoot the population limit.
+
+Static evidence:
+- Inspected installed Quark JAR bytecode: original ItemStack.shrink precedes
+  loveChance and population checks. FeedResult.NONE and pinned target signature
+  exist. Manifest Implementation-Version is 4.0-462.
+- Output retained in .codex-tmp/quark-trough-bytecode.txt.
+- gradlew build compileGameTestJava: BUILD SUCCESSFUL in 20 s.
+  Log: .codex-tmp/verify-0161-build-final.log.
+- 23 JUnit tests passed, 0 failures/errors. Three new policy tests cover 31/32/33,
+  configured limits, babies, parent cooldown and inability to enter love mode.
+- Packaged patch classes/config inspected; 226 JSON/mcmeta parsed; existing
+  lifecycle refmap retained; ordinary JAR has no probe/test or Quark classes.
+- Actual mixin application and animal behavior NOT run: user retains in-game
+  verification. No Minecraft/GameTest/server launch performed.
+
+Deployment:
+- dist/unusualcopper-0.16.1-alpha.1.jar, 870052 bytes.
+- SHA256: 1bbfc57636ca5ddb7677799e384e720949a34415757dc5ef11d9bc7f5dcb2824
+- Installed in actual client and server, one CuE JAR each, checksums verified.
+- Previous 0.16.0 JARs preserved with checksums under
+  .codex-tmp/installs/20261016T171931Z/{client,server}/.
+- Receipt: .codex-tmp/cue-install-20261016T171931Z.json.
+- Quark Love Chance changed from 0.333333333 to 1.0 in BOTH actual configs.
+  Parsed TOML checked to ensure no unrelated setting changed; Max Animals=32,
+  Range=10, Cooldown=30 and Look Chance remain unchanged.
+- Config backups and SHA receipt:
+  .codex-tmp/quark-trough-configs/20261016T171943Z/receipt.json.
+- Quark's original JAR was not modified. No world-save changes or process stops.

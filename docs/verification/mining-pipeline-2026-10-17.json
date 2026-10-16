@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.5-alpha.1",
+  "artifact": "D:\\Unusual copper\\dist\\unusualcopper-0.20.5-alpha.1.jar",
+  "size": 1021931,
+  "sha256": "0a354aed1d6f9c51e1f3940379c86439c01e07bf3ee7be066a751b6e95187ecf",
+  "junit_tests": 54,
+  "failures": 0,
+  "errors": 0,
+  "build_log": "D:\\Unusual copper\\.codex-tmp\\verify-0205-final.log",
+  "game_tests": "11 mining scenarios compiled only; not executed",
+  "minecraft_launched": false,
+  "installed": false,
+  "diagnosis": "Static code inspection: scanning before job servicing could consume deadline; normal output backlog paused all flights for retry delay",
+  "fix": "Bounded flight bookkeeping before optional work; mature commits before scanning; normal owned-loot drain blocks admissions and commits only; unloaded future scan column cannot pause loaded flights",
+  "preserved": "Shared 1ms cooperative budget; 64 scan nodes per station visit; one physical commit per visit; ownership, protection, actual inventory capacity, CuE and tool checks; 0.25 price multiplier; 60 active tick flight",
+  "runtime_claim": "No in-game reproduction, TPS or visual measurements performed",
+  "previous_installed_version": "0.20.4-alpha.1"
+}

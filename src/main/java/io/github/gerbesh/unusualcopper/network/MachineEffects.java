@@ -53,11 +53,47 @@ public final class MachineEffects {
         static Beam decode(FriendlyByteBuf b) { return new Beam(b.readResourceLocation(),b.readBlockPos(),new Vec3(b.readDouble(),b.readDouble(),b.readDouble())); }
         static void encode(Beam v,FriendlyByteBuf b) { b.writeResourceLocation(v.dimension); b.writeBlockPos(v.origin); b.writeDouble(v.target.x); b.writeDouble(v.target.y); b.writeDouble(v.target.z); }
     }
-    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "4", "4"::equals, "4"::equals);
+    /** icon 0 = growth, -1 = harvest without a loot icon, positive = harvested item registry ID. */
+    public record Plant(BlockPos pos,int icon) { public Plant {pos=pos.immutable();if(icon< -1)throw new IllegalArgumentException("Invalid plant icon");} }
+    public record CultivationDelivery(ResourceLocation dimension,BlockPos origin,BlockPos storage,int icon) {
+        public CultivationDelivery {
+            origin=origin.immutable();storage=storage.immutable();
+            if(origin.distSqr(storage)>32*32||icon<=0)throw new IllegalArgumentException("Invalid cultivation delivery");
+        }
+        static CultivationDelivery decode(FriendlyByteBuf b){return new CultivationDelivery(b.readResourceLocation(),b.readBlockPos(),b.readBlockPos(),b.readVarInt());}
+        static void encode(CultivationDelivery v,FriendlyByteBuf b){b.writeResourceLocation(v.dimension);b.writeBlockPos(v.origin);b.writeBlockPos(v.storage);b.writeVarInt(v.icon);}
+    }
+    public record Cultivation(ResourceLocation dimension,BlockPos origin,BlockPos min,BlockPos max,float from,float to,List<Plant> plants) {
+        public Cultivation {
+            origin=origin.immutable();min=min.immutable();max=max.immutable();plants=List.copyOf(plants);
+            var area=new io.github.gerbesh.unusualcopper.gameplay.WorkArea(min,max);
+            double dx=Math.max(Math.abs((double)min.getX()-origin.getX()),Math.abs((double)max.getX()-origin.getX()));
+            double dy=Math.max(Math.abs((double)min.getY()-origin.getY()),Math.abs((double)max.getY()-origin.getY()));
+            double dz=Math.max(Math.abs((double)min.getZ()-origin.getZ()),Math.abs((double)max.getZ()-origin.getZ()));
+            if(dx*dx+dy*dy+dz*dz>32*32 || !Float.isFinite(from)||!Float.isFinite(to)||from<0||to<from||to>33||plants.size()>8)
+                throw new IllegalArgumentException("Invalid cultivation wave");
+            for(var plant:plants)if(!area.contains(plant.pos()))throw new IllegalArgumentException("Plant outside wave area");
+        }
+        static Cultivation decode(FriendlyByteBuf b) {
+            var dimension=b.readResourceLocation();var origin=b.readBlockPos();var min=b.readBlockPos();var max=b.readBlockPos();
+            float from=b.readFloat(),to=b.readFloat();int size=b.readUnsignedByte();
+            if(size>8)throw new IllegalArgumentException("Too many cultivation targets");
+            var plants=new ArrayList<Plant>();for(int i=0;i<size;i++)plants.add(new Plant(b.readBlockPos(),b.readVarInt()));
+            return new Cultivation(dimension,origin,min,max,from,to,plants);
+        }
+        static void encode(Cultivation v,FriendlyByteBuf b) {
+            b.writeResourceLocation(v.dimension);b.writeBlockPos(v.origin);b.writeBlockPos(v.min);b.writeBlockPos(v.max);
+            b.writeFloat(v.from);b.writeFloat(v.to);b.writeByte(v.plants.size());
+            for(var plant:v.plants){b.writeBlockPos(plant.pos());b.writeVarInt(plant.icon());}
+        }
+    }
+    private static final net.minecraftforge.network.simple.SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "machine_effects"), () -> "5", "5"::equals, "5"::equals);
     private static Consumer<Wave> receiver = ignored -> {};
     private static Consumer<Reap> reaperReceiver = ignored -> {};
     private static Consumer<Forestry> forestryReceiver = ignored -> {};
     private static Consumer<Beam> beamReceiver=ignored->{};
+    private static Consumer<Cultivation> cultivatorReceiver=ignored->{};
+    private static Consumer<CultivationDelivery> cultivationDeliveryReceiver=ignored->{};
     private MachineEffects() {}
     public static void register() {
         CHANNEL.registerMessage(0, Wave.class, Wave::encode, Wave::decode, (wave, supplier) -> {
@@ -72,11 +108,33 @@ public final class MachineEffects {
         CHANNEL.registerMessage(3,Beam.class,Beam::encode,Beam::decode,(effect,supplier)-> {
             var context=supplier.get(); context.enqueueWork(()->beamReceiver.accept(effect)); context.setPacketHandled(true);
         },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(4,Cultivation.class,Cultivation::encode,Cultivation::decode,(effect,supplier)-> {
+            var context=supplier.get();context.enqueueWork(()->cultivatorReceiver.accept(effect));context.setPacketHandled(true);
+        },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(5,CultivationDelivery.class,CultivationDelivery::encode,CultivationDelivery::decode,(effect,supplier)-> {
+            var context=supplier.get();context.enqueueWork(()->cultivationDeliveryReceiver.accept(effect));context.setPacketHandled(true);
+        },Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     public static void clientReceiver(Consumer<Wave> handler) { receiver = handler; }
     public static void reaperReceiver(Consumer<Reap> handler) { reaperReceiver=handler; }
     public static void forestryReceiver(Consumer<Forestry> handler) { forestryReceiver=handler; }
     public static void beamReceiver(Consumer<Beam> handler) { beamReceiver=handler; }
+    public static void cultivatorReceiver(Consumer<Cultivation> handler) { cultivatorReceiver=handler; }
+    public static void cultivationDeliveryReceiver(Consumer<CultivationDelivery> handler) { cultivationDeliveryReceiver=handler; }
+    public static void cultivatorDelivery(ServerLevel level,CopperMachineBlockEntity machine,BlockPos storage,ItemStack moved) {
+        try {
+            var p=machine.getBlockPos();var effect=new CultivationDelivery(level.dimension().location(),p,storage,BuiltInRegistries.ITEM.getId(moved.getItem()));
+            CHANNEL.send(PacketDistributor.NEAR.with(()->new PacketDistributor.TargetPoint(p.getX()+.5,p.getY()+.5,p.getZ()+.5,80,level.dimension())),effect);
+        }catch(RuntimeException unavailable){UnusualCopper.LOGGER.debug("Skipped unavailable cultivation delivery",unavailable);}
+    }
+    public static void cultivator(ServerLevel level,CopperMachineBlockEntity machine,float from,float to,Map<BlockPos,Integer> changes) {
+        try {
+            var p=machine.getBlockPos();var area=machine.workArea();if(area==null)return;
+            var plants=changes.entrySet().stream().map(e->new Plant(e.getKey(),e.getValue())).toList();
+            var effect=new Cultivation(level.dimension().location(),p,area.min(),area.max(),from,to,plants);
+            CHANNEL.send(PacketDistributor.NEAR.with(()->new PacketDistributor.TargetPoint(p.getX()+.5,p.getY()+.5,p.getZ()+.5,80,level.dimension())),effect);
+        } catch(RuntimeException unavailable) { UnusualCopper.LOGGER.debug("Skipped unavailable cultivation effect",unavailable); }
+    }
     public static void sentinel(ServerLevel level,CopperMachineBlockEntity m,Vec3 target) {
         try {
             var p=m.getBlockPos(); CHANNEL.send(PacketDistributor.NEAR.with(()->new PacketDistributor.TargetPoint(p.getX()+.5,p.getY()+.5,p.getZ()+.5,96,level.dimension())),new Beam(level.dimension().location(),p,target));

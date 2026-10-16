@@ -17,7 +17,7 @@ public final class SentinelRenderer implements BlockEntityRenderer<CopperMachine
     @Override public void render(CopperMachineBlockEntity m,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay) {
         if(m.sentinel==null||m.getLevel()==null) return;
         boolean active=m.sentinel.active; if(active) activeFrames++; else inactiveFrames++;
-        float time=m.getLevel().getGameTime()+partial; pose.pushPose();
+        float time=(float)(AnimationClock.now()%72000); pose.pushPose();
         pose.translate(.5,active?1.65+Math.sin(time*.07)*.07:.88,.5); pose.mulPose(Axis.YP.rotationDegrees(time*(active?2:.2F)));
         var vertices=buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
         Vec3[] ring={new Vec3(.28,0,0),new Vec3(0,0,.28),new Vec3(-.28,0,0),new Vec3(0,0,-.28)};

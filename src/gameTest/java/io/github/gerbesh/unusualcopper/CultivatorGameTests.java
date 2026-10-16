@@ -48,6 +48,25 @@ public final class CultivatorGameTests {
         });
     }
     @GameTest(template = "empty")
+    public static void outwardSweepContinuesAcrossTicksWithoutGrowingTheFirstBatchTwice(GameTestHelper h) {
+        var m=machine(h,new BlockPos(0,1,0),MachineKind.AURA_CULTIVATOR);m.redstoneMode=1;
+        for(int x=1;x<=4;x++)for(int z=1;z<=4;z++)wheat(h,new BlockPos(x,1,z),0,7);
+        h.assertTrue(m.setWorkArea(WorkArea.between(h.absolutePos(new BlockPos(1,1,1)),h.absolutePos(new BlockPos(4,1,4))),player(h,m)),"Area setup failed");
+        h.runAfterDelay(10,()->{
+            m.redstoneMode=0;m.energy.restore(2240);CultivatorLogic.process(m,h.getLevel());
+            var first=new HashMap<BlockPos,Integer>();
+            for(int x=1;x<=4;x++)for(int z=1;z<=4;z++) {
+                var pos=new BlockPos(x,1,z);int age=h.getBlockState(pos).getValue(CropBlock.AGE);if(age>0)first.put(pos,age);
+            }
+            h.assertTrue(first.size()==8 && m.cultivation.active && m.nextWaveTick==h.getLevel().getGameTime()+1,"First bounded batch did not schedule its continuation for next tick");
+            CultivatorLogic.process(m,h.getLevel());
+            for(int x=1;x<=4;x++)for(int z=1;z<=4;z++)h.assertTrue(h.getBlockState(new BlockPos(x,1,z)).getValue(CropBlock.AGE)>0,"Wave left a crop untouched");
+            first.forEach((pos,age)->h.assertTrue(h.getBlockState(pos).getValue(CropBlock.AGE)==age,"First batch was revisited in the same wave"));
+            h.assertTrue(m.grown==16 && m.inspected==16 && m.energy.stored()==0 && !m.cultivation.active && m.scanCursor==0 && m.nextWaveTick==h.getLevel().getGameTime()+20,"Complete wave did not preserve accounting/cursor/cooldown");
+            h.succeed();
+        });
+    }
+    @GameTest(template = "empty")
     public static void matureDryUnsupportedAndEnergyFailureDoNotCharge(GameTestHelper h) {
         var m = machine(h, new BlockPos(0, 1, 0), MachineKind.AURA_CULTIVATOR); var actor = player(h, m); var pos = new BlockPos(2, 1, 2);
         wheat(h, pos, 7, 7); m.setWorkArea(new WorkArea(h.absolutePos(pos), h.absolutePos(pos)), actor); m.energy.add(140, false);
@@ -63,12 +82,14 @@ public final class CultivatorGameTests {
         });
     }
     @GameTest(template = "empty")
-    public static void focusModeFinishesOnePlantAndSavedSettingsRemainExact(GameTestHelper h) {
+    public static void maturityModeSweepsBothPlantsAndSavedSettingsRemainExact(GameTestHelper h) {
         var m = machine(h, new BlockPos(0, 1, 0), MachineKind.AURA_CULTIVATOR); var actor = player(h, m);
         wheat(h, new BlockPos(1, 1, 1), 0, 7); wheat(h, new BlockPos(2, 1, 1), 0, 7);
         m.setWorkArea(WorkArea.between(h.absolutePos(new BlockPos(1, 1, 1)), h.absolutePos(new BlockPos(2, 1, 1))), actor); m.growthMode = 1; m.energy.add(1120, false);
         CultivatorLogic.process(m, h.getLevel());
-        h.assertTrue(h.getBlockState(new BlockPos(1, 1, 1)).getValue(CropBlock.AGE) == 7 && m.grown <= 8 && m.energy.stored() == 1120 - 140 * m.grown, "Focus mode pays for each real operation and matures the first crop before moving on");
+        h.assertTrue(h.getBlockState(new BlockPos(1,1,1)).getValue(CropBlock.AGE)>0 && h.getBlockState(new BlockPos(2,1,1)).getValue(CropBlock.AGE)>0 && m.grown==2 && m.energy.stored()==840,"Maturity mode focused on one plant instead of sweeping both once");
+        for(int i=0;i<3;i++)CultivatorLogic.process(m,h.getLevel());
+        h.assertTrue(h.getBlockState(new BlockPos(1,1,1)).getValue(CropBlock.AGE)==7 && h.getBlockState(new BlockPos(2,1,1)).getValue(CropBlock.AGE)==7 && m.energy.stored()+m.energy.consumed()==1120,"Repeated field sweeps did not mature both plants or lost energy accounting");
         var restored = (CopperMachineBlockEntity)BlockEntity.loadStatic(m.getBlockPos(), m.getBlockState(), m.saveWithFullMetadata());
         h.assertTrue(restored != null && restored.workArea().equals(m.workArea()) && restored.growthMode == 1 && restored.scanCursor == m.scanCursor && restored.owner().equals(actor.getUUID()), "Area, mode, cursor and owner survive NBT reload"); h.succeed();
     }
@@ -81,7 +102,7 @@ public final class CultivatorGameTests {
         var diagonal = new WorkArea(m.getBlockPos().offset(10, -28, 0), m.getBlockPos().offset(25, -13, 0));
         h.assertTrue(!AreaAccess.geometryValid(h.getLevel(), m.getBlockPos(), diagonal), "Every corner must fit the radius, including the farthest mixed-coordinate corner");
         h.assertTrue(m.setWorkArea(area, owner), "Owner can set a local area");
-        for (int i = 0; i < 12; i++) { m.cycleSide(Direction.NORTH); h.assertTrue(m.sideMode(Direction.NORTH) == SideMode.DISABLED || m.sideMode(Direction.NORTH) == SideMode.ENERGY_INPUT, "Cultivator only enables supported energy inputs"); }
+        for (int i = 0; i < 12; i++) { m.cycleSide(Direction.NORTH); h.assertTrue(m.sideMode(Direction.NORTH) == SideMode.DISABLED || m.sideMode(Direction.NORTH) == SideMode.ENERGY_INPUT || m.sideMode(Direction.NORTH)==SideMode.ITEM_OUTPUT, "Cultivator only enables energy inputs or harvest outputs"); }
         h.succeed();
     }
     @GameTest(template = "empty")

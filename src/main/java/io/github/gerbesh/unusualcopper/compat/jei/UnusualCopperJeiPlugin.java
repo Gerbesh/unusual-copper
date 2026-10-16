@@ -28,6 +28,7 @@ public final class UnusualCopperJeiPlugin implements IModPlugin {
     }
 
     @Override public void registerRecipes(IRecipeRegistration registration) {
+        registration.addItemStackInfo(new ItemStack(ModContent.MACHINES.get(MachineKind.REPAIR_CRYSTAL).get()),Component.translatable("jei.unusualcopper.repair_info"));
         registration.addItemStackInfo(new ItemStack(ModContent.ESSENCE.get()),
                 Component.translatable("jei.unusualcopper.essence_info"));
         registration.addItemStackInfo(new ItemStack(ModContent.SOLAR_LENS.get()),
