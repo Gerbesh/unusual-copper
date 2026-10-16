@@ -59,6 +59,13 @@ public final class ModContent {
     public static final RegistryObject<Item> COPPER_GRIT = ITEMS.register("copper_grit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> IRON_GRIT = ITEMS.register("iron_grit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GOLD_GRIT = ITEMS.register("gold_grit", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> COPPER_PLATE = ITEMS.register("copper_plate", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> COPPER_WIRE = ITEMS.register("copper_wire_spool", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PLATE_DIE = ITEMS.register("plate_die", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WIRE_DIE = ITEMS.register("wire_die", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> RESONANT_COIL = ITEMS.register("resonant_coil", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> REINFORCED_FRAME = ITEMS.register("reinforced_frame", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> CIRCUIT_BLANK = ITEMS.register("circuit_blank", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ENCHANTMENT_CORE = ITEMS.register("resonant_enchantment_core",()->new Item(new Item.Properties()));
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);
     public static final RegistryObject<Item> ITEM_PIPE_ITEM = ITEMS.register("copper_item_pipe", () -> new BlockItem(ITEM_PIPE.get(), new Item.Properties()));

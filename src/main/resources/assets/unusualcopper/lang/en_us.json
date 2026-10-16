@@ -370,5 +370,14 @@
   "item.unusualcopper.copper_grit": "Copper Grit",
   "item.unusualcopper.iron_grit": "Iron Grit",
   "item.unusualcopper.gold_grit": "Gold Grit",
-  "gui.unusualcopper.industrial_recipe": "Recipe: %s"
+  "gui.unusualcopper.industrial_recipe": "Recipe: %s",
+  "block.unusualcopper.copper_press": "Copper Press",
+  "item.unusualcopper.copper_plate": "Copper Plate",
+  "item.unusualcopper.copper_wire_spool": "Copper Wire Spool",
+  "item.unusualcopper.plate_die": "Plate Die",
+  "item.unusualcopper.wire_die": "Wire Die",
+  "item.unusualcopper.resonant_coil": "Resonant Coil",
+  "item.unusualcopper.reinforced_frame": "Reinforced Frame",
+  "item.unusualcopper.circuit_blank": "Blank Circuit Board",
+  "gui.unusualcopper.industrial_die": "Insert the required press die in the second input slot"
 }

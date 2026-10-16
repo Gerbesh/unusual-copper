@@ -21,3 +21,18 @@
 3. Fill output slots and attached chest: ensure pause without recharging or deleting items.
 4. Pause by redstone, unload/reload chunk, use `/reload` and remove recipe datapack temporarily.
 5. Verify disabled side, restricted owner and claimed chunks. Verify external SSN only via installed bridge; no automatic direct dependency.
+
+## E2: Copper Press and industrial components (2026-10-17)
+- Added `copper_press`: plate die produces 2 copper plates from 1 copper ingot; wire die converts 2 plates into 4 wire spools. Each operation takes 40 ticks/120 CuE.
+- Dies remain physical, reusable items in slot 1. A missing/wrong die stops the operation, without consuming additional CuE.
+- Added `copper_plate`, `copper_wire_spool`, `resonant_coil`, `reinforced_frame`, `circuit_blank` and two press dies.
+- Bootstrap is explicit: 1 ingot → 1 plate at crafting table; plate + 2 ingots + redstone + quartz → 1 coil. This avoids the chicken-and-egg dependency: coils can be made before the first press exists.
+- Full-efficiency coil: 4 wire spools + redstone → 1 coil. No plate/wire recipe returns ingots; no copper mass multiplication.
+- The generic machine menu activates slot 1 for the press; the same two protected output slots work with chests and SSN via preexisting logic.
+
+### Manual E2 checks
+1. Craft plate and coil by bootstrap route, craft two dies, assemble press.
+2. 1 ingot + plate die → exactly 2 plates; 2 plates + wire die → 4 spools.
+3. Remove die mid-operation, restore it; verify payment is not repeated, and 120 CuE total.
+4. Pipe input and output using external chest; test full output, redstone pause, reload, old worlds.
+5. Craft 16 coils from 16 ingots + 16 redstone: expect 16 plate cycles, 16 wire cycles and 3 840 CuE spent in presses, excluding other systems.

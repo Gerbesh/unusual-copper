@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PCP",
+    "AFP",
+    "PRP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "A": {
+      "item": "minecraft:anvil"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:copper_press",
+    "count": 1
+  }
+}

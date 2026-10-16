@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PIP",
+    "OFO",
+    "PIP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:reinforced_frame",
+    "count": 1
+  }
+}

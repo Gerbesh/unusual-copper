@@ -370,5 +370,14 @@
   "item.unusualcopper.copper_grit": "Медная крошка",
   "item.unusualcopper.iron_grit": "Железная крошка",
   "item.unusualcopper.gold_grit": "Золотая крошка",
-  "gui.unusualcopper.industrial_recipe": "Рецепт: %s"
+  "gui.unusualcopper.industrial_recipe": "Рецепт: %s",
+  "block.unusualcopper.copper_press": "Медный пресс",
+  "item.unusualcopper.copper_plate": "Медная пластина",
+  "item.unusualcopper.copper_wire_spool": "Катушка медного провода",
+  "item.unusualcopper.plate_die": "Форма для пластин",
+  "item.unusualcopper.wire_die": "Форма для проволоки",
+  "item.unusualcopper.resonant_coil": "Резонансная катушка",
+  "item.unusualcopper.reinforced_frame": "Усиленная рама",
+  "item.unusualcopper.circuit_blank": "Заготовка схемы",
+  "gui.unusualcopper.industrial_die": "Вложите форму во второй вход пресса"
 }

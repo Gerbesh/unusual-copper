@@ -55,6 +55,33 @@ public final class ModDataGeneration {
                     .define('G', Items.GLASS).define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE).unlockedBy("has_frame", has(ModContent.FRAME.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.ESSENCE_SPLITTER).get()).pattern("FRF").pattern("IEI").pattern("RRR")
                     .define('F', ModContent.FRAME.get()).define('R', Items.REDSTONE).define('I', Items.IRON_INGOT).define('E', ModContent.ESSENCE.get()).unlockedBy("has_essence", has(ModContent.ESSENCE.get())).save(out);
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.COPPER_PLATE.get())
+                    .requires(Items.COPPER_INGOT).unlockedBy("has_copper",has(Items.COPPER_INGOT)).save(out,"unusualcopper:copper_plate_bootstrap");
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.RESONANT_COIL.get())
+                    .requires(ModContent.COPPER_PLATE.get()).requires(Items.COPPER_INGOT,2)
+                    .requires(Items.REDSTONE).requires(Items.QUARTZ)
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out,"unusualcopper:resonant_coil_bootstrap");
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.RESONANT_COIL.get()).pattern(" W ").pattern("WRW").pattern(" W ")
+                    .define('W',ModContent.COPPER_WIRE.get()).define('R',Items.REDSTONE)
+                    .unlockedBy("has_wire",has(ModContent.COPPER_WIRE.get())).save(out,"unusualcopper:resonant_coil");
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.PLATE_DIE.get()).pattern("III").pattern("ISI").pattern("III")
+                    .define('I',Items.IRON_INGOT).define('S',Items.SMOOTH_STONE)
+                    .unlockedBy("has_iron",has(Items.IRON_INGOT)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.WIRE_DIE.get()).pattern("III").pattern("SPS").pattern("III")
+                    .define('I',Items.IRON_INGOT).define('P',ModContent.COPPER_PLATE.get()).define('S',Items.SMOOTH_STONE)
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_PRESS).get())
+                    .pattern("PCP").pattern("AFP").pattern("PRP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('C',ModContent.RESONANT_COIL.get())
+                    .define('A',Items.ANVIL).define('F',ModContent.FRAME.get()).define('R',Items.REDSTONE)
+                    .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.REINFORCED_FRAME.get()).pattern("PIP").pattern("OFO").pattern("PIP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('I',Items.IRON_INGOT)
+                    .define('O',Items.OBSIDIAN).define('F',ModContent.FRAME.get())
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.CIRCUIT_BLANK.get()).pattern("PRP").pattern("PQP").pattern("PRP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('R',Items.REDSTONE).define('Q',Items.QUARTZ)
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.MACHINES.get(MachineKind.RESONANCE_CRUSHER).get())
                     .pattern("IFI").pattern("RCR").pattern("IDI")
                     .define('I', Items.IRON_BLOCK).define('F', ModContent.FRAME.get())

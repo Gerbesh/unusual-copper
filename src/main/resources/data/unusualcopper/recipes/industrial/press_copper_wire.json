@@ -1,0 +1,17 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "copper_press",
+  "ingredient": {
+    "item": "unusualcopper:copper_plate"
+  },
+  "mold": {
+    "item": "unusualcopper:wire_die"
+  },
+  "input_count": 2,
+  "result": {
+    "item": "unusualcopper:copper_wire_spool",
+    "count": 4
+  },
+  "ticks": 40,
+  "cue": 120
+}

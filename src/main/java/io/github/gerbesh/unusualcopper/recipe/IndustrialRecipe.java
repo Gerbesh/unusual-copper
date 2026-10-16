@@ -32,7 +32,7 @@ public final class IndustrialRecipe implements Recipe<Container> {
 
     public IndustrialRecipe(ResourceLocation id, MachineKind machine, Ingredient ingredient, Ingredient mold,
                             int inputCount, ItemStack result, int ticks, int cost) {
-        if (machine != MachineKind.RESONANCE_CRUSHER || inputCount < 1 || inputCount > 64
+        if ((machine != MachineKind.RESONANCE_CRUSHER && machine != MachineKind.COPPER_PRESS) || inputCount < 1 || inputCount > 64
                 || result.isEmpty() || result.getCount() > 64 || ticks < 1 || ticks > 12000
                 || cost < 0 || cost > 1_000_000 || ingredient.isEmpty()) {
             throw new IllegalArgumentException("Invalid industrial processing recipe: " + id);

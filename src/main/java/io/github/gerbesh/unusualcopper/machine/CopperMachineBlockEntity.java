@@ -144,6 +144,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     if(arborist.job!=null) return false;
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
                 }
+                if(kind==MachineKind.COPPER_PRESS) return !stack.hasTag() && (slot==0
+                        ? stack.is(net.minecraft.world.item.Items.COPPER_INGOT) || stack.is(ModContent.COPPER_PLATE.get())
+                        : stack.is(ModContent.PLATE_DIE.get()) || stack.is(ModContent.WIRE_DIE.get()));
                 if(kind==MachineKind.RESONANCE_CRUSHER) return slot==0 && !stack.hasTag()
                         && (stack.is(net.minecraft.world.item.Items.RAW_COPPER)
                         || stack.is(net.minecraft.world.item.Items.RAW_IRON)
@@ -158,7 +161,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case SOLAR_INFUSER -> new SolarLogic();
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
-            case RESONANCE_CRUSHER -> new IndustrialProcessingLogic();
+            case RESONANCE_CRUSHER, COPPER_PRESS -> new IndustrialProcessingLogic();
             case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();

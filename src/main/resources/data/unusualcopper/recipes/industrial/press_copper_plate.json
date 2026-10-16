@@ -1,0 +1,17 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "copper_press",
+  "ingredient": {
+    "item": "minecraft:copper_ingot"
+  },
+  "mold": {
+    "item": "unusualcopper:plate_die"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:copper_plate",
+    "count": 2
+  },
+  "ticks": 40,
+  "cue": 120
+}
