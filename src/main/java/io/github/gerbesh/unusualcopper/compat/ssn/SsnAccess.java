@@ -25,7 +25,7 @@ public final class SsnAccess {
     @SuppressWarnings("unchecked") private static void initialize(){
         if(initialized)return;initialized=true;var mods=ModList.get();
         if(!mods.getModContainerById("storagenetwork").map(c->c.getModInfo().getVersion().toString().equals("1.13.2")).orElse(false))return;
-        if(mods.isLoaded("ssn_progressive")&&!mods.getModContainerById("ssn_progressive").map(c->java.util.Set.of("1.2.4","1.3.0","1.3.1","1.4.0").contains(c.getModInfo().getVersion().toString())).orElse(false))return;
+        if(mods.isLoaded("ssn_progressive")&&!mods.getModContainerById("ssn_progressive").map(c->java.util.Set.of("1.2.4","1.3.0","1.3.1","1.4.0","1.4.1").contains(c.getModInfo().getVersion().toString())).orElse(false))return;
         try{
             mainType=Class.forName("com.lothrazar.storagenetwork.block.main.TileMain");linkType=Class.forName("com.lothrazar.storagenetwork.capability.CapabilityConnectableLink");
             var caps=Class.forName("com.lothrazar.storagenetwork.registry.StorageNetworkCapabilities");connectable=(Capability<Object>)caps.getField("CONNECTABLE_CAPABILITY").get(null);storage=(Capability<Object>)caps.getField("CONNECTABLE_ITEM_STORAGE_CAPABILITY").get(null);
