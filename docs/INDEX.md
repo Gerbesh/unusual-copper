@@ -1,10 +1,11 @@
 # Документация Unusual Copper
 
-Актуальная версия: **0.20.6-alpha.1**, сопутствующий SSN Progressive: **1.4.0**. [Изменения](../CHANGELOG.md) · [Манифест сборки](../releases/0.20.6-alpha.1.json).
+Актуальная реализованная версия: **0.20.6-alpha.1**, сопутствующий SSN Progressive: **1.4.0**. Документы Industrial Expansion описывают **план**, а не уже реализованные функции. [Изменения](../CHANGELOG.md) · [Манифест сборки](../releases/0.20.6-alpha.1.json).
 
 | Тема | Документы |
 |---|---|
 | Начало и устройство мода | [Архитектура](ARCHITECTURE.md), [маршрут M0–M5](ROADMAP.md), [backlog](BACKLOG.md), [решения](DECISIONS.md) |
+| **Следующий этап: Industrial Expansion** | **[Порядок разработки E0–E9](INDUSTRIAL_EXPANSION_ROADMAP.md)**, [мастер-GDD](INDUSTRIAL_EXPANSION_GDD.md), [программируемая броня и полёт](PROGRAMMABLE_ARMOR.md), [TDD и матрица проверок](INDUSTRIAL_EXPANSION_TDD.md) |
 | Энергия | [Три класса](ENERGY_TIERS.md), [приоритеты и управление](ENERGY_CONTROL.md), [батареи](BATTERIES.md) |
 | Транспорт и хранилища | [Настройка труб](ITEM_PIPES.md), [архитектура транспорта](ITEM_TRANSPORT.md), [визуальные маршруты](ITEM_TRANSIT_VISUALS.md), [индекс инвентарей](STORAGE_INDEX.md), [SSN Bridge](SSN_BRIDGE.md) |
 | Растения и предметы | [Выбор области](AREA_CULTIVATION.md), [сбор и пересадка](CULTIVATOR_HARVEST.md), [магнитный коллектор](MAGNETIC_COLLECTOR.md), [Арборист](ARBORIST.md) |
