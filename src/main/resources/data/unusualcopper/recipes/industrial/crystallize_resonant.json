@@ -1,0 +1,20 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "resonance_crystallizer",
+  "ingredient": {
+    "item": "minecraft:amethyst_shard"
+  },
+  "mold": {
+    "item": "unusualcopper:resonant_coil"
+  },
+  "additive": {
+    "item": "unusualcopper:saturated_copper_essence"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:resonant_crystal",
+    "count": 1
+  },
+  "ticks": 120,
+  "cue": 8000
+}

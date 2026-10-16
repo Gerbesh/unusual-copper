@@ -1,0 +1,18 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "circuit_etcher",
+  "ingredient": {
+    "item": "unusualcopper:circuit_blank"
+  },
+  "mold": {
+    "item": "unusualcopper:etching_reagent"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:etched_circuit",
+    "count": 1
+  },
+  "ticks": 100,
+  "cue": 1200,
+  "water_mb": 250
+}

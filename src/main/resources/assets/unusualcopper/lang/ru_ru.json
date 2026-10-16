@@ -386,5 +386,10 @@
   "item.unusualcopper.washed_gold_dust": "Очищенная золотая пыль",
   "item.unusualcopper.inert_tailings": "Инертные отходы",
   "gui.unusualcopper.water_tank": "Вода: %s / 4000 мБ",
-  "status.unusualcopper.no_water": "Нет воды"
+  "status.unusualcopper.no_water": "Нет воды",
+  "block.unusualcopper.resonance_crystallizer": "Резонансный кристаллизатор",
+  "block.unusualcopper.circuit_etcher": "Камера травления",
+  "item.unusualcopper.resonant_crystal": "Резонансный кристалл",
+  "item.unusualcopper.etching_reagent": "Травильный реагент",
+  "item.unusualcopper.etched_circuit": "Травлёная схема"
 }

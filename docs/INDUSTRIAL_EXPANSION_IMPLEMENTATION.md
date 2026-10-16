@@ -50,3 +50,20 @@
 3. Fill output slots, suspend CuE, restart, `/reload` and vary redstone. Assert no duplicate tailings/dust and no lost water.
 4. Smelt washed copper dust in existing smelter to a single ingot. Verify iron/gold 2 dust from 1 raw via crusher.
 5. Test fluid capability, item output pipe/chest and SSN bridge with the standard permission and protection rules.
+
+## E3B: Resonance Crystallizer and Circuit Etcher (2026-10-17)
+- Registered `resonance_crystallizer` and `circuit_etcher`, reusing the existing CuE network, sides, block entity and GUI.
+- Crystallizer: 1 amethyst shard + 1 resonant coil + 1 saturated copper essence → 1 crystal in 120 ticks for 8,000 CuE. All three input items are consumed.
+- Etcher: 1 circuit blank + 1 etching reagent + 250 mB water → 1 etched circuit in 100 ticks for 1,200 CuE. Its extra GUI slot accepts a water bucket and returns an empty bucket; Forge water pipes can supply fluid.
+- New dedicated third input and operation snapshots save to optional NBT. The legacy 4 machine inventory slots keep their old indices; extra input is automation slot 4 only on the two new machines.
+- Fluid capability is now input-only, blocking an external pipe from draining water already promised to an operation. Water is consumed internally only on successful operation completion.
+- Added processing JSON, survival crafting, item/block models, RU/EN text, and exact-energy JUnit cases. New textures are placeholders.
+- The etching reagent currently has a chemistry crafting bootstrap. Integration as an output of the existing Aetheric Brewer is not implemented yet. Existing potion recipes are left unchanged.
+- No game or GameTest launched. CI and manual in-game acceptance are separate checks.
+
+### Manual E3B checks
+1. Supply the crystallizer with amethyst, coil and essence: 120 paid ticks, exactly 8000 CuE, all three consumed, one crystal.
+2. Remove the coil or essence while operating: no output; replacing them must not allow unpaid completion. Test save/reload and /reload.
+3. Etch a blank board with chemical reagent and water: 100 paid ticks, exactly 1200 CuE, 250 mB and one reagent consumed.
+4. Fill output slots or stop the energy line during processing: no duplication, no extra billing, no lost water, correct resume.
+5. Test fluid pipes (fill works, drain must return zero), third input via item pipe, old-world loading, redstone, SSN and all side modes.

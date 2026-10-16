@@ -386,5 +386,10 @@
   "item.unusualcopper.washed_gold_dust": "Washed Gold Dust",
   "item.unusualcopper.inert_tailings": "Inert Tailings",
   "gui.unusualcopper.water_tank": "Water: %s / 4000 mB",
-  "status.unusualcopper.no_water": "Requires water"
+  "status.unusualcopper.no_water": "Requires water",
+  "block.unusualcopper.resonance_crystallizer": "Resonance Crystallizer",
+  "block.unusualcopper.circuit_etcher": "Circuit Etcher",
+  "item.unusualcopper.resonant_crystal": "Resonant Crystal",
+  "item.unusualcopper.etching_reagent": "Etching Reagent",
+  "item.unusualcopper.etched_circuit": "Etched Circuit"
 }
