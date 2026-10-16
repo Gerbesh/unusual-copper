@@ -30,7 +30,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
-                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
+                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.CIRCUIT_ETCHER || kind() == MachineKind.RESONANCE_CRYSTALLIZER || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
                 @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
             });
         }
@@ -42,6 +42,11 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         }:machine.battery;
         addSlot(new SlotItemHandler(dock,0,13,64) {
             @Override public boolean isActive() { return kind().isCell(); }
+        });
+        var extra=machine==null?new ItemStackHandler(1):machine.industrialExtra;
+        addSlot(new SlotItemHandler(extra,0,69,91) {
+            @Override public boolean isActive() { return kind()==MachineKind.RESONANCE_CRYSTALLIZER || kind()==MachineKind.CIRCUIT_ETCHER; }
+            @Override public boolean mayPickup(Player player) { return machine==null || !machine.hasOperation(); }
         });
         addDataSlots(data);
     }
@@ -73,8 +78,12 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         Slot slot = slots.get(index);
         if (!slot.isActive() || !slot.hasItem() || !slot.mayPickup(player) || !stillValid(player)) return ItemStack.EMPTY;
         ItemStack current = slot.getItem(); ItemStack original = current.copy();
-        if (index < 4 || index==40) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
+        if (index < 4 || index==40 || index==41) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
         else if(kind().isCell()) { if(!moveItemStackTo(current,40,41,false))return ItemStack.EMPTY; }
+        else if ((kind()==MachineKind.RESONANCE_CRYSTALLIZER && current.is(ModContent.ESSENCE.get()))
+                || (kind()==MachineKind.CIRCUIT_ETCHER && current.is(net.minecraft.world.item.Items.WATER_BUCKET))) {
+            if(!moveItemStackTo(current,41,42,false))return ItemStack.EMPTY;
+        }
         else if (!moveItemStackTo(current, 0, 2, false)) return ItemStack.EMPTY;
         if (current.isEmpty()) slot.set(ItemStack.EMPTY); else slot.setChanged();
         slot.onTake(player, current); return original;

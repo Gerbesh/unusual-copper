@@ -70,6 +70,21 @@ public final class ModDataGeneration {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.WIRE_DIE.get()).pattern("III").pattern("SPS").pattern("III")
                     .define('I',Items.IRON_INGOT).define('P',ModContent.COPPER_PLATE.get()).define('S',Items.SMOOTH_STONE)
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ETCHING_REAGENT.get())
+                    .requires(Items.FERMENTED_SPIDER_EYE).requires(Items.BLAZE_POWDER).requires(Items.GUNPOWDER)
+                    .requires(Items.GLASS_BOTTLE).unlockedBy("has_blaze",has(Items.BLAZE_POWDER)).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.RESONANCE_CRYSTALLIZER).get())
+                    .pattern("ACA").pattern("RFR").pattern("PQP")
+                    .define('A',Items.AMETHYST_BLOCK).define('C',ModContent.RESONANT_COIL.get())
+                    .define('R',Items.REDSTONE_BLOCK).define('F',ModContent.REINFORCED_FRAME.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('Q',Items.QUARTZ)
+                    .unlockedBy("has_frame",has(ModContent.REINFORCED_FRAME.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.CIRCUIT_ETCHER).get())
+                    .pattern("GCG").pattern("PFP").pattern("RBR")
+                    .define('G',Items.GLASS).define('C',ModContent.RESONANT_COIL.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('F',ModContent.REINFORCED_FRAME.get())
+                    .define('R',Items.REDSTONE).define('B',Items.BREWING_STAND)
+                    .unlockedBy("has_frame",has(ModContent.REINFORCED_FRAME.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.VORTEX_PURIFIER).get())
                     .pattern("GCG").pattern("PFP").pattern("GQG")
                     .define('G',Items.GLASS).define('C',ModContent.RESONANT_COIL.get())

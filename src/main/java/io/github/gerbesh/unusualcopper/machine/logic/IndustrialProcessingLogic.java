@@ -23,9 +23,19 @@ public final class IndustrialProcessingLogic implements MachineLogic {
                 });
             }
         }
+        if(m.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.CIRCUIT_ETCHER) {
+            ItemStack bucket=m.industrialExtra.getStackInSlot(0);
+            if(bucket.is(net.minecraft.world.item.Items.WATER_BUCKET) && m.water.getFluidAmount()<=3000) {
+                m.commitLocally(() -> {
+                    m.water.fill(new net.minecraftforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
+                            net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                    m.industrialExtra.setStackInSlot(0,new ItemStack(net.minecraft.world.item.Items.BUCKET));
+                });
+            }
+        }
         ItemStack input=m.inventory.getStackInSlot(0);
         if (input.isEmpty()) { m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.IDLE); return; }
-        var container=new SimpleContainer(input,m.inventory.getStackInSlot(1));
+        var container=new SimpleContainer(input,m.inventory.getStackInSlot(1),m.industrialExtra.getStackInSlot(0));
         IndustrialRecipe recipe=null;
         // Check ID during an in-progress operation; never switch recipes after CuE was paid.
         for (var candidate : level.getRecipeManager().getAllRecipesFor(ModContent.INDUSTRIAL_RECIPE.get())) {
@@ -36,7 +46,7 @@ public final class IndustrialProcessingLogic implements MachineLogic {
         }
         if (recipe==null) { m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.INVALID_INPUT); return; }
         ItemStack result=recipe.assemble(container,level.registryAccess());
-        if (m.hasOperation() && (!m.inputMatches() || m.duration!=recipe.ticks()
+        if (m.hasOperation() && (!m.inputMatches() || !m.industrialInputsMatch() || m.duration!=recipe.ticks()
                 || m.operationCost!=recipe.cost() || m.operationWater!=recipe.waterMb()
                 || !ItemStack.matches(m.secondaryResult,recipe.secondary())
                 || !ItemStack.matches(m.result,result))) {
@@ -46,6 +56,11 @@ public final class IndustrialProcessingLogic implements MachineLogic {
             if (!m.canFitOutputs(result,recipe.secondary())) { m.status(MachineStatus.OUTPUT_FULL); return; }
             m.begin(recipe.getId().toString(),input.copyWithCount(recipe.inputCount()),result,recipe.ticks(),recipe.cost());
             m.secondaryResult=recipe.secondary();
+            if(m.hasIndustrialExtra()) {
+                m.recipeCatalyst=m.inventory.getStackInSlot(1).copyWithCount(1);
+                m.recipeAdditive=m.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.RESONANCE_CRYSTALLIZER
+                        ?m.industrialExtra.getStackInSlot(0).copyWithCount(1):ItemStack.EMPTY;
+            }
             m.operationWater=recipe.waterMb();
             m.setChanged();
         }
