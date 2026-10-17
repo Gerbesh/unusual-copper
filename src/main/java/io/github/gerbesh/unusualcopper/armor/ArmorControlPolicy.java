@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /** Bounds and optimistic concurrency for configuration intentions, not item/energy input. */
 public final class ArmorControlPolicy {
-    public enum Operation { PROFILE,ENABLE,TRIGGER,MINIMUM,ARM }
+    public enum Operation { PROFILE,ENABLE,TRIGGER,MINIMUM,ARM,PRIORITY }
     private ArmorControlPolicy(){}
     public static boolean current(UUID expected,long revision,UUID supplied,long expectedRevision){
         return expected!=null&&expected.equals(supplied)&&revision>=0&&revision==expectedRevision;
@@ -17,6 +17,7 @@ public final class ArmorControlPolicy {
             case ENABLE,ARM -> value==0||value==1;
             case TRIGGER -> value>=0&&value<ArmorModuleSettings.Trigger.values().length;
             case MINIMUM -> value>=0&&value<=95&&value%5==0;
+            case PRIORITY -> value>=2&&value<=6;
             default -> false;
         };
     }

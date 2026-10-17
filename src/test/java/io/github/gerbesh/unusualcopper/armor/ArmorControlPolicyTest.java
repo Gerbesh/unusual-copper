@@ -19,5 +19,9 @@ class ArmorControlPolicyTest {
         assertFalse(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.PROFILE,1,-1,4,9));
         assertFalse(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.MINIMUM,1,4,96,9));
         assertFalse(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.TRIGGER,1,4,Integer.MAX_VALUE,9));
+        assertTrue(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.PRIORITY,1,4,2,9));
+        assertTrue(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.PRIORITY,1,4,6,9));
+        assertFalse(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.PRIORITY,1,4,1,9));
+        assertFalse(ArmorControlPolicy.valid(ArmorControlPolicy.Operation.PRIORITY,1,4,7,9));
     }
 }

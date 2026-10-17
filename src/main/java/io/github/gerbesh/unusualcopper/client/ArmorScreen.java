@@ -25,7 +25,7 @@ public class ArmorScreen extends Screen {
     public ArmorScreen(int piece){super(Component.translatable("armorconsole.title"));selected=Math.max(0,Math.min(3,piece));}
     private Component text(String key,Object...args){return Component.translatable("armorconsole."+key,args);}
     @Override protected void init(){
-        panelWidth=Math.min(460,width-12);panelHeight=Math.min(280,height-12);left=(width-panelWidth)/2;top=(height-panelHeight)/2;rows=Math.max(1,(panelHeight-157)/44);
+        panelWidth=Math.min(460,width-12);panelHeight=Math.min(280,height-12);left=(width-panelWidth)/2;top=(height-panelHeight)/2;rows=Math.max(1,(panelHeight-155)/56);
         rebuild();
     }
     private void rebuild(){
@@ -41,7 +41,7 @@ public class ArmorScreen extends Screen {
         }
         var modules=shown.pieces().get(selected).modules();int maxPage=Math.max(0,(modules.size()-1)/rows);page=Math.min(page,maxPage);
         for(int i=0;i<rows&&page*rows+i<modules.size();i++){
-            var row=modules.get(page*rows+i);var s=row.settings();int y=top+146+i*44;
+            var row=modules.get(page*rows+i);var s=row.settings();int y=top+142+i*56;
             int start=left+12,triggerWidth=panelWidth-219;
             var enabled=control(s.enabled()?"on":"off",start,y,50,()->ArmorClientState.send(selected,row.module(),ArmorControlPolicy.Operation.ENABLE,s.enabled()?0:1));
             enabled.setTooltip(Tooltip.create(text("enable_hint")));
@@ -51,6 +51,9 @@ public class ArmorScreen extends Screen {
             minimum.setTooltip(Tooltip.create(text("minimum_hint")));mutations.add(minimum);addRenderableWidget(minimum);
             var manual=control(s.armed()?"stop":"start",start+133+triggerWidth,y,62,()->ArmorClientState.send(selected,row.module(),ArmorControlPolicy.Operation.ARM,s.armed()?0:1));
             manual.visible=s.trigger()==ArmorModuleSettings.Trigger.MANUAL;
+            var priority=control("priority",start,y+19,102,()->ArmorClientState.send(selected,row.module(),ArmorControlPolicy.Operation.PRIORITY,2+Math.floorMod(s.priority()-2+(hasShiftDown()?-1:1),5)));
+            priority.setMessage(text("priority",s.priority()));
+            priority.setTooltip(Tooltip.create(text("priority_hint")));
         }
         if(maxPage>0){addRenderableWidget(Button.builder(Component.literal("‹"),b->{page=Math.max(0,page-1);rebuild();}).bounds(left+panelWidth-54,top+panelHeight-23,20,18).build());
             addRenderableWidget(Button.builder(Component.literal("›"),b->{page=Math.min(maxPage,page+1);rebuild();}).bounds(left+panelWidth-31,top+panelHeight-23,20,18).build());}
@@ -65,7 +68,7 @@ public class ArmorScreen extends Screen {
         var v=ArmorClientState.view();if(v==null){g.drawString(font,text("sync"),left+12,top+95,0xffe4cb96,false);super.render(g,mouseX,mouseY,partial);return;}
         var modules=v.pieces().get(selected).modules();
         for(int i=0;i<rows&&page*rows+i<modules.size();i++){
-            int y=top+127+i*44;g.fill(left+8,y-2,left+panelWidth-8,y+41,0xff1b3832);
+            int y=top+125+i*56;g.fill(left+8,y-2,left+panelWidth-8,y+54,0xff1b3832);
         }
         super.render(g,mouseX,mouseY,partial);
         var selectedPiece=v.pieces().get(selected);
@@ -88,11 +91,11 @@ public class ArmorScreen extends Screen {
         g.fill(left+12,top+114,left+12+(panelWidth-24)*percent/100,top+119,percent<=10?0xffe6a969:0xff3dd6d3);
         int labelEnd=(panelWidth-48)/2;
         for(int i=0;i<rows&&page*rows+i<modules.size();i++){
-            var row=modules.get(page*rows+i);int y=top+127+i*44;
+            var row=modules.get(page*rows+i);int y=top+125+i*56;
             g.renderItem(new ItemStack(ModContent.ARMOR_MODULES.get(row.module()).get()),left+12,y);
             String name=Component.translatable("item.unusualcopper."+row.module().id+"_module").getString();
             g.drawString(font,font.plainSubstrByWidth(name,labelEnd),left+32,y,0xffe1dfc7,false);
-            String status=!row.settings().enabled()?"off":row.module()==ArmorModuleType.OPTIC_VISOR?"unavailable":!v.complete()?"incomplete":v.capacity()==0?"no_battery":!row.settings().permits(percent,v.conditions())?"waiting":(v.recent()&1L<<row.module().ordinal())!=0?"recent":"ready";
+            String status=!row.settings().enabled()?"off":row.module()==ArmorModuleType.OPTIC_VISOR?"unavailable":!v.complete()?"incomplete":v.capacity()==0?"no_battery":!row.settings().permits(percent,v.conditions())?"waiting":(v.limited()&1L<<row.module().ordinal())!=0?"limited":(v.recent()&1L<<row.module().ordinal())!=0?"recent":"ready";
             String state=font.plainSubstrByWidth(text(status).getString(),panelWidth-labelEnd-55);
             g.drawString(font,state,left+panelWidth-12-font.width(state),y+2,0xff8fc3b0,false);
             if(mouseX>=left+10&&mouseX<left+panelWidth-10&&mouseY>=y&&mouseY<y+16)g.renderTooltip(font,List.of(Component.literal(name),text(status),text("nominal",row.module().cue)),java.util.Optional.empty(),mouseX,mouseY);

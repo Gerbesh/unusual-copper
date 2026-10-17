@@ -70,25 +70,28 @@ public final class ArmorData {
     public static ArmorModuleSettings settings(ItemStack item,ArmorModuleType module,int profile){
         var root=data(item);
         if(profile<0||profile>3)return ArmorModuleSettings.invalid();
-        if(!root.contains("Presets"))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false);
+        if(!root.contains("Presets"))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false,ArmorPowerScheduler.defaultPriority(module));
         if(!root.contains("Presets",Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
         var presets=root.getCompound("Presets");String key=Integer.toString(profile);
         if(presets.contains(key)&&!presets.contains(key,Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
         var preset=presets.getCompound(key);
-        if(!preset.contains(module.id))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false);
+        if(!preset.contains(module.id))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false,ArmorPowerScheduler.defaultPriority(module));
         if(!preset.contains(module.id,Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
         var row=preset.getCompound(module.id);
         if(!row.contains("Enabled",Tag.TAG_BYTE)||!row.contains("Trigger",Tag.TAG_INT)
                 ||!row.contains("Minimum",Tag.TAG_INT)||!row.contains("Armed",Tag.TAG_BYTE))return ArmorModuleSettings.invalid();
         int trigger=row.getInt("Trigger"),minimum=row.getInt("Minimum");
-        if(trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0)return ArmorModuleSettings.invalid();
-        return new ArmorModuleSettings(row.getBoolean("Enabled"),ArmorModuleSettings.Trigger.values()[trigger],minimum,row.getBoolean("Armed"));
+        int priority=row.contains("Priority",Tag.TAG_INT)?row.getInt("Priority"):ArmorPowerScheduler.defaultPriority(module);
+        if(row.contains("Priority")&&!row.contains("Priority",Tag.TAG_INT)
+                ||trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0
+                ||priority<2||priority>6)return ArmorModuleSettings.invalid();
+        return new ArmorModuleSettings(row.getBoolean("Enabled"),ArmorModuleSettings.Trigger.values()[trigger],minimum,row.getBoolean("Armed"),priority);
     }
     public static boolean settings(ItemStack item,ArmorModuleType module,int profile,ArmorModuleSettings value){
         if(profile<0||profile>3||!modules(item).contains(module)||value==null)return false;
         var root=mutable(item);var presets=root.getCompound("Presets");var preset=presets.getCompound(Integer.toString(profile));
         var row=new CompoundTag();row.putBoolean("Enabled",value.enabled());row.putInt("Trigger",value.trigger().ordinal());
-        row.putInt("Minimum",value.minimumPercent());row.putBoolean("Armed",value.armed());
+        row.putInt("Minimum",value.minimumPercent());row.putBoolean("Armed",value.armed());row.putInt("Priority",value.priority());
         preset.put(module.id,row);presets.put(Integer.toString(profile),preset);root.put("Presets",presets);return true;
     }
     public static int percentage(ItemStack chest){var cell=battery(chest);int capacity=CopperBatteryItem.capacity(cell);return capacity==0?0:(int)(100L*CopperBatteryItem.stored(cell)/capacity);}
@@ -99,7 +102,7 @@ public final class ArmorData {
             value.append(module.ordinal()).append(':');
             for(int p=0;p<4;p++){
                 var s=settings(item,module,p);value.append(s.enabled()?'1':'0').append(',').append(s.trigger().ordinal()).append(',')
-                        .append(s.minimumPercent()).append(',').append(s.armed()?'1':'0').append(';');
+                        .append(s.minimumPercent()).append(',').append(s.armed()?'1':'0').append(',').append(s.priority()).append(';');
             }
         }
         return value.toString();
@@ -173,7 +176,9 @@ public final class ArmorData {
                     var row=preset.getCompound(id);int trigger=row.getInt("Trigger"),minimum=row.getInt("Minimum");
                     if(!row.contains("Enabled",Tag.TAG_BYTE)||!row.contains("Armed",Tag.TAG_BYTE)
                             ||!row.contains("Trigger",Tag.TAG_INT)||!row.contains("Minimum",Tag.TAG_INT)
-                            ||trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0)return false;
+                            ||trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0
+                            ||row.contains("Priority")&&(!row.contains("Priority",Tag.TAG_INT)
+                                ||row.getInt("Priority")<2||row.getInt("Priority")>6))return false;
                 }
             }
         }

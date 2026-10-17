@@ -522,5 +522,8 @@
   "armorconsole.profile.2": "Защита",
   "armorconsole.profile.3": "Максимум",
   "armorconsole.minimum": "Мин %s%%",
+  "armorconsole.priority": "Приоритет %s",
+  "armorconsole.priority_hint": "2 = высокий (полёт), 6 = низкий. Нажатие увеличивает номер, Shift уменьшает. Настройка сохраняется отдельно для каждого профиля.",
+  "armorconsole.limited": "Ограничено мощностью / не хватает CuE",
   "armorconsole.open_hint": "Настройки надетой брони: Управление > Unusual Copper"
 }

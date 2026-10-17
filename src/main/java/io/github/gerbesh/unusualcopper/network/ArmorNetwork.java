@@ -18,8 +18,8 @@ public final class ArmorNetwork {
     public record Row(ArmorModuleType module,ArmorModuleSettings settings){}
     public record Piece(String item,int tier,int sockets,List<Row> modules){public Piece{modules=List.copyOf(modules);}}
     public record Snapshot(UUID session,long revision,boolean complete,int profile,int charge,int capacity,int perSecond,
-                           long recent,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);}}
-    private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->"2","2"::equals,"2"::equals);
+                           long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);}}
+    private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->"3","3"::equals,"3"::equals);
     private static Consumer<Snapshot> receiver=ignored->{};
     public static void register(){
         CHANNEL.registerMessage(0,Request.class,(v,b)->{},b->new Request(),(v,s)->{var c=s.get();c.enqueueWork(()->{if(c.getSender()!=null)ArmorControlServer.request(c.getSender());});c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -33,18 +33,18 @@ public final class ArmorNetwork {
     private Codec(){}
     public static void encode(Snapshot v,FriendlyByteBuf b){
         b.writeUUID(v.session);b.writeVarLong(v.revision);b.writeBoolean(v.complete);b.writeVarInt(v.profile);b.writeVarInt(v.charge);b.writeVarInt(v.capacity);
-        b.writeVarInt(v.perSecond);b.writeLong(v.recent);b.writeVarInt(v.conditions);
+        b.writeVarInt(v.perSecond);b.writeLong(v.recent);b.writeLong(v.limited);b.writeVarInt(v.conditions);
         b.writeBoolean(v.flight.session());b.writeVarInt(v.flight.ticksLeft());b.writeVarInt(v.flight.heightLeft());
         b.writeEnum(v.result);b.writeVarInt(v.pieces.size());
         for(var p:v.pieces){b.writeUtf(p.item,128);b.writeVarInt(p.tier);b.writeVarInt(p.sockets);b.writeVarInt(p.modules.size());
-            for(var row:p.modules){var s=row.settings;b.writeEnum(row.module);b.writeBoolean(s.enabled());b.writeEnum(s.trigger());b.writeVarInt(s.minimumPercent());b.writeBoolean(s.armed());}}
+            for(var row:p.modules){var s=row.settings;b.writeEnum(row.module);b.writeBoolean(s.enabled());b.writeEnum(s.trigger());b.writeVarInt(s.minimumPercent());b.writeBoolean(s.armed());b.writeVarInt(s.priority());}}
     }
     public static Snapshot decode(FriendlyByteBuf b){
         var session=b.readUUID();long revision=b.readVarLong();boolean complete=b.readBoolean();int profile=b.readVarInt(),charge=b.readVarInt(),capacity=b.readVarInt(),spent=b.readVarInt();
-        long recent=b.readLong();int conditions=b.readVarInt();
+        long recent=b.readLong(),limited=b.readLong();int conditions=b.readVarInt();
         var flight=new ArmorRuntime.FlightStatus(b.readBoolean(),b.readVarInt(),b.readVarInt());
         var result=b.readEnum(Result.class);int count=b.readVarInt();
-        if(revision<0||profile<0||profile>3||charge<0||capacity<charge||capacity>250_000_000||spent<0||count!=4||conditions<0||conditions>255)throw new IllegalArgumentException("Armor snapshot");
+        if(revision<0||profile<0||profile>3||charge<0||capacity<charge||capacity>250_000_000||spent<0||count!=4||conditions<0||conditions>255||limited<0||limited>>>ArmorModuleType.values().length!=0)throw new IllegalArgumentException("Armor snapshot");
         var pieces=new ArrayList<Piece>(4);
         for(int i=0;i<count;i++){
             String item=b.readUtf(128);int tier=b.readVarInt(),sockets=b.readVarInt(),n=b.readVarInt();
@@ -52,10 +52,10 @@ public final class ArmorNetwork {
             if(tier==0?(!item.isEmpty()||sockets!=0||n!=0):(item.isEmpty()||ResourceLocation.tryParse(item)==null))throw new IllegalArgumentException("Armor item identity");
             var rows=new ArrayList<Row>(n);var seen=EnumSet.noneOf(ArmorModuleType.class);
             for(int k=0;k<n;k++){var module=b.readEnum(ArmorModuleType.class);if(!seen.add(module))throw new IllegalArgumentException("Duplicate module");
-                rows.add(new Row(module,new ArmorModuleSettings(b.readBoolean(),b.readEnum(ArmorModuleSettings.Trigger.class),b.readVarInt(),b.readBoolean())));}
+                rows.add(new Row(module,new ArmorModuleSettings(b.readBoolean(),b.readEnum(ArmorModuleSettings.Trigger.class),b.readVarInt(),b.readBoolean(),b.readVarInt())));}
             pieces.add(new Piece(item,tier,sockets,rows));
         }
-        return new Snapshot(session,revision,complete,profile,charge,capacity,spent,recent,conditions,flight,pieces,result);
+        return new Snapshot(session,revision,complete,profile,charge,capacity,spent,recent,limited,conditions,flight,pieces,result);
     }
     }
     public static void request(){CHANNEL.sendToServer(new Request());}

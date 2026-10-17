@@ -522,5 +522,8 @@
   "armorconsole.profile.2": "Defense",
   "armorconsole.profile.3": "Maximum",
   "armorconsole.minimum": "Min %s%%",
+  "armorconsole.priority": "Priority %s",
+  "armorconsole.priority_hint": "2 = highest (flight), 6 = lowest. Click to increase, Shift-click to decrease. Saved separately for each profile.",
+  "armorconsole.limited": "Power limit reached / not enough CuE",
   "armorconsole.open_hint": "Wear to configure; bind Armor Console in Controls > Unusual Copper"
 }

@@ -48,10 +48,11 @@ public final class ArmorControlServer {
             if(!ArmorData.modules(item).contains(module)){reply(player,session,ArmorNetwork.Result.INVALID);return;}
             var old=ArmorData.settings(item,module,profile);
             var next=switch(action.operation()){
-                case ENABLE -> new ArmorModuleSettings(action.value()!=0,old.trigger(),old.minimumPercent(),old.armed());
-                case TRIGGER -> new ArmorModuleSettings(old.enabled(),ArmorModuleSettings.Trigger.values()[action.value()],old.minimumPercent(),old.armed());
-                case MINIMUM -> new ArmorModuleSettings(old.enabled(),old.trigger(),action.value(),old.armed());
-                case ARM -> new ArmorModuleSettings(old.enabled(),old.trigger(),old.minimumPercent(),action.value()!=0);
+                case ENABLE -> new ArmorModuleSettings(action.value()!=0,old.trigger(),old.minimumPercent(),old.armed(),old.priority());
+                case TRIGGER -> new ArmorModuleSettings(old.enabled(),ArmorModuleSettings.Trigger.values()[action.value()],old.minimumPercent(),old.armed(),old.priority());
+                case MINIMUM -> new ArmorModuleSettings(old.enabled(),old.trigger(),action.value(),old.armed(),old.priority());
+                case ARM -> new ArmorModuleSettings(old.enabled(),old.trigger(),old.minimumPercent(),action.value()!=0,old.priority());
+                case PRIORITY -> new ArmorModuleSettings(old.enabled(),old.trigger(),old.minimumPercent(),old.armed(),action.value());
                 default -> old;
             };
             changed=ArmorData.settings(item,module,profile,next);
@@ -68,7 +69,7 @@ public final class ArmorControlServer {
             pieces.add(new ArmorNetwork.Piece(BuiltInRegistries.ITEM.getKey(item.getItem()).toString(),armor.tier,ArmorData.slots(armor),rows));
         }else pieces.add(new ArmorNetwork.Piece("",0,0,List.of()));}
         return new ArmorNetwork.Snapshot(session.nonce,session.revision,ArmorRuntime.completeSet(player),profile,CopperBatteryItem.stored(battery),CopperBatteryItem.capacity(battery),
-                ArmorTelemetry.perSecond(player),ArmorTelemetry.recent(player),ArmorRuntime.conditions(player),
+                ArmorTelemetry.perSecond(player),ArmorTelemetry.recent(player),ArmorTelemetry.limited(player),ArmorRuntime.conditions(player),
                 ArmorRuntime.flightStatus(player),pieces,result);
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event){

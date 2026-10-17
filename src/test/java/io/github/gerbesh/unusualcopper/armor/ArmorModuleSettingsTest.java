@@ -14,10 +14,15 @@ class ArmorModuleSettingsTest {
         assertFalse(new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.MANUAL,0,false).permits(100,~0));
         assertTrue(new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.MANUAL,0,true).permits(100,0));
         assertFalse(ArmorModuleSettings.invalid().permits(100,~0));
+        var priority=new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.AUTO,20,true,2);
+        assertEquals(2,priority.priority());
+        assertTrue(priority.permits(30,0));
     }
     @Test void malformedSettingsAreRejected(){
         assertThrows(IllegalArgumentException.class,()->new ArmorModuleSettings(true,null,0,false));
         for(int value:new int[]{-5,1,99,100,Integer.MAX_VALUE})assertThrows(IllegalArgumentException.class,()->new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.AUTO,value,false));
+        assertThrows(IllegalArgumentException.class,()->new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.AUTO,0,false,1));
+        assertThrows(IllegalArgumentException.class,()->new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.AUTO,0,false,7));
     }
     @Test void telemetryCountsPaidEventsAndExpiresWithoutExtrapolating(){
         var meter=new ArmorEnergyHistory();meter.record(10,2000,1);meter.record(10,5,2);meter.record(11,80,3);
