@@ -98,7 +98,8 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
             var state=m.getLevel().getBlockState(pos);var mode=m.sideMode(side);
             boolean energy=state.getBlock() instanceof EnergyPipeBlock&&(mode==SideMode.ENERGY_INPUT||mode==SideMode.ENERGY_OUTPUT||m.kind==MachineKind.ENERGY_MONITOR);
             boolean item=state.getBlock() instanceof ItemPipeBlock&&(mode==SideMode.ITEM_INPUT||mode==SideMode.ITEM_OUTPUT);
-            boolean fluid=state.getBlock() instanceof FluidPipeBlock&&(mode==SideMode.FLUID_INPUT||mode==SideMode.FLUID_OUTPUT);
+            boolean fluid=state.getBlock() instanceof FluidPipeBlock&&(mode==SideMode.FLUID_INPUT||mode==SideMode.FLUID_OUTPUT
+                    || (m.kind==MachineKind.VORTEX_PURIFIER||m.kind==MachineKind.CIRCUIT_ETCHER)&&mode!=SideMode.DISABLED);
             if(!(energy||item||fluid)||!state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side.getOpposite())))continue;
             portFrames++;pose.pushPose();VisualGeometry.orientNorth(pose,side);
             var copper=VisualGeometry.material(buffers,"copper",false);var dark=VisualGeometry.material(buffers,"patina",false);

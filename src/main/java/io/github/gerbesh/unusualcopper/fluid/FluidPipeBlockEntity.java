@@ -34,7 +34,10 @@ public final class FluidPipeBlockEntity extends BlockEntity {
         if(other instanceof FluidPipeBlockEntity)return PipeMode.AUTO;
         if(other instanceof CopperMachineBlockEntity machine)
             return machine.sideMode(side.getOpposite())==SideMode.FLUID_OUTPUT?PipeMode.EXTRACT
-                    :machine.sideMode(side.getOpposite())==SideMode.FLUID_INPUT?PipeMode.INSERT:PipeMode.DISABLED;
+                    :machine.sideMode(side.getOpposite())==SideMode.FLUID_INPUT?PipeMode.INSERT
+                    :((machine.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.VORTEX_PURIFIER
+                    || machine.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.CIRCUIT_ETCHER)
+                    && machine.sideMode(side.getOpposite())!=SideMode.DISABLED)?PipeMode.INSERT:PipeMode.DISABLED;
         return PipeMode.INSERT;
     }
     public void changed(){

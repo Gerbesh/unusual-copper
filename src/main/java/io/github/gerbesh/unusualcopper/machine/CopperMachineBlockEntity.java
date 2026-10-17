@@ -434,7 +434,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 @Override public int getTanks(){return 1;}
                 @Override public FluidStack getFluidInTank(int tank){return live()&&tank==0?water.getFluid().copy():FluidStack.EMPTY;}
                 @Override public int getTankCapacity(int tank){return live()&&tank==0?water.getCapacity():0;}
-                @Override public boolean isFluidValid(int tank,FluidStack stack){return live()&&tank==0&&sideMode(side)==SideMode.FLUID_INPUT&&water.isFluidValid(0,stack);}
+                @Override public boolean isFluidValid(int tank,FluidStack stack){
+                    boolean legacyChemistry=(kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER)
+                            && sideMode(side)!=SideMode.DISABLED;
+                    return live()&&tank==0&&(sideMode(side)==SideMode.FLUID_INPUT||legacyChemistry)
+                            && water.isFluidValid(0,stack);
+                }
                 @Override public int fill(FluidStack stack,FluidAction action){return isFluidValid(0,stack)?water.fill(stack,action):0;}
                 @Override public FluidStack drain(FluidStack stack,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(stack,action):FluidStack.EMPTY;}
                 @Override public FluidStack drain(int amount,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(amount,action):FluidStack.EMPTY;}
@@ -471,7 +476,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
         if (side != null && !isRemoved()) {
-            if(cap==ForgeCapabilities.FLUID_HANDLER && (sideMode(side)==SideMode.FLUID_INPUT || sideMode(side)==SideMode.FLUID_OUTPUT)) return fluidCaps.get(side).cast();
+            if(cap==ForgeCapabilities.FLUID_HANDLER && (sideMode(side)==SideMode.FLUID_INPUT || sideMode(side)==SideMode.FLUID_OUTPUT
+                    || ((kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER) && sideMode(side)!=SideMode.DISABLED)))
+                return fluidCaps.get(side).cast();
             if (cap == ForgeCapabilities.ITEM_HANDLER && (sideMode(side) == SideMode.ITEM_INPUT || sideMode(side) == SideMode.ITEM_OUTPUT)) return itemCaps.get(side).cast();
             if (cap == CopperCapabilities.ENERGY && energy.capacity() > 0 && (sideMode(side) == SideMode.ENERGY_INPUT || sideMode(side) == SideMode.ENERGY_OUTPUT)) return energyCaps.get(side).cast();
         }
