@@ -24,7 +24,9 @@ public final class UnusualCopperJeiPlugin implements IModPlugin {
     @Override public ResourceLocation getPluginUid() { return ID; }
 
     @Override public void registerCategories(IRecipeCategoryRegistration registration) {
-        registration.addRecipeCategories(new SolarInfusionCategory(registration.getJeiHelpers().getGuiHelper()));
+        var helper=registration.getJeiHelpers().getGuiHelper();
+        registration.addRecipeCategories(new SolarInfusionCategory(helper),
+                new IndustrialProcessingCategory(helper),new PrecisionAssemblyCategory(helper));
     }
 
     @Override public void registerRecipes(IRecipeRegistration registration) {
@@ -38,13 +40,24 @@ public final class UnusualCopperJeiPlugin implements IModPlugin {
         // Read data-pack recipes, never maintain an independent hardcoded list.
         var recipes = level.getRecipeManager().getAllRecipesFor(ModContent.SOLAR_RECIPE.get());
         registration.addRecipes(SolarInfusionCategory.TYPE, recipes);
-        UnusualCopper.LOGGER.info("CuE JEI SOLAR RECIPES REGISTERED: {} recipes from the active world", recipes.size());
+        var industrial=level.getRecipeManager().getAllRecipesFor(ModContent.INDUSTRIAL_RECIPE.get());
+        registration.addRecipes(IndustrialProcessingCategory.TYPE,industrial);
+        var assembly=level.getRecipeManager().getAllRecipesFor(ModContent.ASSEMBLY_RECIPE.get());
+        registration.addRecipes(PrecisionAssemblyCategory.TYPE,assembly);
+        UnusualCopper.LOGGER.info("CuE JEI data-driven recipes: solar={}, industrial={}, assembly={}",
+                recipes.size(),industrial.size(),assembly.size());
     }
 
     @Override public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(
                 new ItemStack(ModContent.MACHINES.get(MachineKind.SOLAR_INFUSER).get()),
                 SolarInfusionCategory.TYPE);
+        for(var kind:new MachineKind[]{MachineKind.RESONANCE_CRUSHER,MachineKind.COPPER_PRESS,
+                MachineKind.VORTEX_PURIFIER,MachineKind.RESONANCE_CRYSTALLIZER,MachineKind.CIRCUIT_ETCHER})
+            registration.addRecipeCatalyst(new ItemStack(ModContent.MACHINES.get(kind).get()),
+                    IndustrialProcessingCategory.TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModContent.MACHINES.get(MachineKind.PRECISION_ASSEMBLER).get()),
+                PrecisionAssemblyCategory.TYPE);
     }
 
     @Override public void onRuntimeAvailable(mezz.jei.api.runtime.IJeiRuntime runtime) {
