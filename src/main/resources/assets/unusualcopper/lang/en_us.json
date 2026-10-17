@@ -424,6 +424,8 @@
   "production.unusualcopper.preview.header": "Materials for %s × %s: %s CuE, %s machine ticks (gross)",
   "production.unusualcopper.preview.stage": "Stage: %s × %s on %s; %s CuE",
   "production.unusualcopper.preview.material": "Raw input: %s × %s",
+  "production.unusualcopper.preview.stock": "Bound storage census: %s available, %s missing (not reserved)",
+  "production.unusualcopper.preview.unknown": "Bound storage census is incomplete; no stock is assumed",
   "production.unusualcopper.preview.tool": "Reusable mold/tool: %s (at least one)",
   "production.unusualcopper.preview.warning": "Gross bill before subtracting stock. Only controller jobs and physical input feeding are automated; upstream jobs are NOT submitted.",
   "production.unusualcopper.preview.failed": "Cannot plan: %s",

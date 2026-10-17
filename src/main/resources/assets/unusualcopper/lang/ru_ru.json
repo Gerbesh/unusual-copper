@@ -424,6 +424,8 @@
   "production.unusualcopper.preview.header": "Для %s × %s нужно: %s CuE, %s машино-тиков (без учёта запасов)",
   "production.unusualcopper.preview.stage": "Этап: %s × %s на %s; %s CuE",
   "production.unusualcopper.preview.material": "Исходный материал: %s × %s",
+  "production.unusualcopper.preview.stock": "Привязанный склад: в наличии %s, недостаёт %s (ничего не зарезервировано)",
+  "production.unusualcopper.preview.unknown": "Подсчёт на привязанном складе не завершён; наличие не гарантируется",
   "production.unusualcopper.preview.tool": "Многоразовый инструмент/матрица: %s (минимум один)",
   "production.unusualcopper.preview.warning": "Это расчёт без вычета складских запасов. Контроллер автоматизирует собственные заказы и подачу, но НЕ запускает промежуточные машины.",
   "production.unusualcopper.preview.failed": "Не удалось рассчитать цепочку: %s",

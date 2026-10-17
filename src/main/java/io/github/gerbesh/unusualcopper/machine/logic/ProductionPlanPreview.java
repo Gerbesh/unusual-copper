@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import io.github.gerbesh.unusualcopper.storage.StorageEndpoint;
+import io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -41,9 +43,28 @@ public final class ProductionPlanPreview {
             for(var stage:plan.stages())
                 player.displayClientMessage(Component.translatable("production.unusualcopper.preview.stage",
                         stage.operations(),item(stage.output()),stage.machine(),stage.cue()),false);
-            for(var raw:new TreeMap<>(plan.rawMaterials()).entrySet())
+            // Advisory census only: never reserve or promise access to stock.
+            StorageEndpoint endpoint=null;
+            var pos=machine.boundInventory();
+            if(pos!=null && machine.getBlockPos().distSqr(pos)<=32*32
+                    && level.hasChunkAt(pos) && ProtectionPolicy.allowed(level,machine.getBlockPos(),machine.owner())) {
+                var bound=machine.boundEndpoint(level);
+                if(bound!=null && bound.isAvailable())endpoint=bound;
+            }
+            for(var raw:new TreeMap<>(plan.rawMaterials()).entrySet()) {
                 player.displayClientMessage(Component.translatable("production.unusualcopper.preview.material",
                         raw.getValue(),item(raw.getKey())),false);
+                if(endpoint!=null) {
+                    var key=new ResourceLocation(raw.getKey());
+                    var stock=endpoint.countItem(BuiltInRegistries.ITEM.get(key),stack->
+                            !stack.isEmpty() && !stack.hasTag() && stack.is(BuiltInRegistries.ITEM.get(key)));
+                    var estimate=ProductionStockPolicy.estimate(raw.getValue(),stock.amount(),stock.complete());
+                    player.displayClientMessage(estimate.complete()
+                                    ?Component.translatable("production.unusualcopper.preview.stock",
+                                            estimate.available(),estimate.missing())
+                                    :Component.translatable("production.unusualcopper.preview.unknown"),false);
+                }
+            }
             for(String tool:new TreeSet<>(plan.reusableTools()))
                 player.displayClientMessage(Component.translatable("production.unusualcopper.preview.tool",
                         item(tool)),false);

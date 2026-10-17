@@ -73,7 +73,7 @@ class ProductionDependencyResourcesTest {
     @Test void localizedPreviewMessagesAndNotAClientSideOrder() throws Exception {
         for(String lang:new String[]{"ru_ru","en_us"}) {
             var json=recipe("src/main/resources/assets/unusualcopper/lang/"+lang+".json");
-            for(String key:new String[]{"hint","header","stage","material","tool","warning","failed"})
+            for(String key:new String[]{"hint","header","stage","material","stock","unknown","tool","warning","failed"})
                 assertTrue(json.has("production.unusualcopper.preview."+key),lang+"/"+key);
         }
     }
