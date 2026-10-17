@@ -104,7 +104,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         cancelOperation();
     }
     public void nextProductionPattern() {
-        if(kind!=MachineKind.PRODUCTION_CONTROLLER || hasOperation() || productionQueued>0)return;
+        if(kind!=MachineKind.PRODUCTION_CONTROLLER || hasOperation() || productionQueued>0 || boundCargoCount()>0)return;
         productionPattern=(productionPattern+1)%2;productionCompleted=0;setChanged();
     }
     /** Water chemistry or pumped bulk storage, depending on machine kind. */
@@ -626,7 +626,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (sentinel != null) sentinel.load(tag.getCompound("Sentinel"));
         if (brewer != null) {brewer.load(tag.getCompound("Brewer"));if(brewer.job!=null){progress=brewer.job.stage;duration=brewer.job.plan.stages();operationCost=brewer.job.price();}}
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundIdentity=tag.contains("BoundIdentity")?BlockPos.of(tag.getLong("BoundIdentity")):null;boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
-        boundCargoSlot = Math.max(-1, Math.min(1, tag.getInt("BoundCargoSlot"))); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
+        int savedCargoSlot=tag.getInt("BoundCargoSlot");
+        boundCargoSlot=kind==MachineKind.PRODUCTION_CONTROLLER && ProductionSupplyPolicy.gridCargoSlot(savedCargoSlot)
+                ?savedCargoSlot:Math.max(-1,Math.min(1,savedCargoSlot)); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
     }
     private void saveSides(CompoundTag tag) { for (Direction side : Direction.values()) tag.putInt("Side" + side.ordinal(), sides.get(side).ordinal()); }

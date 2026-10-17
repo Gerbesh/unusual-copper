@@ -49,7 +49,8 @@ public final class ProductionOrderLogic implements MachineLogic {
         }
         CraftingContainer grid = snapshot(machine);
         if (!recipe.matches(grid, level)) {
-            machine.status(machine.hasOperation() ? MachineStatus.RECIPE_CHANGED : MachineStatus.INVALID_INPUT);
+            machine.status(machine.hasOperation()?MachineStatus.RECIPE_CHANGED
+                    :machine.boundInventory()!=null?MachineStatus.WAITING_MATERIALS:MachineStatus.INVALID_INPUT);
             return;
         }
         // No modded capabilities, enchantments or container-return recipes in this first whitelist.
