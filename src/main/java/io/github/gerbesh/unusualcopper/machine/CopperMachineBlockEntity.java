@@ -244,8 +244,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case REPAIR_CRYSTAL -> (m,level)->m.status(level.getGameTime()<m.repairUntil?MachineStatus.WORKING:MachineStatus.IDLE);
         };
         for (Direction side : Direction.values()) {
-            SideMode mode = kind==MachineKind.COPPER_FLUID_PUMP ? (side==Direction.WEST ? SideMode.ENERGY_INPUT : SideMode.FLUID_OUTPUT)
-                    : kind==MachineKind.COPPER_FLUID_TANK ? (side==Direction.UP || side==Direction.NORTH ? SideMode.FLUID_INPUT:SideMode.FLUID_OUTPUT)
+            SideMode mode = kind==MachineKind.COPPER_FLUID_PUMP ? (side==state.getValue(CopperMachineBlock.FACING).getOpposite() ? SideMode.ENERGY_INPUT : SideMode.FLUID_OUTPUT)
+                    : kind==MachineKind.COPPER_FLUID_TANK ? (side==Direction.DOWN ? SideMode.FLUID_OUTPUT:SideMode.FLUID_INPUT)
                     : (kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER) && side==Direction.NORTH ? SideMode.FLUID_INPUT
                     : kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
                     : kind == MachineKind.ENERGY_DISTRIBUTOR ? (side == Direction.WEST ? SideMode.ENERGY_INPUT : SideMode.ENERGY_OUTPUT)

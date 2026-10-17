@@ -114,3 +114,7 @@
 - `FluidFlowPolicyTest` fixes the 15-source lake threshold, 15-block collection radius, 250 mB/5-tick transport budget, and pump cost per bucket (water 160 CuE, other liquid 480 CuE).
 - Preserved compatibility for existing 4,000 mB purifiers/etchers on legacy non-disabled sides: fill-only Forge fluid capability remains available after loading older NBT, even though explicit `FLUID_INPUT` is now recommended.
 - Remaining gameplay verification: source selection on waterlogged/modded liquids, server performance with many disconnected ponds, tank breaking with stored liquids (currently contents spill and are not returned as portable fluid NBT), other-mod IFluidHandler interoperability, real SMP claims/ownership, JEI icons and polished visual assets.
+
+## Ergonomic fluid-side defaults
+- Newly placed pumps take CuE through the block's **rear face** (opposite the way the front faces), not a hard-coded world-west port; all remaining faces export liquid.
+- Newly placed fluid tanks accept fluid from all sides except the bottom, which exports fluid. Players can override any face with the existing Face Selector. Previously placed tanks/pumps retain their persisted per-face NBT settings.
