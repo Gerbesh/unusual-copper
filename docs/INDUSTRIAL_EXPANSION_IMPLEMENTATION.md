@@ -101,7 +101,7 @@
 - Minecraft and GameTest are not executed. CI compile/unit tests and user in-game verification are separate.
 
 ### How to manually test E3C
-1. Place the pump within six horizontal blocks and four vertical blocks of a pond with **at least 15 connected, exposed source blocks**. Feed CuE to its western face (or change faces with selector).
+1. Place the pump within six horizontal blocks and four vertical blocks of a pond with **at least 15 connected, exposed source blocks**. Feed CuE to the **rear face** of the pump (or change faces with the selector).
 2. Attach `copper_fluid_pipe` to one of its FLUID_OUTPUT faces and connect to a `copper_fluid_tank` FLUID_INPUT face. The reservoir gains water without lake depletion. To deliver onward, use another tank FLUID_OUTPUT face.
 3. Feed a purifier's/etcher's FLUID_INPUT face. Verify 250 mB per processing operation, no lost water when inputs/outputs are blocked, and ×3 dust per grit.
 4. Attach a pump to a lava lake, verify lava tank works but cannot enter purifier. Change the lake to fewer than 15 exposed source blocks and confirm extraction stops.
