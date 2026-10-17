@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GCG",
+    "PFP",
+    "RBR"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "F": {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "B": {
+      "item": "minecraft:brewing_stand"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:circuit_etcher",
+    "count": 1
+  }
+}

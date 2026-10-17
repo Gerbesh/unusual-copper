@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GCG",
+    "PFP",
+    "IBI"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:copper_fluid_pump",
+    "count": 1
+  }
+}

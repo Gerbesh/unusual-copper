@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RCR",
+    "PEP",
+    "RFR"
+  ],
+  "key": {
+    "R": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "E": {
+      "item": "unusualcopper:etched_circuit"
+    },
+    "F": {
+      "item": "unusualcopper:reinforced_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:precision_assembler",
+    "count": 1
+  }
+}

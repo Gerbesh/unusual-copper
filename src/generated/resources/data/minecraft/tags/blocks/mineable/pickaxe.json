@@ -26,6 +26,12 @@
     "unusualcopper:resonant_extractor",
     "unusualcopper:resonance_crusher",
     "unusualcopper:copper_press",
-    "unusualcopper:vortex_purifier"
+    "unusualcopper:vortex_purifier",
+    "unusualcopper:resonance_crystallizer",
+    "unusualcopper:circuit_etcher",
+    "unusualcopper:precision_assembler",
+    "unusualcopper:copper_fluid_pipe",
+    "unusualcopper:copper_fluid_pump",
+    "unusualcopper:copper_fluid_tank"
   ]
 }
