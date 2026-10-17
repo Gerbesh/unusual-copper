@@ -211,6 +211,8 @@
   "item.unusualcopper.reinforced_battery": "Reinforced Battery II",
   "item.unusualcopper.resonant_battery": "Resonant Battery III",
   "item.unusualcopper.aetheric_battery": "Aetheric Battery IV",
+  "item.unusualcopper.prismatic_battery": "Prismatic Battery V",
+  "item.unusualcopper.sovereign_battery": "Sovereign Battery VI",
   "battery.unusualcopper.charge": "%s / %s CuE",
   "battery.unusualcopper.hint": "Insert into a Copper Cell I, II or III. Select a transfer direction in the cell menu. Upgrading retains charge.",
   "battery.unusualcopper.slot": "Battery",

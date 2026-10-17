@@ -71,6 +71,8 @@ public final class ModContent {
     public static final RegistryObject<Item> REINFORCED_BATTERY=ITEMS.register("reinforced_battery",()->new io.github.gerbesh.unusualcopper.item.CopperBatteryItem(1));
     public static final RegistryObject<Item> RESONANT_BATTERY=ITEMS.register("resonant_battery",()->new io.github.gerbesh.unusualcopper.item.CopperBatteryItem(2));
     public static final RegistryObject<Item> AETHERIC_BATTERY=ITEMS.register("aetheric_battery",()->new io.github.gerbesh.unusualcopper.item.CopperBatteryItem(3));
+    public static final RegistryObject<Item> PRISMATIC_BATTERY=ITEMS.register("prismatic_battery",()->new io.github.gerbesh.unusualcopper.item.CopperBatteryItem(4));
+    public static final RegistryObject<Item> SOVEREIGN_BATTERY=ITEMS.register("sovereign_battery",()->new io.github.gerbesh.unusualcopper.item.CopperBatteryItem(5));
     public static final RegistryObject<RecipeSerializer<io.github.gerbesh.unusualcopper.recipe.BatteryUpgradeRecipe>> BATTERY_UPGRADE_SERIALIZER=SERIALIZERS.register("battery_upgrade",io.github.gerbesh.unusualcopper.recipe.BatteryUpgradeRecipe.Serializer::new);
     public static final RegistryObject<Item> COPPER_GRIT = ITEMS.register("copper_grit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> IRON_GRIT = ITEMS.register("iron_grit", () -> new Item(new Item.Properties()));

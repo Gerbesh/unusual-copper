@@ -11,9 +11,9 @@ public final class CopperBatteryItem extends Item {
     public final int tier, capacity;
     public CopperBatteryItem(int tier) {
         super(new Properties().stacksTo(1));
-        if(tier<0 || tier>3)throw new IllegalArgumentException("Battery tier");
-        this.tier=tier;this.capacity=10_000*(int)Math.pow(10,tier);
+        this.tier=tier;this.capacity=capacityForTier(tier);
     }
+    public static int capacityForTier(int tier) { return BatteryTierPolicy.capacityForTier(tier); }
     public static int stored(ItemStack stack) {
         return stack.getItem() instanceof CopperBatteryItem battery && stack.hasTag()
                 ?Math.max(0,Math.min(battery.capacity,stack.getTag().getInt(ENERGY_TAG))):0;

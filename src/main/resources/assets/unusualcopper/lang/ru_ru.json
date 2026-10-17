@@ -211,6 +211,8 @@
   "item.unusualcopper.reinforced_battery": "Усиленная батарея II",
   "item.unusualcopper.resonant_battery": "Резонансная батарея III",
   "item.unusualcopper.aetheric_battery": "Эфирная батарея IV",
+  "item.unusualcopper.prismatic_battery": "Призматическая батарея V",
+  "item.unusualcopper.sovereign_battery": "Суверенная батарея VI",
   "battery.unusualcopper.charge": "%s / %s CuE",
   "battery.unusualcopper.hint": "Вставьте в медную ячейку I, II или III и выберите направление переноса. Улучшение сохраняет заряд.",
   "battery.unusualcopper.slot": "Батарея",

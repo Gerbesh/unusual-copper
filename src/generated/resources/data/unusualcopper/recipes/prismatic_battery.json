@@ -1,0 +1,27 @@
+{
+  "type": "unusualcopper:battery_upgrade",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "unusualcopper:aetheric_battery"
+    },
+    "C": {
+      "item": "minecraft:netherite_block"
+    },
+    "M": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "R": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "pattern": [
+    "CMC",
+    "RBR",
+    "CMC"
+  ],
+  "result": {
+    "item": "unusualcopper:prismatic_battery"
+  },
+  "show_notification": true
+}

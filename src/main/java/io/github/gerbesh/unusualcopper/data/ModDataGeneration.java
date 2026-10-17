@@ -45,6 +45,16 @@ public final class ModDataGeneration {
                     .define('C',Items.AMETHYST_BLOCK).define('M',Items.DIAMOND).define('R',Items.GOLD_BLOCK).define('B',ModContent.REINFORCED_BATTERY.get()).unlockedBy("has_battery",has(ModContent.REINFORCED_BATTERY.get())).save(batteryUpgrade);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.AETHERIC_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
                     .define('C',Items.OBSIDIAN).define('M',Items.NETHERITE_INGOT).define('R',Items.NETHER_STAR).define('B',ModContent.RESONANT_BATTERY.get()).unlockedBy("has_battery",has(ModContent.RESONANT_BATTERY.get())).save(batteryUpgrade);
+            // E8: the only way to advance a charged V/VI battery is to physically
+            // consume the previous tier in the existing NBT-preserving upgrade recipe.
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.PRISMATIC_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
+                    .define('C',Items.NETHERITE_BLOCK).define('M',ModContent.RESONANT_CRYSTAL.get())
+                    .define('R',Items.DIAMOND_BLOCK).define('B',ModContent.AETHERIC_BATTERY.get())
+                    .unlockedBy("has_battery",has(ModContent.AETHERIC_BATTERY.get())).save(batteryUpgrade);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.SOVEREIGN_BATTERY.get()).pattern("CMC").pattern("RBR").pattern("CMC")
+                    .define('C',Items.NETHERITE_BLOCK).define('M',Items.NETHER_STAR)
+                    .define('R',Items.ECHO_SHARD).define('B',ModContent.PRISMATIC_BATTERY.get())
+                    .unlockedBy("has_battery",has(ModContent.PRISMATIC_BATTERY.get())).save(batteryUpgrade);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.SOLAR_LENS.get()).pattern("IDI").pattern("DGD").pattern("IDI")
                     .define('I', Items.IRON_NUGGET).define('D', Items.DIAMOND).define('G', Items.GLASS).unlockedBy("has_diamond", has(Items.DIAMOND)).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModContent.FRAME.get()).pattern("CCC").pattern("CIC").pattern("CCC")

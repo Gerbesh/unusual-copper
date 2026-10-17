@@ -1,0 +1,27 @@
+{
+  "type": "unusualcopper:battery_upgrade",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "unusualcopper:prismatic_battery"
+    },
+    "C": {
+      "item": "minecraft:netherite_block"
+    },
+    "M": {
+      "item": "minecraft:nether_star"
+    },
+    "R": {
+      "item": "minecraft:echo_shard"
+    }
+  },
+  "pattern": [
+    "CMC",
+    "RBR",
+    "CMC"
+  ],
+  "result": {
+    "item": "unusualcopper:sovereign_battery"
+  },
+  "show_notification": true
+}
