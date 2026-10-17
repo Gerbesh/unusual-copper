@@ -1,0 +1,66 @@
+{
+  "generator": "built-in image_gen",
+  "preparation": "Nearest-neighbor 64x64 conversion only; alpha preserved; originals retained",
+  "assets": [
+    {
+      "id": "resonant_crystal",
+      "source": "sources/resonant_crystal.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Production game asset: one Minecraft inventory sprite for Unusual Copper, resonant_crystal. A single large faceted cyan turquoise quartz crystal, two small subordinate shards, delicately clamped at its base by a dark oxidized copper and warm copper collar. Diagonal upright silhouette, strong pale cyan facets, dark teal outlines, bright concentrated interior, warm copper accents. Hand-crafted pixel art matching detailed 64x64 Minecraft mod item icons, crisp block pixels, limited palette, highly readable at 32px. The object fills roughly 82% of a square canvas, centered, generous clear margin. Transparent background with actual alpha. No cast shadow outside object, no environment, no text, no logo, no border, no numbers, no particles outside silhouette, no photographic gradients. This is a finished usable item sprite, not a concept sheet."
+    },
+    {
+      "id": "aetheric_matrix",
+      "source": "sources/aetheric_matrix.png",
+      "status": "Prepared for pending E7 matrix; not registered yet",
+      "prompt": "Use case: stylized-concept. Finished Minecraft mod inventory asset, single aetheric_matrix. One compact elegant octagonal copper mechanical matrix held diagonally, glowing turquoise faceted diamond core suspended inside two concentric dark teal circuit rings, four symmetric heavy warm copper corner clamps, tiny gold connection pads. This is a late game Unusual Copper crafting component, visually different from a loose crystal or circuit board. Hand-crafted detailed pixel art, crisp pixels and strong dark outlines, restrained highlights, copper #B66B42, patina #315B50, charcoal #272E2C, aqua #37D6D3. Readable silhouette at 64x64, no tiny noisy details. One centered isolated object filling 80% square canvas with transparent actual-alpha background, no ground shadow, no scenery, no words, no letters, no numbers, no frame, no floating particles."
+    },
+    {
+      "id": "resonant_coil",
+      "source": "sources/resonant_coil.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished Minecraft inventory sprite for Unusual Copper. Single compact resonant induction coil: thick luminous warm copper wire tightly wound around a dark steel hollow rectangular bobbin, turquoise crystal endcap and two brass terminals, diagonal isometric view. Dense copper turns clearly distinct from the dark core and one small cyan inset. This is an electrical machine component, not a battery or compass. Hand-crafted detailed crisp pixel art, warm copper #B66B42 and #E3A06A, patina #315B50, charcoal #272E2C, turquoise #37D6D3. Strong dark outlines, precise highlights, readable at 64x64. Single isolated item centered within 80% of a square canvas, transparent actual-alpha background. No ground shadow, scenery, labels, letters, numbers, frame or floating particles. Match copper industrial-magical Minecraft item sprites."
+    },
+    {
+      "id": "shield_field_module",
+      "source": "sources/shield_field_module.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished Minecraft inventory sprite for Unusual Copper. One compact wearable shield field module: a small heavy dark-teal rectangular cartridge with warm copper outer clips and gold corner contacts, centered luminous cyan SHIELD-shaped crystal inset, split turquoise enamel panels. Diagonal isometric inventory view. A readable miniature shield emblem integrated into real hardware, not a floating magic shield. Hand-crafted detailed crisp pixel art, warm copper #B66B42 and #E3A06A, patina #315B50, charcoal #272E2C, turquoise #37D6D3. Strong dark outlines, precise highlights, readable at 64x64. Single isolated item centered within 80% of a square canvas, transparent actual-alpha background. No ground shadow, scenery, labels, letters, numbers, frame or floating particles. Match copper industrial-magical Minecraft item sprites."
+    },
+    {
+      "id": "washed_copper_dust",
+      "source": "sources/washed_copper_dust.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished inventory sprite for a Minecraft industrial mod, Unusual Copper. A single small conical HEAP OF warm clean copper-orange metallic powder with rose-gold facets and dark reddish crevices. Loose fine irregular granular powder, several tiny granules scattered at the base within the object's silhouette. Unmistakably a mound of DUST, not an ingot, ore rock, food or bag. Small amount of bold texture detail to remain readable at 64x64, hand-crafted crisp pixel art with dark outlines, limited palette and precise highlights. Centered isolated item filling 78 percent of a square canvas. Real alpha transparent background, no cast shadow, no text, symbols, labels, border, container or scenery."
+    },
+    {
+      "id": "washed_iron_dust",
+      "source": "sources/washed_iron_dust.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished inventory sprite for a Minecraft industrial mod, Unusual Copper. A single small conical HEAP OF clean pale silver iron powder, cool gray grains, a few bright white facets and charcoal crevices. Loose fine irregular granular powder, several tiny granules scattered at the base within the object's silhouette. Unmistakably a mound of DUST, not an ingot, ore rock, food or bag. Small amount of bold texture detail to remain readable at 64x64, hand-crafted crisp pixel art with dark outlines, limited palette and precise highlights. Centered isolated item filling 78 percent of a square canvas. Real alpha transparent background, no cast shadow, no text, symbols, labels, border, container or scenery."
+    },
+    {
+      "id": "washed_gold_dust",
+      "source": "sources/washed_gold_dust.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished inventory sprite for a Minecraft industrial mod, Unusual Copper. A single small conical HEAP OF clean rich warm golden metallic powder, ochre shadows and small pale yellow facets. Loose fine irregular granular powder, several tiny granules scattered at the base within the object's silhouette. Unmistakably a mound of DUST, not an ingot, ore rock, food or bag. Small amount of bold texture detail to remain readable at 64x64, hand-crafted crisp pixel art with dark outlines, limited palette and precise highlights. Centered isolated item filling 78 percent of a square canvas. Real alpha transparent background, no cast shadow, no text, symbols, labels, border, container or scenery."
+    },
+    {
+      "id": "copper_grit",
+      "source": "sources/copper_grit.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished Minecraft mod inventory sprite, Unusual Copper. One compact loose pile of COARSE CRUSHED METAL GRIT: copper-orange metal grains, subtle rose highlights and tiny oxidized teal crevices. Five to eight irregular angular little shards and pebbles clustered together, chipped faceted surfaces with clearly separated granules. Coarse grit, visibly chunkier than powder, not a solid ore rock, not an ingot, not jewelry. Carefully authored crisp pixel art, dark outlines, chunky readable silhouette at 64x64, restrained highlights, no noisy speckles. Single isolated object centered within 80 percent of square canvas. True transparent alpha background, no text or numbers, no ground shadow, no scenery, no container, no border."
+    },
+    {
+      "id": "iron_grit",
+      "source": "sources/iron_grit.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished Minecraft mod inventory sprite, Unusual Copper. One compact loose pile of COARSE CRUSHED METAL GRIT: cool gray iron granules, silvery cut edges, dark charcoal crevices. Five to eight irregular angular little shards and pebbles clustered together, chipped faceted surfaces with clearly separated granules. Coarse grit, visibly chunkier than powder, not a solid ore rock, not an ingot, not jewelry. Carefully authored crisp pixel art, dark outlines, chunky readable silhouette at 64x64, restrained highlights, no noisy speckles. Single isolated object centered within 80 percent of square canvas. True transparent alpha background, no text or numbers, no ground shadow, no scenery, no container, no border."
+    },
+    {
+      "id": "gold_grit",
+      "source": "sources/gold_grit.png",
+      "status": "Runtime asset",
+      "prompt": "Use case: stylized-concept. Finished Minecraft mod inventory sprite, Unusual Copper. One compact loose pile of COARSE CRUSHED METAL GRIT: rich gold ochre granules, warm pale-yellow cut edges, deep amber crevices. Five to eight irregular angular little shards and pebbles clustered together, chipped faceted surfaces with clearly separated granules. Coarse grit, visibly chunkier than powder, not a solid ore rock, not an ingot, not jewelry. Carefully authored crisp pixel art, dark outlines, chunky readable silhouette at 64x64, restrained highlights, no noisy speckles. Single isolated object centered within 80 percent of square canvas. True transparent alpha background, no text or numbers, no ground shadow, no scenery, no container, no border."
+    }
+  ]
+}

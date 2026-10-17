@@ -17,12 +17,13 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
     private final SentinelRenderer sentinel;
     private final java.util.Map<CopperMachineBlockEntity,Motion> animations=new java.util.WeakHashMap<>();
     private static final class Motion {
-        double last=-1,phase;float speed;
+        double last=-1,phase;float speed,fill=-1,dt;
         float advance(double now,boolean working){
-            float dt=last<0?0:(float)Math.max(0,Math.min(1,now-last));last=now;
+            dt=last<0?0:(float)Math.max(0,Math.min(1,now-last));last=now;
             speed=Math.max(0,Math.min(1,speed+(working?1:-1)*dt*.14F));phase=(phase+dt*speed)%72000;
             return (float)phase;
         }
+        float fluid(float target){fill=fill<0?target:fill+(target-fill)*(1-(float)Math.exp(-dt*.22));return fill;}
     }
     public static long portFrames,workingFrames,idleFrames;
     public CopperMachineRenderer(BlockEntityRendererProvider.Context context){sentinel=new SentinelRenderer(context);}
@@ -89,6 +90,9 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
             }
             default -> {}
         }
+        var animation=animations.get(m);
+        IndustrialMachineVisuals.render(m,pose,buffers,motion,time,animation.speed,
+                animation.fluid((float)m.visualFluidAmount/m.water.getCapacity()),working,light);
         pose.popPose();
         if(m.kind==MachineKind.COPPER_FLUID_PUMP && working && m.pumpSource!=null)pumpAura(m,pose,buffers,light,time);
     }

@@ -1,0 +1,27 @@
+{
+  "authorship": "Original cuboid geometry; materials reused from project art",
+  "models": [
+    "inert_tailings",
+    "copper_plate",
+    "copper_wire_spool",
+    "reinforced_frame",
+    "circuit_blank",
+    "etched_circuit",
+    "precision_processor",
+    "module_blank_i",
+    "plate_die",
+    "wire_die",
+    "pattern_card",
+    "etching_reagent",
+    "prismatic_battery",
+    "sovereign_battery",
+    "optic_visor_module",
+    "aqua_lungs_module",
+    "stride_drive_module",
+    "mining_servo_module",
+    "fall_damper_module",
+    "jump_drive_module",
+    "hover_drive_module",
+    "flight_core_ii_module"
+  ]
+}

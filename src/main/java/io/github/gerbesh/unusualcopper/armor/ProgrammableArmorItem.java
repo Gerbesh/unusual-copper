@@ -37,8 +37,7 @@ public final class ProgrammableArmorItem extends ArmorItem {
         this.tier=tier;
     }
     @Override public String getArmorTexture(ItemStack stack,Entity entity,EquipmentSlot slot,String type) {
-        // Safe vanilla fallback until the authored copper-laminate layers are provided.
-        return "minecraft:textures/models/armor/iron_layer_"+(slot==EquipmentSlot.LEGS?"2":"1")+".png";
+        return "unusualcopper:textures/models/armor/copper_laminate_tier_"+tier+"_layer_"+(slot==EquipmentSlot.LEGS?"2":"1")+".png";
     }
     @Override public void appendHoverText(ItemStack stack,Level level,List<Component> tooltip,TooltipFlag flag){
         tooltip.add(Component.translatable("armor.unusualcopper.sockets",ArmorData.modules(stack).size(),ArmorData.slots(this)));

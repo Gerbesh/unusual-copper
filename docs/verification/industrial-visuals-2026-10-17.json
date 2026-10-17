@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.9-alpha.1",
+  "source_base_commit": "87d42ec0a4c90896bc477843a89899c48214b7cb",
+  "artifact": "dist/unusualcopper-0.20.9-alpha.1.jar",
+  "sha256": "804eda59a9a5b7e97501f68ec61d4f1fbf05bbb72f6c64201d71253efb623d02",
+  "bytes": 1438555,
+  "installed": false,
+  "junit_tests": 111,
+  "junit_failures": 0,
+  "junit_errors": 0,
+  "junit_skipped": 0,
+  "game_tests": "Compiled only; not executed",
+  "visual_client": {
+    "explicitly_authorized": true,
+    "environment": "Separate copied repository test world; Forge development client; not the full Better MC pack",
+    "scope": "Display poses and screenshots only; no functional gameplay acceptance",
+    "frames": [
+      {
+        "path": "art/previews/industrial/industrial-armor-back.png",
+        "sha256": "c059c727507be8f4bf69e2106ff83d36404d3b492e6fdc2e9eed0053fd873eb4"
+      },
+      {
+        "path": "art/previews/industrial/industrial-armor-front.png",
+        "sha256": "c07c71c7d1d804e0be46c365f751ec178bffc90076c08ba1f896d9e27e95efc8"
+      },
+      {
+        "path": "art/previews/industrial/industrial-close-assembly.png",
+        "sha256": "edf26d3f3333d2d2dcbc24c45e0c9377cf789e68071e4749f54a61288d2195ec"
+      },
+      {
+        "path": "art/previews/industrial/industrial-close-processing.png",
+        "sha256": "e6713f0e1321eaed73f589dfa900576e671a34840f5f2539a0e4789b75b24051"
+      },
+      {
+        "path": "art/previews/industrial/industrial-front-idle.png",
+        "sha256": "931b2e8a8154ea4724116acda2bf176cab5d09a0d5803729cc5bac37207209e1"
+      },
+      {
+        "path": "art/previews/industrial/industrial-front-working-a.png",
+        "sha256": "166bbdf666dfc631757916a6be7f229b12a08ef3f9ada83075a33f2ebda0e6b0"
+      },
+      {
+        "path": "art/previews/industrial/industrial-front-working-b.png",
+        "sha256": "2f9e225e0d96a8eac9cc8de249cbd7933ad1d8f44c26fb9399ba4654e26d7e7b"
+      },
+      {
+        "path": "art/previews/industrial/industrial-gear-inventory.png",
+        "sha256": "257113e1e771dfbfa7b22ebd2163f07913184771130e5eabafff3086c4497a6e"
+      },
+      {
+        "path": "art/previews/industrial/industrial-inventory.png",
+        "sha256": "ba03fdc97345a54ac66c0944d777d97b142473982eb6b2dccff917e1f467b146"
+      },
+      {
+        "path": "art/previews/industrial/industrial-night-working.png",
+        "sha256": "e7cfe1805c34ae7007431e9d35e255f1eaeb0ca7c3127ef98c4eed27856bd3d1"
+      },
+      {
+        "path": "art/previews/industrial/industrial-rear-working.png",
+        "sha256": "623268ba4c4f056ae796fb32e9eb934b97ee5b33bab2a542b7b71900b1e7fa41"
+      }
+    ],
+    "missing_unusualcopper_textures": false,
+    "live_server_launched": false,
+    "user_worlds_modified": false
+  },
+  "static_art": {
+    "block_and_item_models_checked": 185,
+    "transparent_sprites": 23,
+    "industrial_devices": 10,
+    "hardware_models": 22,
+    "armor_item_models": 12,
+    "armor_layers": 6,
+    "new_blockbench_sources": 44
+  },
+  "remaining": "See docs/COMPLETION_TRACKER.md and docs/INDUSTRIAL_VISUALS.md; full development and E9 acceptance remain incomplete"
+}

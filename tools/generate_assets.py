@@ -323,14 +323,7 @@ def models():
                  part([13,13,13],[15,16,15],"aqua"),part([6,4,.3],[10,7,.7],"aqua")]
     export_model("enchantment_resonator",enchanter,[])
     repair_model()
-    bridge = frame() + [part([3,3,3],[13,12,13],"patina"),part([3,4,1],[13,12,3],"copper"),
-                        part([4,5,.5],[12,11,1],"dark"),part([6,7,0],[10,9,.4],"aqua"),
-                        part([5,7,13],[11,9,16],"dark"),part([6,7.5,15],[10,8.5,16],"aqua")]
     bridge_model()
-    bridge_states = []
-    for facing, rotation in (("north",{}),("east",{"y":90}),("south",{"y":180}),("west",{"y":270}),("up",{"x":270}),("down",{"x":90})):
-        bridge_states.append({"when":{"facing":facing},"apply":{"model":"unusualcopper:block/ssn_bridge",**rotation}})
-    write_json(ASSETS / "blockstates/ssn_bridge.json",{"multipart":bridge_states})
     for name in ("resonant_enchantment_core", "sentinel_range_focus", "diamond_solar_lens", "saturated_copper_essence", "copper_frame", "copper_core", "face_selector", "cargo_bundle", "area_wand", "copper_battery", "reinforced_battery", "resonant_battery", "aetheric_battery"):
         authored = ART / f"sprites/{name}.png"
         if not authored.exists():
