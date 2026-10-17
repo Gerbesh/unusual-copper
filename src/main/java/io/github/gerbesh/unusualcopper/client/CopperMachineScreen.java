@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
     private Button cancelButton, redstoneButton,brewerButton,energyButton,batteryButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
-    private Button orderOne, orderBatch, orderPattern, patternEngrave;
+    private Button orderOne, orderBatch, orderPattern, orderPreview, patternEngrave;
     private Button armorInstall, armorRemove, armorBattery, armorProfile, armorUpgrade;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
@@ -49,6 +49,8 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
                 .tooltip(Tooltip.create(Component.translatable("armor.unusualcopper.change_profile"))).bounds(leftPos+166,topPos+91,28,18).build());
         armorUpgrade=addRenderableWidget(Button.builder(Component.literal("↑"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,21))
                 .tooltip(Tooltip.create(Component.translatable("armor.unusualcopper.upgrade"))).bounds(leftPos+196,topPos+91,22,18).build());
+        orderPreview=addRenderableWidget(Button.builder(Component.literal("DAG"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,22))
+                .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.preview.hint"))).bounds(leftPos+185,topPos+112,33,14).build());
         orderPattern=addRenderableWidget(Button.builder(Component.translatable("production.unusualcopper.pattern"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,15))
                 .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.pattern_hint"))).bounds(leftPos+145,topPos+91,39,18).build());
     }
@@ -136,7 +138,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         redstoneButton.setWidth(assembler?57:98);
         redstoneButton.setMessage(assembler?Component.literal("R"):Component.translatable("gui.unusualcopper.redstone"));
         boolean controller=menu.kind()==MachineKind.PRODUCTION_CONTROLLER;
-        orderOne.visible=controller;orderBatch.visible=controller;orderPattern.visible=controller;
+        orderOne.visible=controller;orderBatch.visible=controller;orderPattern.visible=controller;orderPreview.visible=controller;
         orderPattern.active=controller && menu.data.get(48)==0 && menu.duration()==0;
         brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
         cancelButton.visible = menu.kind().acceptsInputs() && menu.kind()!=MachineKind.ARMOR_WORKBENCH;

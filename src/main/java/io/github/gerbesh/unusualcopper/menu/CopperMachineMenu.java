@@ -80,6 +80,8 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
             if(button==13){machine.queueProduction(16);return true;}
             if(button==14 || button==1){machine.cancelProduction();return true;}
             if(button==15){machine.nextProductionPattern();return true;}
+            if(button==22 && player instanceof net.minecraft.server.level.ServerPlayer server)
+                return io.github.gerbesh.unusualcopper.machine.logic.ProductionPlanPreview.show(machine,server);
         }
         if(button==11 && machine.kind.isCell()) { machine.batteryMode=(machine.batteryMode+1)%3;machine.setChanged();return true; }
         if(button==10&&player instanceof net.minecraft.server.level.ServerPlayer server&&(machine.kind.capacity>0||machine.kind.energyControl())){EnergyControlMenu.open(server,machine);return true;}
