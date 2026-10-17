@@ -104,8 +104,18 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         cancelOperation();
     }
     public void nextProductionPattern() {
-        if(kind!=MachineKind.PRODUCTION_CONTROLLER || hasOperation() || productionQueued>0 || boundCargoCount()>0)return;
+        if(kind!=MachineKind.PRODUCTION_CONTROLLER || hasOperation() || productionQueued>0 || boundCargoCount()>0 || productionPressTask!=null)return;
         productionPattern=(productionPattern+1)%2;productionCompleted=0;setChanged();
+    }
+    /** E5B-4: one physical, persisted E2 press batch under this controller. */
+    public ProductionPressTask productionPressTask;
+    /** The press-side lease is not an inventory; it prevents concurrent order ownership. */
+    public java.util.UUID productionPressLease;
+    public BlockPos productionPressController;
+    public boolean pressLeased() { return kind==MachineKind.COPPER_PRESS && productionPressLease!=null; }
+    public boolean hasPressLease(ProductionPressTask task,BlockPos controller) {
+        return pressLeased() && task!=null && productionPressLease.equals(task.token())
+                && controller.equals(productionPressController);
     }
     /** Water chemistry or pumped bulk storage, depending on machine kind. */
     public final FluidTank water;
@@ -184,14 +194,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (boundCargo.isEmpty()) { boundFaulted = false; boundCargoSlot = -1; } setChanged();
     }
     public boolean bind(BlockPos pos, Direction side, Player player) {
-        if(brewer!=null && brewer.job!=null)return false;
+        if(brewer!=null && brewer.job!=null || productionPressTask!=null)return false;
         if (!kind.hasInventory() || !canAccess(player) || !boundCargo.isEmpty() || !(level instanceof ServerLevel server) || pos.equals(worldPosition)
                 || worldPosition.distSqr(pos) > 32 * 32 || !server.hasChunkAt(pos) || !io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(server, worldPosition, player.getUUID())) return false;
         var endpoint = io.github.gerbesh.unusualcopper.storage.StorageEndpoints.at(server, pos, side, owner == null ? player.getUUID() : owner);
         if (!endpoint.isAvailable()) return false;
         if (owner == null) setOwner(player.getUUID()); boundInventory = pos.immutable(); boundIdentity=endpoint.identity().pos(); boundSide = side; boundEndpoint = null; if(brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); return true;
     }
-    public void clearBinding() { if(brewer!=null && brewer.job!=null)return; boundInventory = null; boundIdentity=null; boundEndpoint = null; if(brewer!=null&&level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); }
+    public void clearBinding() { if(brewer!=null && brewer.job!=null || productionPressTask!=null)return; boundInventory = null; boundIdentity=null; boundEndpoint = null; if(brewer!=null&&level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); setChanged(); }
     public void recoverBinding(Player player) {
         if (!canAccess(player)) return;
         var remainder = new java.util.ArrayList<ItemStack>();
@@ -240,7 +250,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 if(kind==MachineKind.VORTEX_PURIFIER) return slot==0 ? !stack.hasTag()
                         && (stack.is(ModContent.COPPER_GRIT.get()) || stack.is(ModContent.IRON_GRIT.get()) || stack.is(ModContent.GOLD_GRIT.get()))
                         : stack.is(Items.WATER_BUCKET) && !stack.hasTag();
-                if(kind==MachineKind.COPPER_PRESS) return !stack.hasTag() && (slot==0
+                if(kind==MachineKind.COPPER_PRESS) return !pressLeased() && !stack.hasTag() && (slot==0
                         ? stack.is(net.minecraft.world.item.Items.COPPER_INGOT) || stack.is(ModContent.COPPER_PLATE.get())
                         : stack.is(ModContent.PLATE_DIE.get()) || stack.is(ModContent.WIRE_DIE.get()));
                 if(kind==MachineKind.RESONANCE_CRUSHER) return slot==0 && !stack.hasTag()
@@ -455,7 +465,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         else machine.logic.tick(machine, level);
         if(machine.mining!=null&&machine.status==MachineStatus.REDSTONE_PAUSED)for(var job:machine.mining.jobs)job.advancedAt=Long.MIN_VALUE;
         if(machine.kind.isCell() && machine.energyEnabled())machine.transferBattery();
-        if (machine.energyEnabled() && level.getGameTime() % (machine.cultivation!=null||machine.mining!=null?4:20) == 0) io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
+        if (machine.energyEnabled() && level.getGameTime() % (machine.cultivation!=null||machine.mining!=null?4:20) == 0)
+            io.github.gerbesh.unusualcopper.machine.logic.BoundStorageLogic.tick(machine, level);
+        if(level.getGameTime()%20==0) {
+            if(machine.kind==MachineKind.PRODUCTION_CONTROLLER)
+                io.github.gerbesh.unusualcopper.machine.logic.ProductionUpstreamLogic.tick(machine,level);
+            else if(machine.pressLeased())
+                io.github.gerbesh.unusualcopper.machine.logic.ProductionUpstreamLogic.recoverOrphan(machine,level);
+        }
         boolean active = machine.status == MachineStatus.WORKING || machine.status == MachineStatus.CHARGING;
         if (state.getValue(CopperMachineBlock.ACTIVE) != active) level.setBlock(pos, state.setValue(CopperMachineBlock.ACTIVE, active), 2);
         if (level.getGameTime() % (machine.mining!=null?5:10) == 0 || machine.sentinel!=null && sentinelWasActive!=machine.sentinel.active) level.sendBlockUpdated(pos, machine.getBlockState(), machine.getBlockState(), 2);
@@ -485,14 +502,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 @Override public int getSlots() { return (kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER)?13:hasIndustrialExtra()?5:4; }
                 @Override public ItemStack getStackInSlot(int slot) { return live() ? ((kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) && slot>=4 && slot<13?assemblyGrid.getStackInSlot(slot-4):slot==4 && hasIndustrialExtra()?industrialExtra.getStackInSlot(0):slot>=0&&slot<4?inventory.getStackInSlot(slot):ItemStack.EMPTY).copy() : ItemStack.EMPTY; }
                 @Override public int getSlotLimit(int slot) { return (kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) && slot>=4 && slot<13?assemblyGrid.getSlotLimit(slot-4):slot==4 && hasIndustrialExtra()?industrialExtra.getSlotLimit(0):slot>=0&&slot<4?inventory.getSlotLimit(slot):0; }
-                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && !(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0) && sideMode(side) == SideMode.ITEM_INPUT && ((kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) && slot>=4 && slot<13?assemblyGrid.isItemValid(slot-4,stack):slot==4 && hasIndustrialExtra()?industrialExtra.isItemValid(0,stack):slot>=0&&slot<4&&inventory.isItemValid(slot,stack)); }
+                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && !pressLeased() && !(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0) && sideMode(side) == SideMode.ITEM_INPUT && ((kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) && slot>=4 && slot<13?assemblyGrid.isItemValid(slot-4,stack):slot==4 && hasIndustrialExtra()?industrialExtra.isItemValid(0,stack):slot>=0&&slot<4&&inventory.isItemValid(slot,stack)); }
                 @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                     return isItemValid(slot,stack) ? (kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) && slot>=4 && slot<13
                             ? assemblyGrid.insertItem(slot-4,stack,simulate) : slot==4 && hasIndustrialExtra()
                             ? industrialExtra.insertItem(0,stack,simulate) : inventory.insertItem(slot,stack,simulate) : stack;
                 }
                 @Override public ItemStack extractItem(int slot, int count, boolean simulate) {
-                    return live() && sideMode(side) == SideMode.ITEM_OUTPUT && slot>=2 && slot<4 ? inventory.extractItem(slot,count,simulate) : ItemStack.EMPTY;
+                    return live() && !pressLeased() && sideMode(side) == SideMode.ITEM_OUTPUT && slot>=2 && slot<4 ? inventory.extractItem(slot,count,simulate) : ItemStack.EMPTY;
                 }
             }));
             energyCaps.put(side, LazyOptional.of(() -> new CopperEnergyHandler() {
@@ -553,6 +570,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             if(kind==MachineKind.PRECISION_ASSEMBLER)tag.put("AssemblyReturns",secondaryResult.save(new CompoundTag()));
         }
         if(kind==MachineKind.PRODUCTION_CONTROLLER) {
+            if(productionPressTask!=null)tag.put("ProductionPressTask",productionPressTask.save());
             tag.putInt("ProductionQueued",productionQueued);
             tag.putInt("ProductionCompleted",productionCompleted);
             tag.putInt("ProductionPattern",productionPattern);
@@ -561,6 +579,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             tag.put("IndustrialExtra",industrialExtra.serializeNBT());
             tag.put("RecipeCatalyst",recipeCatalyst.save(new CompoundTag()));
             tag.put("RecipeAdditive",recipeAdditive.save(new CompoundTag()));
+        }
+        if(kind==MachineKind.COPPER_PRESS && productionPressLease!=null) {
+            tag.putUUID("ProductionPressLease",productionPressLease);
+            if(productionPressController!=null)tag.putLong("ProductionPressController",productionPressController.asLong());
         }
         if(pumpSource!=null&&kind==MachineKind.COPPER_FLUID_PUMP)tag.putLong("PumpSource",pumpSource.asLong());
         if (workArea != null) tag.put("WorkArea", workArea.save());
@@ -603,6 +625,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             if(kind==MachineKind.PRECISION_ASSEMBLER)secondaryResult=ItemStack.of(tag.getCompound("AssemblyReturns"));
         }
         if(kind==MachineKind.PRODUCTION_CONTROLLER) {
+            productionPressTask=ProductionPressTask.load(tag.getCompound("ProductionPressTask"));
             productionQueued=Math.max(0,Math.min(4096,tag.getInt("ProductionQueued")));
             productionCompleted=Math.max(0,tag.getInt("ProductionCompleted"));
             productionPattern=Math.floorMod(tag.getInt("ProductionPattern"),2);
@@ -613,6 +636,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             recipeAdditive=ItemStack.of(tag.getCompound("RecipeAdditive"));
         } else { recipeCatalyst=ItemStack.EMPTY; recipeAdditive=ItemStack.EMPTY; }
         if (source.isEmpty() || result.isEmpty() || duration == 0) cancelOperation();
+        if(kind==MachineKind.COPPER_PRESS) {
+            productionPressLease=tag.hasUUID("ProductionPressLease") && tag.contains("ProductionPressController")
+                    ?tag.getUUID("ProductionPressLease"):null;
+            productionPressController=productionPressLease==null?null:BlockPos.of(tag.getLong("ProductionPressController"));
+        }
         pumpSource=kind==MachineKind.COPPER_FLUID_PUMP&&tag.contains("PumpSource")?BlockPos.of(tag.getLong("PumpSource")):null;
         workArea = null;
         if(cultivation!=null)cultivation.reset();
@@ -627,7 +655,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (brewer != null) {brewer.load(tag.getCompound("Brewer"));if(brewer.job!=null){progress=brewer.job.stage;duration=brewer.job.plan.stages();operationCost=brewer.job.price();}}
         boundInventory = tag.contains("BoundInventory") ? BlockPos.of(tag.getLong("BoundInventory")) : null; boundIdentity=tag.contains("BoundIdentity")?BlockPos.of(tag.getLong("BoundIdentity")):null;boundSide = Direction.values()[Math.floorMod(tag.getInt("BoundSide"), 6)]; boundEndpoint = null;
         int savedCargoSlot=tag.getInt("BoundCargoSlot");
-        boundCargoSlot=kind==MachineKind.PRODUCTION_CONTROLLER && ProductionSupplyPolicy.gridCargoSlot(savedCargoSlot)
+        boundCargoSlot=kind==MachineKind.PRODUCTION_CONTROLLER && (ProductionSupplyPolicy.gridCargoSlot(savedCargoSlot) || savedCargoSlot==13)
                 ?savedCargoSlot:Math.max(-1,Math.min(1,savedCargoSlot)); boundFaulted = tag.getBoolean("BoundFaulted"); boundCargo.clear();
         for (var raw : tag.getList("BoundCargo", net.minecraft.nbt.Tag.TAG_COMPOUND)) { var entry = (CompoundTag)raw; var stack = ItemStack.of(entry.getCompound("Stack")); stack.setCount(Math.max(0, entry.getInt("Count"))); if (!stack.isEmpty()) boundCargo.add(stack); }
     }

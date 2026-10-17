@@ -14,7 +14,8 @@ import java.util.*;
 public final class BoundStorageLogic {
     private BoundStorageLogic() {}
     public static void tick(CopperMachineBlockEntity machine, ServerLevel level) {
-        if (!machine.kind.hasInventory() || machine.boundFaulted || !ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) return;
+        if (!machine.kind.hasInventory() || machine.boundFaulted || machine.pressLeased()
+                || !ProtectionPolicy.allowed(level, machine.getBlockPos(), machine.owner())) return;
         var pos = machine.boundInventory();
         StorageEndpoint endpoint = pos == null || machine.getBlockPos().distSqr(pos) > 32 * 32 ? null : machine.boundEndpoint(level);
         var cargo = machine.boundCargo();
@@ -111,7 +112,9 @@ public final class BoundStorageLogic {
     private static void deliver(CopperMachineBlockEntity machine, StorageEndpoint endpoint, List<ItemStack> cargo) {
         var stack = cargo.get(0); int count = Math.min(8, Math.min(stack.getCount(), stack.getMaxStackSize())); var offered = stack.copyWithCount(count);
         ItemStack rest;
-        if(machine.kind==MachineKind.PRODUCTION_CONTROLLER && ProductionSupplyPolicy.gridCargoSlot(machine.boundCargoSlot))
+        if(machine.kind==MachineKind.PRODUCTION_CONTROLLER && machine.boundCargoSlot==13)
+            rest=ProductionUpstreamLogic.deliverInput(machine,offered);
+        else if(machine.kind==MachineKind.PRODUCTION_CONTROLLER && ProductionSupplyPolicy.gridCargoSlot(machine.boundCargoSlot))
             rest=machine.assemblyGrid.insertItem(machine.boundCargoSlot-4,offered,false);
         else if (machine.boundCargoSlot >= 0 && machine.boundCargoSlot < 2)
             rest=machine.inventory.insertItem(machine.boundCargoSlot, offered, false);

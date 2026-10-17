@@ -33,7 +33,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
                 @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.CIRCUIT_ETCHER || kind() == MachineKind.RESONANCE_CRYSTALLIZER || kind() == MachineKind.ARMOR_WORKBENCH || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
-                @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
+                @Override public boolean mayPickup(Player player) { return machine == null || !machine.pressLeased() && (slotIndex >= 2 || !machine.hasOperation()); }
             });
         }
         for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++) addSlot(new Slot(playerInventory, col + row * 9 + 9, 31 + col * 18, 130 + row * 18));
