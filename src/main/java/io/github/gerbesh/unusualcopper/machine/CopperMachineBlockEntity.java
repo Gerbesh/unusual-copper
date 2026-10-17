@@ -132,6 +132,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     /** Water chemistry or pumped bulk storage, depending on machine kind. */
     public final FluidTank water;
+    /** Public appearance only; no fluid tags, inventory stacks or capabilities are synchronized. */
+    public int visualFluidAmount;
+    public net.minecraft.world.level.material.Fluid visualFluid=Fluids.EMPTY;
     public BlockPos pumpSource;
     private final EnumMap<Direction,LazyOptional<IFluidHandler>> fluidCaps=new EnumMap<>(Direction.class);
     public boolean canFitOutputs(ItemStack first,ItemStack second) { return outputPlan(first,second)!=null; }
@@ -695,9 +698,20 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         }
     }
     @Override public CompoundTag getUpdateTag() {
-        CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal()); if(kind==MachineKind.COPPER_FLUID_PUMP&&pumpSource!=null)tag.putLong("PumpSource",pumpSource.asLong()); if(mining!=null){mining.writeVisual(tag,worldPosition);tag.putUUID("MiningRuntime",runtimeIdentity);} if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
+        // The visible tank contents are deliberately narrower than WaterTank's persisted NBT.
+        CompoundTag tag = new CompoundTag(); tag.putInt("Energy", energy.stored()); tag.putInt("Status", status.ordinal());
+        if(kind==MachineKind.VORTEX_PURIFIER||kind==MachineKind.CIRCUIT_ETCHER||kind==MachineKind.COPPER_FLUID_PUMP||kind==MachineKind.COPPER_FLUID_TANK){
+            tag.putInt("VisualFluidAmount",water.getFluidAmount());
+            var fluid=net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(water.getFluid().getFluid());
+            if(fluid!=null)tag.putString("VisualFluid",fluid.toString());
+        }
+        if(kind==MachineKind.COPPER_FLUID_PUMP&&pumpSource!=null)tag.putLong("PumpSource",pumpSource.asLong()); if(mining!=null){mining.writeVisual(tag,worldPosition);tag.putUUID("MiningRuntime",runtimeIdentity);} if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
     }
     @Override public void handleUpdateTag(CompoundTag tag) {
+        visualFluidAmount=Math.max(0,Math.min(water.getCapacity(),tag.getInt("VisualFluidAmount")));
+        var fluidId=net.minecraft.resources.ResourceLocation.tryParse(tag.getString("VisualFluid"));
+        visualFluid=fluidId==null?Fluids.EMPTY:net.minecraftforge.registries.ForgeRegistries.FLUIDS.getValue(fluidId);
+        if(visualFluid==null)visualFluid=Fluids.EMPTY;
         previousVisualEnergy=visualEnergy(0);visualEnergyChanged=level==null?0:level.getGameTime();
         energy.restore(tag.getInt("Energy")); if(kind==MachineKind.COPPER_FLUID_PUMP)pumpSource=tag.contains("PumpSource")?BlockPos.of(tag.getLong("PumpSource")):null; status = MachineStatus.values()[Math.floorMod(tag.getInt("Status"), MachineStatus.values().length)]; loadSides(tag);
         if(mining!=null){mining.visualIdentity=tag.hasUUID("MiningRuntime")?tag.getUUID("MiningRuntime"):null;var a=tag.getIntArray("MiningArea");mining.area=null;if(a.length==4)try{mining.area=new io.github.gerbesh.unusualcopper.gameplay.MiningFootprint(a[0],a[1],a[2],a[3]);}catch(IllegalArgumentException ignored){}mining.enabled=tag.getBoolean("MiningEnabled");mining.visualTick=level==null?0:level.getGameTime();mining.visualRevision++;mining.jobs.clear();for(var raw:tag.getList("MiningBeams",net.minecraft.nbt.Tag.TAG_COMPOUND)){if(mining.jobs.size()>=5)break;var row=(CompoundTag)raw;var job=new MiningState.Job(BlockPos.of(row.getLong("Pos")),net.minecraft.world.level.block.Block.stateById(row.getInt("StateId")),ItemStack.EMPTY,0,0);job.visualId=row.getLong("Flight");job.progress=Math.max(0,Math.min(job.ticks,row.getInt("Progress")));mining.jobs.add(job);}if(level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this);}

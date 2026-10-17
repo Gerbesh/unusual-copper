@@ -57,6 +57,12 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('industrialVisualClient')) {
+                workingDirectory project.file('run-industrial-visual')
+                property 'unusualcopper.industrialVisualClient', 'true'
+                args '--quickPlaySingleplayer', 'cue-industrial-visual', '--width', '1600', '--height', '900'
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
             if (project.hasProperty('harvestClient')) {
                 property 'unusualcopper.harvestClient', 'true'
                 args '--quickPlaySingleplayer', 'cue-smoke', '--width', '1280', '--height', '720'

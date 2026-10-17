@@ -1,36 +1,76 @@
 {
-  "variants": {
-    "facing=north,lit=true": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 0
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump",
+        "y": 0
+      }
     },
-    "facing=north,lit=false": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 0
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump_glass",
+        "y": 0
+      }
     },
-    "facing=east,lit=true": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 90
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump",
+        "y": 90
+      }
     },
-    "facing=east,lit=false": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 90
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump_glass",
+        "y": 90
+      }
     },
-    "facing=south,lit=true": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 180
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump",
+        "y": 180
+      }
     },
-    "facing=south,lit=false": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 180
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump_glass",
+        "y": 180
+      }
     },
-    "facing=west,lit=true": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 270
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump",
+        "y": 270
+      }
     },
-    "facing=west,lit=false": {
-      "model": "unusualcopper:block/copper_fluid_pump",
-      "y": 270
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "unusualcopper:block/copper_fluid_pump_glass",
+        "y": 270
+      }
     }
-  }
+  ]
 }
