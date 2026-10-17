@@ -73,7 +73,7 @@ public final class ModDataGeneration {
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out,"unusualcopper:resonant_coil_bootstrap");
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.RESONANT_COIL.get()).pattern(" W ").pattern("WRW").pattern(" W ")
                     .define('W',ModContent.COPPER_WIRE.get()).define('R',Items.REDSTONE)
-                    .unlockedBy("has_wire",has(ModContent.COPPER_WIRE.get())).save(out,"unusualcopper:resonant_coil");
+                    .unlockedBy("has_wire",has(ModContent.COPPER_WIRE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.PLATE_DIE.get()).pattern("III").pattern("ISI").pattern("III")
                     .define('I',Items.IRON_INGOT).define('S',Items.SMOOTH_STONE)
                     .unlockedBy("has_iron",has(Items.IRON_INGOT)).save(out);

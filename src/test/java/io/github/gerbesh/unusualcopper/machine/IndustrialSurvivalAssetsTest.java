@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /** CI verifies the actual bundled survival assets, not only their datagen authoring code. */
 class IndustrialSurvivalAssetsTest {
     @Test void newMachinesShipLootCraftingAndPickaxeTags() throws Exception {
-        String[] ids={"resonance_crystallizer","circuit_etcher","precision_assembler",
-                "copper_fluid_pipe","copper_fluid_pump","copper_fluid_tank"};
+        String[] ids={"resonance_crusher","copper_press","vortex_purifier",
+                "resonance_crystallizer","circuit_etcher","precision_assembler",
+                "copper_fluid_pipe","copper_fluid_pump","copper_fluid_tank",
+                "production_controller","armor_workbench"};
         String tag=Files.readString(Path.of("src/generated/resources/data/minecraft/tags/blocks/mineable/pickaxe.json"));
         for(String id:ids){
             Path crafting=Path.of("src/generated/resources/data/unusualcopper/recipes/"+id+".json");

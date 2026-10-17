@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "unusualcopper:copper_core"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "IFI",
+    "RCR",
+    "IDI"
+  ],
+  "result": {
+    "item": "unusualcopper:resonance_crusher"
+  },
+  "show_notification": true
+}

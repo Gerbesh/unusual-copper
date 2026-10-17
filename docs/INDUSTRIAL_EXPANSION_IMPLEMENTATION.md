@@ -1,5 +1,12 @@
 # Industrial Expansion implementation log
 
+## Current-main deployment audit (2026-10-17)
+
+- The E1–E2 and E5 feature branches are ancestors of main `b20599e`; main also contains the SSN Progressive 1.4.1 bridge compatibility change. The complete baseline has 28 registered machine kinds, including the ten industrial additions, modular armor and F1–F3 movement prototypes.
+- A packaged-resource audit found the missing survival recipe for `resonance_crusher`. The recipe existed in Java datagen, but regeneration stopped at a redundant explicit default ID for `resonant_coil`. Removed that redundant ID and successfully reran Forge data generation; bundled the missing crusher recipe and industrial recipe-unlock advancements.
+- Expanded survival-resource checks to all ten industrial machines and the fluid pipe. Recipe assertions accept the standard implicit result count of one.
+- `build compileGameTestJava`: 110 JUnit tests pass. GameTest sources compile only; no Minecraft client, GameTest server or live server was launched for this deployment audit. Visual and gameplay acceptance remain separate.
+
 ## E0 baseline (2026-10-17)
 - Source: `main`, Unusual Copper 0.20.6-alpha.1, Forge 1.20.1 / Java 17.
 - Preserve the ordinal of every existing `MachineKind` (client menu serializes the ordinal).

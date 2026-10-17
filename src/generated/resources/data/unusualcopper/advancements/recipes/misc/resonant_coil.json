@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "unusualcopper:resonant_coil"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_wire": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "unusualcopper:copper_wire_spool"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_wire",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "unusualcopper:resonant_coil"
+    ]
+  },
+  "sends_telemetry_event": false
+}

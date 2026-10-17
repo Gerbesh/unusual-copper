@@ -19,7 +19,8 @@ class ProductionBoundSupplyAssetsTest {
             assertEquals(3,pattern.size(),"Grid slots must not be shifted for "+name);
             for(var row:pattern)assertEquals(3,row.getAsString().length(),name);
             assertEquals("unusualcopper:"+name,json.getAsJsonObject("result").get("item").getAsString());
-            assertEquals(1,json.getAsJsonObject("result").get("count").getAsInt());
+            var result=json.getAsJsonObject("result");
+            assertEquals(1,result.has("count")?result.get("count").getAsInt():1);
         }
     }
     @Test void bothLanguagesExplainPhysicalEscrow() throws Exception {
