@@ -23,7 +23,7 @@ public final class PrecisionAssemblyRecipe implements Recipe<Container> {
     private final int cue;
 
     public PrecisionAssemblyRecipe(ResourceLocation id, NonNullList<Ingredient> inputs, ItemStack result, int ticks, int cue) {
-        if (inputs.size()!=9 || inputs.stream().anyMatch(Ingredient::isEmpty) || result.isEmpty()
+        if (inputs.size()!=9 || inputs.stream().allMatch(Ingredient::isEmpty) || result.isEmpty()
                 || result.hasTag() || result.getCount()>64 || ticks<40 || ticks>200
                 || cue<400 || cue>4000)
             throw new IllegalArgumentException("Invalid precision assembly recipe: "+id);
@@ -35,9 +35,31 @@ public final class PrecisionAssemblyRecipe implements Recipe<Container> {
         if(items.getContainerSize()<9)return false;
         for(int i=0;i<9;i++) {
             ItemStack item=items.getItem(i);
-            if(item.isEmpty() || item.hasTag() || !inputs.get(i).test(item))return false;
+            if(inputs.get(i).isEmpty()) {
+                if(!item.isEmpty())return false;
+            } else if(item.isEmpty() || item.hasTag() || !inputs.get(i).test(item))return false;
         }
         return true;
+    }
+    /** Null signals a rejected container-return recipe, never a silently lost item. */
+    @Nullable public ItemStack containerReturns(Container items) {
+        ItemStack combined=ItemStack.EMPTY;
+        for(int i=0;i<9;i++) {
+            ItemStack input=items.getItem(i);
+            if(input.isEmpty())continue;
+            ItemStack returned=input.getCraftingRemainingItem();
+            if(returned.isEmpty())continue;
+            // A single output slot can safely return only vanilla, stateless containers.
+            // Tools, batteries, custom NBT and mixed remainder types are intentionally refused.
+            if(returned.hasTag() || returned.getCount()!=1
+                    || !(returned.is(net.minecraft.world.item.Items.BUCKET)
+                    || returned.is(net.minecraft.world.item.Items.GLASS_BOTTLE)))return null;
+            if(combined.isEmpty())combined=returned.copy();
+            else if(ItemStack.isSameItemSameTags(combined,returned)
+                    && combined.getCount()<combined.getMaxStackSize())combined.grow(1);
+            else return null;
+        }
+        return combined;
     }
     @Override public ItemStack assemble(Container container, RegistryAccess access) { return result.copy(); }
     @Override public boolean canCraftInDimensions(int width,int height) { return width>=3&&height>=3; }
@@ -53,7 +75,7 @@ public final class PrecisionAssemblyRecipe implements Recipe<Container> {
             var array=GsonHelper.getAsJsonArray(json,"ingredients");
             if(array.size()!=9)throw new JsonParseException("Precision assembly requires exactly 9 inputs: "+id);
             NonNullList<Ingredient> ingredients=NonNullList.withSize(9,Ingredient.EMPTY);
-            for(int i=0;i<9;i++)ingredients.set(i,Ingredient.fromJson(array.get(i)));
+            for(int i=0;i<9;i++)ingredients.set(i,array.get(i).isJsonNull()?Ingredient.EMPTY:Ingredient.fromJson(array.get(i)));
             ItemStack output=ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json,"result"));
             try {
                 return new PrecisionAssemblyRecipe(id,ingredients,output,GsonHelper.getAsInt(json,"ticks"),GsonHelper.getAsInt(json,"cue"));

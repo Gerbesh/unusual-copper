@@ -1,0 +1,34 @@
+{
+  "type": "unusualcopper:precision_assembly",
+  "ingredients": [
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    null,
+    {
+      "item": "minecraft:water_bucket"
+    },
+    null,
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    {
+      "item": "unusualcopper:copper_plate"
+    },
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    }
+  ],
+  "result": {
+    "item": "unusualcopper:resonant_coil",
+    "count": 2
+  },
+  "ticks": 100,
+  "cue": 1600
+}

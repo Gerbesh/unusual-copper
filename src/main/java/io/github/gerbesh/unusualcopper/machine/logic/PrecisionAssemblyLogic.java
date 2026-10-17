@@ -4,6 +4,7 @@ import io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity;
 import io.github.gerbesh.unusualcopper.machine.MachineLogic;
 import io.github.gerbesh.unusualcopper.machine.MachineStatus;
 import io.github.gerbesh.unusualcopper.machine.OperationMath;
+import io.github.gerbesh.unusualcopper.recipe.AssemblyPatternCard;
 import io.github.gerbesh.unusualcopper.recipe.PrecisionAssemblyRecipe;
 import io.github.gerbesh.unusualcopper.registry.ModContent;
 import net.minecraft.server.level.ServerLevel;
@@ -12,9 +13,27 @@ import net.minecraft.world.item.ItemStack;
 
 /** E4 single-recipe precision assembly, with server-owned grid and exactly-once material commit. */
 public final class PrecisionAssemblyLogic implements MachineLogic {
+    /** Bind one existing physical card to the actual server-side recipe of the displayed grid. */
+    public static boolean engrave(CopperMachineBlockEntity m,ServerLevel level) {
+        if(m.kind!=io.github.gerbesh.unusualcopper.machine.MachineKind.PRECISION_ASSEMBLER
+                || m.hasOperation() || !m.energyEnabled())return false;
+        ItemStack card=m.inventory.getStackInSlot(0);
+        if(!AssemblyPatternCard.valid(card) || card.getCount()!=1)return false;
+        SimpleContainer grid=new SimpleContainer(9);
+        for(int i=0;i<9;i++)grid.setItem(i,m.assemblyGrid.getStackInSlot(i));
+        for(var candidate:level.getRecipeManager().getAllRecipesFor(ModContent.ASSEMBLY_RECIPE.get())) {
+            if(!candidate.matches(grid,level) || candidate.containerReturns(grid)==null)continue;
+            ItemStack bound=AssemblyPatternCard.engraved(card,candidate.getId());
+            if(bound.isEmpty())return false;
+            m.inventory.setStackInSlot(0,bound);
+            m.setChanged();
+            return true;
+        }
+        return false;
+    }
     @Override public void tick(CopperMachineBlockEntity m, ServerLevel level) {
         ItemStack card=m.inventory.getStackInSlot(0);
-        if(!card.is(ModContent.PATTERN_CARD.get()) || card.hasTag()) {
+        if(!AssemblyPatternCard.valid(card)) {
             m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.INVALID_INPUT);
             return;
         }
@@ -22,24 +41,27 @@ public final class PrecisionAssemblyLogic implements MachineLogic {
         for(int i=0;i<9;i++)container.setItem(i,m.assemblyGrid.getStackInSlot(i));
         PrecisionAssemblyRecipe recipe=null;
         for(var candidate:level.getRecipeManager().getAllRecipesFor(ModContent.ASSEMBLY_RECIPE.get())) {
-            if(candidate.matches(container,level) && (!m.hasOperation()||m.recipeId.equals(candidate.getId().toString()))) {
+            if(candidate.matches(container,level) && AssemblyPatternCard.accepts(card,candidate.getId()) && (!m.hasOperation()||m.recipeId.equals(candidate.getId().toString()))) {
                 recipe=candidate; break;
             }
         }
         if(recipe==null){m.status(m.hasOperation()?MachineStatus.RECIPE_CHANGED:MachineStatus.INVALID_INPUT);return;}
         ItemStack output=recipe.assemble(container,level.registryAccess());
+        ItemStack returns=recipe.containerReturns(container);
+        if(returns==null){m.status(MachineStatus.INVALID_INPUT);return;}
         if(m.hasOperation() && (!m.inputMatches()||!m.assemblyInputsMatch()
                 ||m.duration!=recipe.ticks()||m.operationCost!=recipe.cue()
-                ||!ItemStack.matches(m.result,output))) {
+                ||!ItemStack.matches(m.result,output)||!ItemStack.matches(m.secondaryResult,returns))) {
             m.status(MachineStatus.RECIPE_CHANGED);return;
         }
         if(!m.hasOperation()){
-            if(!m.canFitOutput(output)){m.status(MachineStatus.OUTPUT_FULL);return;}
+            if(!m.canFitAssemblyOutputs(output,returns)){m.status(MachineStatus.OUTPUT_FULL);return;}
             m.begin(recipe.getId().toString(),card.copyWithCount(1),output,recipe.ticks(),recipe.cue());
+            m.secondaryResult=returns.copy();
             for(int i=0;i<9;i++)m.assemblySnapshot.setStackInSlot(i,m.assemblyGrid.getStackInSlot(i).copyWithCount(1));
             m.setChanged();
         }
-        if(!m.canFitOutput(m.result)){m.status(MachineStatus.OUTPUT_FULL);return;}
+        if(!m.canFitAssemblyOutputs(m.result,m.secondaryResult)){m.status(MachineStatus.OUTPUT_FULL);return;}
         if(m.progress>=m.duration){if(!m.finish())m.status(MachineStatus.RECIPE_CHANGED);return;}
         int due=OperationMath.payment(m.operationCost,m.progress+1,m.duration);
         if(!m.energy.spend(due)){m.status(MachineStatus.NO_ENERGY);return;}

@@ -232,7 +232,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 }
                 if(kind==MachineKind.ARMOR_WORKBENCH)return slot==0?stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem
                         : stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ArmorModuleItem || stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem;
-                if(kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) return slot==0 && !stack.hasTag() && stack.is(ModContent.PATTERN_CARD.get());
+                if(kind==MachineKind.PRECISION_ASSEMBLER) return slot==0 && io.github.gerbesh.unusualcopper.recipe.AssemblyPatternCard.valid(stack);
+                if(kind==MachineKind.PRODUCTION_CONTROLLER) return slot==0 && !stack.hasTag() && stack.is(ModContent.PATTERN_CARD.get());
                 if(kind==MachineKind.RESONANCE_CRYSTALLIZER) return !stack.hasTag() && (slot==0 ? stack.is(Items.AMETHYST_SHARD) : stack.is(ModContent.RESONANT_COIL.get()));
                 if(kind==MachineKind.CIRCUIT_ETCHER) return !stack.hasTag() && (slot==0 ? stack.is(ModContent.CIRCUIT_BLANK.get()) : stack.is(ModContent.ETCHING_REAGENT.get()));
                 if(kind==MachineKind.VORTEX_PURIFIER) return slot==0 ? !stack.hasTag()
@@ -377,6 +378,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         recipeId = ""; source = ItemStack.EMPTY; result = ItemStack.EMPTY; progress = 0; duration = 0; paid = 0; operationCost = 0; setChanged();
     }
     public boolean canFitOutput(ItemStack stack) { return outputPlan(stack) != null; }
+    /** Reserve both finished items and container returns in the machine's two physical outputs. */
+    public boolean canFitAssemblyOutputs(ItemStack output,ItemStack returns){return outputPlan(output,returns)!=null;}
     public ItemStack insertOutput(ItemStack stack) {
         var rest = stack.copy();
         for (int slot = 2; slot <= 3 && !rest.isEmpty(); slot++) {
@@ -546,6 +549,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if(kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) {
             tag.put("AssemblyGrid",assemblyGrid.serializeNBT());
             tag.put("AssemblySnapshot",assemblySnapshot.serializeNBT());
+            if(kind==MachineKind.PRECISION_ASSEMBLER)tag.put("AssemblyReturns",secondaryResult.save(new CompoundTag()));
         }
         if(kind==MachineKind.PRODUCTION_CONTROLLER) {
             tag.putInt("ProductionQueued",productionQueued);
@@ -595,6 +599,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if(kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER){
             assemblyGrid.deserializeNBT(tag.getCompound("AssemblyGrid"));
             assemblySnapshot.deserializeNBT(tag.getCompound("AssemblySnapshot"));
+            if(kind==MachineKind.PRECISION_ASSEMBLER)secondaryResult=ItemStack.of(tag.getCompound("AssemblyReturns"));
         }
         if(kind==MachineKind.PRODUCTION_CONTROLLER) {
             productionQueued=Math.max(0,Math.min(4096,tag.getInt("ProductionQueued")));
