@@ -26,7 +26,9 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     private CopperMachineMenu(int id, Inventory playerInventory, CopperMachineBlockEntity machine, BlockPos pos, IItemHandler slots, ContainerData data) {
         super(ModContent.MACHINE_MENU.get(), id); this.machine = machine; this.pos = pos; this.data = data;
-        int[][] positions = {{44, 63}, {44, 91}, {134, 63}, {152, 63}};
+        int[][] positions = kind()==MachineKind.PRECISION_ASSEMBLER
+                ? new int[][]{{185,63},{44,91},{134,63},{152,63}}
+                : new int[][]{{44,63},{44,91},{134,63},{152,63}};
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
@@ -48,6 +50,14 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
             @Override public boolean isActive() { return kind()==MachineKind.RESONANCE_CRYSTALLIZER || kind()==MachineKind.CIRCUIT_ETCHER; }
             @Override public boolean mayPickup(Player player) { return machine==null || !machine.hasOperation(); }
         });
+        var grid=machine==null?new ItemStackHandler(9):machine.assemblyGrid;
+        for(int i=0;i<9;i++){
+            final int slotIndex=i;
+            addSlot(new SlotItemHandler(grid,i,13+(i%3)*18,61+(i/3)*18){
+                @Override public boolean isActive(){return kind()==MachineKind.PRECISION_ASSEMBLER;}
+                @Override public boolean mayPickup(Player player){return machine==null||!machine.hasOperation();}
+            });
+        }
         addDataSlots(data);
     }
     @Override public boolean stillValid(Player player) {
@@ -78,8 +88,11 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         Slot slot = slots.get(index);
         if (!slot.isActive() || !slot.hasItem() || !slot.mayPickup(player) || !stillValid(player)) return ItemStack.EMPTY;
         ItemStack current = slot.getItem(); ItemStack original = current.copy();
-        if (index < 4 || index==40 || index==41) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
+        if (index < 4 || index==40 || index==41 || index>=42) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
         else if(kind().isCell()) { if(!moveItemStackTo(current,40,41,false))return ItemStack.EMPTY; }
+        else if(kind()==MachineKind.PRECISION_ASSEMBLER && !current.is(ModContent.PATTERN_CARD.get())) {
+            if(!moveItemStackTo(current,42,51,false))return ItemStack.EMPTY;
+        }
         else if ((kind()==MachineKind.RESONANCE_CRYSTALLIZER && current.is(ModContent.ESSENCE.get()))
                 || (kind()==MachineKind.CIRCUIT_ETCHER && current.is(net.minecraft.world.item.Items.WATER_BUCKET))) {
             if(!moveItemStackTo(current,41,42,false))return ItemStack.EMPTY;

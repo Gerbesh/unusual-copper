@@ -62,6 +62,25 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         }
         return true;
     }
+    /** Separate 3x3 grid; old four-slot machines keep their original NBT and slot IDs. */
+    public final ItemStackHandler assemblyGrid = new ItemStackHandler(9) {
+        @Override public boolean isItemValid(int slot,ItemStack stack) {
+            return kind==MachineKind.PRECISION_ASSEMBLER && !stack.hasTag()
+                    && !(stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem);
+        }
+        @Override protected void onContentsChanged(int slot){setChanged();}
+    };
+    /** An operation's immutable input identities, persisted before any CuE is spent. */
+    public final ItemStackHandler assemblySnapshot = new ItemStackHandler(9);
+    public boolean assemblyInputsMatch() {
+        if(kind!=MachineKind.PRECISION_ASSEMBLER)return true;
+        for(int slot=0;slot<9;slot++) {
+            ItemStack expected=assemblySnapshot.getStackInSlot(slot);
+            ItemStack current=assemblyGrid.getStackInSlot(slot);
+            if(expected.isEmpty() || !ItemStack.isSameItemSameTags(expected,current) || current.getCount()<expected.getCount())return false;
+        }
+        return true;
+    }
     public final FluidTank water = new FluidTank(4000, stack -> stack.getFluid() == Fluids.WATER) {
         @Override protected void onContentsChanged() { setChanged(); }
     };
@@ -180,6 +199,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     if(arborist.job!=null) return false;
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
                 }
+                if(kind==MachineKind.PRECISION_ASSEMBLER) return slot==0 && !stack.hasTag() && stack.is(ModContent.PATTERN_CARD.get());
                 if(kind==MachineKind.RESONANCE_CRYSTALLIZER) return !stack.hasTag() && (slot==0 ? stack.is(Items.AMETHYST_SHARD) : stack.is(ModContent.RESONANT_COIL.get()));
                 if(kind==MachineKind.CIRCUIT_ETCHER) return !stack.hasTag() && (slot==0 ? stack.is(ModContent.CIRCUIT_BLANK.get()) : stack.is(ModContent.ETCHING_REAGENT.get()));
                 if(kind==MachineKind.VORTEX_PURIFIER) return slot==0 ? !stack.hasTag()
@@ -203,6 +223,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case ESSENCE_SPLITTER -> new SplitterLogic();
             case RESONANCE_SMELTER -> new SmelterLogic();
             case RESONANCE_CRUSHER, COPPER_PRESS, VORTEX_PURIFIER, RESONANCE_CRYSTALLIZER, CIRCUIT_ETCHER -> new IndustrialProcessingLogic();
+            case PRECISION_ASSEMBLER -> new PrecisionAssemblyLogic();
             case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
@@ -310,6 +331,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public void cancelOperation() {
         secondaryResult = ItemStack.EMPTY; operationWater = 0;
         recipeCatalyst=ItemStack.EMPTY; recipeAdditive=ItemStack.EMPTY;
+        if(kind==MachineKind.PRECISION_ASSEMBLER)for(int i=0;i<9;i++)assemblySnapshot.setStackInSlot(i,ItemStack.EMPTY);
         recipeId = ""; source = ItemStack.EMPTY; result = ItemStack.EMPTY; progress = 0; duration = 0; paid = 0; operationCost = 0; setChanged();
     }
     public boolean canFitOutput(ItemStack stack) { return outputPlan(stack) != null; }
@@ -344,10 +366,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     public boolean finish() {
         ItemStack[] outputs=outputPlan(result,secondaryResult);
-        if(outputs==null||!inputMatches()||!industrialInputsMatch()||(operationWater>0 && water.getFluidAmount()<operationWater))return false;
+        if(outputs==null||!inputMatches()||!industrialInputsMatch()||!assemblyInputsMatch()||(operationWater>0 && water.getFluidAmount()<operationWater))return false;
         commitLocally(() -> {
             if(operationWater>0)water.drain(operationWater,IFluidHandler.FluidAction.EXECUTE);
-            inventory.getStackInSlot(0).shrink(source.getCount());
+            if(kind==MachineKind.PRECISION_ASSEMBLER) {
+                for(int slot=0;slot<9;slot++)assemblyGrid.getStackInSlot(slot).shrink(assemblySnapshot.getStackInSlot(slot).getCount());
+            } else inventory.getStackInSlot(0).shrink(source.getCount());
             if(hasIndustrialExtra())inventory.getStackInSlot(1).shrink(recipeCatalyst.getCount());
             if(kind==MachineKind.RESONANCE_CRYSTALLIZER)industrialExtra.getStackInSlot(0).shrink(recipeAdditive.getCount());
             inventory.setStackInSlot(2,outputs[0]);inventory.setStackInSlot(3,outputs[1]);
@@ -406,12 +430,14 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             itemCaps.put(side, LazyOptional.of(() -> new IItemHandler() {
                 private final long epoch = capabilityEpoch;
                 private boolean live() { return epoch == capabilityEpoch && !isRemoved(); }
-                @Override public int getSlots() { return hasIndustrialExtra()?5:4; }
-                @Override public ItemStack getStackInSlot(int slot) { return live() ? (slot==4 && hasIndustrialExtra()?industrialExtra.getStackInSlot(0):slot>=0&&slot<4?inventory.getStackInSlot(slot):ItemStack.EMPTY).copy() : ItemStack.EMPTY; }
-                @Override public int getSlotLimit(int slot) { return slot==4 && hasIndustrialExtra()?industrialExtra.getSlotLimit(0):slot>=0&&slot<4?inventory.getSlotLimit(slot):0; }
-                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && !(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0) && sideMode(side) == SideMode.ITEM_INPUT && (slot==4 && hasIndustrialExtra()?industrialExtra.isItemValid(0,stack):slot>=0&&slot<4&&inventory.isItemValid(slot,stack)); }
+                @Override public int getSlots() { return kind==MachineKind.PRECISION_ASSEMBLER?13:hasIndustrialExtra()?5:4; }
+                @Override public ItemStack getStackInSlot(int slot) { return live() ? (kind==MachineKind.PRECISION_ASSEMBLER && slot>=4 && slot<13?assemblyGrid.getStackInSlot(slot-4):slot==4 && hasIndustrialExtra()?industrialExtra.getStackInSlot(0):slot>=0&&slot<4?inventory.getStackInSlot(slot):ItemStack.EMPTY).copy() : ItemStack.EMPTY; }
+                @Override public int getSlotLimit(int slot) { return kind==MachineKind.PRECISION_ASSEMBLER && slot>=4 && slot<13?assemblyGrid.getSlotLimit(slot-4):slot==4 && hasIndustrialExtra()?industrialExtra.getSlotLimit(0):slot>=0&&slot<4?inventory.getSlotLimit(slot):0; }
+                @Override public boolean isItemValid(int slot, ItemStack stack) { return live() && !(kind==MachineKind.ENCHANTMENT_RESONATOR&&slot==0) && sideMode(side) == SideMode.ITEM_INPUT && (kind==MachineKind.PRECISION_ASSEMBLER && slot>=4 && slot<13?assemblyGrid.isItemValid(slot-4,stack):slot==4 && hasIndustrialExtra()?industrialExtra.isItemValid(0,stack):slot>=0&&slot<4&&inventory.isItemValid(slot,stack)); }
                 @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-                    return isItemValid(slot,stack) ? slot==4 ? industrialExtra.insertItem(0,stack,simulate) : inventory.insertItem(slot,stack,simulate) : stack;
+                    return isItemValid(slot,stack) ? kind==MachineKind.PRECISION_ASSEMBLER && slot>=4 && slot<13
+                            ? assemblyGrid.insertItem(slot-4,stack,simulate) : slot==4 && hasIndustrialExtra()
+                            ? industrialExtra.insertItem(0,stack,simulate) : inventory.insertItem(slot,stack,simulate) : stack;
                 }
                 @Override public ItemStack extractItem(int slot, int count, boolean simulate) {
                     return live() && sideMode(side) == SideMode.ITEM_OUTPUT && slot>=2 && slot<4 ? inventory.extractItem(slot,count,simulate) : ItemStack.EMPTY;
@@ -468,6 +494,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             tag.put("SecondaryResult",secondaryResult.save(new CompoundTag()));
             tag.putInt("WaterCost",operationWater);
         }
+        if(kind==MachineKind.PRECISION_ASSEMBLER) {
+            tag.put("AssemblyGrid",assemblyGrid.serializeNBT());
+            tag.put("AssemblySnapshot",assemblySnapshot.serializeNBT());
+        }
         if(hasIndustrialExtra()) {
             tag.put("IndustrialExtra",industrialExtra.serializeNBT());
             tag.put("RecipeCatalyst",recipeCatalyst.save(new CompoundTag()));
@@ -507,6 +537,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             secondaryResult=ItemStack.of(tag.getCompound("SecondaryResult"));
             operationWater=Math.max(0,Math.min(4000,tag.getInt("WaterCost")));
         } else { secondaryResult=ItemStack.EMPTY; operationWater=0; }
+        if(kind==MachineKind.PRECISION_ASSEMBLER){
+            assemblyGrid.deserializeNBT(tag.getCompound("AssemblyGrid"));
+            assemblySnapshot.deserializeNBT(tag.getCompound("AssemblySnapshot"));
+        }
         if(hasIndustrialExtra()) {
             industrialExtra.deserializeNBT(tag.getCompound("IndustrialExtra"));
             recipeCatalyst=ItemStack.of(tag.getCompound("RecipeCatalyst"));

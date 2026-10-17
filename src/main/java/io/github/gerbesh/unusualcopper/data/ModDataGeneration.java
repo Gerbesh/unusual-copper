@@ -70,6 +70,17 @@ public final class ModDataGeneration {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.WIRE_DIE.get()).pattern("III").pattern("SPS").pattern("III")
                     .define('I',Items.IRON_INGOT).define('P',ModContent.COPPER_PLATE.get()).define('S',Items.SMOOTH_STONE)
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.PATTERN_CARD.get())
+                    .pattern("PRP").pattern("CQC").pattern("PRP")
+                    .define('P',Items.PAPER).define('R',Items.REDSTONE)
+                    .define('C',ModContent.COPPER_PLATE.get()).define('Q',Items.QUARTZ)
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRECISION_ASSEMBLER).get())
+                    .pattern("RCR").pattern("PEP").pattern("RFR")
+                    .define('R',ModContent.RESONANT_COIL.get()).define('C',ModContent.RESONANT_CRYSTAL.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('E',ModContent.ETCHED_CIRCUIT.get())
+                    .define('F',ModContent.REINFORCED_FRAME.get())
+                    .unlockedBy("has_circuit",has(ModContent.ETCHED_CIRCUIT.get())).save(out);
             ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ETCHING_REAGENT.get())
                     .requires(Items.FERMENTED_SPIDER_EYE).requires(Items.BLAZE_POWDER).requires(Items.GUNPOWDER)
                     .requires(Items.GLASS_BOTTLE).unlockedBy("has_blaze",has(Items.BLAZE_POWDER)).save(out);
