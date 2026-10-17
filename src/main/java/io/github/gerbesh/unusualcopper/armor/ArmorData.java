@@ -42,7 +42,8 @@ public final class ArmorData {
         if(!(item.getItem() instanceof ProgrammableArmorItem armor))return false;
         var modules=modules(item);
         return type.slot==armor.getEquipmentSlot() && modules.size()<slots(armor) && !modules.contains(type)
-                && (type!=ArmorModuleType.HOVER_DRIVE || armor.tier>=HoverPolicy.REQUIRED_TIER);
+                && (type!=ArmorModuleType.HOVER_DRIVE || armor.tier>=HoverPolicy.REQUIRED_TIER)
+                && (type!=ArmorModuleType.FLIGHT_CORE_II || armor.tier>=LimitedFlightPolicy.REQUIRED_TIER);
     }
     public static boolean install(ItemStack item,ArmorModuleType kind) {
         if(!canInstall(item,kind))return false;

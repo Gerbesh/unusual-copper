@@ -45,6 +45,14 @@ public final class ArmorRuntime {
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event) {
         if(event.phase!=TickEvent.Phase.END || !(event.player instanceof ServerPlayer player))return;
+        // Ground contact alone resets an F3 session; re-equipping in mid-air,
+        // disconnects and dimension transitions cannot cheaply reset the ceiling.
+        var flightData=player.getPersistentData();
+        if(player.onGround()) {
+            flightData.remove("UCF3AnchorY");
+            flightData.remove("UCF3Start");
+            flightData.remove("UCF3Dimension");
+        }
         var movement=player.getAttribute(Attributes.MOVEMENT_SPEED);
         if(movement!=null && movement.getModifier(STRIDE)!=null)movement.removeModifier(STRIDE);
         ItemStack chest=chest(player);
@@ -114,6 +122,46 @@ public final class ArmorRuntime {
                 player.fallDistance=0F;
                 player.hurtMarked=true;
                 used+=HoverPolicy.CUE_PER_TICK;
+                paid=true;
+            }
+        }
+        // F3A: sprint in the air and steer with view pitch/yaw. The server moves
+        // the wearer but never grants mayfly or modifies foreign abilities.
+        ItemStack chestPiece=player.getItemBySlot(EquipmentSlot.CHEST);
+        if(chestPiece.getItem() instanceof ProgrammableArmorItem chestArmor
+                && boots.getItem() instanceof ProgrammableArmorItem bootArmor
+                && player.isSprinting() && !player.isShiftKeyDown()
+                && !player.onGround() && !player.isPassenger()
+                && !player.isInWater() && !player.isInLava()
+                && !player.getAbilities().mayfly && !player.getAbilities().flying
+                && equipped(player,EquipmentSlot.CHEST,ArmorModuleType.FLIGHT_CORE_II,profile)
+                && used+LimitedFlightPolicy.CUE_PER_TICK<=ArmorProgression.totalBudget()) {
+            long now=player.level().getGameTime();
+            var data=player.getPersistentData();
+            boolean newSession=!data.contains("UCF3AnchorY",net.minecraft.nbt.Tag.TAG_DOUBLE);
+            long started=newSession?now:data.getLong("UCF3Start");
+            double anchorY=newSession?player.getY():data.getDouble("UCF3AnchorY");
+            String dimension=player.level().dimension().location().toString();
+            boolean matchingDimension=newSession||dimension.equals(data.getString("UCF3Dimension"));
+            if(LimitedFlightPolicy.canThrust(chestArmor.tier,bootArmor.tier,now,started,
+                    matchingDimension,player.level().getWorldBorder().isWithinBounds(player.blockPosition()))
+                    && ArmorData.pay(chest,LimitedFlightPolicy.CUE_PER_TICK)) {
+                if(newSession) {
+                    data.putLong("UCF3Start",now);
+                    data.putDouble("UCF3AnchorY",anchorY);
+                    data.putString("UCF3Dimension",dimension);
+                }
+                var look=player.getLookAngle();
+                var velocity=player.getDeltaMovement();
+                var horizontal=LimitedFlightPolicy.horizontal(
+                        look.x*0.28D+velocity.x*0.30D,
+                        look.z*0.28D+velocity.z*0.30D);
+                double vertical=LimitedFlightPolicy.vertical(look.y,
+                        anchorY+LimitedFlightPolicy.MAX_HEIGHT-player.getY());
+                player.setDeltaMovement(horizontal[0],vertical,horizontal[1]);
+                player.fallDistance=0F;
+                player.hurtMarked=true;
+                used+=LimitedFlightPolicy.CUE_PER_TICK;
                 paid=true;
             }
         }

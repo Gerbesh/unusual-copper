@@ -11,7 +11,8 @@ public enum ArmorModuleType {
     SHIELD_FIELD("shield_field", EquipmentSlot.CHEST, 6),
     FALL_DAMPER("fall_damper", EquipmentSlot.FEET, 2),
     JUMP_DRIVE("jump_drive", EquipmentSlot.FEET, 10),
-    HOVER_DRIVE("hover_drive", EquipmentSlot.FEET, 80);
+    HOVER_DRIVE("hover_drive", EquipmentSlot.FEET, 80),
+    FLIGHT_CORE_II("flight_core_ii", EquipmentSlot.CHEST, 200);
 
     public final String id;
     public final EquipmentSlot slot;

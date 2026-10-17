@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {"item": "unusualcopper:module_blank_i"},
+    {"item": "minecraft:nether_star"},
+    {"item": "minecraft:redstone"}
+  ],
+  "result": {
+    "item": "unusualcopper:flight_core_ii_module",
+    "count": 1
+  }
+}
