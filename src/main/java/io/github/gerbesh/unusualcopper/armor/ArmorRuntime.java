@@ -13,6 +13,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.UUID;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * One server-authoritative wearer scheduler. The E6A wearable power bus requires
@@ -21,12 +23,15 @@ import java.util.UUID;
  */
 public final class ArmorRuntime {
     private static final UUID STRIDE=UUID.fromString("2a48d4cb-52ee-4473-9dc9-7cae61db6e0c");
+    // Short-lived input conditions belong to this player session, never saved NBT.
+    private static final Map<ServerPlayer,Long> COMBAT_UNTIL=new WeakHashMap<>(),MINING_UNTIL=new WeakHashMap<>();
     private ArmorRuntime(){}
 
-    private static boolean completeSet(ServerPlayer player) {
+    public static boolean completeSet(ServerPlayer player) {
         int tier=0;
         for(var slot:new EquipmentSlot[]{EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET}) {
-            if(!(player.getItemBySlot(slot).getItem() instanceof ProgrammableArmorItem armor))return false;
+            var item=player.getItemBySlot(slot);
+            if(!(item.getItem() instanceof ProgrammableArmorItem armor)||armor.getEquipmentSlot()!=slot||item.getCount()!=1||!ArmorData.upgradeSafe(item))return false;
             if(tier==0)tier=armor.tier;
             else if(tier!=armor.tier)return false;
         }
@@ -37,7 +42,18 @@ public final class ArmorRuntime {
     }
     private static boolean equipped(ServerPlayer player,EquipmentSlot slot,ArmorModuleType module,int profile) {
         ItemStack stack=player.getItemBySlot(slot);
-        return ArmorData.enabled(module,profile) && ArmorData.modules(stack).contains(module);
+        return ArmorData.modules(stack).contains(module)
+                && ArmorData.settings(stack,module,profile).permits(ArmorData.percentage(player.getItemBySlot(EquipmentSlot.CHEST)),conditions(player));
+    }
+    public static int conditions(ServerPlayer player){
+        int flags=0;
+        if(player.isUnderWater())flags|=1<<ArmorModuleSettings.Trigger.UNDERWATER.ordinal();
+        if(!player.onGround())flags|=1<<ArmorModuleSettings.Trigger.AIRBORNE.ordinal();
+        if(player.isOnFire())flags|=1<<ArmorModuleSettings.Trigger.ON_FIRE.ordinal();
+        if(COMBAT_UNTIL.getOrDefault(player,Long.MIN_VALUE)>=player.tickCount)flags|=1<<ArmorModuleSettings.Trigger.IN_COMBAT.ordinal();
+        if(player.getHealth()<player.getMaxHealth()*.4F)flags|=1<<ArmorModuleSettings.Trigger.LOW_HEALTH.ordinal();
+        if(MINING_UNTIL.getOrDefault(player,Long.MIN_VALUE)>=player.tickCount)flags|=1<<ArmorModuleSettings.Trigger.MINING.ordinal();
+        return flags;
     }
     private static void sync(ServerPlayer player) {
         player.getInventory().setChanged();
@@ -65,28 +81,33 @@ public final class ArmorRuntime {
                 && ArmorData.pay(chest,ArmorModuleType.AQUA_LUNGS.cue)) {
             player.setAirSupply(Math.min(player.getMaxAirSupply(),player.getAirSupply()+4));
             used+=ArmorModuleType.AQUA_LUNGS.cue;paid=true;
+            ArmorTelemetry.record(player,ArmorModuleType.AQUA_LUNGS,ArmorModuleType.AQUA_LUNGS.cue);
         }
         if(movement!=null && equipped(player,EquipmentSlot.LEGS,ArmorModuleType.STRIDE_DRIVE,profile)
                 && used+ArmorModuleType.STRIDE_DRIVE.cue<=ArmorProgression.totalBudget()
                 && ArmorData.pay(chest,ArmorModuleType.STRIDE_DRIVE.cue)) {
             movement.addTransientModifier(new AttributeModifier(STRIDE,"Copper stride drive",0.05D,AttributeModifier.Operation.ADDITION));
             used+=ArmorModuleType.STRIDE_DRIVE.cue;paid=true;
+            ArmorTelemetry.record(player,ArmorModuleType.STRIDE_DRIVE,ArmorModuleType.STRIDE_DRIVE.cue);
         }
         // The shield's 6 CuE/t idle charge is separate from its 300 CuE per absorbed HP.
         if(equipped(player,EquipmentSlot.CHEST,ArmorModuleType.SHIELD_FIELD,profile)
                 && used+ArmorModuleType.SHIELD_FIELD.cue<=ArmorProgression.totalBudget()
                 && ArmorData.pay(chest,ArmorModuleType.SHIELD_FIELD.cue)){
             used+=ArmorModuleType.SHIELD_FIELD.cue;paid=true;
+            ArmorTelemetry.record(player,ArmorModuleType.SHIELD_FIELD,ArmorModuleType.SHIELD_FIELD.cue);
         }
         if(!player.onGround() && equipped(player,EquipmentSlot.FEET,ArmorModuleType.FALL_DAMPER,profile)
                 && used+ArmorModuleType.FALL_DAMPER.cue<=ArmorProgression.totalBudget()
                 && ArmorData.pay(chest,ArmorModuleType.FALL_DAMPER.cue)){
             used+=ArmorModuleType.FALL_DAMPER.cue;paid=true;
+            ArmorTelemetry.record(player,ArmorModuleType.FALL_DAMPER,ArmorModuleType.FALL_DAMPER.cue);
         }
         if(equipped(player,EquipmentSlot.FEET,ArmorModuleType.JUMP_DRIVE,profile)
                 && used+ArmorModuleType.JUMP_DRIVE.cue<=ArmorProgression.totalBudget()
                 && ArmorData.pay(chest,ArmorModuleType.JUMP_DRIVE.cue)){
             used+=ArmorModuleType.JUMP_DRIVE.cue;paid=true;
+            ArmorTelemetry.record(player,ArmorModuleType.JUMP_DRIVE,ArmorModuleType.JUMP_DRIVE.cue);
         }
         // F2: crouch in mid-air to stabilize vertically. This NEVER touches mayfly,
         // flying or another mod's permissions and stops immediately when unpowered.
@@ -122,6 +143,7 @@ public final class ArmorRuntime {
                 player.fallDistance=0F;
                 player.hurtMarked=true;
                 used+=HoverPolicy.CUE_PER_TICK;
+                ArmorTelemetry.record(player,ArmorModuleType.HOVER_DRIVE,HoverPolicy.CUE_PER_TICK);
                 paid=true;
             }
         }
@@ -162,6 +184,7 @@ public final class ArmorRuntime {
                 player.fallDistance=0F;
                 player.hurtMarked=true;
                 used+=LimitedFlightPolicy.CUE_PER_TICK;
+                ArmorTelemetry.record(player,ArmorModuleType.FLIGHT_CORE_II,LimitedFlightPolicy.CUE_PER_TICK);
                 paid=true;
             }
         }
@@ -174,12 +197,14 @@ public final class ArmorRuntime {
         if(equipped(player,EquipmentSlot.FEET,ArmorModuleType.FALL_DAMPER,ArmorData.profile(chest))
                 && ArmorData.payEvent(chest,1000)) {
             event.setDamageMultiplier(0F);
+            ArmorTelemetry.record(player,ArmorModuleType.FALL_DAMPER,1000);
             sync(player);
         }
     }
     @SubscribeEvent public static void shield(LivingDamageEvent event) {
-        if(!(event.getEntity() instanceof ServerPlayer player) || event.getAmount()<=0
-                || event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))return;
+        if(!(event.getEntity() instanceof ServerPlayer player) || event.getAmount()<=0)return;
+        COMBAT_UNTIL.put(player,(long)player.tickCount+100);
+        if(event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))return;
         ItemStack chest=chest(player);
         if(chest.isEmpty())return;
         float prevented=Math.min(event.getAmount(),2F);
@@ -187,16 +212,19 @@ public final class ArmorRuntime {
         if(equipped(player,EquipmentSlot.CHEST,ArmorModuleType.SHIELD_FIELD,ArmorData.profile(chest))
                 && ArmorData.payEvent(chest,cue)) {
             event.setAmount(Math.max(0F,event.getAmount()-prevented));
+            ArmorTelemetry.record(player,ArmorModuleType.SHIELD_FIELD,cue);
             sync(player);
         }
     }
     @SubscribeEvent public static void mining(PlayerEvent.BreakSpeed event) {
         if(!(event.getEntity() instanceof ServerPlayer player) || event.getNewSpeed()<=0)return;
+        MINING_UNTIL.put(player,(long)player.tickCount+10);
         ItemStack chest=chest(player);
         if(chest.isEmpty())return;
         if(equipped(player,EquipmentSlot.LEGS,ArmorModuleType.MINING_SERVO,ArmorData.profile(chest))
                 && ArmorData.pay(chest,ArmorModuleType.MINING_SERVO.cue)){
             event.setNewSpeed(event.getNewSpeed()*1.4F);
+            ArmorTelemetry.record(player,ArmorModuleType.MINING_SERVO,ArmorModuleType.MINING_SERVO.cue);
             sync(player);
         }
     }
@@ -212,6 +240,7 @@ public final class ArmorRuntime {
             if(now>=last && now-last<40)return;
         }
         if(!ArmorData.payEvent(chest,2000))return;
+        ArmorTelemetry.record(player,ArmorModuleType.JUMP_DRIVE,2000);
         data.putLong("UnusualCopperLastJump",now);
         var velocity=player.getDeltaMovement();
         player.setDeltaMovement(velocity.x,Math.max(velocity.y,0.75D),velocity.z);
@@ -219,6 +248,7 @@ public final class ArmorRuntime {
         sync(player);
     }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if(event.getEntity() instanceof ServerPlayer player){ArmorTelemetry.clear(player);COMBAT_UNTIL.remove(player);MINING_UNTIL.remove(player);}
         var attribute=event.getEntity().getAttribute(Attributes.MOVEMENT_SPEED);
         if(attribute!=null && attribute.getModifier(STRIDE)!=null)attribute.removeModifier(STRIDE);
     }

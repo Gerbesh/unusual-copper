@@ -1,10 +1,10 @@
 # Unusual Copper
 
-**Ветка художественного прохода:** **0.20.9-alpha.1**, ещё не установлена. Установленная пара — **UC 0.20.8-alpha.1 + SSN Progressive 1.4.1**. В новой ветке — оформление промышленных устройств, компонентов и брони; [полный список оставшейся разработки](docs/COMPLETION_TRACKER.md). Кадры витрины подтверждают внешний вид в тестовом клиенте, а не функциональную приёмку всей фабрики.
+**Текущая разработка:** **0.20.10-alpha.1**, экран настройки надетой брони и HUD; ещё не установлена. Установленная пара — **UC 0.20.9-alpha.1 + SSN Progressive 1.4.1** с оформлением промышленных устройств, компонентов и брони. [Настройка брони](docs/ARMOR_CONSOLE.md) · [Полный список оставшейся разработки](docs/COMPLETION_TRACKER.md). Кадры витрины подтверждают внешний вид в тестовом клиенте, а не функциональную приёмку всей фабрики.
 
 Медная энергия, магические механизмы и автоматизация для **Minecraft Java 1.20.1 · Forge 47.x · Java 17**.
 
-**Опубликованный релиз: 0.20.6-alpha.1.** Более новая промышленная 0.20.8-alpha.1 установлена локально. Проект находится в alpha: полная приёмка 1.0 ещё не завершена.
+**Опубликованный релиз: 0.20.6-alpha.1.** Более новая промышленная 0.20.9-alpha.1 установлена локально. Проект находится в alpha: полная приёмка 1.0 ещё не завершена.
 
 [Скачать 0.20.6-alpha.1](https://github.com/Gerbesh/unusual-copper/releases/tag/v0.20.6-alpha.1) · [Изменения](CHANGELOG.md) · [Руководства](docs/INDEX.md) · [Маршрут](docs/ROADMAP.md) · [Задачи](https://github.com/Gerbesh/unusual-copper/issues)
 
@@ -35,7 +35,7 @@
 
 ## Документация
 
-**Следующий этап разработки:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Реализованные alpha-срезы и их ограничения описаны в [журнале промышленной реализации](docs/INDUSTRIAL_EXPANSION_IMPLEMENTATION.md). Они ещё не являются функциями установленного релиза 0.20.6.
+**Промышленная разработка:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Реализованные alpha-срезы и их ограничения описаны в [журнале промышленной реализации](docs/INDUSTRIAL_EXPANSION_IMPLEMENTATION.md) и [списке оставшейся разработки](docs/COMPLETION_TRACKER.md). Установленная 0.20.9 содержит промышленные устройства, но ещё не весь план E0–E9.
 
 - [Экстрактор и сфера](docs/RESONANT_EXTRACTOR.md) — кирка, энергия, область, руды, очередь и визуальные эффекты.
 - [Батареи](docs/BATTERIES.md), [предметные трубы](docs/ITEM_PIPES.md), [SSN Bridge](docs/SSN_BRIDGE.md).
@@ -50,7 +50,7 @@
 
 На Linux/macOS: `./gradlew --no-daemon build compileGameTestJava --console=plain`.
 
-Результат: `build/libs/unusualcopper-0.20.6-alpha.1.jar`. Команда выполняет JUnit и компилирует GameTest-сценарии; Minecraft и сервер не запускаются. Последняя локальная проверка: **54 JUnit без ошибок**. Совместно с SSN Progressive 1.4.0 — **98 тестов**. CI также собирает проект без запуска игры.
+Результат: `build/libs/unusualcopper-<mod_version>.jar`, версия из `gradle.properties`. Команда выполняет JUnit и компилирует GameTest-сценарии; Minecraft и сервер не запускаются. Исторические проверки привязаны к версии в [отчётах](docs/verification/); их нельзя переносить на новые исходники. CI также собирает проект без запуска игры.
 
 Обычный JAR не включает тестовые сцены, GameTest-классы и production probes. Внешний вид, совместимость в модпаке и нагрузочные показатели проверяются отдельно в игре; результаты прежних версий не подменяют проверку текущей сборки. [Как вносить изменения](CONTRIBUTING.md).
 

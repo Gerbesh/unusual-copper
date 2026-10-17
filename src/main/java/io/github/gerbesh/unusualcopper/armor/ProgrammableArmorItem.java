@@ -41,6 +41,7 @@ public final class ProgrammableArmorItem extends ArmorItem {
     }
     @Override public void appendHoverText(ItemStack stack,Level level,List<Component> tooltip,TooltipFlag flag){
         tooltip.add(Component.translatable("armor.unusualcopper.sockets",ArmorData.modules(stack).size(),ArmorData.slots(this)));
+        tooltip.add(Component.translatable("armorconsole.open_hint"));
         if(getType()==Type.CHESTPLATE) {
             var battery=ArmorData.battery(stack);
             tooltip.add(Component.translatable("armor.unusualcopper.battery",

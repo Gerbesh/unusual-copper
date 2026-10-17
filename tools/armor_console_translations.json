@@ -1,0 +1,206 @@
+{
+  "key.categories.unusualcopper": [
+    "Unusual Copper",
+    "Unusual Copper"
+  ],
+  "key.unusualcopper.armor_open": [
+    "Open armor console",
+    "Открыть настройки брони"
+  ],
+  "key.unusualcopper.armor_profile": [
+    "Next armor profile",
+    "Следующий профиль брони"
+  ],
+  "key.unusualcopper.armor_hud": [
+    "Toggle armor HUD",
+    "Показать/скрыть HUD брони"
+  ],
+  "armorconsole.title": [
+    "Programmable armor",
+    "Программируемая броня"
+  ],
+  "armorconsole.piece.0": [
+    "Helmet",
+    "Шлем"
+  ],
+  "armorconsole.piece.1": [
+    "Chest",
+    "Нагрудник"
+  ],
+  "armorconsole.piece.2": [
+    "Legs",
+    "Поножи"
+  ],
+  "armorconsole.piece.3": [
+    "Boots",
+    "Ботинки"
+  ],
+  "armorconsole.charge": [
+    "Charge: %s / %s CuE",
+    "Заряд: %s / %s CuE"
+  ],
+  "armorconsole.consumption": [
+    "Last 1s: %s CuE",
+    "За 1с: %s CuE"
+  ],
+  "armorconsole.sockets": [
+    "%s/%s · %s CuE/t",
+    "%s/%s · %s CuE/т"
+  ],
+  "armorconsole.hours": [
+    "≈ %sh %sm",
+    "≈ %sч %sм"
+  ],
+  "armorconsole.minutes": [
+    "≈ %sm %ss",
+    "≈ %sм %sс"
+  ],
+  "armorconsole.seconds": [
+    "≈ %ss",
+    "≈ %sс"
+  ],
+  "armorconsole.hud_cost": [
+    "Last 1s: %s CuE",
+    "За 1с: %s CuE"
+  ],
+  "armorconsole.warning": [
+    "Armor battery: %s%% remaining",
+    "Заряд брони: осталось %s%%"
+  ],
+  "armorconsole.hud_incomplete": [
+    "Incomplete armor set",
+    "Неполный комплект"
+  ],
+  "armorconsole.incomplete": [
+    "Wear a complete set of the same tier",
+    "Нужен полный комплект одного уровня"
+  ],
+  "armorconsole.no_battery": [
+    "No chest battery",
+    "Нет батареи в нагруднике"
+  ],
+  "armorconsole.on": [
+    "On",
+    "Вкл"
+  ],
+  "armorconsole.off": [
+    "Off",
+    "Выкл"
+  ],
+  "armorconsole.start": [
+    "Arm",
+    "Пуск"
+  ],
+  "armorconsole.stop": [
+    "Stop",
+    "Стоп"
+  ],
+  "armorconsole.sync": [
+    "Waiting for server…",
+    "Ожидание сервера…"
+  ],
+  "armorconsole.waiting": [
+    "Waiting for condition / charge",
+    "Ожидание условия / заряда"
+  ],
+  "armorconsole.ready": [
+    "Ready; natural trigger still applies",
+    "Готов; ждёт события"
+  ],
+  "armorconsole.recent": [
+    "Paid in the last second",
+    "Работал в последнюю секунду"
+  ],
+  "armorconsole.unavailable": [
+    "Effect unavailable in this version",
+    "Эффект пока недоступен"
+  ],
+  "armorconsole.empty": [
+    "No modules in this piece. Install them at an armor workbench.",
+    "Нет модулей. Монтаж выполняется на станции брони."
+  ],
+  "armorconsole.footer": [
+    "Module and battery installation: armor workbench",
+    "Монтаж модулей и батареи — на станции брони"
+  ],
+  "armorconsole.enable_hint": [
+    "Enable this module in the selected preset only. Other presets are retained.",
+    "Включение только для выбранного профиля. Остальные профили сохраняются."
+  ],
+  "armorconsole.trigger_hint": [
+    "Click: next condition. Shift-click: previous. Conditions are checked by the server; natural module restrictions remain.",
+    "Нажатие: следующее условие. Shift: предыдущее. Условия проверяет сервер; ограничения самого модуля остаются."
+  ],
+  "armorconsole.minimum_hint": [
+    "Do not start below this charge percentage. Click +5%, Shift-click -5%. This is not a protected flight reserve.",
+    "Не запускать ниже этого заряда. Нажатие +5%, Shift -5%. Это порог допуска, а не защищённый резерв полёта."
+  ],
+  "armorconsole.nominal": [
+    "Base module cost: %s CuE; event costs may be additional",
+    "Базовая цена модуля: %s CuE; события могут стоить дополнительно"
+  ],
+  "armorconsole.result.1": [
+    "Equipment or settings changed; updated from the server",
+    "Экипировка или настройки изменились; состояние обновлено"
+  ],
+  "armorconsole.result.2": [
+    "Server refused this setting or unsupported item data",
+    "Сервер отклонил настройку или неподдерживаемые данные"
+  ],
+  "armorconsole.trigger.0": [
+    "Auto",
+    "Авто"
+  ],
+  "armorconsole.trigger.1": [
+    "Underwater",
+    "Под водой"
+  ],
+  "armorconsole.trigger.2": [
+    "Airborne",
+    "В воздухе"
+  ],
+  "armorconsole.trigger.3": [
+    "On fire",
+    "В огне"
+  ],
+  "armorconsole.trigger.4": [
+    "In combat",
+    "В бою"
+  ],
+  "armorconsole.trigger.5": [
+    "Low health",
+    "Мало HP"
+  ],
+  "armorconsole.trigger.6": [
+    "Mining",
+    "Добыча"
+  ],
+  "armorconsole.trigger.7": [
+    "Manual",
+    "Вручную"
+  ],
+  "armorconsole.profile.0": [
+    "Economy",
+    "Эконом"
+  ],
+  "armorconsole.profile.1": [
+    "Miner",
+    "Шахтёр"
+  ],
+  "armorconsole.profile.2": [
+    "Defense",
+    "Защита"
+  ],
+  "armorconsole.profile.3": [
+    "Maximum",
+    "Максимум"
+  ],
+  "armorconsole.minimum": [
+    "Min %s%%",
+    "Мин %s%%"
+  ],
+  "armorconsole.open_hint": [
+    "Wear to configure; bind Armor Console in Controls > Unusual Copper",
+    "Настройки надетой брони: Управление > Unusual Copper"
+  ]
+}
