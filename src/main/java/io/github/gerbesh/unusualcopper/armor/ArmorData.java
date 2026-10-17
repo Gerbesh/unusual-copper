@@ -63,6 +63,47 @@ public final class ArmorData {
     }
     public static int profile(ItemStack item) {return Math.floorMod(data(item).getInt("Profile"),4);}
     public static void nextProfile(ItemStack item){mutable(item).putInt("Profile",(profile(item)+1)%4);}
+    public static boolean profile(ItemStack item,int profile){
+        if(!(item.getItem() instanceof ProgrammableArmorItem armor)||armor.getType()!=ArmorItem.Type.CHESTPLATE||profile<0||profile>3)return false;
+        mutable(item).putInt("Profile",profile);return true;
+    }
+    public static ArmorModuleSettings settings(ItemStack item,ArmorModuleType module,int profile){
+        var root=data(item);
+        if(profile<0||profile>3)return ArmorModuleSettings.invalid();
+        if(!root.contains("Presets"))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false);
+        if(!root.contains("Presets",Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
+        var presets=root.getCompound("Presets");String key=Integer.toString(profile);
+        if(presets.contains(key)&&!presets.contains(key,Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
+        var preset=presets.getCompound(key);
+        if(!preset.contains(module.id))return new ArmorModuleSettings(enabled(module,profile),ArmorModuleSettings.Trigger.AUTO,0,false);
+        if(!preset.contains(module.id,Tag.TAG_COMPOUND))return ArmorModuleSettings.invalid();
+        var row=preset.getCompound(module.id);
+        if(!row.contains("Enabled",Tag.TAG_BYTE)||!row.contains("Trigger",Tag.TAG_INT)
+                ||!row.contains("Minimum",Tag.TAG_INT)||!row.contains("Armed",Tag.TAG_BYTE))return ArmorModuleSettings.invalid();
+        int trigger=row.getInt("Trigger"),minimum=row.getInt("Minimum");
+        if(trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0)return ArmorModuleSettings.invalid();
+        return new ArmorModuleSettings(row.getBoolean("Enabled"),ArmorModuleSettings.Trigger.values()[trigger],minimum,row.getBoolean("Armed"));
+    }
+    public static boolean settings(ItemStack item,ArmorModuleType module,int profile,ArmorModuleSettings value){
+        if(profile<0||profile>3||!modules(item).contains(module)||value==null)return false;
+        var root=mutable(item);var presets=root.getCompound("Presets");var preset=presets.getCompound(Integer.toString(profile));
+        var row=new CompoundTag();row.putBoolean("Enabled",value.enabled());row.putInt("Trigger",value.trigger().ordinal());
+        row.putInt("Minimum",value.minimumPercent());row.putBoolean("Armed",value.armed());
+        preset.put(module.id,row);presets.put(Integer.toString(profile),preset);root.put("Presets",presets);return true;
+    }
+    public static int percentage(ItemStack chest){var cell=battery(chest);int capacity=CopperBatteryItem.capacity(cell);return capacity==0?0:(int)(100L*CopperBatteryItem.stored(cell)/capacity);}
+    /** Bounded configuration fingerprint deliberately excludes changing battery charge. */
+    public static String configuration(ItemStack item){
+        var value=new StringBuilder().append(profile(item)).append('/');
+        for(var module:modules(item)){
+            value.append(module.ordinal()).append(':');
+            for(int p=0;p<4;p++){
+                var s=settings(item,module,p);value.append(s.enabled()?'1':'0').append(',').append(s.trigger().ordinal()).append(',')
+                        .append(s.minimumPercent()).append(',').append(s.armed()?'1':'0').append(';');
+            }
+        }
+        return value.toString();
+    }
     public static boolean enabled(ArmorModuleType module,int profile){
         return switch(profile){
             case 0 -> module==ArmorModuleType.AQUA_LUNGS || module==ArmorModuleType.FALL_DAMPER || module==ArmorModuleType.OPTIC_VISOR;
@@ -120,6 +161,22 @@ public final class ArmorData {
                 || armor.getType()!=ArmorItem.Type.CHESTPLATE || battery(item).isEmpty()))return false;
         if(root.contains("Profile") && (!root.contains("Profile",Tag.TAG_INT)
                 || root.getInt("Profile")<0 || root.getInt("Profile")>3))return false;
+        if(root.contains("Presets")){
+            if(!root.contains("Presets",Tag.TAG_COMPOUND))return false;
+            var presets=root.getCompound("Presets");if(presets.size()>4)return false;
+            for(String key:presets.getAllKeys()){
+                if(!java.util.Set.of("0","1","2","3").contains(key)||!presets.contains(key,Tag.TAG_COMPOUND))return false;
+                var preset=presets.getCompound(key);if(preset.size()>ArmorModuleType.values().length)return false;
+                for(String id:preset.getAllKeys()){
+                    var module=ArmorModuleType.byId(id);
+                    if(module==null||module.slot!=armor.getEquipmentSlot()||!preset.contains(id,Tag.TAG_COMPOUND))return false;
+                    var row=preset.getCompound(id);int trigger=row.getInt("Trigger"),minimum=row.getInt("Minimum");
+                    if(!row.contains("Enabled",Tag.TAG_BYTE)||!row.contains("Armed",Tag.TAG_BYTE)
+                            ||!row.contains("Trigger",Tag.TAG_INT)||!row.contains("Minimum",Tag.TAG_INT)
+                            ||trigger<0||trigger>=ArmorModuleSettings.Trigger.values().length||minimum<0||minimum>95||minimum%5!=0)return false;
+                }
+            }
+        }
         return true;
     }
     public static boolean pay(ItemStack chest,int amount) {

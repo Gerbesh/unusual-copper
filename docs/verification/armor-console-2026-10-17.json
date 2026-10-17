@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-17",
+  "version": "0.20.10-alpha.1",
+  "source_base_commit": "de51959537da6f1a1a503416c1297463e86a9f17",
+  "source_branch": "codex/armor-console",
+  "artifact": "dist/unusualcopper-0.20.10-alpha.1.jar",
+  "sha256": "dbf894c3605283ec9cea1ac34a4a6a952459eea5a000389df1e9018b18bb5fdd",
+  "bytes": 1485164,
+  "installed": false,
+  "junit": {
+    "tests": 119,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Pure settings, payment history, command policy and bounded snapshot codec, plus existing suite; no live server authority/save acceptance"
+  },
+  "game_tests": "Compiled only; not executed. Includes real ItemStack NBT round-trip and malformed preset scenarios.",
+  "static_checks": {
+    "visual_assets": "185 block/item models, 23 transparent sprites; texture/UV/geometry checks passed",
+    "ru_en_keys_equal": true,
+    "ordinary_jar_excludes_test_fixtures": true,
+    "lifecycle_refmap_checked": true,
+    "historical_0209_frames_unchanged": true
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Synthetic owner snapshot GUI/HUD render only. No configuration intentions sent; player not equipped with active armor.",
+    "environment": "Separate copied repository test world, Forge development client; not full Better MC",
+    "languages": [
+      "ru_ru",
+      "en_us"
+    ],
+    "sizes": [
+      "1600x900",
+      "1280x720 (ru_ru)"
+    ],
+    "frames": [
+      {
+        "path": "art/previews/armor-console/en-1600x900-boots.png",
+        "sha256": "48f37da1ee86d2c18f854156d1d1257776b28d6c41d1bc26f3f343bcc895c604",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/en-1600x900-chest.png",
+        "sha256": "8502b5f9b536abc3131865c5e725f7ce792efcc8669a575e79cb49c68bd3ae4d",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/en-1600x900-head.png",
+        "sha256": "ea80e3f2c0d4dde741d5c284aee3b046b2810d4108b3fb6d0c10138a9fdf53ab",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/en-1600x900-hud.png",
+        "sha256": "0d8f350572af83909a38bf05a9121780bcd0f3bed68b4034a3c879fd1f93e560",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/ru-1280x720-boots.png",
+        "sha256": "8b956fd5c7d8956effe71d67523cb3204ef7c7652d560f2d348bf709fe463178",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-console/ru-1280x720-chest.png",
+        "sha256": "d120faef46978516d260f16305a087c84c5140c745dcfe7c3a8bbab90351f630",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-console/ru-1280x720-head.png",
+        "sha256": "91f28878c5eac8232921fd1168d3c2386426873b30ec16d8c42af11bf3e96545",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-console/ru-1280x720-hud.png",
+        "sha256": "0a710eaeb85ecafb64f75c30a1e2141801dfb658c03f51e73b294ac8c9061fa6",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-console/ru-1600x900-chest.png",
+        "sha256": "6f239aeea155110f15797ae76cff83a8e43200d58ee12d1f808c825bcaa3c23e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/ru-1600x900-head.png",
+        "sha256": "9ddd78f12bb7fb6cd755493bf9688a8364b893e5cb337da8f21fbbf7820d1da3",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-console/ru-1600x900-hud.png",
+        "sha256": "0110930d037772a3a69d68a5a7f5282d7a7686c64735585119db44cfce2bd6ef",
+        "width": 1600,
+        "height": 900
+      }
+    ],
+    "missing_unusualcopper_textures": false,
+    "live_server_launched": false,
+    "user_worlds_modified": false,
+    "minor_later_change": "Part label width widened after RU captures; English captures include this change. Tooltip hint added after captures."
+  },
+  "remaining": "E6 priorities, single debit/power arbitration, remaining modules and functional acceptance; E7 F4/reserve/landing and all other open rows in docs/COMPLETION_TRACKER.md remain incomplete."
+}
