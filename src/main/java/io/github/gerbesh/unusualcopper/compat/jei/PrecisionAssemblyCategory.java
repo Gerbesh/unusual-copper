@@ -44,6 +44,11 @@ final class PrecisionAssemblyCategory implements IRecipeCategory<PrecisionAssemb
                 .addItemStack(new ItemStack(ModContent.PATTERN_CARD.get()));
         layout.addSlot(RecipeIngredientRole.OUTPUT,134,27)
                 .addItemStack(recipe.getResultItem(RegistryAccess.EMPTY));
+        // E4B vanilla buckets/bottles are truly returned to a second physical
+        // machine output. Show them as additional results, never as consumed inputs.
+        ItemStack returned=recipe.previewContainerReturns();
+        if(returned!=null&&!returned.isEmpty())
+            layout.addSlot(RecipeIngredientRole.OUTPUT,134,53).addItemStack(returned);
     }
     @Override public void draw(PrecisionAssemblyRecipe recipe,IRecipeSlotsView slots,GuiGraphics graphics,double mouseX,double mouseY) {
         graphics.drawString(Minecraft.getInstance().font,recipe.cue()+" CuE / "+recipe.ticks()+" t",7,75,0xff52625c,false);

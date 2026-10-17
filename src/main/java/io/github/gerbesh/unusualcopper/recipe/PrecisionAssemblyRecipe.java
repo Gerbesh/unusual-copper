@@ -61,6 +61,24 @@ public final class PrecisionAssemblyRecipe implements Recipe<Container> {
         }
         return combined;
     }
+    /**
+     * JEI-only representative container returns. Deliberately skips recipes with
+     * alternative ingredient variants: a single icon cannot truthfully describe
+     * two different possible remainder items. The server still validates the actual
+     * nine physical ingredients with containerReturns() before any paid operation.
+     */
+    @Nullable public ItemStack previewContainerReturns() {
+        var inputs=new net.minecraft.world.SimpleContainer(9);
+        for(int i=0;i<9;i++) {
+            var ingredient=this.inputs.get(i);
+            if(ingredient.isEmpty())continue;
+            var choices=ingredient.getItems();
+            if(choices.length!=1 || choices[0].isEmpty() || choices[0].hasTag())return null;
+            inputs.setItem(i,choices[0].copyWithCount(1));
+        }
+        return containerReturns(inputs);
+    }
+
     @Override public ItemStack assemble(Container container, RegistryAccess access) { return result.copy(); }
     @Override public boolean canCraftInDimensions(int width,int height) { return width>=3&&height>=3; }
     @Override public ItemStack getResultItem(RegistryAccess registries) { return result.copy(); }
