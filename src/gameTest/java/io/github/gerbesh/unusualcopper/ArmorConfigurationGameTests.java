@@ -13,6 +13,27 @@ import net.minecraftforge.gametest.GameTestHolder;
 @GameTestHolder(UnusualCopper.MOD_ID)
 public final class ArmorConfigurationGameTests {
     @GameTest(template="empty",timeoutTicks=40)
+    public static void pendingDebitFollowsRemovedBatteryAndSurvivesSave(GameTestHelper h){
+        var chest=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_chestplate_tier_3").get());
+        var battery=new ItemStack(ModContent.AETHERIC_BATTERY.get());CopperBatteryItem.stored(battery,5000);
+        h.assertTrue(ArmorData.installBattery(chest,battery)&&ArmorData.reserve(chest,2000),"Physical reservation failed");
+        h.assertTrue(CopperBatteryItem.stored(ArmorData.battery(chest))==3000,"Reserved energy remained spendable");
+        var restored=ItemStack.of(chest.save(new CompoundTag()));var removed=ArmorData.takeBattery(restored);
+        h.assertTrue(CopperBatteryItem.stored(removed)==3000&&ArmorData.battery(restored).isEmpty(),"Removal duplicated energy");
+        h.assertTrue(CopperBatteryItem.settle(removed)&&CopperBatteryItem.stored(removed)==3000,"Settlement changed effective energy");h.succeed();
+    }
+    @GameTest(template="empty",timeoutTicks=40)
+    public static void releasingOneEventKeepsOtherPaymentsAndForeignData(GameTestHelper h){
+        var chest=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_chestplate_tier_3").get());
+        var battery=new ItemStack(ModContent.AETHERIC_BATTERY.get());CopperBatteryItem.stored(battery,5000);
+        battery.getOrCreateTag().putString("CustomMarker","retained");ArmorData.installBattery(chest,battery);
+        h.assertTrue(ArmorData.reserve(chest,280)&&ArmorData.reserve(chest,2000),"Reservation failed");
+        var batch=ArmorData.reservationBatch(chest);h.assertTrue(ArmorData.release(chest,2000,batch),"Reservation refund failed");
+        h.assertTrue(ArmorData.settle(chest,batch)&&!ArmorData.settle(chest,batch),"Settlement was not idempotent");
+        var actual=ArmorData.battery(chest);h.assertTrue(CopperBatteryItem.stored(actual)==4720,"Wrong net price");
+        h.assertTrue(actual.getTag().getString("CustomMarker").equals("retained"),"Foreign battery NBT erased");h.succeed();
+    }
+    @GameTest(template="empty",timeoutTicks=40)
     public static void preferencesRoundTripWithoutChangingBattery(GameTestHelper h){
         var chest=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_chestplate_tier_3").get());
         var battery=new ItemStack(ModContent.AETHERIC_BATTERY.get());CopperBatteryItem.stored(battery,123456);

@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Map;
 
 /**
  * Pure, deterministic per-tick arbitration of the physical chest battery.
@@ -24,10 +25,15 @@ public final class ArmorPowerScheduler {
                 throw new IllegalArgumentException("Invalid armor power request");
         }
     }
-    public record Plan(List<ArmorModuleType> accepted,List<ArmorModuleType> limited,int cost) {
+    public record Plan(List<ArmorModuleType> accepted,List<ArmorModuleType> limited,int cost,Map<ArmorModuleType,Integer> charges) {
         public Plan {
             accepted=List.copyOf(accepted);
             limited=List.copyOf(limited);
+            charges=Map.copyOf(charges);
+            var expected=EnumSet.noneOf(ArmorModuleType.class);expected.addAll(accepted);
+            if(cost<0||cost>ArmorProgression.totalBudget()||expected.size()!=accepted.size()||!charges.keySet().equals(expected)||charges.values().stream().anyMatch(n->n<=0)
+                    ||charges.values().stream().mapToLong(Integer::longValue).sum()!=cost)
+                throw new IllegalArgumentException("Incomplete power quote");
         }
     }
     public static int defaultPriority(ArmorModuleType module) {
@@ -40,6 +46,10 @@ public final class ArmorPowerScheduler {
         };
     }
     public static Plan plan(Collection<Demand> requests,int available) {
+        return plan(requests,available,List.of());
+    }
+    /** Earlier on-demand continuous work (mining) still occupies this tick's power bus. */
+    public static Plan plan(Collection<Demand> requests,int available,Collection<Demand> committed) {
         if(available<0)throw new IllegalArgumentException("Negative battery energy");
         var sorted=new ArrayList<>(requests);
         sorted.sort(Comparator.comparingInt(Demand::priority)
@@ -48,21 +58,32 @@ public final class ArmorPowerScheduler {
         var consumed=new EnumMap<EquipmentSlot,Integer>(EquipmentSlot.class);
         var accepted=new ArrayList<ArmorModuleType>();
         var limited=new ArrayList<ArmorModuleType>();
-        int total=0;
+        var charges=new EnumMap<ArmorModuleType,Integer>(ArmorModuleType.class);
+        int total=0,alreadyPaid=0;
+        for(var request:committed){
+            if(!seen.add(request.module()))throw new IllegalArgumentException("Duplicate committed module");
+            var slot=request.module().slot;int cap=ArmorProgression.pieceBudget(slot==EquipmentSlot.CHEST,slot==EquipmentSlot.FEET,slot==EquipmentSlot.HEAD);
+            int occupied=consumed.getOrDefault(slot,0);
+            if(request.cue()>cap-occupied||request.cue()>ArmorProgression.totalBudget()-total)
+                throw new IllegalArgumentException("Invalid committed power");
+            total+=request.cue();consumed.put(slot,occupied+request.cue());
+        }
+        alreadyPaid=total;
         for(var request:sorted) {
             if(!seen.add(request.module()))throw new IllegalArgumentException("Duplicate module power request");
             EquipmentSlot slot=request.module().slot;
             int cap=ArmorProgression.pieceBudget(slot==EquipmentSlot.CHEST,slot==EquipmentSlot.FEET,slot==EquipmentSlot.HEAD);
             int occupied=consumed.getOrDefault(slot,0);
             int cost=request.cue();
-            if(cost>cap-occupied || cost>ArmorProgression.totalBudget()-total || cost>available-total) {
+            if(cost>cap-occupied || cost>ArmorProgression.totalBudget()-total || cost>available-(total-alreadyPaid)) {
                 limited.add(request.module());
                 continue;
             }
             total+=cost;
             consumed.put(slot,occupied+cost);
             accepted.add(request.module());
+            charges.put(request.module(),cost);
         }
-        return new Plan(accepted,limited,total);
+        return new Plan(accepted,limited,total-alreadyPaid,charges);
     }
 }

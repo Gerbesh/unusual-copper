@@ -12,6 +12,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import java.util.UUID;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -78,12 +79,9 @@ public final class ArmorRuntime {
         if(MINING_UNTIL.getOrDefault(player,Long.MIN_VALUE)>=player.tickCount)flags|=1<<ArmorModuleSettings.Trigger.MINING.ordinal();
         return flags;
     }
-    private static void sync(ServerPlayer player) {
-        player.getInventory().setChanged();
-        player.inventoryMenu.broadcastChanges();
-    }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event) {
         if(event.phase!=TickEvent.Phase.END || !(event.player instanceof ServerPlayer player))return;
+        if(!ArmorPayments.beginContinuous(player))return;
         // Ground contact alone resets an F3 session; re-equipping in mid-air,
         // disconnects and dimension transitions cannot cheaply reset the ceiling.
         var flightData=player.getPersistentData();
@@ -187,28 +185,21 @@ public final class ArmorRuntime {
                 .map(module->new ArmorPowerScheduler.Demand(module,
                         ArmorData.settings(player.getItemBySlot(module.slot),module,profile).priority(),module.cue)).toList();
         var plan=ArmorPowerScheduler.plan(requests,
-                io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(ArmorData.battery(chest)));
-        ArmorTelemetry.limited(player,plan.limited());
-        if(plan.cost()>0 && ArmorData.pay(chest,plan.cost())) {
-            for(var module:plan.accepted()) {
-                actions.get(module).run();
-                ArmorTelemetry.record(player,module,module.cue);
-            }
-            sync(player);
-        }
+                io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(ArmorData.battery(chest)),ArmorPayments.committedPower(player));
+        ArmorTelemetry.updateLimited(player,plan.limited(),actions.keySet());
+        ArmorPayments.execute(player,chest,plan,actions);
     }
-    @SubscribeEvent public static void fall(LivingFallEvent event) {
+    @SubscribeEvent(priority=EventPriority.LOWEST) public static void fall(LivingFallEvent event) {
         if(!(event.getEntity() instanceof ServerPlayer player) || event.getDistance()<=3 || event.getDamageMultiplier()<=0)return;
         ItemStack chest=chest(player);
         if(chest.isEmpty())return;
         if(equipped(player,EquipmentSlot.FEET,ArmorModuleType.FALL_DAMPER,ArmorData.profile(chest))
-                && ArmorData.payEvent(chest,1000)) {
+                && ArmorPayments.event(player,chest,ArmorModuleType.FALL_DAMPER,event,1000,
+                    ()->!event.isCanceled()&&event.getDamageMultiplier()==0F)) {
             event.setDamageMultiplier(0F);
-            ArmorTelemetry.record(player,ArmorModuleType.FALL_DAMPER,1000);
-            sync(player);
         }
     }
-    @SubscribeEvent public static void shield(LivingDamageEvent event) {
+    @SubscribeEvent(priority=EventPriority.LOWEST) public static void shield(LivingDamageEvent event) {
         if(!(event.getEntity() instanceof ServerPlayer player) || event.getAmount()<=0)return;
         COMBAT_UNTIL.put(player,(long)player.tickCount+100);
         if(event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))return;
@@ -217,22 +208,18 @@ public final class ArmorRuntime {
         float prevented=Math.min(event.getAmount(),2F);
         int cue=(int)Math.ceil(prevented*300F);
         if(equipped(player,EquipmentSlot.CHEST,ArmorModuleType.SHIELD_FIELD,ArmorData.profile(chest))
-                && ArmorData.payEvent(chest,cue)) {
+                && ArmorPayments.event(player,chest,ArmorModuleType.SHIELD_FIELD,event,cue,()->!event.isCanceled())) {
             event.setAmount(Math.max(0F,event.getAmount()-prevented));
-            ArmorTelemetry.record(player,ArmorModuleType.SHIELD_FIELD,cue);
-            sync(player);
         }
     }
-    @SubscribeEvent public static void mining(PlayerEvent.BreakSpeed event) {
+    @SubscribeEvent(priority=EventPriority.LOWEST) public static void mining(PlayerEvent.BreakSpeed event) {
         if(!(event.getEntity() instanceof ServerPlayer player) || event.getNewSpeed()<=0)return;
         MINING_UNTIL.put(player,(long)player.tickCount+10);
         ItemStack chest=chest(player);
         if(chest.isEmpty())return;
         if(equipped(player,EquipmentSlot.LEGS,ArmorModuleType.MINING_SERVO,ArmorData.profile(chest))
-                && ArmorData.pay(chest,ArmorModuleType.MINING_SERVO.cue)){
+                && ArmorPayments.mining(player,chest,event,event.getNewSpeed())){
             event.setNewSpeed(event.getNewSpeed()*1.4F);
-            ArmorTelemetry.record(player,ArmorModuleType.MINING_SERVO,ArmorModuleType.MINING_SERVO.cue);
-            sync(player);
         }
     }
     /** F1: server-side boosted jump, real CuE event debit, 40-tick cooldown. */
@@ -246,13 +233,11 @@ public final class ArmorRuntime {
             long last=data.getLong("UnusualCopperLastJump");
             if(now>=last && now-last<40)return;
         }
-        if(!ArmorData.payEvent(chest,2000))return;
-        ArmorTelemetry.record(player,ArmorModuleType.JUMP_DRIVE,2000);
+        if(!ArmorPayments.event(player,chest,ArmorModuleType.JUMP_DRIVE,event,2000,()->true))return;
         data.putLong("UnusualCopperLastJump",now);
         var velocity=player.getDeltaMovement();
         player.setDeltaMovement(velocity.x,Math.max(velocity.y,0.75D),velocity.z);
         player.hurtMarked=true;
-        sync(player);
     }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
         if(event.getEntity() instanceof ServerPlayer player){ArmorTelemetry.clear(player);COMBAT_UNTIL.remove(player);MINING_UNTIL.remove(player);}

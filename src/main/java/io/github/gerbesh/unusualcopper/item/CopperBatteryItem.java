@@ -7,7 +7,7 @@ import java.util.List;
 
 /** Portable CuE belongs to the individual, unstackable item; it is never Forge Energy. */
 public final class CopperBatteryItem extends Item {
-    public static final String ENERGY_TAG="CuE";
+    public static final String ENERGY_TAG=BatteryChargeLedger.ENERGY;
     public final int tier, capacity;
     public CopperBatteryItem(int tier) {
         super(new Properties().stacksTo(1));
@@ -16,18 +16,37 @@ public final class CopperBatteryItem extends Item {
     public static int capacityForTier(int tier) { return BatteryTierPolicy.capacityForTier(tier); }
     public static int stored(ItemStack stack) {
         return stack.getItem() instanceof CopperBatteryItem battery && stack.hasTag()
-                ?Math.max(0,Math.min(battery.capacity,stack.getTag().getInt(ENERGY_TAG))):0;
+                ?BatteryChargeLedger.available(stack.getTag(),battery.capacity):0;
     }
     public static void stored(ItemStack stack,int value) {
         if(!(stack.getItem() instanceof CopperBatteryItem battery))return;
         int charge=Math.max(0,Math.min(battery.capacity,value));
-        if(charge>0)stack.getOrCreateTag().putInt(ENERGY_TAG,charge);
+        if(charge>0)BatteryChargeLedger.assign(stack.getOrCreateTag(),battery.capacity,charge);
         else if(stack.hasTag()) {
             // Keep empty crafted/upgraded batteries identical to their recipe-book result.
             // SSN verifies exact NBT; CuE:0 would make its planned result differ from assemble().
-            var tag=stack.getTag();tag.remove(ENERGY_TAG);
+            var tag=stack.getTag();BatteryChargeLedger.assign(tag,battery.capacity,0);
             if(tag.isEmpty())stack.setTag(null);
         }
+    }
+    public static boolean reserve(ItemStack stack,int amount){
+        return stack.getCount()==1&&stack.getItem() instanceof CopperBatteryItem battery
+                &&BatteryChargeLedger.reserve(stack.getTag(),battery.capacity,amount);
+    }
+    public static boolean validReservations(ItemStack stack){
+        return stack.getCount()==1&&stack.getItem() instanceof CopperBatteryItem battery
+                &&BatteryChargeLedger.valid(stack.getTag(),battery.capacity);
+    }
+    public static java.util.UUID reservationBatch(ItemStack stack){return BatteryChargeLedger.batch(stack.getTag());}
+    public static boolean release(ItemStack stack,int amount,java.util.UUID expected){
+        return stack.getCount()==1&&stack.getItem() instanceof CopperBatteryItem battery
+                &&BatteryChargeLedger.release(stack.getTag(),battery.capacity,amount,expected);
+    }
+    public static boolean settle(ItemStack stack){
+        if(!(stack.getItem() instanceof CopperBatteryItem battery)||stack.getCount()!=1)return false;
+        boolean changed=BatteryChargeLedger.settle(stack.getTag(),battery.capacity);
+        if(stack.hasTag()&&stack.getTag().isEmpty())stack.setTag(null);
+        return changed;
     }
     public static int capacity(ItemStack stack) { return stack.getItem() instanceof CopperBatteryItem battery?battery.capacity:0; }
     public static String amount(int value) { return String.format(java.util.Locale.ROOT,"%,d",value).replace(',',' '); }

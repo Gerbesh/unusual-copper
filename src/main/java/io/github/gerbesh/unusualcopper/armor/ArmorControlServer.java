@@ -9,12 +9,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import java.util.*;
 
 /** Configures only the sender's currently worn physical items on the server thread. */
 public final class ArmorControlServer {
     public static final List<EquipmentSlot> PIECES=List.of(EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET);
     private static final Map<ServerPlayer,Session> SESSIONS=new WeakHashMap<>();
+    private static final Set<ServerPlayer> PENDING=Collections.newSetFromMap(new WeakHashMap<>());
     private static final class Session {
         UUID nonce=UUID.randomUUID();long revision;int lastRequest=Integer.MIN_VALUE,lastAction=Integer.MIN_VALUE;
         final ItemStack[] gear=new ItemStack[4];final String[] configuration=new String[4];
@@ -74,9 +76,18 @@ public final class ArmorControlServer {
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event){
         if(event.phase!=TickEvent.Phase.END||!(event.player instanceof ServerPlayer player)||player.tickCount%10!=0)return;
-        boolean wearing=PIECES.stream().anyMatch(slot->player.getItemBySlot(slot).getItem() instanceof ProgrammableArmorItem);
-        if(wearing)reply(player,SESSIONS.computeIfAbsent(player,p->new Session()),ArmorNetwork.Result.OK);
-        else{var session=SESSIONS.remove(player);if(session!=null)reply(player,session,ArmorNetwork.Result.OK);}
+        PENDING.add(player);
     }
-    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof ServerPlayer player)SESSIONS.remove(player);}
+    /** Publish settled balances, after the LOW-priority armor payment batch. */
+    @SubscribeEvent(priority=EventPriority.LOWEST) public static void publish(TickEvent.ServerTickEvent event){
+        if(event.phase!=TickEvent.Phase.END)return;
+        for(var player:PENDING){
+            if(player.isRemoved())continue;
+            boolean wearing=PIECES.stream().anyMatch(slot->player.getItemBySlot(slot).getItem() instanceof ProgrammableArmorItem);
+            if(wearing)reply(player,SESSIONS.computeIfAbsent(player,p->new Session()),ArmorNetwork.Result.OK);
+            else{var session=SESSIONS.remove(player);if(session!=null)reply(player,session,ArmorNetwork.Result.OK);}
+        }
+        PENDING.clear();
+    }
+    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof ServerPlayer player){SESSIONS.remove(player);PENDING.remove(player);}}
 }

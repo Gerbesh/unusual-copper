@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-17T21:23:33.544975+00:00",
+  "version": "0.20.11-alpha.1",
+  "source_base_commit": "514617a2737002ee8940a6042626f232ae11ef1c",
+  "source_branch": "codex/armor-power-arbitration",
+  "artifact": "dist/unusualcopper-0.20.11-alpha.1.jar",
+  "sha256": "6ed81ab4d7b5ccc883f41c670daa2728d7374dfafa41ecfe8072dc00ff65c46c",
+  "bytes": 1509705,
+  "installed": false,
+  "armor_protocol": "4",
+  "junit": {
+    "tests": 137,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Actual NBT reservation ledger, batch ownership and binary round-trip; guarded/idempotent/bounded payment journal, including reentrancy and failed payment retry; power quotas and exact per-demand quotes; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "nested battery reservation save/remove/settle",
+      "canceled debit and foreign NBT",
+      "repeated jump hook",
+      "late-canceled shield hook",
+      "multiple BreakSpeed callbacks"
+    ]
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Synthetic owner snapshots: priority controls, limited power, active/expired F3, RU narrow layout and EN wide layout. No live armor effects or payment acceptance.",
+    "environment": "Separate copied repository test world; Forge development client; not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/armor-power/en-1600x900-console-boots.png",
+        "sha256": "e7292270b0ab4fef730e62df7c9e44a5d31669cd60a78a496850fbea3142ec00",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-power/en-1600x900-console-chest.png",
+        "sha256": "0ad135dbfd075b4d091318c928178e6d3ddd0c14914d0381755af828e471b7d9",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-power/en-1600x900-console-head.png",
+        "sha256": "df04c398603834afe40c8dbc33b7c87bc62b6cfb8db890184aaffd42e019a677",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-power/en-1600x900-hud-expired.png",
+        "sha256": "8d1bbbc27d0d384826d23746a9262a28a6266b59e880788b686a4232c648b3af",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-power/en-1600x900-hud.png",
+        "sha256": "21618d7d78ee855f8e5892417bc041280493b70b2a45d61e69f91049f1e7972e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-power/ru-1280x720-console-boots.png",
+        "sha256": "cf28eec8678f8c80800329c82c53d803b1c5571cfd5c317936d89b5e51519794",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-power/ru-1280x720-console-chest.png",
+        "sha256": "8c17171aa30355f2725f30a12f20d520a8fe5c2e4fd0a2a115e4e33a1b3960ed",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-power/ru-1280x720-console-head.png",
+        "sha256": "dfb39a8e9b99044a153126dfdef11815d018dd33ec72eef975df9157deb5f406",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-power/ru-1280x720-hud-expired.png",
+        "sha256": "5b9f7ca9801b6d8251f037fea208813dc5b8c8d5bdda3bc17104274b94d681e2",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-power/ru-1280x720-hud.png",
+        "sha256": "e3795ec99c00a6d15996c0450e425b779d0dbd7feacf0528026cc1f711736eb2",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "missing_unusualcopper_textures": false,
+    "live_user_server_launched": false,
+    "user_worlds_modified": false,
+    "later_nonvisual_change": "Final build adds per-module refusal retention, tightens immutable quote validation and binds reservations/refunds to a durable batch UUID after frames; no layout changes."
+  },
+  "static_checks": {
+    "models": 185,
+    "transparent_sprites": 23,
+    "ru_en_keys_equal": true,
+    "ordinary_jar_excludes_fixtures": true,
+    "lifecycle_refmap_checked": true,
+    "historical_frames_unchanged": true
+  },
+  "limitations": [
+    "Functional GameTests compiled only; user performs gameplay acceptance",
+    "External nested-battery rewrite/transfer before a canceled debit is released may prevent a provable refund; no invented compensation",
+    "No cross-file crash atomicity or guarantees for old-JAR rollback",
+    "SMP, claims, performance, remaining modules/levels and full F4/reserve/landing remain open in docs/COMPLETION_TRACKER.md"
+  ]
+}

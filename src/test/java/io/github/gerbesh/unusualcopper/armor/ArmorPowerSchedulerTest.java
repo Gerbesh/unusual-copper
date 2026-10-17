@@ -5,6 +5,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ArmorPowerSchedulerTest {
+    @Test void earlierMiningOccupiesPowerButIsNotChargedTwice(){
+        var mining=new ArmorPowerScheduler.Demand(ArmorModuleType.MINING_SERVO,5,8);
+        var stride=new ArmorPowerScheduler.Demand(ArmorModuleType.STRIDE_DRIVE,4,145);
+        var breath=new ArmorPowerScheduler.Demand(ArmorModuleType.AQUA_LUNGS,3,3);
+        var result=ArmorPowerScheduler.plan(List.of(stride,breath),3,List.of(mining));
+        assertEquals(List.of(ArmorModuleType.AQUA_LUNGS),result.accepted());assertEquals(3,result.cost());
+        assertEquals(3,result.charges().get(ArmorModuleType.AQUA_LUNGS));
+        assertEquals(List.of(ArmorModuleType.STRIDE_DRIVE),result.limited());
+        assertThrows(IllegalArgumentException.class,()->ArmorPowerScheduler.plan(List.of(mining),20,List.of(mining)));
+    }
     private static ArmorPowerScheduler.Demand demand(ArmorModuleType module,int priority,int charge) {
         return new ArmorPowerScheduler.Demand(module,priority,charge);
     }
