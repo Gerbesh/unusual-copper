@@ -24,6 +24,11 @@ public final class FaceSelectorItem extends Item {
             if(player.isShiftKeyDown()&&player instanceof net.minecraft.server.level.ServerPlayer serverPlayer&&(machine.kind.capacity>0||machine.kind.energyControl())){io.github.gerbesh.unusualcopper.menu.EnergyControlMenu.open(serverPlayer,machine);return InteractionResult.SUCCESS;}
             machine.cycleSide(side); player.displayClientMessage(Component.translatable(machine.sideMode(side).translationKey()), true); return InteractionResult.SUCCESS;
         }
+        if(entity instanceof io.github.gerbesh.unusualcopper.fluid.FluidPipeBlockEntity fluidPipe && fluidPipe.canAccess(player)){
+            fluidPipe.cycle(side);
+            player.displayClientMessage(Component.translatable(fluidPipe.mode(side).translationKey()),true);
+            return InteractionResult.SUCCESS;
+        }
         if (entity instanceof ItemPipeBlockEntity pipe && pipe.canAccess(player)) {
             pipe.rule(side).mode = pipe.rule(side).mode.next(); pipe.changed();
             player.displayClientMessage(Component.translatable(pipe.rule(side).mode.translationKey()), true); return InteractionResult.SUCCESS;

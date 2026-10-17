@@ -77,6 +77,10 @@ public final class ModContent {
     public static final RegistryObject<Item> ETCHING_REAGENT = ITEMS.register("etching_reagent", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ETCHED_CIRCUIT = ITEMS.register("etched_circuit", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ENCHANTMENT_CORE = ITEMS.register("resonant_enchantment_core",()->new Item(new Item.Properties()));
+    public static final RegistryObject<Block> FLUID_PIPE = BLOCKS.register("copper_fluid_pipe", io.github.gerbesh.unusualcopper.fluid.FluidPipeBlock::new);
+    public static final RegistryObject<Item> FLUID_PIPE_ITEM = ITEMS.register("copper_fluid_pipe",()->new BlockItem(FLUID_PIPE.get(),new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<io.github.gerbesh.unusualcopper.fluid.FluidPipeBlockEntity>> FLUID_PIPE_ENTITY =
+            ENTITIES.register("copper_fluid_pipe",()->BlockEntityType.Builder.of(io.github.gerbesh.unusualcopper.fluid.FluidPipeBlockEntity::new,FLUID_PIPE.get()).build(null));
     public static final RegistryObject<Block> ITEM_PIPE = BLOCKS.register("copper_item_pipe", io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock::new);
     public static final RegistryObject<Item> ITEM_PIPE_ITEM = ITEMS.register("copper_item_pipe", () -> new BlockItem(ITEM_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Item> FACE_SELECTOR = ITEMS.register("face_selector", io.github.gerbesh.unusualcopper.item.FaceSelectorItem::new);

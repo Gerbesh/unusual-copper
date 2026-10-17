@@ -75,6 +75,10 @@ public final class ModDataGeneration {
                     .define('P',Items.PAPER).define('R',Items.REDSTONE)
                     .define('C',ModContent.COPPER_PLATE.get()).define('Q',Items.QUARTZ)
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.FLUID_PIPE.get(),8)
+                    .pattern("PPP").pattern("G G").pattern("PPP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('G',Items.GLASS)
+                    .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_FLUID_PUMP).get())
                     .pattern("GCG").pattern("PFP").pattern("IBI")
                     .define('G',Items.GLASS).define('C',ModContent.RESONANT_COIL.get())
