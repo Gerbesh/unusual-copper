@@ -81,10 +81,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         }
         return true;
     }
-    public final FluidTank water = new FluidTank(4000, stack -> stack.getFluid() == Fluids.WATER) {
-        @Override protected void onContentsChanged() { setChanged(); }
-    };
-    private LazyOptional<IFluidHandler> fluidCap = LazyOptional.empty();
+    /** Water chemistry or pumped bulk storage, depending on machine kind. */
+    public final FluidTank water;
+    public BlockPos pumpSource;
+    private final EnumMap<Direction,LazyOptional<IFluidHandler>> fluidCaps=new EnumMap<>(Direction.class);
     public boolean canFitOutputs(ItemStack first,ItemStack second) { return outputPlan(first,second)!=null; }
     public final ItemStackHandler battery = new ItemStackHandler(1) {
         @Override public int getSlotLimit(int slot) { return 1; }
@@ -179,6 +179,11 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public CopperMachineBlockEntity(BlockPos pos, BlockState state) {
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
         kind = ((CopperMachineBlock)state.getBlock()).kind;
+        int fluidCapacity=kind==MachineKind.COPPER_FLUID_PUMP?16000:kind==MachineKind.COPPER_FLUID_TANK?64000:4000;
+        water=new FluidTank(fluidCapacity, stack -> kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK
+                ? !stack.isEmpty() : stack.getFluid()==Fluids.WATER) {
+            @Override protected void onContentsChanged(){setChanged();}
+        };
         cultivation = kind == MachineKind.AURA_CULTIVATOR ? new io.github.gerbesh.unusualcopper.gameplay.CultivationSweep() : null;
         reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
         arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
@@ -224,6 +229,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case RESONANCE_SMELTER -> new SmelterLogic();
             case RESONANCE_CRUSHER, COPPER_PRESS, VORTEX_PURIFIER, RESONANCE_CRYSTALLIZER, CIRCUIT_ETCHER -> new IndustrialProcessingLogic();
             case PRECISION_ASSEMBLER -> new PrecisionAssemblyLogic();
+            case COPPER_FLUID_PUMP -> new FluidPumpLogic();
+            case COPPER_FLUID_TANK -> (m,server)->m.status(MachineStatus.IDLE);
             case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
             case AURA_CULTIVATOR -> new CultivatorLogic();
             case MAGNETIC_COLLECTOR -> new CollectorLogic();
@@ -237,7 +244,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case REPAIR_CRYSTAL -> (m,level)->m.status(level.getGameTime()<m.repairUntil?MachineStatus.WORKING:MachineStatus.IDLE);
         };
         for (Direction side : Direction.values()) {
-            SideMode mode = kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
+            SideMode mode = kind==MachineKind.COPPER_FLUID_PUMP ? (side==Direction.WEST ? SideMode.ENERGY_INPUT : SideMode.FLUID_OUTPUT)
+                    : kind==MachineKind.COPPER_FLUID_TANK ? (side==Direction.UP || side==Direction.NORTH ? SideMode.FLUID_INPUT:SideMode.FLUID_OUTPUT)
+                    : (kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER) && side==Direction.NORTH ? SideMode.FLUID_INPUT
+                    : kind.usesArea() && !kind.hasInventory() ? SideMode.ENERGY_INPUT
                     : kind == MachineKind.ENERGY_DISTRIBUTOR ? (side == Direction.WEST ? SideMode.ENERGY_INPUT : SideMode.ENERGY_OUTPUT)
                     : kind.isCell() ? (side == Direction.EAST ? SideMode.ENERGY_OUTPUT : SideMode.ENERGY_INPUT)
                     : side == Direction.UP && kind.acceptsInputs() ? SideMode.ITEM_INPUT : side == Direction.DOWN && kind.hasInventory() ? SideMode.ITEM_OUTPUT
@@ -314,6 +324,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case ITEM_OUTPUT -> kind.hasInventory();
             case ENERGY_INPUT -> kind.consumes();
             case ENERGY_OUTPUT -> kind.produces();
+            case FLUID_INPUT -> kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER || kind==MachineKind.COPPER_FLUID_TANK;
+            case FLUID_OUTPUT -> kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK;
         };
     }
 
@@ -489,7 +501,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         tag.putInt("ResultCount", result.getCount());
         tag.putInt("Progress", progress); tag.putInt("Duration", duration); tag.putInt("Paid", paid);
         tag.putInt("Cost", operationCost);
-        if (kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER) {
+        if (kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER || kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK) {
             tag.put("WaterTank",water.writeToNBT(new CompoundTag()));
             tag.put("SecondaryResult",secondaryResult.save(new CompoundTag()));
             tag.putInt("WaterCost",operationWater);
@@ -503,6 +515,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             tag.put("RecipeCatalyst",recipeCatalyst.save(new CompoundTag()));
             tag.put("RecipeAdditive",recipeAdditive.save(new CompoundTag()));
         }
+        if(pumpSource!=null&&kind==MachineKind.COPPER_FLUID_PUMP)tag.putLong("PumpSource",pumpSource.asLong());
         if (workArea != null) tag.put("WorkArea", workArea.save());
         tag.putInt("ScanCursor", scanCursor); tag.putInt("GrowthMode", growthMode);
         if(kind==MachineKind.AURA_CULTIVATOR)tag.put("Harvest",harvest.save());
@@ -532,7 +545,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         if (!result.isEmpty()) result.setCount(Math.max(1, Math.min(128, tag.getInt("ResultCount"))));
         duration = Math.max(0, tag.getInt("Duration")); progress = Math.max(0, Math.min(duration, tag.getInt("Progress"))); paid = Math.max(0, tag.getInt("Paid"));
         operationCost = tag.contains("Cost") ? Math.max(0, tag.getInt("Cost")) : kind == MachineKind.RESONANCE_SMELTER ? 240 : 0;
-        if(kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER) {
+        if(kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER || kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK) {
             water.readFromNBT(tag.getCompound("WaterTank"));
             secondaryResult=ItemStack.of(tag.getCompound("SecondaryResult"));
             operationWater=Math.max(0,Math.min(4000,tag.getInt("WaterCost")));
@@ -547,6 +560,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             recipeAdditive=ItemStack.of(tag.getCompound("RecipeAdditive"));
         } else { recipeCatalyst=ItemStack.EMPTY; recipeAdditive=ItemStack.EMPTY; }
         if (source.isEmpty() || result.isEmpty() || duration == 0) cancelOperation();
+        pumpSource=kind==MachineKind.COPPER_FLUID_PUMP&&tag.contains("PumpSource")?BlockPos.of(tag.getLong("PumpSource")):null;
         workArea = null;
         if(cultivation!=null)cultivation.reset();
         if (tag.contains("WorkArea")) try { workArea = io.github.gerbesh.unusualcopper.gameplay.WorkArea.load(tag.getCompound("WorkArea")); } catch (IllegalArgumentException ignored) {}
@@ -615,7 +629,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 43 -> sentinel!=null && sentinel.active?1:0;
                     case 44 -> io.github.gerbesh.unusualcopper.config.ServerConfig.sentinelCost()>>>16;
                     case 45 -> batteryMode; case 46 -> harvested;
-                    case 47 -> kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER ? water.getFluidAmount() : 0;
+                    case 47 -> kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER || kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK ? water.getFluidAmount() : 0;
                     default -> 0;
                 };
             }

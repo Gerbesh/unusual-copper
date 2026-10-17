@@ -75,6 +75,17 @@ public final class ModDataGeneration {
                     .define('P',Items.PAPER).define('R',Items.REDSTONE)
                     .define('C',ModContent.COPPER_PLATE.get()).define('Q',Items.QUARTZ)
                     .unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_FLUID_PUMP).get())
+                    .pattern("GCG").pattern("PFP").pattern("IBI")
+                    .define('G',Items.GLASS).define('C',ModContent.RESONANT_COIL.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('F',ModContent.FRAME.get())
+                    .define('I',Items.IRON_INGOT).define('B',Items.BUCKET)
+                    .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.COPPER_FLUID_TANK).get())
+                    .pattern("PGP").pattern("GCG").pattern("PGP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('G',Items.GLASS)
+                    .define('C',ModContent.RESONANT_COIL.get())
+                    .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRECISION_ASSEMBLER).get())
                     .pattern("RCR").pattern("PEP").pattern("RFR")
                     .define('R',ModContent.RESONANT_COIL.get()).define('C',ModContent.RESONANT_CRYSTAL.get())
