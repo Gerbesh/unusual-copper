@@ -70,6 +70,9 @@ public final class ModContent {
     public static final RegistryObject<Item> RESONANT_COIL = ITEMS.register("resonant_coil", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> REINFORCED_FRAME = ITEMS.register("reinforced_frame", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> CIRCUIT_BLANK = ITEMS.register("circuit_blank", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PATTERN_CARD = ITEMS.register("pattern_card", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> PRECISION_PROCESSOR = ITEMS.register("precision_processor", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> MODULE_BLANK_I = ITEMS.register("module_blank_i", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> RESONANT_CRYSTAL = ITEMS.register("resonant_crystal", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ETCHING_REAGENT = ITEMS.register("etching_reagent", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ETCHED_CIRCUIT = ITEMS.register("etched_circuit", () -> new Item(new Item.Properties()));
@@ -90,6 +93,12 @@ public final class ModContent {
     public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.menu.RepairMenu>> REPAIR_MENU=MENUS.register("repair_crystal",()->IForgeMenuType.create(io.github.gerbesh.unusualcopper.menu.RepairMenu::new));
     public static final RegistryObject<BlockEntityType<io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity>> ITEM_PIPE_ENTITY = ENTITIES.register("item_pipe", () -> BlockEntityType.Builder.of(io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlockEntity::new, ITEM_PIPE.get()).build(null));
     public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.menu.ItemPipeMenu>> PIPE_MENU = MENUS.register("item_pipe", () -> IForgeMenuType.create(io.github.gerbesh.unusualcopper.menu.ItemPipeMenu::new));
+    public static final RegistryObject<RecipeType<io.github.gerbesh.unusualcopper.recipe.PrecisionAssemblyRecipe>> ASSEMBLY_RECIPE =
+            RECIPES.register("precision_assembly", () -> new RecipeType<>() {
+                @Override public String toString() { return "unusualcopper:precision_assembly"; }
+            });
+    public static final RegistryObject<RecipeSerializer<io.github.gerbesh.unusualcopper.recipe.PrecisionAssemblyRecipe>> ASSEMBLY_SERIALIZER =
+            SERIALIZERS.register("precision_assembly", io.github.gerbesh.unusualcopper.recipe.PrecisionAssemblyRecipe.Serializer::new);
     public static final RegistryObject<RecipeType<io.github.gerbesh.unusualcopper.recipe.IndustrialRecipe>> INDUSTRIAL_RECIPE =
             RECIPES.register("industrial_processing", () -> new RecipeType<>() {
                 @Override public String toString() { return "unusualcopper:industrial_processing"; }

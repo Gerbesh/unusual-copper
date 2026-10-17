@@ -23,7 +23,8 @@ public enum MachineKind {
     COPPER_PRESS("copper_press", 20_000),
     VORTEX_PURIFIER("vortex_purifier", 50_000),
     RESONANCE_CRYSTALLIZER("resonance_crystallizer", 50_000),
-    CIRCUIT_ETCHER("circuit_etcher", 50_000);
+    CIRCUIT_ETCHER("circuit_etcher", 50_000),
+    PRECISION_ASSEMBLER("precision_assembler", 100_000);
 
     public final String id;
     public final int capacity;
@@ -32,7 +33,7 @@ public enum MachineKind {
     public int energyTier() { return this == COPPER_CELL ? 0 : this == COPPER_CELL_II ? 1 : 2; }
     public boolean energyControl() { return this == ENERGY_DISTRIBUTOR || this == ENERGY_MONITOR; }
     public boolean produces() { return this == ESSENCE_SPLITTER || this == ENERGY_DISTRIBUTOR || isCell(); }
-    public boolean consumes() { return this == RESONANCE_SMELTER || this == ENERGY_DISTRIBUTOR || isCell() || this == ARBORIST || this == COPPER_SENTINEL || this == AETHERIC_BREWER || this == ENCHANTMENT_RESONATOR || this==REPAIR_CRYSTAL || this==RESONANT_EXTRACTOR || this==RESONANCE_CRUSHER || this==COPPER_PRESS || this==VORTEX_PURIFIER || this==RESONANCE_CRYSTALLIZER || this==CIRCUIT_ETCHER || usesArea(); }
+    public boolean consumes() { return this == RESONANCE_SMELTER || this == ENERGY_DISTRIBUTOR || isCell() || this == ARBORIST || this == COPPER_SENTINEL || this == AETHERIC_BREWER || this == ENCHANTMENT_RESONATOR || this==REPAIR_CRYSTAL || this==RESONANT_EXTRACTOR || this==RESONANCE_CRUSHER || this==COPPER_PRESS || this==VORTEX_PURIFIER || this==RESONANCE_CRYSTALLIZER || this==CIRCUIT_ETCHER || this==PRECISION_ASSEMBLER || usesArea(); }
     public boolean hasInventory() { return !isCell() && !energyControl() && this != GROWTH_SHEPHERD && this != COPPER_SENTINEL; }
     public boolean acceptsInputs() { return hasInventory() && this != AURA_CULTIVATOR && this != MAGNETIC_COLLECTOR && this != MOB_REAPER; }
     public boolean usesArea() { return this == AURA_CULTIVATOR || this == MAGNETIC_COLLECTOR || this == GROWTH_SHEPHERD || this == MOB_REAPER; }
