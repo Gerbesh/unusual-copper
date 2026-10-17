@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.gerbesh.unusualcopper.energy.EnergyPipeBlock;
 import io.github.gerbesh.unusualcopper.itempipe.ItemPipeBlock;
+import io.github.gerbesh.unusualcopper.fluid.FluidPipeBlock;
 import io.github.gerbesh.unusualcopper.machine.*;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.*;
@@ -89,6 +90,7 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
             default -> {}
         }
         pose.popPose();
+        if(m.kind==MachineKind.COPPER_FLUID_PUMP && working && m.pumpSource!=null)pumpAura(m,pose,buffers,light,time);
     }
     private static void ports(CopperMachineBlockEntity m,PoseStack pose,MultiBufferSource buffers,int light){
         for(var side:Direction.values()){
@@ -96,7 +98,8 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
             var state=m.getLevel().getBlockState(pos);var mode=m.sideMode(side);
             boolean energy=state.getBlock() instanceof EnergyPipeBlock&&(mode==SideMode.ENERGY_INPUT||mode==SideMode.ENERGY_OUTPUT||m.kind==MachineKind.ENERGY_MONITOR);
             boolean item=state.getBlock() instanceof ItemPipeBlock&&(mode==SideMode.ITEM_INPUT||mode==SideMode.ITEM_OUTPUT);
-            if(!(energy||item)||!state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side.getOpposite())))continue;
+            boolean fluid=state.getBlock() instanceof FluidPipeBlock&&(mode==SideMode.FLUID_INPUT||mode==SideMode.FLUID_OUTPUT);
+            if(!(energy||item||fluid)||!state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side.getOpposite())))continue;
             portFrames++;pose.pushPose();VisualGeometry.orientNorth(pose,side);
             var copper=VisualGeometry.material(buffers,"copper",false);var dark=VisualGeometry.material(buffers,"patina",false);
             // All sockets meet the block boundary at (8,8), with a load-bearing backing pedestal.
@@ -109,6 +112,33 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
                 VisualGeometry.box(pose,glow,6.1F,6.1F,.03F,9.9F,9.9F,1.05F,.65F,1,1,.7F,0xf000f0);}
             pose.popPose();
         }
+    }
+    /** Pure client-side appearance; no fluid source mutation or particle packets. */
+    private static void pumpAura(CopperMachineBlockEntity m,PoseStack pose,MultiBufferSource buffers,int light,float time){
+        var source=m.pumpSource;
+        if(source==null||!m.getLevel().hasChunkAt(source))return;
+        boolean lava=m.getLevel().getFluidState(source).is(net.minecraft.tags.FluidTags.LAVA);
+        float red=lava?1F:.27F,green=lava?.54F:.92F,blue=lava?.17F:.96F;
+        pose.pushPose();
+        pose.translate(source.getX()-m.getBlockPos().getX()+.5,source.getY()-m.getBlockPos().getY()+2.15,
+                source.getZ()-m.getBlockPos().getZ()+.5);
+        var translucent=VisualGeometry.material(buffers,"energy",true);
+        VisualGeometry.sphere(pose,translucent,.64F,red,green,blue,.30F,0xf000f0);
+        VisualGeometry.sphere(pose,translucent,.47F,red,green,blue,.12F,0xf000f0);
+        for(int index=0;index<24;index++){
+            float angle=index*2.399963F;
+            float radius=1.8F+(index%7)*1.6F;
+            int offX=Math.round((float)Math.cos(angle)*radius);
+            int offZ=Math.round((float)Math.sin(angle)*radius);
+            var block=source.offset(offX,0,offZ);
+            if(!m.getLevel().hasChunkAt(block)||!m.getLevel().getFluidState(block).isSource())continue;
+            if(m.getLevel().getFluidState(block).getType()!=m.getLevel().getFluidState(source).getType())continue;
+            float t=(time*.012F+index*.173F)%1;
+            float x=offX*(1-t),z=offZ*(1-t),y=-1.95F+1.95F*t;
+            VisualGeometry.box(pose,translucent,x*16-1.25F,y*16-1.25F,z*16-1.25F,
+                    x*16+1.25F,y*16+1.25F,z*16+1.25F,red,green,blue,.72F,0xf000f0);
+        }
+        pose.popPose();
     }
     private static void rotor(PoseStack p,VertexConsumer out,float angle,float y,float radius,int light){
         p.pushPose();p.translate(.5,y/16,.5);p.mulPose(Axis.YP.rotationDegrees(angle));p.translate(-.5,-y/16,-.5);
@@ -124,7 +154,7 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
         p.pushPose();p.translate(x/16,y/16,z/16);p.mulPose(Axis.YP.rotationDegrees(angle));
         VisualGeometry.crystal(p,out,size/16,light);p.popPose();
     }
-    @Override public boolean shouldRenderOffScreen(CopperMachineBlockEntity m){return m.sentinel!=null||m.mining!=null;}
+    @Override public boolean shouldRenderOffScreen(CopperMachineBlockEntity m){return m.sentinel!=null||m.mining!=null||m.kind==MachineKind.COPPER_FLUID_PUMP;}
     @Override public boolean shouldRender(CopperMachineBlockEntity m,net.minecraft.world.phys.Vec3 camera){return m.mining!=null?net.minecraft.world.phys.Vec3.atCenterOf(m.getBlockPos()).distanceToSqr(camera)<224*224:BlockEntityRenderer.super.shouldRender(m,camera);}
     @Override public int getViewDistance(){return 64;}
 }

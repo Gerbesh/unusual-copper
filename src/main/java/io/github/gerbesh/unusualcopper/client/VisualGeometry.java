@@ -37,6 +37,26 @@ final class VisualGeometry {
                 .uv(uv[i][0],uv[i][1]).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
                 .normal(pose.last().normal(),n.getStepX(),n.getStepY(),n.getStepZ()).endVertex();
     }
+    /** Lightweight translucent orb made from quads, for the fluid harvester. */
+    static void sphere(PoseStack pose,VertexConsumer out,float radius,float r,float g,float b,float alpha,int light){
+        int bands=8,sectors=16;
+        for(int band=0;band<bands;band++)for(int step=0;step<sectors;step++){
+            float a0=(float)(Math.PI*((double)band/bands-.5));
+            float a1=(float)(Math.PI*((double)(band+1)/bands-.5));
+            float t0=(float)(Math.PI*2*step/sectors);
+            float t1=(float)(Math.PI*2*(step+1)/sectors);
+            float[] lat={a0,a1,a1,a0},lon={t0,t0,t1,t1};
+            for(int k=0;k<4;k++){
+                float nx=(float)(Math.cos(lat[k])*Math.cos(lon[k]));
+                float ny=(float)Math.sin(lat[k]);
+                float nz=(float)(Math.cos(lat[k])*Math.sin(lon[k]));
+                out.vertex(pose.last().pose(),radius*nx,radius*ny,radius*nz)
+                        .color(r,g,b,alpha).uv(k==0||k==3?0:1,k<2?0:1)
+                        .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
+                        .uv2(light).normal(pose.last().normal(),nx,ny,nz).endVertex();
+            }
+        }
+    }
     static void orientNorth(PoseStack pose, Direction side) {
         pose.translate(.5,.5,.5);
         // Keep pedestals upright on all four walls; getRotation() includes an unwanted roll.
