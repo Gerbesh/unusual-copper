@@ -16,7 +16,7 @@ import java.util.*;
 /** 250mB per step; the withdrawing pipe persists fluid until the destination accepts it. */
 public final class FluidNetworks {
     private static final Map<ServerLevel,World> WORLDS=new IdentityHashMap<>();
-    private static final int RATE=250,MAX_NODES=128,WORK=32,BUDGET=64;
+    private static final int RATE=FluidFlowPolicy.BATCH_MB,MAX_NODES=128,WORK=32,BUDGET=64;
     private FluidNetworks(){}
     public static void add(LevelAccessor level,BlockPos pos){
         if(level instanceof ServerLevel server)WORLDS.computeIfAbsent(server,ignore->new World()).pipes.add(pos.immutable());
@@ -29,7 +29,7 @@ public final class FluidNetworks {
         if(e.getLevel() instanceof ServerLevel server)WORLDS.remove(server);
     }
     @SubscribeEvent public static void tick(TickEvent.LevelTickEvent e){
-        if(e.phase==TickEvent.Phase.END&&e.level instanceof ServerLevel server&&server.getGameTime()%5==0){
+        if(e.phase==TickEvent.Phase.END&&e.level instanceof ServerLevel server&&server.getGameTime()%FluidFlowPolicy.TICKS_PER_BATCH==0){
             World world=WORLDS.get(server);if(world!=null)world.tick(server);
         }
     }

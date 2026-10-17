@@ -2,6 +2,7 @@ package io.github.gerbesh.unusualcopper.machine.logic;
 
 import io.github.gerbesh.unusualcopper.machine.*;
 import io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy;
+import io.github.gerbesh.unusualcopper.fluid.FluidFlowPolicy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +14,8 @@ import java.util.*;
 
 /** Powered extraction from a validated *surface*, without changing world fluid blocks. */
 public final class FluidPumpLogic implements MachineLogic {
-    private static final int POND_MIN=15, RADIUS=15, OUTPUT_MB=250;
+    private static final int POND_MIN=FluidFlowPolicy.MIN_SURFACE_SOURCES,
+            RADIUS=FluidFlowPolicy.HARVEST_RADIUS,OUTPUT_MB=FluidFlowPolicy.BATCH_MB;
     private long nextScan;
     private Fluid sourceFluid=Fluids.EMPTY;
 
@@ -29,13 +31,13 @@ public final class FluidPumpLogic implements MachineLogic {
         if(machine.pumpSource==null || sourceFluid==Fluids.EMPTY) {
             machine.status(MachineStatus.NO_TARGETS);return;
         }
-        if(level.getGameTime()%5!=0)return;
+        if(level.getGameTime()%FluidFlowPolicy.TICKS_PER_BATCH!=0)return;
         if(!machine.water.getFluid().isEmpty() && machine.water.getFluid().getFluid()!=sourceFluid){
             machine.status(MachineStatus.BUFFER_FULL);return;
         }
         int room=machine.water.fill(new FluidStack(sourceFluid,OUTPUT_MB),IFluidHandler.FluidAction.SIMULATE);
         if(room<OUTPUT_MB){machine.status(MachineStatus.BUFFER_FULL);return;}
-        int cost=sourceFluid==Fluids.WATER?40:120;
+        int cost=FluidFlowPolicy.pumpCuE(sourceFluid==Fluids.WATER);
         if(!machine.energy.spend(cost)){machine.status(MachineStatus.NO_ENERGY);return;}
         machine.water.fill(new FluidStack(sourceFluid,OUTPUT_MB),IFluidHandler.FluidAction.EXECUTE);
         machine.status(MachineStatus.WORKING);machine.setChanged();
