@@ -202,5 +202,25 @@
   "armorconsole.open_hint": [
     "Wear to configure; bind Armor Console in Controls > Unusual Copper",
     "Настройки надетой брони: Управление > Unusual Copper"
+  ],
+  "armorconsole.hud_f3": [
+    "F3 thrust: %ss · +%s blocks",
+    "Тяга F3: %s с · +%s блоков"
+  ],
+  "armorconsole.hud_f3_exhausted": [
+    "F3: land to reset",
+    "F3: нужна посадка"
+  ],
+  "armorconsole.priority": [
+    "Priority %s",
+    "Приоритет %s"
+  ],
+  "armorconsole.priority_hint": [
+    "2 = highest (flight), 6 = lowest. Click to increase, Shift-click to decrease. Saved separately for each profile.",
+    "2 = высокий (полёт), 6 = низкий. Нажатие увеличивает номер, Shift уменьшает. Настройка сохраняется отдельно для каждого профиля."
+  ],
+  "armorconsole.limited": [
+    "Power / charge limit",
+    "Лимит мощности / заряда"
   ]
 }

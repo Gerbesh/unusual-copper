@@ -19,7 +19,9 @@ public final class ArmorNetwork {
     public record Piece(String item,int tier,int sockets,List<Row> modules){public Piece{modules=List.copyOf(modules);}}
     public record Snapshot(UUID session,long revision,boolean complete,int profile,int charge,int capacity,int perSecond,
                            long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);}}
-    private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->"3","3"::equals,"3"::equals);
+    // Both sides must understand reserved battery NBT as unavailable charge.
+    private static final String PROTOCOL="4";
+    private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->PROTOCOL,PROTOCOL::equals,PROTOCOL::equals);
     private static Consumer<Snapshot> receiver=ignored->{};
     public static void register(){
         CHANNEL.registerMessage(0,Request.class,(v,b)->{},b->new Request(),(v,s)->{var c=s.get();c.enqueueWork(()->{if(c.getSender()!=null)ArmorControlServer.request(c.getSender());});c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));

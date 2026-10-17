@@ -125,7 +125,7 @@ public final class ArmorData {
     public static boolean installBattery(ItemStack chest,ItemStack battery){
         if(!(chest.getItem() instanceof ProgrammableArmorItem armor)
                 || armor.getType()!=ArmorItem.Type.CHESTPLATE || !ArmorData.battery(chest).isEmpty()
-                || !(battery.getItem() instanceof CopperBatteryItem) || battery.getCount()!=1)return false;
+                || !(battery.getItem() instanceof CopperBatteryItem) || battery.getCount()!=1||!CopperBatteryItem.validReservations(battery))return false;
         mutable(chest).put("Battery",battery.save(new CompoundTag()));
         return true;
     }
@@ -161,7 +161,7 @@ public final class ArmorData {
             }
         }
         if(root.contains("Battery") && (!root.contains("Battery",Tag.TAG_COMPOUND)
-                || armor.getType()!=ArmorItem.Type.CHESTPLATE || battery(item).isEmpty()))return false;
+                || armor.getType()!=ArmorItem.Type.CHESTPLATE || battery(item).isEmpty()||!CopperBatteryItem.validReservations(battery(item))))return false;
         if(root.contains("Profile") && (!root.contains("Profile",Tag.TAG_INT)
                 || root.getInt("Profile")<0 || root.getInt("Profile")>3))return false;
         if(root.contains("Presets")){
@@ -184,19 +184,18 @@ public final class ArmorData {
         }
         return true;
     }
-    public static boolean pay(ItemStack chest,int amount) {
-        return ArmorProgression.validPayment(amount) && spend(chest,amount);
+    /** Charge is durably unavailable before effects; one settlement folds the whole batch. */
+    public static boolean reserve(ItemStack chest,int amount){
+        var cell=battery(chest);if(!CopperBatteryItem.reserve(cell,amount))return false;
+        setBattery(chest,cell);return true;
     }
-    /** Paid trigger costs are separate from the 900 CuE/t scheduler ceiling. */
-    public static boolean payEvent(ItemStack chest,int amount) {
-        return amount>0 && amount<=10000 && spend(chest,amount);
+    public static java.util.UUID reservationBatch(ItemStack chest){return CopperBatteryItem.reservationBatch(battery(chest));}
+    public static boolean release(ItemStack chest,int amount,java.util.UUID expected){
+        var cell=battery(chest);if(!CopperBatteryItem.release(cell,amount,expected))return false;
+        setBattery(chest,cell);return true;
     }
-    private static boolean spend(ItemStack chest,int amount) {
-        ItemStack cell=battery(chest);
-        int available=CopperBatteryItem.stored(cell);
-        if(available<amount)return false;
-        CopperBatteryItem.stored(cell,available-amount);
-        setBattery(chest,cell);
-        return true;
+    public static boolean settle(ItemStack chest,java.util.UUID expected){
+        var cell=battery(chest);if(expected==null||!expected.equals(CopperBatteryItem.reservationBatch(cell))||!CopperBatteryItem.settle(cell))return false;
+        setBattery(chest,cell);return true;
     }
 }

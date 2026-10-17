@@ -512,7 +512,7 @@
   "armorconsole.trigger.7": "Manual",
   "armorconsole.warning": "Armor battery: %s%% remaining",
   "armorconsole.hud_f3": "F3 thrust: %ss · +%s blocks",
-  "armorconsole.hud_f3_exhausted": "F3: land to restart",
+  "armorconsole.hud_f3_exhausted": "F3: land to reset",
   "armorconsole.sockets": "%s/%s · %s CuE/t",
   "armorconsole.hours": "≈ %sh %sm",
   "armorconsole.minutes": "≈ %sm %ss",
@@ -524,6 +524,6 @@
   "armorconsole.minimum": "Min %s%%",
   "armorconsole.priority": "Priority %s",
   "armorconsole.priority_hint": "2 = highest (flight), 6 = lowest. Click to increase, Shift-click to decrease. Saved separately for each profile.",
-  "armorconsole.limited": "Power limit reached / not enough CuE",
+  "armorconsole.limited": "Power / charge limit",
   "armorconsole.open_hint": "Wear to configure; bind Armor Console in Controls > Unusual Copper"
 }

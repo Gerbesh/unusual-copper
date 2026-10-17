@@ -512,7 +512,7 @@
   "armorconsole.trigger.7": "Вручную",
   "armorconsole.warning": "Заряд брони: осталось %s%%",
   "armorconsole.hud_f3": "Тяга F3: %s с · +%s блоков",
-  "armorconsole.hud_f3_exhausted": "F3: приземлитесь для сброса",
+  "armorconsole.hud_f3_exhausted": "F3: нужна посадка",
   "armorconsole.sockets": "%s/%s · %s CuE/т",
   "armorconsole.hours": "≈ %sч %sм",
   "armorconsole.minutes": "≈ %sм %sс",
@@ -524,6 +524,6 @@
   "armorconsole.minimum": "Мин %s%%",
   "armorconsole.priority": "Приоритет %s",
   "armorconsole.priority_hint": "2 = высокий (полёт), 6 = низкий. Нажатие увеличивает номер, Shift уменьшает. Настройка сохраняется отдельно для каждого профиля.",
-  "armorconsole.limited": "Ограничено мощностью / не хватает CuE",
+  "armorconsole.limited": "Лимит мощности / заряда",
   "armorconsole.open_hint": "Настройки надетой брони: Управление > Unusual Copper"
 }

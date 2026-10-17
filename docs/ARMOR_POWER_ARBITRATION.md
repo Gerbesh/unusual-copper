@@ -1,6 +1,6 @@
 # E6B: server-owned armor power arbitration and configurable priorities
 
-Baseline: `origin/main` at `2e08dbb` (2026-10-17). This is an incremental E6 subsystem, not E6/E7 acceptance.
+Historical E6B baseline: `2e08dbb` (2026-10-17). This is an incremental E6 subsystem, not E6/E7 acceptance. The later [0.20.11 payment batches](ARMOR_PAYMENT_BATCHES.md) supersede its independent-event settlement described below.
 
 ## Implemented
 
@@ -27,6 +27,6 @@ Manual checks for the owner:
 
 ## Still open
 
-- Per-tick arbitration does not consolidate **event** expenses (impact, shield, mining, jump) with all simultaneous event activity. Each remains its existing independent atomic event payment.
+- At E6B, event expenses were independent transactions. The later [payment batch](ARMOR_PAYMENT_BATCHES.md) consolidates their durable reservations and net debit, adds cancellation guards and accounts for mining power. Complete functional and concurrency acceptance remains open.
 - Current module costs usually stay well below the 900 CuE/t ceiling. Synthetic unit tests exercise competition, while functional over-budget GameTests require future higher-tier modules.
 - F4, emergency landing reserve, charging microbuffers, additional modules, full SMP/claims/performance acceptance, and visual review are not implemented or proven by this change.
