@@ -72,8 +72,9 @@ public final class ArmorClientState {
         if(!v.complete())g.drawString(mc.font,Component.translatable("armorconsole.hud_incomplete"),x+7,y+35,0xffffc174,false);
         else{
             int index=0;for(var module:ArmorModuleType.values())if((v.recent()&1L<<module.ordinal())!=0&&index<9){
-                var item=io.github.gerbesh.unusualcopper.registry.ModContent.ARMOR_MODULES.get(module);
-                g.renderItem(new ItemStack(item.get()),x+6+index++*17,y+43);
+                int level=v.pieces().stream().flatMap(piece->piece.modules().stream()).filter(row->row.module()==module).mapToInt(ArmorNetwork.Row::level).findFirst().orElse(1);
+                var item=io.github.gerbesh.unusualcopper.registry.ModContent.armorModuleItem(module,level);
+                g.renderItem(new ItemStack(item),x+6+index++*17,y+43);
             }
         }
         if(v.flight().session()) {

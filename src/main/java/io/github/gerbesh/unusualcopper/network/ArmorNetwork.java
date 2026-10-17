@@ -15,12 +15,15 @@ public final class ArmorNetwork {
     public enum Result { OK,STALE,INVALID }
     public record Request(){}
     public record Action(UUID session,long revision,int piece,int module,ArmorControlPolicy.Operation operation,int value){}
-    public record Row(ArmorModuleType module,ArmorModuleSettings settings){}
+    public record Row(ArmorModuleType module,ArmorModuleSettings settings,int level){
+        public Row{Objects.requireNonNull(module);Objects.requireNonNull(settings);if(level<1||level>module.maxLevel())throw new IllegalArgumentException("Module level");}
+        public Row(ArmorModuleType module,ArmorModuleSettings settings){this(module,settings,1);}
+    }
     public record Piece(String item,int tier,int sockets,List<Row> modules){public Piece{modules=List.copyOf(modules);}}
     public record Snapshot(UUID session,long revision,boolean complete,int profile,int charge,int capacity,int perSecond,
                            long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);}}
     // Both sides must understand reserved battery NBT as unavailable charge.
-    private static final String PROTOCOL="4";
+    private static final String PROTOCOL="5";
     private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->PROTOCOL,PROTOCOL::equals,PROTOCOL::equals);
     private static Consumer<Snapshot> receiver=ignored->{};
     public static void register(){
@@ -39,7 +42,7 @@ public final class ArmorNetwork {
         b.writeBoolean(v.flight.session());b.writeVarInt(v.flight.ticksLeft());b.writeVarInt(v.flight.heightLeft());
         b.writeEnum(v.result);b.writeVarInt(v.pieces.size());
         for(var p:v.pieces){b.writeUtf(p.item,128);b.writeVarInt(p.tier);b.writeVarInt(p.sockets);b.writeVarInt(p.modules.size());
-            for(var row:p.modules){var s=row.settings;b.writeEnum(row.module);b.writeBoolean(s.enabled());b.writeEnum(s.trigger());b.writeVarInt(s.minimumPercent());b.writeBoolean(s.armed());b.writeVarInt(s.priority());}}
+            for(var row:p.modules){var s=row.settings;b.writeEnum(row.module);b.writeVarInt(row.level);b.writeBoolean(s.enabled());b.writeEnum(s.trigger());b.writeVarInt(s.minimumPercent());b.writeBoolean(s.armed());b.writeVarInt(s.priority());}}
     }
     public static Snapshot decode(FriendlyByteBuf b){
         var session=b.readUUID();long revision=b.readVarLong();boolean complete=b.readBoolean();int profile=b.readVarInt(),charge=b.readVarInt(),capacity=b.readVarInt(),spent=b.readVarInt();
@@ -54,7 +57,8 @@ public final class ArmorNetwork {
             if(tier==0?(!item.isEmpty()||sockets!=0||n!=0):(item.isEmpty()||ResourceLocation.tryParse(item)==null))throw new IllegalArgumentException("Armor item identity");
             var rows=new ArrayList<Row>(n);var seen=EnumSet.noneOf(ArmorModuleType.class);
             for(int k=0;k<n;k++){var module=b.readEnum(ArmorModuleType.class);if(!seen.add(module))throw new IllegalArgumentException("Duplicate module");
-                rows.add(new Row(module,new ArmorModuleSettings(b.readBoolean(),b.readEnum(ArmorModuleSettings.Trigger.class),b.readVarInt(),b.readBoolean(),b.readVarInt())));}
+                int level=b.readVarInt();if(level>tier)throw new IllegalArgumentException("Module exceeds chassis");
+                rows.add(new Row(module,new ArmorModuleSettings(b.readBoolean(),b.readEnum(ArmorModuleSettings.Trigger.class),b.readVarInt(),b.readBoolean(),b.readVarInt()),level));}
             pieces.add(new Piece(item,tier,sockets,rows));
         }
         return new Snapshot(session,revision,complete,profile,charge,capacity,spent,recent,limited,conditions,flight,pieces,result);

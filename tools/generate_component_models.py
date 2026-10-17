@@ -88,11 +88,21 @@ def models():
         'jump_drive':[block([7.3,5,5.8],[8.7,11,6.5],'aqua'),block([5.5,9,5.8],[10.5,10,6.5]),block([6.3,10,5.8],[9.7,11,6.5])],
         'hover_drive':[block([4.5,6.5,5.8],[11.5,7.5,6.5],'aqua'),block([5.5,9,5.8],[10.5,10,6.5],'aqua'),block([7.2,5,5.6],[8.8,11.5,5.8])],
         'flight_core_ii':[block([7,6,5.6],[9,11,6.5],'aqua'),block([4.6,5,5.8],[6,10.5,6.5]),block([10,5,5.8],[11.4,10.5,6.5])],
+        'shield_field':frame(5,6,11,12,5.8,6.5,'copper',.8)+[block([6,5,5.8],[10,6,6.5],'aqua'),block([7,4.5,5.8],[9,5,6.5],'aqua'),
+                            dict(block([6.7,7.2,5.3],[9.3,9.8,6.3],'aqua'),rotation={'origin':[8,8.5,5.8],'axis':'z','angle':45})],
     }
     for name,glyph in glyphs.items():
         if name=='fall_damper':
             for y in (6.5,8,9.5):glyph.append(block([5.5,y,5.6],[10.5,y+.6,6.5],'aqua'))
-        out(name+'_module',cartridge()+glyph)
+        if name!='shield_field':out(name+'_module',cartridge()+glyph)
+        max_level=3 if name in ('mining_servo','shield_field') else 2 if name in ('optic_visor','aqua_lungs','stride_drive','jump_drive') else 1
+        for level in range(2,max_level+1):
+            body=cartridge()+glyph
+            for index in range(level):
+                x=5+index*2.2
+                body.append(block([x,12.6,6],[x+1.3,13.3,6.5],'aqua'))
+            if level==3:body+=frame(4.2,3.8,11.8,12,6.4,6.6,'copper',.3)
+            out(name+'_module_tier_'+str(level),body)
     write_json(ART/'industrial/component-models.json',{'authorship':'Original cuboid geometry; materials reused from project art','models':names})
     return names
 

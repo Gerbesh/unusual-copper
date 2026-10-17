@@ -56,6 +56,9 @@ def main():
                 path=ASSETS/'textures/models/armor'/name;texture=Image.open(path)
                 assert texture.size==(256,128) and texture.mode=='RGBA' and texture.getbbox(),name
                 assert path.read_bytes()==(ROOT/'art/armor/uv'/name).read_bytes(),name
+                if layer==1:
+                    # All tiers keep the central eyes, nose and mouth clear.
+                    assert texture.getchannel('A').crop((9*4,10*4,15*4,16*4)).getbbox() is None,('covered face',name)
     for name in ('copper_energy_pipe','reinforced_energy_pipe','crystalline_energy_pipe'):
         for path in (ASSETS/'models/block').glob(f'{name}_*.json'):
             model=json.loads(path.read_text(encoding='utf-8'))

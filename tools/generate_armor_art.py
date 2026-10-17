@@ -35,14 +35,15 @@ def atlas(tier,layer):
         for x in (x0+.65,x1-1.1):
             for y in (y0+.65,y1-1.1):rect(d,(x,y,x+.4,y+.4),'gold')
     if layer==1:
-        # The front has a real face opening; the third tier closes it with a visor.
-        rect(d,(9,11,15,16),(0,0,0,0))
-        rect(d,(8.7,9.3,15.3,10.2),'dark')
-        rect(d,(9,9.5,15,10),'aqua' if tier>1 else 'gold')
+        # Every tier leaves eyes, nose and mouth visible. Optics sit on the brow;
+        # upgrading armor never silently replaces the face opening with a mask.
+        rect(d,(8.8,9.5,15.2,16),(0,0,0,0))
+        rect(d,(8.7,8.5,15.3,9.2),'dark')
+        rect(d,(9,8.7,15,9),'aqua' if tier>1 else 'gold')
         rect(d,(11.5,.5,12.5,3),'patina' if tier==1 else 'aqua')
-        if tier==3:
-            rect(d,(10,11,14,15.5),'dark');rect(d,(10.5,11.8,13.5,12.4),'aqua')
-            for x in (10.4,11.8,13.2):rect(d,(x,13,x+.35,15),'copper')
+        for index in range(tier):
+            rect(d,(1.5+index,11,2+index,13),'aqua' if tier>1 else 'gold')
+            rect(d,(18+index,11,18.5+index,13),'aqua' if tier>1 else 'gold')
         # Distinct chest plates, central power socket, seams and shoulder accents.
         rect(d,(20.8,21,23.5,27.5),'copper');rect(d,(24.5,21,27.2,27.5),'copper')
         rect(d,(23.4,22,24.6,25.5),'dark')
@@ -77,7 +78,7 @@ def icons(tier):
     armor={
         'helmet':[part([3,4,10],[13,13,13],shell),part([3,4,3],[5,13,10],shell),
                   part([11,4,3],[13,13,10],shell),part([5,11,3],[11,13,10],'copper'),
-                  part([5,9,3],[11,11,5],shell),part([5.3,9.2,2.8],[10.7,9.7,3],'aqua' if tier>1 else 'dark')],
+                  part([5.3,12,2.8],[10.7,12.5,3],'aqua' if tier>1 else 'dark')],
         'chestplate':[part([4,4,5],[12,13,11],shell),part([1,10,5],[4,13,10],'copper'),
                       part([12,10,5],[15,13,10],'copper'),part([5,6,3.5],[11,11,5],'copper'),
                       part([7,7.5,3],[9,10,3.5],'aqua' if tier>1 else 'dark'),part([4,12,5],[12,14,11],'dark')],

@@ -67,7 +67,7 @@ public final class ArmorControlServer {
         var chest=player.getItemBySlot(EquipmentSlot.CHEST);int profile=ArmorData.profile(chest);var battery=ArmorData.battery(chest);
         var pieces=new ArrayList<ArmorNetwork.Piece>(4);
         for(var slot:PIECES){var item=player.getItemBySlot(slot);if(item.getItem() instanceof ProgrammableArmorItem armor){
-            var rows=ArmorData.modules(item).stream().map(module->new ArmorNetwork.Row(module,ArmorData.settings(item,module,profile))).toList();
+            var rows=ArmorData.upgradeSafe(item)?ArmorData.modules(item).stream().map(module->new ArmorNetwork.Row(module,ArmorData.settings(item,module,profile),ArmorData.moduleLevel(item,module))).toList():List.<ArmorNetwork.Row>of();
             pieces.add(new ArmorNetwork.Piece(BuiltInRegistries.ITEM.getKey(item.getItem()).toString(),armor.tier,ArmorData.slots(armor),rows));
         }else pieces.add(new ArmorNetwork.Piece("",0,0,List.of()));}
         return new ArmorNetwork.Snapshot(session.nonce,session.revision,ArmorRuntime.completeSet(player),profile,CopperBatteryItem.stored(battery),CopperBatteryItem.capacity(battery),

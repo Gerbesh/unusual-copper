@@ -1,0 +1,1115 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "java_block",
+    "box_uv": false
+  },
+  "name": "optic_visor_module_tier_2",
+  "resolution": {
+    "width": 32,
+    "height": 32
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        2,
+        7
+      ],
+      "to": [
+        13,
+        14,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            20,
+            24
+          ]
+        },
+        "south": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            20,
+            24
+          ]
+        },
+        "east": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            4,
+            24
+          ]
+        },
+        "west": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            4,
+            24
+          ]
+        },
+        "up": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            20,
+            4
+          ]
+        },
+        "down": {
+          "texture": 1,
+          "uv": [
+            0,
+            0,
+            20,
+            4
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_00",
+      "uuid": "00610f59-eb26-5d52-a2af-74d9ea1b7a73",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        4,
+        3,
+        6.5
+      ],
+      "to": [
+        12,
+        13,
+        7
+      ],
+      "faces": {
+        "north": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            16,
+            20
+          ]
+        },
+        "south": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            16,
+            20
+          ]
+        },
+        "east": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            1.0,
+            20
+          ]
+        },
+        "west": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            1.0,
+            20
+          ]
+        },
+        "up": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            16,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 2,
+          "uv": [
+            0,
+            0,
+            16,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_01",
+      "uuid": "5dc247da-f6c6-58ec-b0a5-26ff598ec340",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        3,
+        2,
+        6.6
+      ],
+      "to": [
+        3.7,
+        14,
+        7.2
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            24
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            24
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            24
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            24
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            1.200000000000001
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            1.200000000000001
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_02",
+      "uuid": "f6c59c16-f9b8-5283-86de-11950351ab4b",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        12.3,
+        2,
+        6.6
+      ],
+      "to": [
+        13,
+        14,
+        7.2
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.3999999999999986,
+            24
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.3999999999999986,
+            24
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            24
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            24
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.3999999999999986,
+            1.200000000000001
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.3999999999999986,
+            1.200000000000001
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_03",
+      "uuid": "8a03115d-2c6b-565e-92e8-657244e3ca22",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        3.7,
+        2,
+        6.6
+      ],
+      "to": [
+        12.3,
+        2.7,
+        7.2
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.4000000000000004
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.4000000000000004
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            1.4000000000000004
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            1.4000000000000004
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.200000000000001
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.200000000000001
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_04",
+      "uuid": "e69be8e7-e5a5-55c4-8399-2b8b9366100c",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        3.7,
+        13.3,
+        6.6
+      ],
+      "to": [
+        12.3,
+        14,
+        7.2
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.3999999999999986
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.3999999999999986
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            1.3999999999999986
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.200000000000001,
+            1.3999999999999986
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.200000000000001
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            17.200000000000003,
+            1.200000000000001
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_05",
+      "uuid": "91bffcb1-d3d2-5064-a80d-f02509ba806b",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        3.3,
+        3,
+        6.1
+      ],
+      "to": [
+        4.2,
+        5,
+        6.6
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.8000000000000007,
+            4
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.8000000000000007,
+            4
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            4
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            4
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.8000000000000007,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.8000000000000007,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_06",
+      "uuid": "bfeb81c3-c23b-52cb-8782-6212648bf0e5",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        11.8,
+        11,
+        6.1
+      ],
+      "to": [
+        12.7,
+        13,
+        6.6
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.7999999999999972,
+            4
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.7999999999999972,
+            4
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            4
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            4
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.7999999999999972,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.7999999999999972,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_07",
+      "uuid": "de942d8b-2e53-53ba-90b5-bafd818607c6",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        5,
+        7,
+        5.8
+      ],
+      "to": [
+        7.5,
+        9.5,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            5.0
+          ]
+        },
+        "south": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            5.0
+          ]
+        },
+        "east": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            5.0
+          ]
+        },
+        "west": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            5.0
+          ]
+        },
+        "up": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            1.4000000000000004
+          ]
+        },
+        "down": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            1.4000000000000004
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_08",
+      "uuid": "dba86cf4-addc-5c1a-8a54-f61ef5ce059a",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        8.5,
+        7,
+        5.8
+      ],
+      "to": [
+        11,
+        9.5,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            5.0
+          ]
+        },
+        "south": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            5.0
+          ]
+        },
+        "east": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            5.0
+          ]
+        },
+        "west": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.4000000000000004,
+            5.0
+          ]
+        },
+        "up": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            1.4000000000000004
+          ]
+        },
+        "down": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            5.0,
+            1.4000000000000004
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_09",
+      "uuid": "40c5bf12-a3b8-5ec2-a9bf-124dd8a91ec7",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        7.5,
+        8,
+        6
+      ],
+      "to": [
+        8.5,
+        8.5,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            2.0,
+            1.0
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            2.0,
+            1.0
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.0
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.0
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            2.0,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            2.0,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_10",
+      "uuid": "c9dced11-d043-5134-acb2-acb8a575b79f",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        5.0,
+        12.6,
+        6
+      ],
+      "to": [
+        6.3,
+        13.3,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.4000000000000021
+          ]
+        },
+        "south": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.4000000000000021
+          ]
+        },
+        "east": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.4000000000000021
+          ]
+        },
+        "west": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.4000000000000021
+          ]
+        },
+        "up": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_11",
+      "uuid": "f20e7eef-48d6-5cea-b647-b6d04ac431ad",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "from": [
+        7.2,
+        12.6,
+        6
+      ],
+      "to": [
+        8.5,
+        13.3,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.4000000000000021
+          ]
+        },
+        "south": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.4000000000000021
+          ]
+        },
+        "east": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.4000000000000021
+          ]
+        },
+        "west": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            1.0,
+            1.4000000000000021
+          ]
+        },
+        "up": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.0
+          ]
+        },
+        "down": {
+          "texture": 3,
+          "uv": [
+            0,
+            0,
+            2.5999999999999996,
+            1.0
+          ]
+        }
+      },
+      "name": "optic_visor_module_tier_2_12",
+      "uuid": "0e31609f-6ecd-5534-b3a1-ede748b407a9",
+      "type": "cube",
+      "origin": [
+        8,
+        8,
+        8
+      ]
+    }
+  ],
+  "outliner": [
+    "00610f59-eb26-5d52-a2af-74d9ea1b7a73",
+    "5dc247da-f6c6-58ec-b0a5-26ff598ec340",
+    "f6c59c16-f9b8-5283-86de-11950351ab4b",
+    "8a03115d-2c6b-565e-92e8-657244e3ca22",
+    "e69be8e7-e5a5-55c4-8399-2b8b9366100c",
+    "91bffcb1-d3d2-5064-a80d-f02509ba806b",
+    "bfeb81c3-c23b-52cb-8782-6212648bf0e5",
+    "de942d8b-2e53-53ba-90b5-bafd818607c6",
+    "dba86cf4-addc-5c1a-8a54-f61ef5ce059a",
+    "40c5bf12-a3b8-5ec2-a9bf-124dd8a91ec7",
+    "c9dced11-d043-5134-acb2-acb8a575b79f",
+    "f20e7eef-48d6-5cea-b647-b6d04ac431ad",
+    "0e31609f-6ecd-5534-b3a1-ede748b407a9"
+  ],
+  "textures": [
+    {
+      "name": "copper.png",
+      "id": "0",
+      "uuid": "f971c4d8-49eb-5b1d-a549-083cda60ee39",
+      "mode": "bitmap",
+      "relative_path": "../textures/copper.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,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"
+    },
+    {
+      "name": "dark.png",
+      "id": "1",
+      "uuid": "0ab12ca2-e016-5d03-ba95-c601aedb2369",
+      "mode": "bitmap",
+      "relative_path": "../textures/dark.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,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"
+    },
+    {
+      "name": "patina.png",
+      "id": "2",
+      "uuid": "2fcdd3f0-aeae-575d-84ca-3bb11b1fbbb6",
+      "mode": "bitmap",
+      "relative_path": "../textures/patina.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,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"
+    },
+    {
+      "name": "aqua.png",
+      "id": "3",
+      "uuid": "aad00674-a6f1-5183-90b3-07cbfc25318d",
+      "mode": "bitmap",
+      "relative_path": "../textures/aqua.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEFUlEQVR4nH2Xy2pUQRCGTzodMiFkJYIrEXwRlz6NCD6DCxeC5N1cSJSREKIwDAkMIZfJRb5Ovva3jRYM50xfquqv+ru6zsar+de72Ww2IdfX19P29vZUSplWq9XE+MXFRXtubm5Ol5eXU621r+WdeZ78HGOtOvb29qb1et3ntra2/tBdeVksFn0BDtzc3LT/V1dXzdj5+fmk6BDzinsRHUAHz+Pj4zaPI+jhfXd3t70vl8upuIkFPEGJ4MjZ2VlDgiINsVnjrN/Z2elPhX04ylPjoOYd59HJO5EpKuePSgkTCETFBhSyiXcNMsY+nL29ve3rMYJRBbSMGXbt8F4wxAtGRYm3/Fcx/9lg6JjToNEALeMCQlg/pkvHjEx1AiQSio0q1XM2kB6QJydYDwj2qMP3NOpcRqCBwGM2oCQVYgzDoMKg5Mw0ERkc4pkij0Sa/EGHOluaySk/NuEpXoFc4sh6BGeZFwUK86ilvHv5rL9/+HLUHH3z/Ekf+/jt5z2/VqtV34xyvMIgHnoyDD+OSbJ0gv1yiPHkAYJxdKegs9eBk5OTPkGoVSTDMc7TcEskU4JB1ibqFIGlAAzbnYQqBbl1wcJhTTAiIyeYk7jK/uGy6/P8f/q+aOnOdFXDKLOT5UmcdM5wExnXJPFEbUQtUukMUUNPJdSGGEN4lzmTtSOpssIZ0hy3vmDM4yw47xVsFCY0jiEUeBIsuyPDLb+MZ2FxPOuEzskTI6fNgpdePlY3Q06+WGjIFVBLVs+zFZRx53BOUKbIMi7gSgQstSoyT16bRGP/8N44KBhTgUfOKzm5kTXE45xlGV1thxtTPOePiSVbaUhq/YsneTmNTpq2oiH+gCYXjUfLiyjXWFZHMQ3oNEqZyt7IzB5C7QbDam9gwbCrSdYbxqwJiqdAEBkdagQ2Tk9P749htmKikSwyF8f4easZNbmDwvefv/czno5k3kcHK0ylFDPw9sXTvgBlY04NrbfkiMrxxy6dMZW9FK8fEP6PdEbEjojfeLn8S0SPI54KSztSPHLZQiVzFTskvB/v/zSW6BHrQnbFWeQ2Xv84uqMrllSyM6ujBq35KpMjnm9ApANcPrk+nSKKBwcHv+tAHpGRbF5IEsrouCbr/GOpU39eyxa56ilwgfUgP0iSydn9iFrBCXM9Fh2jaBV1f3EhSsnNWISyhmezkqS1q0ojtt2Cs7k10jpes6IhiRiDfmYp+f0wyvgZBghrSzav2dCWVOzNiFEmRc8cP1IkGo2gPK9tSzVPux+AeHXb6tlLFIwZJr2zWchr1OpmQ6HRhuLhaykjpNOs9cxLPN9xoph3r+RsRMdQEx3vcufMvd2wJVsiZ77HWtNs4tF8Pu+nwHxbLkUwst85z7nkSz0SW+T5kSPRfwEw204aOwoK+gAAAABJRU5ErkJggg=="
+    },
+    {
+      "name": "fire.png",
+      "id": "4",
+      "uuid": "7d23edff-b661-549c-b4bb-40b92117054f",
+      "mode": "bitmap",
+      "relative_path": "../textures/fire.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEYUlEQVR4nHWXsW4TQRCGh/MZx7Jc8EK0CEFBQY+QKCh4IIpIiIIeoUgRT0OkpEhHosiynZwd9O3dd4wXPJK159vZmdl//p2de/L449Vj3N1FkZOTGKXrIto2YjKJ2O36cbuNmM8jHh7iH9lsIhaL/hk9bSyXvf502r9br/++j4g29vvoui72+300XRfr9Trm83k8DE42m02cDIHxvFwu486AMdC2MZvNYrvdxrzrypz6yOT+Plar1fhuOp32Out1XF1dRRurVXmBIX4418hkMinvCBAnvMu6ym63G/+jgz7CmqZpxjmdswk2WOwAG9GwaP76Q1F8lpB9CpI/v5YFBOSuNYgwBzr+1zHv2f1isSgIGSBoF3Qmkx4BFx4T0uICDOAMo6aJ9czxn42YNvUIwl2jiz30CKqFeA+/fxfl+ZEA2BFGSA8jCAA7ThnZEWPeSH5+9vbTQLiIu++fD/jTwm6US2Rnp2OEOMuGc84NiF0xL8nQFw1Rq4WdZ1K3HLEMpZHlPPFMQM7hFOfOCzOGRUbyyhvFdaOvSMcLwZnQ5iNY2PziXfRaEffnX8b37DYjZGAIed6dnR5JbkTjAyhwRMqC5Fx215Ciw890EQC6OjUI5jIKoGKaWFMCYPcyXAFWc09w5D2LRkQNw6zJaRp32TRF1/pgkPx/8vjt+eP9UK00wIJSGZseIPmAeApqyEsdGXhisUJ4Z4rQyeP19XU0HEMZbWQYcAfsXrhzkBlODeIIfWzxjp/OMzEZPXkNlwQLUMS5Jde8s9Dc4pxALDY6zbvlPYhh05RiQzTlhCev8WbzHjC/GvbIGQTORct1uQxLUMQgQU67OGajHu+WCZzVJNOAJbcwNnEi785KV1A6/zI6UIexrjWmta1Za66zUcqnt6Q13Vwa1DGRCwaSES6pUYk/ONZwFstyFhH7X30Qdo8ejj3WtZ2W7sQFsjTnWMgzlFZKTwAI6ciN8JxtIqDFOnuEMi8kLCR3GXouJ5uRGrr6jvDiMqWO+VKT2PIBVJqYzQ4WZ5EwlmcLjATyHrDxUDd3Ucxn2xDb1KALJkeJ5OmwcJhHCxABefaF33Nu71Bvxitcu00mUn0Uc+vl+c1lloD4z0hQtmHaJChtmi59GVwDCT0FNRL0iBoVNp1Zrk1JLmKSTPJpW8QOLrsYLhYZe8j/ODj7jrbtpqMmobm2QUEY7ZokPLYLAsXxcPRyz6bY9eZc4ri+pkXSazr3Aaznh2OJSkDlOs551Qm5Wr75+JeQZ6cHUNqs1NesF5a8OdYZM15cXARbj3Y42+XrJn0V1fL05fvxuwGkRM3T4tHytnRebklYN8CvfJohwpI/QLLkbgZRV0flZhs+03Ln611gH2GVHPuISP2fXY0I0Hi64H+3ZS7b9gnm1kpZOy/Vb0AE3cIBILSwIBqwxc5Ryxdvx8wBn3P5zcQVXflweXnZc+D616+RqQbgwvor2fTc3t4eECqnyUBEyEBB0U3d3NwUf38AfAAyw+CjyQsAAAAASUVORK5CYII="
+    },
+    {
+      "name": "solar.png",
+      "id": "5",
+      "uuid": "c8de9b06-d374-5457-bbfb-b4e5bb5ce6f2",
+      "mode": "bitmap",
+      "relative_path": "../textures/solar.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEdElEQVR4nMWXTWtUVxjHT2bumIRhloJdpYtu/AaVSkSsgtWC7Uo3RbTgwkURuugHcKEgFBcuAm2RblpQVHxp6zuGlvglAi0YGNKAA0NIQu5E+Z07vztPBrEr6wOXO/ec5/X/vJwzE7MXL71K75GKnTMfpPlbj1JZlqkoitRqtVK/30/tdjs1Go2058i+tHDvWV6bmprKQvDyQIeOH01Prv+RZZvNZhoMBml9fT3z8v3J5/vTg1/v5m/XsbG2tpZevniRGnqiUjZg2tjYyL+hra2tvCbP2e/OpE6nUzs0OTmZ3zgMub66ulpHqvFoL8v4QQQocsPvqJg1jF8+f6VWCuGsRHS+NYiz2kFmc3Oz2mu3U6Fi4MIQzMA9Tig89c1X6cqFuZwelKgYedHRaVDTQXl5G2CmwaBCAEaMw8AjjBhSGcbnLv2Ypqenc8Qq1zmcqHRWNQCPa5DpjHWUnXdRw5FJaL8+dzIbj4qMzDcI4oj1Eo2YYouUN08qy1ENsBCjgoBz90cz6Yfvr1YCQVksKOsERzCAIxEVZKwNUZIm3jYHZg98nOYfP0/vfA48GPYpJExnvj2dYZ899mk9J3giH0Sf/3XnaZ3z2EVEzRyJ8tSVCPzb7Y5qACIFttpPl3+uUyJ87Mkjv/C7Z2fEWkEeh0kpvKar0WpVNQAD3iGscYopKtMJOyPmGF77HsXwW3QQaw4lWhx+qaEBBGg1hgzfCFjlsZ2ED0Wuq9xAaFXniusEA58pAK0tdGiAnFPtznCUSLGdHDRxoCBjEDxEiBHbmEDiZDRV/V6vcoAF+9ycojAWVHzjoI7W1RwK0LkfHWfN9NWIlsM5YAHxoBTjRBpnuMNDWCEjtMLjjIgRi5qp4jsXaVm+fQ78r/eBZoBTT4GMPvc+ABmddwb2vQ9A6rHQuC8wZ2JH2SHdpaXRYQScwIsgiq1ayOOT9XhnsCNiy8WjWafgpTB5WNv/xWc1X0NG8kJUTsJ43DoDcMhKj8S+ZwB7BGI7igr7yGP8z7sPR06mYVHAgEEhsiiFzQKT4rVMFOXx+jZ+rzh84sv0+y83RgvlsAuAAy+FSNjisYpzthq88UQ0RTokchLBEfnDa7czH/uZpxw6AAI4YU7NpwjE+wKwwhcRiHwREQnjT2/+ViMLMp4VhR4anemI53ckUMLB8RTEtGicKJsTO9L87fu1UxHVRqfzbufArg9nUvfvf/57Dizce1bP73E4vQ+IiNB5N2Afea9lphHYKTj/N1hHFjQt3V1crGoA4xYiG/6JkPwjMX46jjtFmyEXc66z6I3DLDtaFFUNeEw6HKgDJx6E4fELRzSsIfb2Hj2YjY+fls6Qbe1cFKNBFCeYaMRbTRQkkoiQXYNx+5xuiV0S21uZ+kbEJgJOOVstkg7olEerJOwaIK3x+NUhnHFy5j298Zr0pvbSc1OCMvg9ZiHGq/8LHLs6EPlMaeYltSxwKkFAkh3hL9OQAeL2GvCmaPCo+j2Uj/xMuJyqXi+/l5eXt+ntr6zk/CP/GkIxpcMLd+hfAAAAAElFTkSuQmCC"
+    },
+    {
+      "name": "gauge.png",
+      "id": "6",
+      "uuid": "dfd2f9a2-dcd4-554d-b1d3-77facffb1e54",
+      "mode": "bitmap",
+      "relative_path": "../textures/gauge.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADRUlEQVR4nMWXS2sUQRSFazoTMiHEX+I2CioJJJCoEfEPuM5GAi5cCOpCBRcuhOAma/+CCC4UFBE0W2FWswhMhpAHGcxjMswkI98Np6mpVM9TzYGmu7qr65x7q27Vvblbd+db9XrdNZtNl8/n3djYmDs5ObE2V6FQcMLo6KjdT09PXZIkrtFoWB/AvyMjI+l7oG9gfHzc3vt9GC9P4+joyB0eHlpHCPmwv7/vJiYm7M5APCPs48NrrhNmXn22MSCSIYhjHBkB+fHxsb3LY40skPV0oI04ifqwfNX1gi+PZ1MhiPYJGQc+eRIBuem56y1U0picnLQOQNOiAYWf3351FHDlxuW29sKb7+f64B2wsbHhcrMLM63t7e2UnKlAOXefvBtxJyFzr7+adxkTL+ANUK1WXY5FuLe3Zy9wuTwgl8eIn679jpK+mLqUKeTO2zW7a4GCcrl8JoAHf7VroYXkWcTdhEiE1gWGMuXmgfnFudQDWeQh8bvV53a/v/Qs2o4JkYjbKz9sfTEl6+vrLlG8c3Ujh0hkMYTf/X81JlPLnkC0IcLijJDjChGS94osEYJCEU8kqKCRNe9C6N6Yxd3ge6FWq5nXE1TQCCHl/RBkIeYFDGfh2xr49Gi6TeG/hO8FkPfDL8v6Qbzg/8P0MWZsn0jcBcJORv/I/N8gFBNiclAsLz2xaygP1CIR4IP5i4WgT5wlIutfgcPJ9oGLgp0LsQ9arZ3Ur6y+jD5nIRYBILd472arUqmc2wv+1kYkIyRAhxI5ws7OjkvYl2MLsRcv9EsewrZi5YBKncKUalARsX/8I1kncEIoqBHCV96PCL9vdPdLkjQBypETKmUmV1Me2EtC0ok4JJf1eJrTl6kvlUpnKdnm5qblAwjgnnU4DZuSQQ4H4ccpTCZmKdnBwUFatchF7x9MRUUMmpSSD5J5iwcBGN4mQFWMigm/ChomLcdySJWWa/zd3d2zfWBrayudFxUkUhuWYv0WJsS7akxVRKqUEJRmxSqdgP+sCAkrpG7wKyLGwyDOHTzMeOw9tvY071KIF/xpUMJK7PZanIY1IW3IVSEzHjxc5oFisRhVKnEQ+6uXgVRLcle55c+v7lpXslr9te/8Abdhj78TTjGnAAAAAElFTkSuQmCC"
+    },
+    {
+      "name": "glass.png",
+      "id": "7",
+      "uuid": "2c6c20bd-4959-5076-9ab8-7ecaa5af8298",
+      "mode": "bitmap",
+      "relative_path": "../textures/glass.png",
+      "width": 32,
+      "height": 32,
+      "uv_width": 32,
+      "uv_height": 32,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAsklEQVR4nO3XIQ6DMBjF8dLsPJygqanFkWCRiJ5ngissmSOZwhBOgCPhMMt0oXyI9z0xnqhr/r+kqsVnW1tD3ON3jNM8MOLBu8oa8uzVC7GpOxogNnX3fL17CiAC4mIAKi4CIOOnAHQ8C9CIHwK04rsAzXgC0I4nAO14AmDM3gBzPwF59u8AwbuSBgjeleM0LxRA2ImrAY7iKoBcHA44i0MBkjgMII3DANI4DHBlBft7/gWmgFHX0fWIUwAAAABJRU5ErkJggg=="
+    }
+  ]
+}

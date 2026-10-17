@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-17T21:54:26.799875+00:00",
+  "version": "0.20.12-alpha.1",
+  "source_base_commit": "c346a2222b3866a7eda8ba30096de3dcc6f6d3f8",
+  "source_branch": "codex/armor-module-effects",
+  "artifact": "dist/unusualcopper-0.20.12-alpha.1.jar",
+  "sha256": "8886debc2001122b931ce0a88484e8fd5f28624c16f0aace45dc9d7bf52874ab",
+  "bytes": 1545399,
+  "installed": false,
+  "armor_protocol": "5",
+  "junit": {
+    "tests": 144,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Malformed/legacy physical module level NBT; chassis/installed module bounds; exact affordable fractional shield quotes; foreign attribute caps; mining bounds; level packet round trip and rejection; static recipe result/previous-module assets; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "physical level survives save; rejects lower chassis and duplicate functional ID; removal clears level"
+    ]
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Native player mannequins show eyes/nose/mouth for armor I/II/III; inventory models; synthetic level-aware console/HUD. No functional armor acceptance.",
+    "environment": "Separate copied repository test world; Forge development client; EN 1600x900; not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/armor-levels/en-armor-front.png",
+        "sha256": "fef3bbfefb8a1798a11a7e0bb473fafa9e4b163a0b8d009a0e3422c859b78962",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-back.png",
+        "sha256": "d8614db6147928fda94e874113267549d62731bb0ef406a96f588141c0bfe791",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-gear-inventory.png",
+        "sha256": "e4ebfb80767ada2ee1767680ac5173fe750db758437fb2b0c6f7f80ba87e7005",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-console-head.png",
+        "sha256": "f8e8fbf208f269173f22bf01b8f065b2b3c9676117418edbd0664c9380dbb087",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-console-chest.png",
+        "sha256": "a472be966a254cf8b338f9d0874d08581b071e9636af4b88d143a21341397dab",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-console-boots.png",
+        "sha256": "a47deb4991f780acf1d4ad8cc1def54a706d424eaccaa6bb5c22ee970f5259e2",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-hud.png",
+        "sha256": "f52837ef2bfc3fcf80e4628aa7b597229ade50211cede44103d1a11fe768cbd9",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-hud-expired.png",
+        "sha256": "2878446d47c34513ff5bbba24526b4ca884790ce7aff8183c92fda2473d1029f",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-levels/en-armor-faces.png",
+        "sha256": "dddd1157e5d21278012c6acb4d5e56e1a2df102f811df8e22d704634ba2d7929",
+        "width": 1600,
+        "height": 900
+      }
+    ],
+    "missing_unusualcopper_textures": false,
+    "live_user_server_launched": false,
+    "user_worlds_modified": false
+  },
+  "static_checks": {
+    "models": 193,
+    "transparent_sprites": 23,
+    "component_models": 30,
+    "ru_en_keys_equal": true,
+    "central_face_alpha_clear_all_tiers": true,
+    "ordinary_jar_excludes_fixtures": true,
+    "historical_frames_unchanged": true
+  },
+  "limitations": [
+    "Functional GameTests compiled only; user performs gameplay acceptance",
+    "Visor I/II effect remains unavailable; physical recipe progression is present",
+    "Remaining E6 effects/configuration/jump arming, full F4/reserve/landing and E5/E8/E9 remain open",
+    "16,000 mB/block tank multiblock and migration of old 64,000 mB tanks not implemented yet",
+    "No new SMP/claims/performance/shader or full Better MC acceptance claim"
+  ]
+}

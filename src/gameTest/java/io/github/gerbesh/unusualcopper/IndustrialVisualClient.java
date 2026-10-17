@@ -30,7 +30,7 @@ public final class IndustrialVisualClient {
             MachineKind.VORTEX_PURIFIER,MachineKind.RESONANCE_CRYSTALLIZER,MachineKind.CIRCUIT_ETCHER,
             MachineKind.PRECISION_ASSEMBLER,MachineKind.COPPER_FLUID_PUMP,MachineKind.COPPER_FLUID_TANK,
             MachineKind.PRODUCTION_CONTROLLER,MachineKind.ARMOR_WORKBENCH};
-    private static final String[] SHOTS={"front-idle","front-working-a","front-working-b","rear-working","night-working","close-processing","close-assembly","armor-front","armor-back","inventory","gear-inventory","armor-console-head","armor-console-chest","armor-console-boots","armor-hud","armor-hud-expired"};
+    private static final String[] SHOTS={"front-idle","front-working-a","front-working-b","rear-working","night-working","close-processing","close-assembly","armor-front","armor-back","inventory","gear-inventory","armor-console-head","armor-console-chest","armor-console-boots","armor-hud","armor-hud-expired","armor-faces"};
     private static final AtomicBoolean ready=new AtomicBoolean(),saved=new AtomicBoolean();
     private static volatile int stage;
     private static boolean started,captured;
@@ -108,6 +108,7 @@ public final class IndustrialVisualClient {
         stage++;ticks=0;captured=false;saved.set(false);
         if(stage==5)mc.options.fov().set(45);
         if(stage==9||stage==10){mc.setScreen(new Catalogue(stage==10));return;}
+        if(stage==16){mc.options.hideGui=true;mc.setScreen(new ArmorFaces());return;}
         if(stage>=11){
             io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
             mc.options.hideGui=stage<14;
@@ -137,11 +138,37 @@ public final class IndustrialVisualClient {
                 var trigger=module==io.github.gerbesh.unusualcopper.armor.ArmorModuleType.AQUA_LUNGS?io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.UNDERWATER:
                         module==io.github.gerbesh.unusualcopper.armor.ArmorModuleType.FLIGHT_CORE_II?io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.MANUAL:io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.AUTO;
                 rows.add(new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Row(module,new io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings(true,trigger,10,false,
-                        io.github.gerbesh.unusualcopper.armor.ArmorPowerScheduler.defaultPriority(module))));
+                        io.github.gerbesh.unusualcopper.armor.ArmorPowerScheduler.defaultPriority(module)),module.maxLevel()));
             }
             pieces.add(new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Piece("unusualcopper:programmable_"+types[i]+"_tier_3",3,i==1?4:3,rows));
         }
         return new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot(new java.util.UUID(0,42),1,true,1,frame>=14?800000:3400000,10000000,4440,36,1L<<io.github.gerbesh.unusualcopper.armor.ArmorModuleType.SHIELD_FIELD.ordinal(),4,new io.github.gerbesh.unusualcopper.armor.ArmorRuntime.FlightStatus(true,frame==15?0:820,39),pieces,io.github.gerbesh.unusualcopper.network.ArmorNetwork.Result.OK);
+    }
+    /** Client-only mannequins: never inserted into the world or given working modules/cells. */
+    private static final class ArmorFaces extends Screen {
+        private final net.minecraft.client.player.RemotePlayer[] mannequins=new net.minecraft.client.player.RemotePlayer[3];
+        ArmorFaces(){
+            super(Component.literal("Unusual Copper — Open-face copper armor I / II / III"));
+            for(int tier=1;tier<=3;tier++){
+                var dummy=new net.minecraft.client.player.RemotePlayer(Minecraft.getInstance().level,new com.mojang.authlib.GameProfile(new java.util.UUID(0,100+tier),"CuE display "+tier));
+                for(var type:net.minecraft.world.item.ArmorItem.Type.values()){
+                    var armor=ModContent.PROGRAMMABLE_ARMOR.get("programmable_"+type.getName()+"_tier_"+tier).get();
+                    dummy.setItemSlot(((io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem)armor).getEquipmentSlot(),new ItemStack(armor));
+                }
+                mannequins[tier-1]=dummy;
+            }
+        }
+        @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){
+            g.fill(0,0,width,height,0xff172527);g.drawCenteredString(font,title,width/2,15,0xffe5cfab);
+            int scale=Math.min((height-60)/2,110),bottom=height-35;
+            for(int i=0;i<3;i++){
+                int x=width*(i*2+1)/6;
+                net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsAngle(g,x,bottom,scale,0,0,mannequins[i]);
+                g.drawCenteredString(font,"Copper "+(i+1),x,height-20,0xff82dad0);
+            }
+            super.render(g,-1,-1,partial);
+        }
+        @Override public boolean isPauseScreen(){return false;}
     }
     private static final class Catalogue extends Screen {
         private static final String[] COMPONENTS={"copper_grit","iron_grit","gold_grit","washed_copper_dust","washed_iron_dust","washed_gold_dust",
@@ -153,13 +180,14 @@ public final class IndustrialVisualClient {
             super(Component.literal(armor?"Unusual Copper — Programmable armor":"Unusual Copper — Industrial components"));
             if(armor){var list=new java.util.ArrayList<String>();
                 for(int tier=1;tier<=3;tier++)for(var type:new String[]{"helmet","chestplate","leggings","boots"})list.add("programmable_"+type+"_tier_"+tier);
-                for(var module:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values())list.add(module.id+"_module");
+                for(var module:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values())for(int level=1;level<=module.maxLevel();level++)list.add(module.itemId(level));
                 ids=list.toArray(String[]::new);
             }else ids=COMPONENTS;
         }
         @Override public void render(GuiGraphics g,int x,int y,float partial){
             g.fill(0,0,width,height,0xff111c20);g.drawCenteredString(font,title,width/2,9,0xffc9e4db);
-            int cell=Math.min((width-20)/6,(height-34)/4),left=(width-cell*6)/2,top=29;
+            int rows=(ids.length+5)/6;
+            int cell=Math.min((width-20)/6,(height-34)/rows),left=(width-cell*6)/2,top=29;
             for(int i=0;i<ids.length;i++){
                 int xx=left+(i%6)*cell,yy=top+(i/6)*cell;g.fill(xx+1,yy+1,xx+cell-2,yy+cell-2,0xff243b39);
                 var stack=new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("unusualcopper",ids[i])));

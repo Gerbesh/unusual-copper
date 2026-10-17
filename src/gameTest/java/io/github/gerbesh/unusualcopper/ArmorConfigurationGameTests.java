@@ -13,6 +13,18 @@ import net.minecraftforge.gametest.GameTestHolder;
 @GameTestHolder(UnusualCopper.MOD_ID)
 public final class ArmorConfigurationGameTests {
     @GameTest(template="empty",timeoutTicks=40)
+    public static void physicalLevelsSurviveSaveAndCannotFitLowerChassis(GameTestHelper h){
+        var low=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_leggings_tier_1").get());
+        h.assertTrue(!ArmorData.install(low,ArmorModuleType.MINING_SERVO,3),"Level III fitted chassis I");
+        var high=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_leggings_tier_3").get());
+        h.assertTrue(ArmorData.install(high,ArmorModuleType.MINING_SERVO,3),"Physical level III install failed");
+        var restored=ItemStack.of(high.save(new CompoundTag()));
+        h.assertTrue(ArmorData.upgradeSafe(restored)&&ArmorData.moduleLevel(restored,ArmorModuleType.MINING_SERVO)==3,"Level lost after reload");
+        h.assertTrue(!ArmorData.install(restored,ArmorModuleType.MINING_SERVO,1),"Duplicate functional ID fitted");
+        h.assertTrue(ArmorData.removeLast(restored)==ArmorModuleType.MINING_SERVO&&ArmorData.upgradeSafe(restored),"Recovery left an orphan level");
+        h.assertTrue(ArmorData.modules(restored).isEmpty(),"Recovery did not remove the module");h.succeed();
+    }
+    @GameTest(template="empty",timeoutTicks=40)
     public static void pendingDebitFollowsRemovedBatteryAndSurvivesSave(GameTestHelper h){
         var chest=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_chestplate_tier_3").get());
         var battery=new ItemStack(ModContent.AETHERIC_BATTERY.get());CopperBatteryItem.stored(battery,5000);
