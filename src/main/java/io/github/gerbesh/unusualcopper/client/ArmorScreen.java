@@ -92,13 +92,13 @@ public class ArmorScreen extends Screen {
         int labelEnd=(panelWidth-48)/2;
         for(int i=0;i<rows&&page*rows+i<modules.size();i++){
             var row=modules.get(page*rows+i);int y=top+125+i*56;
-            g.renderItem(new ItemStack(ModContent.ARMOR_MODULES.get(row.module()).get()),left+12,y);
-            String name=Component.translatable("item.unusualcopper."+row.module().id+"_module").getString();
+            g.renderItem(new ItemStack(ModContent.armorModuleItem(row.module(),row.level())),left+12,y);
+            String name=Component.translatable("item.unusualcopper."+row.module().itemId(row.level())).getString();
             g.drawString(font,font.plainSubstrByWidth(name,labelEnd),left+32,y,0xffe1dfc7,false);
             String status=!row.settings().enabled()?"off":row.module()==ArmorModuleType.OPTIC_VISOR?"unavailable":!v.complete()?"incomplete":v.capacity()==0?"no_battery":!row.settings().permits(percent,v.conditions())?"waiting":(v.limited()&1L<<row.module().ordinal())!=0?"limited":(v.recent()&1L<<row.module().ordinal())!=0?"recent":"ready";
             String state=font.plainSubstrByWidth(text(status).getString(),panelWidth-labelEnd-55);
             g.drawString(font,state,left+panelWidth-12-font.width(state),y+2,0xff8fc3b0,false);
-            if(mouseX>=left+10&&mouseX<left+panelWidth-10&&mouseY>=y&&mouseY<y+16)g.renderTooltip(font,List.of(Component.literal(name),text(status),text("nominal",row.module().cue)),java.util.Optional.empty(),mouseX,mouseY);
+            if(mouseX>=left+10&&mouseX<left+panelWidth-10&&mouseY>=y&&mouseY<y+16)g.renderTooltip(font,List.of(Component.literal(name),text(status),text("nominal",row.module().cue(row.level()))),java.util.Optional.empty(),mouseX,mouseY);
         }
         if(modules.isEmpty())g.drawString(font,text("empty"),left+12,top+140,0xffc6d6c7,false);
         Component footer=ArmorClientState.pending()?text("sync"):v.result()!=ArmorNetwork.Result.OK?text("result."+v.result().ordinal()):!v.complete()?text("incomplete"):text("footer");

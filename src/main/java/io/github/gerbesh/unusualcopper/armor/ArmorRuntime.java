@@ -24,6 +24,7 @@ import java.util.WeakHashMap;
  */
 public final class ArmorRuntime {
     private static final UUID STRIDE=UUID.fromString("2a48d4cb-52ee-4473-9dc9-7cae61db6e0c");
+    private static final UUID SWIM=UUID.fromString("447795d5-b9dd-48f2-95e4-33c461cd5a8a");
     // Short-lived input conditions belong to this player session, never saved NBT.
     private static final Map<ServerPlayer,Long> COMBAT_UNTIL=new WeakHashMap<>(),MINING_UNTIL=new WeakHashMap<>();
     private ArmorRuntime(){}
@@ -62,7 +63,14 @@ public final class ArmorRuntime {
                 LimitedFlightPolicy.headroom(data.getDouble("UCF3AnchorY"),player.getY(),same));
     }
     private static ItemStack chest(ServerPlayer player) {
-        return completeSet(player)?player.getItemBySlot(EquipmentSlot.CHEST):ItemStack.EMPTY;
+        return player.isAlive()&&!player.isSpectator()&&!player.isCreative()&&completeSet(player)?player.getItemBySlot(EquipmentSlot.CHEST):ItemStack.EMPTY;
+    }
+    private static int level(ServerPlayer player,ArmorModuleType module){return ArmorData.moduleLevel(player.getItemBySlot(module.slot),module);}
+    private static double addition(net.minecraft.world.entity.ai.attributes.AttributeInstance attribute,double requested,double cap){
+        if(attribute==null)return 0;
+        double multiplier=1+attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE).stream().mapToDouble(AttributeModifier::getAmount).sum();
+        for(var mod:attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))multiplier*=1+mod.getAmount();
+        return ArmorEffectLimits.addition(attribute.getValue(),requested,cap,multiplier);
     }
     private static boolean equipped(ServerPlayer player,EquipmentSlot slot,ArmorModuleType module,int profile) {
         ItemStack stack=player.getItemBySlot(slot);
@@ -92,24 +100,30 @@ public final class ArmorRuntime {
         }
         var movement=player.getAttribute(Attributes.MOVEMENT_SPEED);
         if(movement!=null && movement.getModifier(STRIDE)!=null)movement.removeModifier(STRIDE);
+        var swim=player.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
+        if(swim!=null&&swim.getModifier(SWIM)!=null)swim.removeModifier(SWIM);
         ItemStack chest=chest(player);
         if(chest.isEmpty()){ArmorTelemetry.limited(player,java.util.List.of());return;}
         int profile=ArmorData.profile(chest);
         // Build intentions first. Neither an effect nor its energy debit may run until
         // the server has allocated all eligible tick requests to piece and set limits.
         var actions=new java.util.EnumMap<ArmorModuleType,Runnable>(ArmorModuleType.class);
-        if(player.isUnderWater() && player.getAirSupply()<player.getMaxAirSupply()
-                && equipped(player,EquipmentSlot.HEAD,ArmorModuleType.AQUA_LUNGS,profile)) {
-            actions.put(ArmorModuleType.AQUA_LUNGS,
-                    ()->player.setAirSupply(Math.min(player.getMaxAirSupply(),player.getAirSupply()+4)));
+        if(player.isUnderWater()&&equipped(player,EquipmentSlot.HEAD,ArmorModuleType.AQUA_LUNGS,profile)) {
+            boolean needsAir=player.getAirSupply()<player.getMaxAirSupply()&&!player.hasEffect(net.minecraft.world.effect.MobEffects.WATER_BREATHING);
+            double swimBoost=level(player,ArmorModuleType.AQUA_LUNGS)>=2?addition(swim,.35D,2D):0;
+            if(needsAir||swimBoost>0)actions.put(ArmorModuleType.AQUA_LUNGS,()->{
+                if(needsAir)player.setAirSupply(Math.min(player.getMaxAirSupply(),player.getAirSupply()+4));
+                if(swimBoost>0)swim.addTransientModifier(new AttributeModifier(SWIM,"Copper aqua lungs",swimBoost,AttributeModifier.Operation.ADDITION));
+            });
         }
         if(equipped(player,EquipmentSlot.CHEST,ArmorModuleType.SHIELD_FIELD,profile))
             actions.put(ArmorModuleType.SHIELD_FIELD,()->{});
         if(!player.onGround() && equipped(player,EquipmentSlot.FEET,ArmorModuleType.FALL_DAMPER,profile))
             actions.put(ArmorModuleType.FALL_DAMPER,()->{});
-        if(movement!=null && equipped(player,EquipmentSlot.LEGS,ArmorModuleType.STRIDE_DRIVE,profile))
+        double stride=addition(movement,.05D*level(player,ArmorModuleType.STRIDE_DRIVE),.30D);
+        if(stride>0 && equipped(player,EquipmentSlot.LEGS,ArmorModuleType.STRIDE_DRIVE,profile))
             actions.put(ArmorModuleType.STRIDE_DRIVE,
-                    ()->movement.addTransientModifier(new AttributeModifier(STRIDE,"Copper stride drive",0.05D,AttributeModifier.Operation.ADDITION)));
+                    ()->movement.addTransientModifier(new AttributeModifier(STRIDE,"Copper stride drive",stride,AttributeModifier.Operation.ADDITION)));
 
         ItemStack boots=player.getItemBySlot(EquipmentSlot.FEET);
         // F2 uses no mayfly, and only asks for power while crouching in mid-air.
@@ -183,7 +197,7 @@ public final class ArmorRuntime {
         // visual/event features have independent activation paths.
         var requests=actions.keySet().stream()
                 .map(module->new ArmorPowerScheduler.Demand(module,
-                        ArmorData.settings(player.getItemBySlot(module.slot),module,profile).priority(),module.cue)).toList();
+                        ArmorData.settings(player.getItemBySlot(module.slot),module,profile).priority(),module.cue(level(player,module)))).toList();
         var plan=ArmorPowerScheduler.plan(requests,
                 io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(ArmorData.battery(chest)),ArmorPayments.committedPower(player));
         ArmorTelemetry.updateLimited(player,plan.limited(),actions.keySet());
@@ -200,26 +214,32 @@ public final class ArmorRuntime {
         }
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void shield(LivingDamageEvent event) {
-        if(!(event.getEntity() instanceof ServerPlayer player) || event.getAmount()<=0)return;
+        if(!(event.getEntity() instanceof ServerPlayer player) || !Float.isFinite(event.getAmount())||event.getAmount()<=0)return;
         COMBAT_UNTIL.put(player,(long)player.tickCount+100);
         if(event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))return;
         ItemStack chest=chest(player);
         if(chest.isEmpty())return;
-        float prevented=Math.min(event.getAmount(),2F);
-        int cue=(int)Math.ceil(prevented*300F);
+        var quote=ArmorEffectLimits.shield(event.getAmount(),level(player,ArmorModuleType.SHIELD_FIELD),
+                io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(ArmorData.battery(chest)));
+        float prevented=quote.prevented();int cue=quote.cue();
+        if(cue<=0)return;
         if(equipped(player,EquipmentSlot.CHEST,ArmorModuleType.SHIELD_FIELD,ArmorData.profile(chest))
                 && ArmorPayments.event(player,chest,ArmorModuleType.SHIELD_FIELD,event,cue,()->!event.isCanceled())) {
             event.setAmount(Math.max(0F,event.getAmount()-prevented));
         }
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void mining(PlayerEvent.BreakSpeed event) {
-        if(!(event.getEntity() instanceof ServerPlayer player) || event.getNewSpeed()<=0)return;
+        if(!(event.getEntity() instanceof ServerPlayer player) || !Float.isFinite(event.getNewSpeed())||event.getNewSpeed()<=0)return;
         MINING_UNTIL.put(player,(long)player.tickCount+10);
         ItemStack chest=chest(player);
-        if(chest.isEmpty())return;
-        if(equipped(player,EquipmentSlot.LEGS,ArmorModuleType.MINING_SERVO,ArmorData.profile(chest))
-                && ArmorPayments.mining(player,chest,event,event.getNewSpeed())){
-            event.setNewSpeed(event.getNewSpeed()*1.4F);
+        if(chest.isEmpty()||!equipped(player,EquipmentSlot.LEGS,ArmorModuleType.MINING_SERVO,ArmorData.profile(chest)))return;
+        var pos=event.getPosition();
+        if(pos.isEmpty()||!io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy.allowed(player.serverLevel(),pos.get(),player.getUUID())
+                ||event.getState().requiresCorrectToolForDrops()&&!player.getMainHandItem().isCorrectToolForDrops(event.getState()))return;
+        float speed=ArmorEffectLimits.mining(event.getNewSpeed(),level(player,ArmorModuleType.MINING_SERVO));
+        if(speed<=event.getNewSpeed())return;
+        if(ArmorPayments.mining(player,chest,event,event.getNewSpeed())){
+            event.setNewSpeed(speed);
         }
     }
     /** F1: server-side boosted jump, real CuE event debit, 40-tick cooldown. */
@@ -227,21 +247,26 @@ public final class ArmorRuntime {
         if(!(event.getEntity() instanceof ServerPlayer player))return;
         ItemStack chest=chest(player);
         if(chest.isEmpty() || !equipped(player,EquipmentSlot.FEET,ArmorModuleType.JUMP_DRIVE,ArmorData.profile(chest)))return;
+        int moduleLevel=level(player,ArmorModuleType.JUMP_DRIVE),cooldown=moduleLevel==1?40:60,cost=moduleLevel==1?2000:5000;
+        double boost=moduleLevel==1?.75D:1D;
+        if(player.getDeltaMovement().y>=boost)return;
         var data=player.getPersistentData();
         long now=player.level().getGameTime();
         if(data.contains("UnusualCopperLastJump")){
             long last=data.getLong("UnusualCopperLastJump");
-            if(now>=last && now-last<40)return;
+            if(now>=last && now-last<cooldown)return;
         }
-        if(!ArmorPayments.event(player,chest,ArmorModuleType.JUMP_DRIVE,event,2000,()->true))return;
+        if(!ArmorPayments.event(player,chest,ArmorModuleType.JUMP_DRIVE,event,cost,()->true))return;
         data.putLong("UnusualCopperLastJump",now);
         var velocity=player.getDeltaMovement();
-        player.setDeltaMovement(velocity.x,Math.max(velocity.y,0.75D),velocity.z);
+        player.setDeltaMovement(velocity.x,boost,velocity.z);
         player.hurtMarked=true;
     }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
         if(event.getEntity() instanceof ServerPlayer player){ArmorTelemetry.clear(player);COMBAT_UNTIL.remove(player);MINING_UNTIL.remove(player);}
         var attribute=event.getEntity().getAttribute(Attributes.MOVEMENT_SPEED);
         if(attribute!=null && attribute.getModifier(STRIDE)!=null)attribute.removeModifier(STRIDE);
+        var swim=event.getEntity().getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
+        if(swim!=null&&swim.getModifier(SWIM)!=null)swim.removeModifier(SWIM);
     }
 }

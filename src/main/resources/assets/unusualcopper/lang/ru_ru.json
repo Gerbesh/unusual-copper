@@ -525,5 +525,15 @@
   "armorconsole.priority": "Приоритет %s",
   "armorconsole.priority_hint": "2 = высокий (полёт), 6 = низкий. Нажатие увеличивает номер, Shift уменьшает. Настройка сохраняется отдельно для каждого профиля.",
   "armorconsole.limited": "Лимит мощности / заряда",
-  "armorconsole.open_hint": "Настройки надетой брони: Управление > Unusual Copper"
+  "armorconsole.open_hint": "Настройки надетой брони: Управление > Unusual Copper",
+  "item.unusualcopper.optic_visor_module_tier_2": "Модуль оптического визора II",
+  "item.unusualcopper.aqua_lungs_module_tier_2": "Модуль аквалёгких II",
+  "item.unusualcopper.stride_drive_module_tier_2": "Модуль ускорения II",
+  "item.unusualcopper.mining_servo_module_tier_2": "Модуль горного сервопривода II",
+  "item.unusualcopper.mining_servo_module_tier_3": "Модуль горного сервопривода III",
+  "item.unusualcopper.shield_field_module_tier_2": "Модуль силового щита II",
+  "item.unusualcopper.shield_field_module_tier_3": "Модуль силового щита III",
+  "item.unusualcopper.jump_drive_module_tier_2": "Модуль прыжкового импульса II",
+  "armor.unusualcopper.module_level": "Уровень модуля: %s",
+  "armor.unusualcopper.module_chassis": "Минимальный уровень шасси: %s"
 }

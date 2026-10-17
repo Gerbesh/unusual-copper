@@ -39,26 +39,35 @@ public final class ArmorData {
         return List.copyOf(result);
     }
     public static boolean canInstall(ItemStack item,ArmorModuleType type) {
+        return canInstall(item,type,1);
+    }
+    public static boolean canInstall(ItemStack item,ArmorModuleType type,int level) {
         if(!(item.getItem() instanceof ProgrammableArmorItem armor))return false;
         var modules=modules(item);
-        return type.slot==armor.getEquipmentSlot() && modules.size()<slots(armor) && !modules.contains(type)
-                && (type!=ArmorModuleType.HOVER_DRIVE || armor.tier>=HoverPolicy.REQUIRED_TIER)
-                && (type!=ArmorModuleType.FLIGHT_CORE_II || armor.tier>=LimitedFlightPolicy.REQUIRED_TIER);
+        return level>=1&&level<=type.maxLevel()&&armor.tier>=type.requiredTier(level)&&upgradeSafe(item)&&type.slot==armor.getEquipmentSlot() && modules.size()<slots(armor) && !modules.contains(type);
     }
     public static boolean install(ItemStack item,ArmorModuleType kind) {
-        if(!canInstall(item,kind))return false;
+        return install(item,kind,1);
+    }
+    public static int moduleLevel(ItemStack item,ArmorModuleType kind){
+        return ArmorModuleLevels.read(data(item),kind);
+    }
+    public static boolean install(ItemStack item,ArmorModuleType kind,int level) {
+        if(!canInstall(item,kind,level))return false;
         var list=new ListTag();
         for(var existing:modules(item))list.add(StringTag.valueOf(existing.id));
         list.add(StringTag.valueOf(kind.id));
         mutable(item).put("Modules",list);
+        var levels=mutable(item).getCompound("ModuleLevels");levels.putInt(kind.id,level);mutable(item).put("ModuleLevels",levels);
         return true;
     }
     public static ArmorModuleType removeLast(ItemStack item){
         var types=modules(item);
-        if(types.isEmpty())return null;
+        if(types.isEmpty()||!upgradeSafe(item))return null;
         var list=new ListTag();
         for(int i=0;i<types.size()-1;i++)list.add(StringTag.valueOf(types.get(i).id));
         mutable(item).put("Modules",list);
+        mutable(item).getCompound("ModuleLevels").remove(types.get(types.size()-1).id);
         return types.get(types.size()-1);
     }
     public static int profile(ItemStack item) {return Math.floorMod(data(item).getInt("Profile"),4);}
@@ -99,7 +108,7 @@ public final class ArmorData {
     public static String configuration(ItemStack item){
         var value=new StringBuilder().append(profile(item)).append('/');
         for(var module:modules(item)){
-            value.append(module.ordinal()).append(':');
+            value.append(module.ordinal()).append(':').append(moduleLevel(item,module)).append(':');
             for(int p=0;p<4;p++){
                 var s=settings(item,module,p);value.append(s.enabled()?'1':'0').append(',').append(s.trigger().ordinal()).append(',')
                         .append(s.minimumPercent()).append(',').append(s.armed()?'1':'0').append(',').append(s.priority()).append(';');
@@ -160,6 +169,7 @@ public final class ArmorData {
                 if(module==null || module.slot!=armor.getEquipmentSlot() || !seen.add(module))return false;
             }
         }
+        if(!ArmorModuleLevels.valid(root,armor.tier,modules(item)))return false;
         if(root.contains("Battery") && (!root.contains("Battery",Tag.TAG_COMPOUND)
                 || armor.getType()!=ArmorItem.Type.CHESTPLATE || battery(item).isEmpty()||!CopperBatteryItem.validReservations(battery(item))))return false;
         if(root.contains("Profile") && (!root.contains("Profile",Tag.TAG_INT)

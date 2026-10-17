@@ -159,6 +159,13 @@ public final class ModDataGeneration {
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ARMOR_MODULES.get(type).get())
                         .requires(ModContent.MODULE_BLANK_I.get()).requires(catalyst).requires(Items.REDSTONE)
                         .unlockedBy("has_module_blank",has(ModContent.MODULE_BLANK_I.get())).save(out);
+                for(int level=2;level<=type.maxLevel();level++) {
+                    var previous=ModContent.armorModuleItem(type,level-1);
+                    ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.armorModuleItem(type,level))
+                            .requires(previous).requires(ModContent.PRECISION_PROCESSOR.get())
+                            .requires(ModContent.RESONANT_CRYSTAL.get(),level)
+                            .unlockedBy("has_previous_module",has(previous)).save(out);
+                }
             }
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRODUCTION_CONTROLLER).get())
                     .pattern("RCR").pattern("PEP").pattern("RFR")

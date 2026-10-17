@@ -32,9 +32,16 @@ class ArmorProgressionTest {
             assertTrue(Files.readString(recipes.resolve(id+".json")).contains("unusualcopper:"+id));
         }
         for(var kind:ArmorModuleType.values()){
-            String id=kind.id+"_module";
+            for(int level=1;level<=kind.maxLevel();level++){
+            String id=kind.itemId(level);
             assertTrue(Files.isRegularFile(recipes.resolve(id+".json")),"Recipe: "+id);
             assertTrue(Files.isRegularFile(models.resolve(id+".json")),"Model: "+id);
+            if(level>1){
+                var json=Files.readString(recipes.resolve(id+".json"));
+                assertTrue(json.contains("unusualcopper:"+kind.itemId(level-1)),"Physical prior module: "+id);
+                assertTrue(json.contains("unusualcopper:"+id),"Static result for SSN: "+id);
+            }
+            }
         }
         assertTrue(Files.isRegularFile(recipes.resolve("armor_workbench.json")));
         assertTrue(Files.isRegularFile(Path.of("src/generated/resources/data/unusualcopper/loot_tables/blocks/armor_workbench.json")));

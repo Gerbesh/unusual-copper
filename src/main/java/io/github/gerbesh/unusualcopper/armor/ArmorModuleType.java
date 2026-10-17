@@ -17,6 +17,16 @@ public enum ArmorModuleType {
     public final String id;
     public final EquipmentSlot slot;
     public final int cue;
+    public int maxLevel(){return switch(this){case SHIELD_FIELD,MINING_SERVO->3;case OPTIC_VISOR,AQUA_LUNGS,STRIDE_DRIVE,JUMP_DRIVE->2;default->1;};}
+    public int cue(int level){
+        if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");
+        if(level==1)return cue;
+        return switch(this){case OPTIC_VISOR,AQUA_LUNGS->8;case SHIELD_FIELD->level==2?15:35;
+            case STRIDE_DRIVE->15;case MINING_SERVO->level==2?24:60;
+            case JUMP_DRIVE->25;default->throw new IllegalArgumentException("Module level");};
+    }
+    public String itemId(int level){if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");return id+"_module"+(level==1?"":"_tier_"+level);}
+    public int requiredTier(int level){if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");return this==FLIGHT_CORE_II?LimitedFlightPolicy.REQUIRED_TIER:this==HOVER_DRIVE?HoverPolicy.REQUIRED_TIER:level;}
     ArmorModuleType(String id, EquipmentSlot slot, int cue) {
         this.id=id;this.slot=slot;this.cue=cue;
     }

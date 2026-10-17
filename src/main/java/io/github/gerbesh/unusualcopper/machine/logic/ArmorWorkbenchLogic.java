@@ -19,9 +19,9 @@ public final class ArmorWorkbenchLogic implements MachineLogic {
         ItemStack input=m.inventory.getStackInSlot(1);
         if(!(armor.getItem() instanceof ProgrammableArmorItem)||input.isEmpty())return false;
         if(input.getItem() instanceof ArmorModuleItem module) {
-            if(input.hasTag() || !ArmorData.canInstall(armor,module.module))return false;
+            if(input.hasTag() || !ArmorData.canInstall(armor,module.module,module.moduleLevel))return false;
             m.commitLocally(()-> {
-                if(ArmorData.install(armor,module.module))input.shrink(1);
+                if(ArmorData.install(armor,module.module,module.moduleLevel))input.shrink(1);
                 m.setChanged();
             });
             return true;
@@ -88,9 +88,9 @@ public final class ArmorWorkbenchLogic implements MachineLogic {
         if(!allowed(m)||!m.energyEnabled())return false;
         ItemStack armor=m.inventory.getStackInSlot(0);
         var types=ArmorData.modules(armor);
-        if(types.isEmpty())return false;
+        if(types.isEmpty()||!ArmorData.upgradeSafe(armor))return false;
         var module=types.get(types.size()-1);
-        ItemStack result=new ItemStack(ModContent.ARMOR_MODULES.get(module).get());
+        ItemStack result=new ItemStack(ModContent.armorModuleItem(module,ArmorData.moduleLevel(armor,module)));
         if(!m.canFitOutput(result))return false;
         m.commitLocally(()->{
             ArmorData.removeLast(armor);

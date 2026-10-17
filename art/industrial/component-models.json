@@ -16,12 +16,20 @@
     "prismatic_battery",
     "sovereign_battery",
     "optic_visor_module",
+    "optic_visor_module_tier_2",
     "aqua_lungs_module",
+    "aqua_lungs_module_tier_2",
     "stride_drive_module",
+    "stride_drive_module_tier_2",
     "mining_servo_module",
+    "mining_servo_module_tier_2",
+    "mining_servo_module_tier_3",
     "fall_damper_module",
     "jump_drive_module",
+    "jump_drive_module_tier_2",
     "hover_drive_module",
-    "flight_core_ii_module"
+    "flight_core_ii_module",
+    "shield_field_module_tier_2",
+    "shield_field_module_tier_3"
   ]
 }

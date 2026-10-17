@@ -41,6 +41,8 @@ public final class ModContent {
     public static final java.util.Map<String,RegistryObject<Item>> PROGRAMMABLE_ARMOR = new java.util.LinkedHashMap<>();
     public static final EnumMap<io.github.gerbesh.unusualcopper.armor.ArmorModuleType,RegistryObject<Item>> ARMOR_MODULES =
             new EnumMap<>(io.github.gerbesh.unusualcopper.armor.ArmorModuleType.class);
+    public static final java.util.Map<String,RegistryObject<Item>> ARMOR_MODULE_VARIANTS=new java.util.LinkedHashMap<>();
+    public static Item armorModuleItem(io.github.gerbesh.unusualcopper.armor.ArmorModuleType module,int level){return ARMOR_MODULE_VARIANTS.get(module.itemId(level)).get();}
     static {
         for(int tier=1;tier<=3;tier++){
             final int t=tier;
@@ -50,7 +52,10 @@ public final class ModContent {
             }
         }
         for(var kind:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values()){
-            ARMOR_MODULES.put(kind,ITEMS.register(kind.id+"_module",()->new io.github.gerbesh.unusualcopper.armor.ArmorModuleItem(kind)));
+            for(int level=1;level<=kind.maxLevel();level++){
+                final int l=level;RegistryObject<Item> registered=ITEMS.register(kind.itemId(l),()->new io.github.gerbesh.unusualcopper.armor.ArmorModuleItem(kind,l));
+                ARMOR_MODULE_VARIANTS.put(kind.itemId(l),registered);if(l==1)ARMOR_MODULES.put(kind,registered);
+            }
         }
     }
     public static final RegistryObject<Block> ENERGY_PIPE = BLOCKS.register("copper_energy_pipe", EnergyPipeBlock::new);

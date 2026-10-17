@@ -525,5 +525,15 @@
   "armorconsole.priority": "Priority %s",
   "armorconsole.priority_hint": "2 = highest (flight), 6 = lowest. Click to increase, Shift-click to decrease. Saved separately for each profile.",
   "armorconsole.limited": "Power / charge limit",
-  "armorconsole.open_hint": "Wear to configure; bind Armor Console in Controls > Unusual Copper"
+  "armorconsole.open_hint": "Wear to configure; bind Armor Console in Controls > Unusual Copper",
+  "item.unusualcopper.optic_visor_module_tier_2": "Optic Visor Module II",
+  "item.unusualcopper.aqua_lungs_module_tier_2": "Aqua Lungs Module II",
+  "item.unusualcopper.stride_drive_module_tier_2": "Stride Drive Module II",
+  "item.unusualcopper.mining_servo_module_tier_2": "Mining Servo Module II",
+  "item.unusualcopper.mining_servo_module_tier_3": "Mining Servo Module III",
+  "item.unusualcopper.shield_field_module_tier_2": "Shield Field Module II",
+  "item.unusualcopper.shield_field_module_tier_3": "Shield Field Module III",
+  "item.unusualcopper.jump_drive_module_tier_2": "Jump Drive Module II",
+  "armor.unusualcopper.module_level": "Module level: %s",
+  "armor.unusualcopper.module_chassis": "Minimum chassis tier: %s"
 }

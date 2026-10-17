@@ -24,7 +24,7 @@ public final class ArmorPayments {
     private static final class State {
         final int tick;boolean continuous;
         final EnumMap<ArmorModuleType,ArmorPowerScheduler.Demand> power=new EnumMap<>(ArmorModuleType.class);
-        ItemStack miningChest,miningLegs;ArmorModuleSettings miningSettings;int miningProfile;
+        ItemStack miningChest,miningLegs;ArmorModuleSettings miningSettings;int miningProfile,miningLevel;
         final List<BooleanSupplier> miningApplications=new ArrayList<>();
         State(int tick){this.tick=tick;}
     }
@@ -57,24 +57,25 @@ public final class ArmorPayments {
         UUID batch=ArmorData.reservationBatch(chest);track(p,chest,batch);
         DEBITS.add(new Debit(p,chest,batch,module,amount,applied));return true;
     }
-    /** One 8 CuE mining allocation per server tick, even with repeated BreakSpeed queries. */
+    /** One level-priced mining allocation per tick, even with repeated BreakSpeed queries. */
     public static boolean mining(ServerPlayer p,ItemStack chest,PlayerEvent.BreakSpeed event,float before){
         var s=state(p);var module=ArmorModuleType.MINING_SERVO;
         var piece=p.getItemBySlot(EquipmentSlot.LEGS);int profile=ArmorData.profile(chest);
+        int level=ArmorData.moduleLevel(piece,module),cost=module.cue(level);
         var settings=ArmorData.settings(piece,module,profile);
         if(EVENTS.contains(event))return false;
         if(s.miningChest!=null){
-            if(s.miningChest!=chest||s.miningLegs!=piece||s.miningProfile!=profile||!s.miningSettings.equals(settings))return false;
+            if(s.miningChest!=chest||s.miningLegs!=piece||s.miningProfile!=profile||s.miningLevel!=level||!s.miningSettings.equals(settings))return false;
             if(s.miningApplications.size()>=64)return false;
             EVENTS.markQuery(event);
             s.miningApplications.add(()->!event.isCanceled()&&event.getNewSpeed()>before);return true;
         }
-        var request=new ArmorPowerScheduler.Demand(module,settings.priority(),module.cue);
+        var request=new ArmorPowerScheduler.Demand(module,settings.priority(),cost);
         var plan=ArmorPowerScheduler.plan(List.of(request),CopperBatteryItem.stored(ArmorData.battery(chest)),committedPower(p));
         ArmorTelemetry.updateLimited(p,plan.limited(),List.of(module));
         if(plan.accepted().isEmpty())return false;
-        if(!event(p,chest,module,event,module.cue,()->s.miningApplications.stream().anyMatch(BooleanSupplier::getAsBoolean)))return false;
-        s.miningChest=chest;s.miningLegs=piece;s.miningProfile=profile;s.miningSettings=settings;s.power.put(module,request);
+        if(!event(p,chest,module,event,cost,()->s.miningApplications.stream().anyMatch(BooleanSupplier::getAsBoolean)))return false;
+        s.miningChest=chest;s.miningLegs=piece;s.miningProfile=profile;s.miningLevel=level;s.miningSettings=settings;s.power.put(module,request);
         s.miningApplications.add(()->!event.isCanceled()&&event.getNewSpeed()>before);return true;
     }
     @SubscribeEvent(priority=EventPriority.LOW)
