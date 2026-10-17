@@ -80,6 +80,43 @@ public final class ArmorRuntime {
                 && ArmorData.pay(chest,ArmorModuleType.JUMP_DRIVE.cue)){
             used+=ArmorModuleType.JUMP_DRIVE.cue;paid=true;
         }
+        // F2: crouch in mid-air to stabilize vertically. This NEVER touches mayfly,
+        // flying or another mod's permissions and stops immediately when unpowered.
+        ItemStack boots=player.getItemBySlot(EquipmentSlot.FEET);
+        if(boots.getItem() instanceof ProgrammableArmorItem chassis
+                && chassis.tier>=HoverPolicy.REQUIRED_TIER
+                && !player.getAbilities().mayfly && !player.isPassenger()
+                && !player.onGround() && !player.isInWater() && !player.isInLava()
+                && player.isShiftKeyDown()
+                && equipped(player,EquipmentSlot.FEET,ArmorModuleType.HOVER_DRIVE,profile)
+                && used+HoverPolicy.CUE_PER_TICK<=ArmorProgression.totalBudget()) {
+            var data=player.getPersistentData();
+            long now=player.level().getGameTime();
+            long last=data.getLong("UCHoverLastTick");
+            long started=data.getLong("UCHoverStart");
+            long restUntil=data.getLong("UCHoverRestUntil");
+            if(!data.contains("UCHoverLastTick") || now<=last || now-last>1) {
+                // Releasing crouch, losing equipment or changing dimension ends the session.
+                started=now;
+            }
+            if(now>=restUntil && !HoverPolicy.canRun(chassis.tier,now,started,restUntil)) {
+                // Duration cap: maintain a separate, persistent cooldown on the wearer.
+                if(now>=started && now-started>=HoverPolicy.MAX_SESSION_TICKS)
+                    data.putLong("UCHoverRestUntil",HoverPolicy.restUntil(started));
+            } else if(HoverPolicy.canRun(chassis.tier,now,started,restUntil)
+                    && ArmorData.pay(chest,HoverPolicy.CUE_PER_TICK)) {
+                data.putLong("UCHoverStart",started);
+                data.putLong("UCHoverLastTick",now);
+                var velocity=player.getDeltaMovement();
+                // Vertical thrust roughly compensates vanilla gravity. Collisions and world
+                // border remain vanilla-server-controlled; no noclip or free-flying grant.
+                player.setDeltaMovement(velocity.x*0.65D,0.075D,velocity.z*0.65D);
+                player.fallDistance=0F;
+                player.hurtMarked=true;
+                used+=HoverPolicy.CUE_PER_TICK;
+                paid=true;
+            }
+        }
         if(paid)sync(player);
     }
     @SubscribeEvent public static void fall(LivingFallEvent event) {

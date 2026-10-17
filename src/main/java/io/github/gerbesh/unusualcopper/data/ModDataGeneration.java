@@ -143,6 +143,7 @@ public final class ModDataGeneration {
                     case SHIELD_FIELD -> Items.IRON_BLOCK;
                     case FALL_DAMPER -> Items.PHANTOM_MEMBRANE;
                     case JUMP_DRIVE -> Items.RABBIT_FOOT;
+                    case HOVER_DRIVE -> Items.SHULKER_SHELL;
                 };
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ARMOR_MODULES.get(type).get())
                         .requires(ModContent.MODULE_BLANK_I.get()).requires(catalyst).requires(Items.REDSTONE)

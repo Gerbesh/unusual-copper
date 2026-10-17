@@ -10,7 +10,8 @@ public enum ArmorModuleType {
     MINING_SERVO("mining_servo", EquipmentSlot.LEGS, 8),
     SHIELD_FIELD("shield_field", EquipmentSlot.CHEST, 6),
     FALL_DAMPER("fall_damper", EquipmentSlot.FEET, 2),
-    JUMP_DRIVE("jump_drive", EquipmentSlot.FEET, 10);
+    JUMP_DRIVE("jump_drive", EquipmentSlot.FEET, 10),
+    HOVER_DRIVE("hover_drive", EquipmentSlot.FEET, 80);
 
     public final String id;
     public final EquipmentSlot slot;

@@ -41,7 +41,8 @@ public final class ArmorData {
     public static boolean canInstall(ItemStack item,ArmorModuleType type) {
         if(!(item.getItem() instanceof ProgrammableArmorItem armor))return false;
         var modules=modules(item);
-        return type.slot==armor.getEquipmentSlot() && modules.size()<slots(armor) && !modules.contains(type);
+        return type.slot==armor.getEquipmentSlot() && modules.size()<slots(armor) && !modules.contains(type)
+                && (type!=ArmorModuleType.HOVER_DRIVE || armor.tier>=HoverPolicy.REQUIRED_TIER);
     }
     public static boolean install(ItemStack item,ArmorModuleType kind) {
         if(!canInstall(item,kind))return false;

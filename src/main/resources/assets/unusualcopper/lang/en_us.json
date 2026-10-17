@@ -449,6 +449,8 @@
   "armor.unusualcopper.change_profile": "Cycle chestplate profile",
   "armor.unusualcopper.upgrade": "Upgrade chassis I → II or II → III. Place the original armor in the first input and one newly crafted next-tier piece of the same slot in the second. Costs 24,000 / 60,000 CuE; preserves the original enchantments, NBT, physical battery, modules, name and durability percentage. Consumes the donor chassis.",
   "item.unusualcopper.jump_drive_module": "Jump Drive Module",
+  "item.unusualcopper.hover_drive_module": "Hover Drive Module",
+  "armor.unusualcopper.hover_hint": "F2: Hold sneak while airborne with a full tier II+ set and a charged chest battery. Uses 80 CuE/tick, lasts 30 seconds continuously, followed by 5 seconds cooldown. This does not grant creative flight.",
   "armor.unusualcopper.event_cost": "Activation charge: %s CuE",
   "armor.unusualcopper.shield_event": "Additional cost: %s CuE per absorbed HP"
 }

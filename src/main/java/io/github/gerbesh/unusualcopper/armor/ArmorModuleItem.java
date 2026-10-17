@@ -17,6 +17,7 @@ public final class ArmorModuleItem extends Item {
         tooltip.add(Component.translatable("armor.unusualcopper.module_cost",module.cue));
         if(module==ArmorModuleType.FALL_DAMPER)tooltip.add(Component.translatable("armor.unusualcopper.event_cost",1000));
         if(module==ArmorModuleType.JUMP_DRIVE)tooltip.add(Component.translatable("armor.unusualcopper.event_cost",2000));
+        if(module==ArmorModuleType.HOVER_DRIVE)tooltip.add(Component.translatable("armor.unusualcopper.hover_hint"));
         if(module==ArmorModuleType.SHIELD_FIELD)tooltip.add(Component.translatable("armor.unusualcopper.shield_event",300));
     }
 }
