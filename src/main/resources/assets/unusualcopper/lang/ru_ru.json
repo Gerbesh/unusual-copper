@@ -447,6 +447,7 @@
   "armor.unusualcopper.remove": "Вынуть последний модуль в выходной слот",
   "armor.unusualcopper.eject_battery": "Извлечь батарею с сохранением заряда",
   "armor.unusualcopper.change_profile": "Переключить профиль нагрудника",
+  "armor.unusualcopper.upgrade": "Улучшить шасси I → II или II → III. Положите старую броню в первый вход, а новую броню следующего уровня того же типа во второй. Цена 24 000 / 60 000 CuE. Чары, NBT, физическая батарея, модули, имя и доля прочности сохраняются. Новый предмет-донор расходуется.",
   "item.unusualcopper.jump_drive_module": "Модуль прыжкового импульса",
   "armor.unusualcopper.event_cost": "Стоимость активации: %s CuE",
   "armor.unusualcopper.shield_event": "Дополнительно: %s CuE за 1 HP поглощённого урона"

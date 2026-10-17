@@ -231,7 +231,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
                 }
                 if(kind==MachineKind.ARMOR_WORKBENCH)return slot==0?stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem
-                        : stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ArmorModuleItem || stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem;
+                        : stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ArmorModuleItem || stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem
+                        || stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem;
                 if(kind==MachineKind.PRECISION_ASSEMBLER) return slot==0 && io.github.gerbesh.unusualcopper.recipe.AssemblyPatternCard.valid(stack);
                 if(kind==MachineKind.PRODUCTION_CONTROLLER) return slot==0 && !stack.hasTag() && stack.is(ModContent.PATTERN_CARD.get());
                 if(kind==MachineKind.RESONANCE_CRYSTALLIZER) return !stack.hasTag() && (slot==0 ? stack.is(Items.AMETHYST_SHARD) : stack.is(ModContent.RESONANT_COIL.get()));

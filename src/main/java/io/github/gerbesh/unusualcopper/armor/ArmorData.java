@@ -10,6 +10,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 
 /** All persistent module/battery state belongs to the physical armor stack. */
 public final class ArmorData {
@@ -93,6 +94,31 @@ public final class ArmorData {
                 || !(battery.getItem() instanceof CopperBatteryItem) || battery.getCount()!=1)
             throw new IllegalArgumentException("Invalid battery");
         mutable(chest).put("Battery",battery.save(new CompoundTag()));
+    }
+    /** Refuse corrupt or future-version armor data rather than silently dropping charged state. */
+    public static boolean upgradeSafe(ItemStack item) {
+        if(!(item.getItem() instanceof ProgrammableArmorItem armor) || item.getCount()!=1)return false;
+        if(!item.hasTag() || !item.getTag().contains(ROOT))return true;
+        if(!item.getTag().contains(ROOT,Tag.TAG_COMPOUND))return false;
+        CompoundTag root=item.getTag().getCompound(ROOT);
+        if(!root.contains("Version",Tag.TAG_INT)||root.getInt("Version")!=1)return false;
+        if(root.contains("Modules")) {
+            if(!root.contains("Modules",Tag.TAG_LIST))return false;
+            ListTag list=root.getList("Modules",Tag.TAG_STRING);
+            if(list.size()>0 && list.getElementType()!=Tag.TAG_STRING)return false;
+            if(root.get("Modules") instanceof ListTag raw && raw.size()>0 && raw.getElementType()!=Tag.TAG_STRING)return false;
+            if(list.size()>slots(armor))return false;
+            var seen=new HashSet<ArmorModuleType>();
+            for(int i=0;i<list.size();i++) {
+                ArmorModuleType module=ArmorModuleType.byId(list.getString(i));
+                if(module==null || module.slot!=armor.getEquipmentSlot() || !seen.add(module))return false;
+            }
+        }
+        if(root.contains("Battery") && (!root.contains("Battery",Tag.TAG_COMPOUND)
+                || armor.getType()!=ArmorItem.Type.CHESTPLATE || battery(item).isEmpty()))return false;
+        if(root.contains("Profile") && (!root.contains("Profile",Tag.TAG_INT)
+                || root.getInt("Profile")<0 || root.getInt("Profile")>3))return false;
+        return true;
     }
     public static boolean pay(ItemStack chest,int amount) {
         return ArmorProgression.validPayment(amount) && spend(chest,amount);

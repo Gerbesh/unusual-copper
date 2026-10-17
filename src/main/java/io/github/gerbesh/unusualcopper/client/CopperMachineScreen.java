@@ -14,7 +14,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
     private Button cancelButton, redstoneButton,brewerButton,energyButton,batteryButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
     private Button orderOne, orderBatch, orderPattern, patternEngrave;
-    private Button armorInstall, armorRemove, armorBattery, armorProfile;
+    private Button armorInstall, armorRemove, armorBattery, armorProfile, armorUpgrade;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
     }
@@ -47,6 +47,8 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
                 .tooltip(Tooltip.create(Component.translatable("armor.unusualcopper.eject_battery"))).bounds(leftPos+135,topPos+91,28,18).build());
         armorProfile=addRenderableWidget(Button.builder(Component.literal("P"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,19))
                 .tooltip(Tooltip.create(Component.translatable("armor.unusualcopper.change_profile"))).bounds(leftPos+166,topPos+91,28,18).build());
+        armorUpgrade=addRenderableWidget(Button.builder(Component.literal("↑"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,21))
+                .tooltip(Tooltip.create(Component.translatable("armor.unusualcopper.upgrade"))).bounds(leftPos+196,topPos+91,22,18).build());
         orderPattern=addRenderableWidget(Button.builder(Component.translatable("production.unusualcopper.pattern"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,15))
                 .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.pattern_hint"))).bounds(leftPos+145,topPos+91,39,18).build());
     }
@@ -126,7 +128,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         energyButton.visible=menu.kind().capacity>0;
         redstoneButton.visible=menu.kind()!=MachineKind.COPPER_FLUID_TANK && menu.kind()!=MachineKind.PRODUCTION_CONTROLLER && menu.kind()!=MachineKind.ARMOR_WORKBENCH;
         boolean armorBench=menu.kind()==MachineKind.ARMOR_WORKBENCH;
-        armorInstall.visible=armorBench;armorRemove.visible=armorBench;armorBattery.visible=armorBench;armorProfile.visible=armorBench;
+        armorInstall.visible=armorBench;armorRemove.visible=armorBench;armorBattery.visible=armorBench;armorProfile.visible=armorBench;armorUpgrade.visible=armorBench;
         boolean assembler=menu.kind()==MachineKind.PRECISION_ASSEMBLER;
         patternEngrave.visible=assembler;
         patternEngrave.active=assembler && menu.duration()==0 && !menu.slots.get(0).getItem().isEmpty();

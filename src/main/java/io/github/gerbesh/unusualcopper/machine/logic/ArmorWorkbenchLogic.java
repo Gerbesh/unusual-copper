@@ -41,6 +41,49 @@ public final class ArmorWorkbenchLogic implements MachineLogic {
         return false;
     }
 
+    /**
+     * Consume one already-crafted next-tier chassis, preserving the original physical
+     * stack's name, enchants, full serialized capabilities, modules and embedded battery.
+     * A separate donor cannot be re-used; one old plus one new chassis become one new.
+     */
+    public static boolean upgrade(CopperMachineBlockEntity m) {
+        if(!allowed(m)||!m.energyEnabled()||!(m.getLevel() instanceof ServerLevel))return false;
+        ItemStack previous=m.inventory.getStackInSlot(0);
+        ItemStack donor=m.inventory.getStackInSlot(1);
+        if(!(previous.getItem() instanceof ProgrammableArmorItem from)
+                || !(donor.getItem() instanceof ProgrammableArmorItem to)
+                || previous.getCount()!=1 || donor.getCount()!=1 || donor.hasTag()
+                || donor.save(new net.minecraft.nbt.CompoundTag()).contains("ForgeCaps")
+                || from.getType()!=to.getType() || to.tier!=from.tier+1
+                || !ArmorData.upgradeSafe(previous))return false;
+        int cost=ArmorUpgradePolicy.energyCost(from.tier);
+        if(cost<=0||m.energy.stored()<cost)return false;
+
+        // NBT-based identity conversion retains serialized ForgeCaps unlike copying
+        // only the vanilla tag. Validate it before consuming either physical item.
+        var saved=previous.save(new net.minecraft.nbt.CompoundTag());
+        var itemId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(donor.getItem());
+        if(itemId==null)return false;
+        saved.putString("id",itemId.toString());
+        ItemStack upgraded=ItemStack.of(saved);
+        if(!upgraded.is(donor.getItem()) || !ArmorData.upgradeSafe(upgraded))return false;
+        if(saved.contains("ForgeCaps") && !upgraded.save(new net.minecraft.nbt.CompoundTag())
+                .getCompound("ForgeCaps").equals(saved.getCompound("ForgeCaps")))return false;
+        int damage;
+        try {
+            damage=ArmorUpgradePolicy.damageAfterUpgrade(previous.getDamageValue(),
+                    previous.getMaxDamage(),upgraded.getMaxDamage());
+        } catch(IllegalArgumentException invalid) {return false;}
+        upgraded.setDamageValue(damage);
+        m.commitLocally(()->{
+            if(!m.energy.spend(cost))throw new IllegalStateException("Upgrade energy changed");
+            m.inventory.setStackInSlot(0,upgraded);
+            m.inventory.setStackInSlot(1,ItemStack.EMPTY);
+            m.setChanged();
+        });
+        return true;
+    }
+
     public static boolean recoverModule(CopperMachineBlockEntity m) {
         if(!allowed(m)||!m.energyEnabled())return false;
         ItemStack armor=m.inventory.getStackInSlot(0);

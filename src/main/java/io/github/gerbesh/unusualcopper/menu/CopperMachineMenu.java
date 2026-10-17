@@ -70,6 +70,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
             if(button==17)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.recoverModule(machine);
             if(button==18)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.recoverBattery(machine);
             if(button==19)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.cycleProfile(machine);
+            if(button==21)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.upgrade(machine);
         }
         if(machine.kind==MachineKind.PRECISION_ASSEMBLER && button==20
                 && player instanceof net.minecraft.server.level.ServerPlayer server)
