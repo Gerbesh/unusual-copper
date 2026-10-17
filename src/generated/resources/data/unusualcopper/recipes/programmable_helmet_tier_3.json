@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NCN",
+    "P P"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_helmet_tier_3",
+    "count": 1
+  }
+}

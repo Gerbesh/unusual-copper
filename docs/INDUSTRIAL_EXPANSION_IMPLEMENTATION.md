@@ -137,3 +137,30 @@
 3. Switch to reinforced-frame pattern only while queue idle, load the exact vanilla recipe layout; confirm recipe ID/output validation and 1,800 CuE per item.
 4. Verify two controllers cannot share one grid or consume a neighboring SSN/chest via simulated reservation. Assert craft cancellation keeps all unconsumed inputs.
 5. In-game UI/animations, saved-world migration, claim protection and concurrency remain user acceptance tests; no Minecraft/GameTest launched.
+
+
+## E6A: physical modular copper armor, first live abilities (2026-10-17)
+
+- Registered **12 additive armor IDs**: helmet, chestplate, leggings, boots in tiers I/II/III. Protection/durability scale per tier. Four socket capacities are 1/1/1/1, 2/3/2/2 and 3/4/3/3. Existing standard armor enchantments are unchanged.
+- Registered **seven physical modules**, with fixed whitelist IDs, allowed piece, inventory items, survival crafting, visible localized names and module costs: optic visor, aqua lungs, stride drive, mining servo, shield field, fall damper and jump drive.
+- Armor NBT uses `UCProgrammableArmor` version 1 with a clamped, validated module list and exactly **one physical battery ItemStack serialized inside the chestplate**. Existing CuE battery items and charge format are reused unchanged; unknown module IDs do not activate. No charger, module or armor upgrade fabricates CuE.
+- New `armor_workbench` is a 100,000 CuE machine with server-validated `+` installation, `-` module removal, `B` battery ejection and `P` chestplate profile cycling. Armor goes in primary input, module/battery in secondary input; recovered physical items appear in the same two persistent outputs. The workstation transfers at most **4096 CuE/t** from its real network buffer to the real embedded battery, preserving remaining charge. Its normal side-mode, owner and item-output restrictions are inherited.
+- Four built-in profiles (Economy / Mining / Defense / All) drive the server executor. **E6A interim bus requires a full same-tier four-piece set** plus the chestplate battery; mixed/partial sets do not receive shared energy or movement bonuses. This is more conservative than permitting cross-piece energy without the E6 microbuffer design.
+- Live paid abilities: `aqua_lungs` in helmet restores air underwater (3 CuE/t when used); `stride_drive` in leggings gives one unique transient movement attribute modifier (5 CuE/t); `mining_servo` in leggings modifies only normal server player BreakSpeed (8 CuE per server callback, no extractor support); `shield_field` in chestplate reserves 6 CuE/t and additionally pays **300 CuE per 1 HP absorbed** in the post-armor damage hook; `fall_damper` in boots uses 2 CuE/t airborne and 1000 CuE per falling-damage intervention.
+- **E7 F1 prototype**: `jump_drive` in boots, active in Mining/All profiles, uses 10 CuE/t while armed and **2000 CuE** for a server-side boosted jump with 40-tick cooldown. It does not grant free-flight, levitation or fall immunity.
+- All runtime abilities check the physically equipped, same-tier full set, server-calculated triggers, installed module whitelist and current battery charge. Movement modifiers owned by this mod are removed at the start of the next server tick and on logout; foreign potion effects are not altered.
+
+### Limitations before a full E6/E7 release
+
+- No player-worn configuration screen, editable per-module thresholds, custom armor HUD, hotkeys, visor night vision or scanner. The visor can be crafted/installed but does **not** yet grant an effect, avoiding hostile overwrites of external Night Vision effects.
+- Tier II/III chassis have independently craftable, expensive fresh-item recipes. **Upgrade recipes transferring name/durability/enchants/NBT/installed battery are not yet provided**, so no existing charged chassis is accepted as a crafting ingredient.
+- No microbuffers, charge reserve, safe multi-source flight grants, F2 hover, F3 bounded flight, F4 Creative Flight, or emergency landing. `ArmorProgression` guards a 900 CuE/t limit, while paid event costs (e.g. F1 jump) use a separate validated path.
+- The workstation casing and item icons are placeholders; armor renders using a vanilla iron-layer fallback until authored copper-laminate textures ship. No game client or GameTest server was launched.
+
+### Manual E6A/F1 acceptance checks
+
+1. Craft all four tier-I items, blank modules and workbench; place a helmet/chest/leggings/boots in the station input, module in its other input, press `+`. Check slot limits; removing a module gives a **physical module** into an output, no duplicate. Check both outputs filled (recovery must refuse).
+2. Install a real charged battery in a chestplate; take it back using `B`; assert the exact stored CuE is unchanged. Recharge on the station with energy from a CuE cell and verify input/debit, tick limit and energy bookkeeping.
+3. Equip a same-tier four-piece set and choose profiles using `P` while chestplate is in the workbench. Try aqua lungs in water, movement attribute, normal mining, shield damage and fall protection. Check precise CuE loss, no effects with an incomplete/mixed set, no gratis effects after depleted battery or removal.
+4. Test F1 jumping while in the Mining/All profile, 2000 CuE event charge and cooldown; test dismount, logout, death, dimension switch, foreign Speed/Water Breathing and SMP two players.
+5. Test restart/old worlds, enchanted armor, full inventory, claims, side configuration, shaders and manual visual quality in Minecraft. These checks are **not** claimed as automated in-game verification.

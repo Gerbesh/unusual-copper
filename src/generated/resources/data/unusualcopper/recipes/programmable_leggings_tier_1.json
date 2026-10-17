@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "P P",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_leggings_tier_1",
+    "count": 1
+  }
+}

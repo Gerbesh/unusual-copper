@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 51;
+    public static final int DATA_COUNT = 54;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -32,7 +32,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for (int index = 0; index < 4; index++) {
             final int slotIndex = index;
             addSlot(new SlotItemHandler(slots, index, positions[index][0], positions[index][1]) {
-                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.CIRCUIT_ETCHER || kind() == MachineKind.RESONANCE_CRYSTALLIZER || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
+                @Override public boolean isActive() { return slotIndex >= 2 ? kind().hasInventory() : kind().acceptsInputs() && (slotIndex != 1 || kind() == MachineKind.SOLAR_INFUSER || kind() == MachineKind.COPPER_PRESS || kind() == MachineKind.VORTEX_PURIFIER || kind() == MachineKind.CIRCUIT_ETCHER || kind() == MachineKind.RESONANCE_CRYSTALLIZER || kind() == MachineKind.ARMOR_WORKBENCH || kind() == MachineKind.ARBORIST || kind()==MachineKind.AETHERIC_BREWER); }
                 @Override public boolean mayPickup(Player player) { return machine == null || slotIndex >= 2 || !machine.hasOperation(); }
             });
         }
@@ -65,6 +65,12 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (machine == null || !stillValid(player)) return false;
+        if(machine.kind==MachineKind.ARMOR_WORKBENCH) {
+            if(button==16)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.install(machine);
+            if(button==17)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.recoverModule(machine);
+            if(button==18)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.recoverBattery(machine);
+            if(button==19)return io.github.gerbesh.unusualcopper.machine.logic.ArmorWorkbenchLogic.cycleProfile(machine);
+        }
         if(machine.kind==MachineKind.PRODUCTION_CONTROLLER) {
             if(button==12){machine.queueProduction(1);return true;}
             if(button==13){machine.queueProduction(16);return true;}

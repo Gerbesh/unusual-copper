@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RCR",
+    "F F"
+  ],
+  "key": {
+    "R": {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_helmet_tier_2",
+    "count": 1
+  }
+}

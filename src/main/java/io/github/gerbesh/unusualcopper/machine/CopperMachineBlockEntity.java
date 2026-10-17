@@ -230,6 +230,8 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     if(arborist.job!=null) return false;
                     return slot==1?io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.axe(stack):io.github.gerbesh.unusualcopper.gameplay.TreeSpecies.item(stack)!=null;
                 }
+                if(kind==MachineKind.ARMOR_WORKBENCH)return slot==0?stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem
+                        : stack.getItem() instanceof io.github.gerbesh.unusualcopper.armor.ArmorModuleItem || stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem;
                 if(kind==MachineKind.PRECISION_ASSEMBLER || kind==MachineKind.PRODUCTION_CONTROLLER) return slot==0 && !stack.hasTag() && stack.is(ModContent.PATTERN_CARD.get());
                 if(kind==MachineKind.RESONANCE_CRYSTALLIZER) return !stack.hasTag() && (slot==0 ? stack.is(Items.AMETHYST_SHARD) : stack.is(ModContent.RESONANT_COIL.get()));
                 if(kind==MachineKind.CIRCUIT_ETCHER) return !stack.hasTag() && (slot==0 ? stack.is(ModContent.CIRCUIT_BLANK.get()) : stack.is(ModContent.ETCHING_REAGENT.get()));
@@ -256,6 +258,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             case RESONANCE_CRUSHER, COPPER_PRESS, VORTEX_PURIFIER, RESONANCE_CRYSTALLIZER, CIRCUIT_ETCHER -> new IndustrialProcessingLogic();
             case PRECISION_ASSEMBLER -> new PrecisionAssemblyLogic();
             case PRODUCTION_CONTROLLER -> new ProductionOrderLogic();
+            case ARMOR_WORKBENCH -> new ArmorWorkbenchLogic();
             case COPPER_FLUID_PUMP -> new FluidPumpLogic();
             case COPPER_FLUID_TANK -> (m,server)->m.status(MachineStatus.IDLE);
             case COPPER_CELL, COPPER_CELL_II, COPPER_CELL_III, ENERGY_DISTRIBUTOR, ENERGY_MONITOR -> (m, level) -> m.status(MachineStatus.IDLE);
@@ -675,6 +678,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                     case 45 -> batteryMode; case 46 -> harvested;
                     case 47 -> kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER || kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK ? water.getFluidAmount() : 0;
                     case 48 -> productionQueued; case 49 -> productionCompleted; case 50 -> productionPattern;
+                    case 51 -> io.github.gerbesh.unusualcopper.armor.ArmorData.modules(inventory.getStackInSlot(0)).size();
+                    case 52 -> inventory.getStackInSlot(0).getItem() instanceof io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem armorItem ? io.github.gerbesh.unusualcopper.armor.ArmorData.slots(armorItem):0;
+                    case 53 -> io.github.gerbesh.unusualcopper.armor.ArmorData.profile(inventory.getStackInSlot(0));
                     default -> 0;
                 };
             }

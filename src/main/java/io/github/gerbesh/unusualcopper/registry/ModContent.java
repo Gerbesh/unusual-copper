@@ -37,6 +37,22 @@ public final class ModContent {
             MACHINES.put(kind, block); ITEMS.register(kind.id, () -> new BlockItem(block.get(), new Item.Properties()));
         }
     }
+    /** Stable individual armor item IDs. Never replace an older item's registry entry. */
+    public static final java.util.Map<String,RegistryObject<Item>> PROGRAMMABLE_ARMOR = new java.util.LinkedHashMap<>();
+    public static final EnumMap<io.github.gerbesh.unusualcopper.armor.ArmorModuleType,RegistryObject<Item>> ARMOR_MODULES =
+            new EnumMap<>(io.github.gerbesh.unusualcopper.armor.ArmorModuleType.class);
+    static {
+        for(int tier=1;tier<=3;tier++){
+            final int t=tier;
+            for(var type:new ArmorItem.Type[]{ArmorItem.Type.HELMET,ArmorItem.Type.CHESTPLATE,ArmorItem.Type.LEGGINGS,ArmorItem.Type.BOOTS}){
+                String name="programmable_"+type.getName()+"_tier_"+tier;
+                PROGRAMMABLE_ARMOR.put(name,ITEMS.register(name,()->new io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem(type,t)));
+            }
+        }
+        for(var kind:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values()){
+            ARMOR_MODULES.put(kind,ITEMS.register(kind.id+"_module",()->new io.github.gerbesh.unusualcopper.armor.ArmorModuleItem(kind)));
+        }
+    }
     public static final RegistryObject<Block> ENERGY_PIPE = BLOCKS.register("copper_energy_pipe", EnergyPipeBlock::new);
     public static final RegistryObject<Item> ENERGY_PIPE_ITEM = ITEMS.register("copper_energy_pipe", () -> new BlockItem(ENERGY_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Block> REINFORCED_ENERGY_PIPE = BLOCKS.register("reinforced_energy_pipe", () -> new EnergyPipeBlock(1));

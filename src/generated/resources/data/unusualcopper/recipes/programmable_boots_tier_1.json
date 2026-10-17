@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "P P",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_boots_tier_1",
+    "count": 1
+  }
+}

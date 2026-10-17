@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "R R",
+    "FCF"
+  ],
+  "key": {
+    "R": {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_boots_tier_2",
+    "count": 1
+  }
+}

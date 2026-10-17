@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "P P",
+    "PFP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_chestplate_tier_1",
+    "count": 1
+  }
+}

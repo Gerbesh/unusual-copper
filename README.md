@@ -1,6 +1,6 @@
 # Unusual Copper
 
-**Ветка следующего исправления:** Unusual Copper **0.20.7-alpha.1**, ещё не установлен. Добавлен допуск SSN Progressive 1.4.1 для моста. Опубликованный установленный релиз ниже остаётся 0.20.6-alpha.1.
+**Ветка разработки Industrial Expansion:** **0.20.8-alpha.1**, не установлена и не проверена в Minecraft. E1–E4 + жидкости объединены, E5A и E6A/F1 добавлены в ветке разработки. Установленным релизом остаётся 0.20.6-alpha.1.
 
 Медная энергия, магические механизмы и автоматизация для **Minecraft Java 1.20.1 · Forge 47.x · Java 17**.
 
@@ -35,7 +35,7 @@
 
 ## Документация
 
-**Следующий этап разработки:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Это **проектные спецификации**, а не функции релиза 0.20.6.
+**Следующий этап разработки:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Реализованные alpha-срезы и их ограничения описаны в [журнале промышленной реализации](docs/INDUSTRIAL_EXPANSION_IMPLEMENTATION.md). Они ещё не являются функциями установленного релиза 0.20.6.
 
 - [Экстрактор и сфера](docs/RESONANT_EXTRACTOR.md) — кирка, энергия, область, руды, очередь и визуальные эффекты.
 - [Батареи](docs/BATTERIES.md), [предметные трубы](docs/ITEM_PIPES.md), [SSN Bridge](docs/SSN_BRIDGE.md).

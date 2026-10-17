@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PCP",
+    "FIF",
+    "PBP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_coil"
+    },
+    "F": {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    "I": {
+      "item": "unusualcopper:precision_processor"
+    },
+    "B": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:armor_workbench",
+    "count": 1
+  }
+}

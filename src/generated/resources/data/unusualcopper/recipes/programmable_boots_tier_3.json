@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N N",
+    "PCP"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_boots_tier_3",
+    "count": 1
+  }
+}

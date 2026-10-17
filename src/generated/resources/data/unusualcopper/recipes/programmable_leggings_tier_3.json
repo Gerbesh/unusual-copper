@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NCN",
+    "P P",
+    "P P"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_leggings_tier_3",
+    "count": 1
+  }
+}

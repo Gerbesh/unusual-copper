@@ -90,6 +90,64 @@ public final class ModDataGeneration {
                     .define('P',ModContent.COPPER_PLATE.get()).define('G',Items.GLASS)
                     .define('C',ModContent.RESONANT_COIL.get())
                     .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.ARMOR_WORKBENCH).get())
+                    .pattern("PCP").pattern("FIF").pattern("PBP")
+                    .define('P',ModContent.COPPER_PLATE.get()).define('C',ModContent.RESONANT_COIL.get())
+                    .define('F',ModContent.REINFORCED_FRAME.get()).define('I',ModContent.PRECISION_PROCESSOR.get())
+                    .define('B',Items.IRON_BLOCK)
+                    .unlockedBy("has_processor",has(ModContent.PRECISION_PROCESSOR.get())).save(out);
+            for(int tier=1;tier<=3;tier++) {
+                for(var type:new net.minecraft.world.item.ArmorItem.Type[]{
+                        net.minecraft.world.item.ArmorItem.Type.HELMET,
+                        net.minecraft.world.item.ArmorItem.Type.CHESTPLATE,
+                        net.minecraft.world.item.ArmorItem.Type.LEGGINGS,
+                        net.minecraft.world.item.ArmorItem.Type.BOOTS}) {
+                    String[] pattern=switch(tier) {
+                        case 1 -> switch(type) {
+                            case HELMET -> new String[]{"PPP","P P"};
+                            case CHESTPLATE -> new String[]{"P P","PFP","PPP"};
+                            case LEGGINGS -> new String[]{"PPP","P P","P P"};
+                            case BOOTS -> new String[]{"P P","P P"};
+                        };
+                        case 2 -> switch(type) {
+                            case HELMET -> new String[]{"RCR","F F"};
+                            case CHESTPLATE -> new String[]{"R R","FCF","RRR"};
+                            case LEGGINGS -> new String[]{"RCR","F F","F F"};
+                            case BOOTS -> new String[]{"R R","FCF"};
+                        };
+                        default -> switch(type) {
+                            case HELMET -> new String[]{"NCN","P P"};
+                            case CHESTPLATE -> new String[]{"N N","PCP","NFN"};
+                            case LEGGINGS -> new String[]{"NCN","P P","P P"};
+                            case BOOTS -> new String[]{"N N","PCP"};
+                        };
+                    };
+                    var item=ModContent.PROGRAMMABLE_ARMOR.get("programmable_"+type.getName()+"_tier_"+tier).get();
+                    var recipe=ShapedRecipeBuilder.shaped(RecipeCategory.MISC,item);
+                    for(var row:pattern)recipe.pattern(row);
+                    String symbols=String.join("",pattern);
+                    if(symbols.indexOf('P')>=0)recipe.define('P',ModContent.COPPER_PLATE.get());
+                    if(symbols.indexOf('F')>=0)recipe.define('F',ModContent.FRAME.get());
+                    if(symbols.indexOf('R')>=0)recipe.define('R',ModContent.REINFORCED_FRAME.get());
+                    if(symbols.indexOf('C')>=0)recipe.define('C',ModContent.RESONANT_CRYSTAL.get());
+                    if(symbols.indexOf('N')>=0)recipe.define('N',Items.NETHERITE_INGOT);
+                    recipe.unlockedBy("has_plate",has(ModContent.COPPER_PLATE.get())).save(out);
+                }
+            }
+            for(var type:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values()) {
+                var catalyst=switch(type){
+                    case OPTIC_VISOR -> Items.AMETHYST_SHARD;
+                    case AQUA_LUNGS -> Items.PRISMARINE_CRYSTALS;
+                    case STRIDE_DRIVE -> Items.SUGAR;
+                    case MINING_SERVO -> Items.DIAMOND;
+                    case SHIELD_FIELD -> Items.IRON_BLOCK;
+                    case FALL_DAMPER -> Items.PHANTOM_MEMBRANE;
+                    case JUMP_DRIVE -> Items.RABBIT_FOOT;
+                };
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ARMOR_MODULES.get(type).get())
+                        .requires(ModContent.MODULE_BLANK_I.get()).requires(catalyst).requires(Items.REDSTONE)
+                        .unlockedBy("has_module_blank",has(ModContent.MODULE_BLANK_I.get())).save(out);
+            }
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRODUCTION_CONTROLLER).get())
                     .pattern("RCR").pattern("PEP").pattern("RFR")
                     .define('R',ModContent.RESONANT_COIL.get()).define('C',ModContent.RESONANT_CRYSTAL.get())

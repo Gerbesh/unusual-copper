@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N N",
+    "PCP",
+    "NFN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "C": {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    "F": {
+      "item": "unusualcopper:copper_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:programmable_chestplate_tier_3",
+    "count": 1
+  }
+}

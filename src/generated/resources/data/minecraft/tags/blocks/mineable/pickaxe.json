@@ -33,6 +33,7 @@
     "unusualcopper:copper_fluid_pipe",
     "unusualcopper:copper_fluid_pump",
     "unusualcopper:copper_fluid_tank",
-    "unusualcopper:production_controller"
+    "unusualcopper:production_controller",
+    "unusualcopper:armor_workbench"
   ]
 }
