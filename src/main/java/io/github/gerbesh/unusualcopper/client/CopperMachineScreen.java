@@ -84,13 +84,15 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
             var charge=portable.isEmpty()?Component.translatable("battery.unusualcopper.empty"):Component.translatable("battery.unusualcopper.charge",io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(portable)),io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.capacity(portable)));
             g.drawString(font,charge,40,81,0xffe6f5ee,false);
         }
-        if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST && !menu.kind().isCell()) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
+        if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST && !menu.kind().isCell()
+                && menu.kind()!=MachineKind.COPPER_FLUID_PUMP && menu.kind()!=MachineKind.COPPER_FLUID_TANK) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         batteryButton.visible=menu.kind().isCell();
         batteryButton.setMessage(Component.translatable("battery.unusualcopper.mode."+Math.floorMod(menu.data.get(45),3)));
         energyButton.visible=menu.kind().capacity>0;
+        redstoneButton.visible=menu.kind()!=MachineKind.COPPER_FLUID_TANK;
         brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
         cancelButton.visible = menu.kind().acceptsInputs();
         redstoneButton.setTooltip(Tooltip.create(Component.translatable("gui.unusualcopper.redstone_mode."+menu.data.get(7))));
