@@ -396,5 +396,13 @@
   "item.unusualcopper.pattern_card": "Карта-шаблон",
   "item.unusualcopper.precision_processor": "Прецизионный процессор",
   "item.unusualcopper.module_blank_i": "Заготовка модуля I",
-  "gui.unusualcopper.assembler_hint": "Карта используется многократно. Заполните сетку 3×3 по промышленному рецепту."
+  "gui.unusualcopper.assembler_hint": "Карта используется многократно. Заполните сетку 3×3 по промышленному рецепту.",
+  "block.unusualcopper.copper_fluid_pump": "Медный сифонный насос",
+  "block.unusualcopper.copper_fluid_tank": "Медный резервуар жидкостей",
+  "block.unusualcopper.copper_fluid_pipe": "Медный жидкостный трубопровод",
+  "gui.unusualcopper.fluid_tank": "Жидкость: %s / 64000 мБ",
+  "gui.unusualcopper.pump_fluid": "Жидкость: %s / 16000 мБ",
+  "fluid.unusualcopper.pipe_status": "В трубопроводе: %s / %s мБ",
+  "side.unusualcopper.fluid_input": "Ввод жидкости",
+  "side.unusualcopper.fluid_output": "Вывод жидкости"
 }

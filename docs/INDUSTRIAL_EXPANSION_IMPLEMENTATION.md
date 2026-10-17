@@ -89,3 +89,21 @@
 - User explicitly superseded the earlier 1:1 copper mass rule: every grit now produces **3 washed dust** for the existing 250 mB water and 300 CuE process. Copper: 1 raw copper → 1 grit → 3 dust → 3 ingots. Iron/gold: 1 raw → 2 grit → 6 dust → 6 ingots.
 - No loop converting ingots, plates, dust or tailings back to raw copper is added. The gain still needs finite mined raw ore, CuE, water and additional smelting payments.
 - The legacy production docs were updated so the former x1 copper cap no longer misstates the author's new balance.
+
+## E3C: Non-destructive liquid logistics (2026-10-17)
+- Added CuE-powered `copper_fluid_pump` (internal 16,000 mB) and `copper_fluid_tank` (64,000 mB), plus `copper_fluid_pipe` using Forge `IFluidHandler`. All three are additional registry IDs and do not replace the existing machines or the SSN bridge.
+- The pump identifies an adjacent lake **with at least 15 connected liquid source blocks with open air above**, without draining or replacing world sources. It scans only loaded positions, with a bounded search and no forced chunk loading; the collector radius around the fluid source is 15 horizontal blocks.
+- Every 5 ticks the pump produces 250 mB of the detected fluid if its reservoir has room and sufficient CuE: water = 40 CuE, lava/other fluid = 120 CuE per transfer (160 / 480 CuE per bucket equivalent). It stops on no pond, full buffer or no CuE. No passive fluid generation without an energy payment.
+- Copper fluid pipes move up to 250 mB per update, run a 5-tick scheduler with 32 origin pipes and 64 transfer attempts per dimension, and cap each BFS to 128 loaded nodes. Pipe faces support AUTO / EXTRACT / INSERT / DISABLED using the existing Face Selector (click a pipe face to cycle). AUTO extracts from a pump/tank `FLUID_OUTPUT` face and sends to a tank/processing machine `FLUID_INPUT` face.
+- Each source pipe has a **persisted 1,000 mB escrow fluid buffer**. A full destination does not cause the pipe to drain the source. If a target refuses an already-withdrawn fluid, it stays owned by the pipe for later delivery; network chunk unload does not generate resources.
+- Every machine's fluid capability is side-limited: purifier and etcher only accept water, pump only exports, tank accepts and exports according to configured sides. Tank can be filled/drained with normal water/lava buckets by hand; mod fluids can be routed using Forge fluid capabilities.
+- Copper fluid pump has a **client-only** semi-transparent surface collector and upward-moving aqua/lava sparks. No server particles or forced remote chunk draws; visual source position is synchronized via existing block entity updates. Assets are first-pass copper/patina placeholders, pipe visuals reuse item-pipe geometry.
+- Minecraft and GameTest are not executed. CI compile/unit tests and user in-game verification are separate.
+
+### How to manually test E3C
+1. Place the pump within six horizontal blocks and four vertical blocks of a pond with **at least 15 connected, exposed source blocks**. Feed CuE to its western face (or change faces with selector).
+2. Attach `copper_fluid_pipe` to one of its FLUID_OUTPUT faces and connect to a `copper_fluid_tank` FLUID_INPUT face. The reservoir gains water without lake depletion. To deliver onward, use another tank FLUID_OUTPUT face.
+3. Feed a purifier's/etcher's FLUID_INPUT face. Verify 250 mB per processing operation, no lost water when inputs/outputs are blocked, and ×3 dust per grit.
+4. Attach a pump to a lava lake, verify lava tank works but cannot enter purifier. Change the lake to fewer than 15 exposed source blocks and confirm extraction stops.
+5. Change pipe faces with selector: AUTO, EXTRACT, INSERT, DISABLED. Check full and mixed tanks, unloading/loading chunks and server restarts, water-filled buckets, item pipe and SSN coexistence.
+6. Check that the collector sphere and sparkles exist only in a client rendering context, not as server entities.

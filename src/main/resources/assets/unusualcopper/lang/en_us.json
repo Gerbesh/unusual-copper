@@ -396,5 +396,13 @@
   "item.unusualcopper.pattern_card": "Pattern Card",
   "item.unusualcopper.precision_processor": "Precision Processor",
   "item.unusualcopper.module_blank_i": "Module Blank I",
-  "gui.unusualcopper.assembler_hint": "Pattern card is reusable. Fill the 3x3 grid with a supported precision recipe."
+  "gui.unusualcopper.assembler_hint": "Pattern card is reusable. Fill the 3x3 grid with a supported precision recipe.",
+  "block.unusualcopper.copper_fluid_pump": "Copper Siphon Pump",
+  "block.unusualcopper.copper_fluid_tank": "Copper Fluid Reservoir",
+  "block.unusualcopper.copper_fluid_pipe": "Copper Fluid Conduit",
+  "gui.unusualcopper.fluid_tank": "Fluid: %s / 64000 mB",
+  "gui.unusualcopper.pump_fluid": "Fluid: %s / 16000 mB",
+  "fluid.unusualcopper.pipe_status": "Transit: %s / %s mB",
+  "side.unusualcopper.fluid_input": "Fluid input",
+  "side.unusualcopper.fluid_output": "Fluid output"
 }
