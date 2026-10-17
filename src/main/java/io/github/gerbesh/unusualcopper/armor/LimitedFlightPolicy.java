@@ -20,6 +20,19 @@ public final class LimitedFlightPolicy {
                 && now-sessionStart<MAX_SESSION_TICKS;
     }
 
+    /** Remains locked until physical landing, even if the player releases the key. */
+    public static int remainingTicks(long now,long started,boolean sameDimension) {
+        if(!sameDimension||started<0||now<started)return 0;
+        return (int)Math.max(0L,MAX_SESSION_TICKS-Math.min(MAX_SESSION_TICKS,now-started));
+    }
+
+    /** HUD only: clamp to a bounded, conservative displayed height allowance. */
+    public static int headroom(double anchorY,double currentY,boolean sameDimension) {
+        if(!sameDimension||!Double.isFinite(anchorY)||!Double.isFinite(currentY))return 0;
+        double remaining=anchorY+MAX_HEIGHT-currentY;
+        return (int)Math.floor(Math.max(0D,Math.min(MAX_HEIGHT,remaining)));
+    }
+
     /** Vanilla gravity compensation, with upward/downward steering using look pitch. */
     public static double vertical(double lookY,double remainingHeight) {
         if(!Double.isFinite(lookY)||!Double.isFinite(remainingHeight))

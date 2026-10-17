@@ -8,7 +8,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ArmorSnapshotPacketTest {
-    private static ArmorNetwork.Snapshot sample(List<ArmorNetwork.Piece> pieces){return new ArmorNetwork.Snapshot(UUID.randomUUID(),4,true,1,100,1000,8,1,0,pieces,ArmorNetwork.Result.OK);}
+    private static ArmorNetwork.Snapshot sample(List<ArmorNetwork.Piece> pieces){return new ArmorNetwork.Snapshot(UUID.randomUUID(),4,true,1,100,1000,8,1,0,new ArmorRuntime.FlightStatus(true,930,35),pieces,ArmorNetwork.Result.OK);}
     @Test void roundTripHasOnlyBoundedEquipmentMetadataAndPreferences(){
         var row=new ArmorNetwork.Row(ArmorModuleType.AQUA_LUNGS,new ArmorModuleSettings(true,ArmorModuleSettings.Trigger.UNDERWATER,25,false));
         var piece=new ArmorNetwork.Piece("unusualcopper:programmable_helmet_tier_3",3,3,List.of(row));

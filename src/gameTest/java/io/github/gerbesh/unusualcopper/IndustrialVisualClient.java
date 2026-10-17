@@ -140,7 +140,7 @@ public final class IndustrialVisualClient {
             }
             pieces.add(new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Piece("unusualcopper:programmable_"+types[i]+"_tier_3",3,i==1?4:3,rows));
         }
-        return new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot(new java.util.UUID(0,42),1,true,1,warning?800000:3400000,10000000,4440,36,4,pieces,io.github.gerbesh.unusualcopper.network.ArmorNetwork.Result.OK);
+        return new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot(new java.util.UUID(0,42),1,true,1,warning?800000:3400000,10000000,4440,36,4,new io.github.gerbesh.unusualcopper.armor.ArmorRuntime.FlightStatus(true,820,39),pieces,io.github.gerbesh.unusualcopper.network.ArmorNetwork.Result.OK);
     }
     private static final class Catalogue extends Screen {
         private static final String[] COMPONENTS={"copper_grit","iron_grit","gold_grit","washed_copper_dust","washed_iron_dust","washed_gold_dust",

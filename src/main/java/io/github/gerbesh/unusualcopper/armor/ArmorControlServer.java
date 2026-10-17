@@ -68,7 +68,8 @@ public final class ArmorControlServer {
             pieces.add(new ArmorNetwork.Piece(BuiltInRegistries.ITEM.getKey(item.getItem()).toString(),armor.tier,ArmorData.slots(armor),rows));
         }else pieces.add(new ArmorNetwork.Piece("",0,0,List.of()));}
         return new ArmorNetwork.Snapshot(session.nonce,session.revision,ArmorRuntime.completeSet(player),profile,CopperBatteryItem.stored(battery),CopperBatteryItem.capacity(battery),
-                ArmorTelemetry.perSecond(player),ArmorTelemetry.recent(player),ArmorRuntime.conditions(player),pieces,result);
+                ArmorTelemetry.perSecond(player),ArmorTelemetry.recent(player),ArmorRuntime.conditions(player),
+                ArmorRuntime.flightStatus(player),pieces,result);
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event){
         if(event.phase!=TickEvent.Phase.END||!(event.player instanceof ServerPlayer player)||player.tickCount%10!=0)return;

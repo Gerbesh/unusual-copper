@@ -15,6 +15,23 @@ class LimitedFlightPolicyTest {
         assertEquals(200,LimitedFlightPolicy.CUE_PER_TICK);
         assertEquals(64D,LimitedFlightPolicy.MAX_HEIGHT);
     }
+    @Test void f3HudReportsRemainingSecondsAndHeadroomWithoutResettingOnKeyRelease() {
+        assertEquals(1200,LimitedFlightPolicy.remainingTicks(1200,1200,true));
+        assertEquals(920,LimitedFlightPolicy.remainingTicks(1280,1000,true));
+        assertEquals(0,LimitedFlightPolicy.remainingTicks(2200,1000,true));
+        assertEquals(0,LimitedFlightPolicy.remainingTicks(999,1000,true));
+        assertEquals(0,LimitedFlightPolicy.remainingTicks(1300,1000,false));
+        assertEquals(64,LimitedFlightPolicy.headroom(80,80,true));
+        assertEquals(29,LimitedFlightPolicy.headroom(80,115,true));
+        assertEquals(0,LimitedFlightPolicy.headroom(80,160,true));
+        assertEquals(0,LimitedFlightPolicy.headroom(80,90,false));
+        assertEquals(0,LimitedFlightPolicy.headroom(Double.NaN,90,true));
+        assertThrows(IllegalArgumentException.class,()->new ArmorRuntime.FlightStatus(true,1201,10));
+        assertThrows(IllegalArgumentException.class,()->new ArmorRuntime.FlightStatus(false,20,10));
+        assertThrows(IllegalArgumentException.class,()->new ArmorRuntime.FlightStatus(true,120,65));
+        assertThrows(IllegalArgumentException.class,()->new ArmorRuntime.FlightStatus(true,-1,20));
+    }
+
     @Test void directionChangesVerticalThrustButCannotPassTakeoffCeiling() {
         assertTrue(LimitedFlightPolicy.vertical(1,64)>LimitedFlightPolicy.vertical(0,64));
         assertTrue(LimitedFlightPolicy.vertical(0,64)>LimitedFlightPolicy.vertical(-1,64));

@@ -511,6 +511,8 @@
   "armorconsole.trigger.6": "Добыча",
   "armorconsole.trigger.7": "Вручную",
   "armorconsole.warning": "Заряд брони: осталось %s%%",
+  "armorconsole.hud_f3": "Тяга F3: %s с · +%s блоков",
+  "armorconsole.hud_f3_exhausted": "F3: приземлитесь для сброса",
   "armorconsole.sockets": "%s/%s · %s CuE/т",
   "armorconsole.hours": "≈ %sч %sм",
   "armorconsole.minutes": "≈ %sм %sс",

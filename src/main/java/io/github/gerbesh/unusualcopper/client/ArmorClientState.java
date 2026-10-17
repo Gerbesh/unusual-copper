@@ -61,7 +61,8 @@ public final class ArmorClientState {
         var mc=Minecraft.getInstance();var v=snapshot;
         if(v==null||mc.player==null||mc.options.hideGui||!ArmorClientConfig.HUD.get()||clock-received>60||v.pieces().stream().noneMatch(p->p.tier()>0))return;
         var g=event.getGuiGraphics();int x=8,y=8,w=160;
-        g.fill(x,y,x+w,y+64,0xb0112422);g.fill(x,y,x+2,y+64,0xffb66b42);
+        int h=v.flight().session()?79:64;
+        g.fill(x,y,x+w,y+h,0xb0112422);g.fill(x,y,x+2,y+h,0xffb66b42);
         int percent=v.capacity()==0?0:(int)(100L*v.charge()/v.capacity());
         int color=percent<=5?0xffffa385:percent<=10?0xffffc174:percent<=25?0xffe6d389:0xff83e7d0;
         String charge=v.capacity()==0?Component.translatable("armorconsole.no_battery").getString():percent+"% · "+compact(v.charge())+" CuE";
@@ -74,6 +75,15 @@ public final class ArmorClientState {
                 var item=io.github.gerbesh.unusualcopper.registry.ModContent.ARMOR_MODULES.get(module);
                 g.renderItem(new ItemStack(item.get()),x+6+index++*17,y+43);
             }
+        }
+        if(v.flight().session()) {
+            var flight=v.flight();
+            var label=flight.ticksLeft()==0
+                    ?Component.translatable("armorconsole.hud_f3_exhausted")
+                    :Component.translatable("armorconsole.hud_f3",
+                            (flight.ticksLeft()+19)/20,flight.heightLeft());
+            g.drawString(mc.font,mc.font.plainSubstrByWidth(label.getString(),w-14),x+7,y+65,
+                    flight.ticksLeft()==0?0xffffc174:0xff83e7d0,false);
         }
     }
     private static String compact(int value){return value>=1_000_000?String.format(java.util.Locale.ROOT,"%.1fM",value/1_000_000D):value>=10_000?String.format(java.util.Locale.ROOT,"%.1fk",value/1000D):Integer.toString(value);}

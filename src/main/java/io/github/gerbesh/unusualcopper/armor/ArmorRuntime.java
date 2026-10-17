@@ -37,6 +37,29 @@ public final class ArmorRuntime {
         }
         return true;
     }
+    /** Owner-only, server-authored F3 status for the armor HUD. No NBT sent to clients. */
+    public record FlightStatus(boolean session,int ticksLeft,int heightLeft) {
+        public FlightStatus {
+            if(ticksLeft<0||ticksLeft>LimitedFlightPolicy.MAX_SESSION_TICKS
+                    ||heightLeft<0||heightLeft>LimitedFlightPolicy.MAX_HEIGHT
+                    ||!session&&(ticksLeft!=0||heightLeft!=0))
+                throw new IllegalArgumentException("Invalid flight HUD state");
+        }
+    }
+    public static FlightStatus flightStatus(ServerPlayer player) {
+        if(player.onGround())return new FlightStatus(false,0,0);
+        var data=player.getPersistentData();
+        if(!data.contains("UCF3AnchorY",net.minecraft.nbt.Tag.TAG_DOUBLE))
+            return new FlightStatus(false,0,0);
+        String dimension=player.level().dimension().location().toString();
+        boolean same=dimension.equals(data.getString("UCF3Dimension"));
+        long start=data.contains("UCF3Start",net.minecraft.nbt.Tag.TAG_LONG)
+                ?data.getLong("UCF3Start"):-1L;
+        long now=player.level().getGameTime();
+        return new FlightStatus(true,
+                LimitedFlightPolicy.remainingTicks(now,start,same),
+                LimitedFlightPolicy.headroom(data.getDouble("UCF3AnchorY"),player.getY(),same));
+    }
     private static ItemStack chest(ServerPlayer player) {
         return completeSet(player)?player.getItemBySlot(EquipmentSlot.CHEST):ItemStack.EMPTY;
     }

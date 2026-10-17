@@ -511,6 +511,8 @@
   "armorconsole.trigger.6": "Mining",
   "armorconsole.trigger.7": "Manual",
   "armorconsole.warning": "Armor battery: %s%% remaining",
+  "armorconsole.hud_f3": "F3 thrust: %ss · +%s blocks",
+  "armorconsole.hud_f3_exhausted": "F3: land to restart",
   "armorconsole.sockets": "%s/%s · %s CuE/t",
   "armorconsole.hours": "≈ %sh %sm",
   "armorconsole.minutes": "≈ %sm %ss",
