@@ -114,6 +114,9 @@ public final class BoundStorageLogic {
         ItemStack rest;
         if(machine.kind==MachineKind.PRODUCTION_CONTROLLER && machine.boundCargoSlot==13)
             rest=ProductionUpstreamLogic.deliverInput(machine,offered);
+        else if(machine.kind==MachineKind.PRODUCTION_CONTROLLER
+                && machine.boundCargoSlot>=14 && machine.boundCargoSlot<=22)
+            rest=machine.productionSubGrid.insertItem(machine.boundCargoSlot-14,offered,false);
         else if(machine.kind==MachineKind.PRODUCTION_CONTROLLER && ProductionSupplyPolicy.gridCargoSlot(machine.boundCargoSlot))
             rest=machine.assemblyGrid.insertItem(machine.boundCargoSlot-4,offered,false);
         else if (machine.boundCargoSlot >= 0 && machine.boundCargoSlot < 2)

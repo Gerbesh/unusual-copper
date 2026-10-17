@@ -98,6 +98,7 @@ public final class ProductionUpstreamLogic {
             continueBatch(controller,press,level,task);
             return;
         }
+        if(ProductionSubcraftLogic.tick(controller,level))return;
         if(!controller.energyEnabled() || controller.productionQueued<=0
                 || controller.hasOperation() && !controller.productionInputsMatch()
                 || controller.boundCargoCount()!=0 || controller.boundFaulted || controller.boundInventory()==null
@@ -130,17 +131,25 @@ public final class ProductionUpstreamLogic {
     /** Never try to commission intermediate jobs while the source census is incomplete. */
     private static int desiredStage(CopperMachineBlockEntity m,StorageEndpoint endpoint) {
         Item wanted=m.productionPattern==0?ModContent.COPPER_WIRE.get():ModContent.COPPER_PLATE.get();
-        int missingSlots=0;
+        var order=ProductionOrderPolicy.plan(m.productionPattern);
+        var entry=m.getLevel().getRecipeManager().byKey(new ResourceLocation("unusualcopper",order.recipe()));
+        if(entry.isEmpty() || !(entry.get() instanceof net.minecraft.world.item.crafting.ShapedRecipe shaped)
+                || shaped.getWidth()!=3 || shaped.getHeight()!=3 || shaped.getIngredients().size()!=9)return 0;
+        ItemStack output=shaped.getResultItem(m.getLevel().registryAccess());
+        if(output.getCount()!=1 || output.hasTag()
+                || !output.is(m.productionPattern==0?ModContent.RESONANT_COIL.get():ModContent.REINFORCED_FRAME.get()))return 0;
+        boolean[] positions=new boolean[9], matching=new boolean[9], target=new boolean[9];
+        int[] counts=new int[9];
         for(int i=0;i<9;i++) {
-            int row=i/3,col=i%3;
-            boolean needed=m.productionPattern==0?(row==1 && (col==0||col==2) || col==1 && (row==0||row==2))
-                    :(row==0||row==2)&&(col==0||col==2);
+            var ingredient=shaped.getIngredients().get(i);
             ItemStack held=m.assemblyGrid.getStackInSlot(i);
-            if(needed && !held.isEmpty() && (!held.is(wanted)||held.hasTag()))return 0;
-            if(!needed && !held.isEmpty())return 0;
-            if(needed && held.getCount()<Math.min(m.productionQueued,64))missingSlots++;
+            positions[i]=!ingredient.isEmpty();
+            matching[i]=held.isEmpty() || !held.hasTag() && ingredient.test(held);
+            target[i]=positions[i] && ingredient.test(new ItemStack(wanted));
+            counts[i]=held.getCount();
         }
-        if(missingSlots==0)return 0;
+        int missingSlots=ProductionInputDemandPolicy.missing(m.productionQueued,positions,matching,target,counts);
+        if(missingSlots<=0)return 0;
         long stocked=available(endpoint,wanted);
         if(stocked!=0)return 0;
         long plates=m.productionPattern==0?available(endpoint,ModContent.COPPER_PLATE.get()):0;
@@ -152,7 +161,7 @@ public final class ProductionUpstreamLogic {
         return census.complete()?census.amount():-1;
     }
 
-    private static StorageEndpoint warehouse(CopperMachineBlockEntity m,ServerLevel level) {
+    static StorageEndpoint warehouse(CopperMachineBlockEntity m,ServerLevel level) {
         var bound=m.boundInventory();
         if(bound==null || m.getBlockPos().distSqr(bound)>32*32 || !level.hasChunkAt(bound)
                 || !ProtectionPolicy.allowed(level,m.getBlockPos(),m.owner()))return null;

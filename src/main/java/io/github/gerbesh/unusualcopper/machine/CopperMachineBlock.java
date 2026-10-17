@@ -102,6 +102,11 @@ public final class CopperMachineBlock extends BaseEntityBlock {
                 ItemStack[] grid=new ItemStack[9];
                 for(int i=0;i<9;i++)grid[i]=machine.assemblyGrid.getStackInSlot(i).copy();
                 Containers.dropContents(level,pos,new SimpleContainer(grid));
+                if(machine.kind==MachineKind.PRODUCTION_CONTROLLER) {
+                    ItemStack[] subgrid=new ItemStack[9];
+                    for(int i=0;i<9;i++)subgrid[i]=machine.productionSubGrid.getStackInSlot(i).copy();
+                    Containers.dropContents(level,pos,new SimpleContainer(subgrid));
+                }
             }
             if(machine.hasIndustrialExtra()) {
                 ItemStack extra=machine.industrialExtra.getStackInSlot(0).copy();
