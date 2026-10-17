@@ -1,0 +1,38 @@
+{
+  "type": "unusualcopper:precision_assembly",
+  "ingredients": [
+    {
+      "item": "unusualcopper:copper_plate"
+    },
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    {
+      "item": "unusualcopper:copper_plate"
+    },
+    {
+      "item": "unusualcopper:etched_circuit"
+    },
+    {
+      "item": "unusualcopper:precision_processor"
+    },
+    {
+      "item": "unusualcopper:etched_circuit"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "item": "unusualcopper:module_blank_i",
+    "count": 1
+  },
+  "ticks": 160,
+  "cue": 3200
+}

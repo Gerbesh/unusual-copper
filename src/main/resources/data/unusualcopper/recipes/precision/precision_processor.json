@@ -1,0 +1,38 @@
+{
+  "type": "unusualcopper:precision_assembly",
+  "ingredients": [
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    {
+      "item": "unusualcopper:etched_circuit"
+    },
+    {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    {
+      "item": "unusualcopper:resonant_coil"
+    },
+    {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    {
+      "item": "unusualcopper:resonant_coil"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    }
+  ],
+  "result": {
+    "item": "unusualcopper:precision_processor",
+    "count": 1
+  },
+  "ticks": 120,
+  "cue": 2500
+}

@@ -67,3 +67,20 @@
 3. Etch a blank board with chemical reagent and water: 100 paid ticks, exactly 1200 CuE, 250 mB and one reagent consumed.
 4. Fill output slots or stop the energy line during processing: no duplication, no extra billing, no lost water, correct resume.
 5. Test fluid pipes (fill works, drain must return zero), third input via item pipe, old-world loading, redstone, SSN and all side modes.
+
+## E4A: Precision Assembler, safe single-recipe execution (2026-10-17)
+- Added `precision_assembler` with 100,000 CuE buffer, physically stored 3×3 item grid and reusable `pattern_card` in standard machine input 0.
+- New `precision_assembly` JSON serializer accepts **exactly nine nonempty ingredients** and bounded 40–200 ticks / 400–4,000 CuE; no free-form client output or custom NBT recipes. The matching recipe is selected by the server RecipeManager from an explicit industrial type.
+- Server snapshots all nine grid item identities at job start, persists the snapshot and recipe/progress/paid CuE to NBT, and rechecks input identities, recipe ID, cost, result and output capacity before performing an all-or-nothing local commit.
+- The card is not consumed; exactly one item from each of the nine real grid slots is consumed per completed operation. Both output slots are protected and use the existing item pipe/SSN-compatible output path.
+- Machine item automation exposes grid slots 4–12 only for this kind. Old 0–3 slots, other machine menus, CuE sides, existing NBT and the optional SSN bridge retain their previous semantics.
+- Shipped 2 production recipes: `precision_processor` (120 ticks, 2,500 CuE) and `module_blank_i` (160 ticks, 3,200 CuE). Both use E2/E3 materials.
+- **Current limitation**: the blank pattern card authorizes the current 3×3 industrial grid rather than storing a programmable per-card recipe. Only the dedicated `precision_assembly` recipe type is supported, not arbitrary vanilla/capability/NBT/container recipes. Pattern engraving and safe container returns remain E4B.
+- No Minecraft/GameTest launch. CI compilation/JUnit and manual game tests are separate.
+
+### Manual E4A checks
+1. Craft pattern card and assembler without using assembler outputs. Place card in primary slot, fill 3×3 grid with one of the specified recipes.
+2. Verify exactly one unit from each grid slot is consumed, the pattern card remains, expected item is output, and CuE matches 2,500/3,200.
+3. Fill outputs, remove one reagent mid-operation, unload/reload or /reload. No duplicated output, missing materials or repeated energy billing.
+4. Check 9-slot GUI layout, shift transfer, separate item-pipe insertion into slots 4–12, proper side modes and item drops after block break.
+5. Test empty/unrelated grid, card removal, low energy, redstone control, old worlds, SSN bridge and the two-step dependency processor → module blank.

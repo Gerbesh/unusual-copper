@@ -391,5 +391,10 @@
   "block.unusualcopper.circuit_etcher": "Circuit Etcher",
   "item.unusualcopper.resonant_crystal": "Resonant Crystal",
   "item.unusualcopper.etching_reagent": "Etching Reagent",
-  "item.unusualcopper.etched_circuit": "Etched Circuit"
+  "item.unusualcopper.etched_circuit": "Etched Circuit",
+  "block.unusualcopper.precision_assembler": "Precision Assembler",
+  "item.unusualcopper.pattern_card": "Pattern Card",
+  "item.unusualcopper.precision_processor": "Precision Processor",
+  "item.unusualcopper.module_blank_i": "Module Blank I",
+  "gui.unusualcopper.assembler_hint": "Pattern card is reusable. Fill the 3x3 grid with a supported precision recipe."
 }

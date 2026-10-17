@@ -391,5 +391,10 @@
   "block.unusualcopper.circuit_etcher": "Камера травления",
   "item.unusualcopper.resonant_crystal": "Резонансный кристалл",
   "item.unusualcopper.etching_reagent": "Травильный реагент",
-  "item.unusualcopper.etched_circuit": "Травлёная схема"
+  "item.unusualcopper.etched_circuit": "Травлёная схема",
+  "block.unusualcopper.precision_assembler": "Прецизионный сборщик",
+  "item.unusualcopper.pattern_card": "Карта-шаблон",
+  "item.unusualcopper.precision_processor": "Прецизионный процессор",
+  "item.unusualcopper.module_blank_i": "Заготовка модуля I",
+  "gui.unusualcopper.assembler_hint": "Карта используется многократно. Заполните сетку 3×3 по промышленному рецепту."
 }
