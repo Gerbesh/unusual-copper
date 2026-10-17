@@ -18,8 +18,7 @@ public final class FluidPumpLogic implements MachineLogic {
     private Fluid sourceFluid=Fluids.EMPTY;
 
     @Override public void tick(CopperMachineBlockEntity machine,ServerLevel level) {
-        if(machine.pumpSource==null || !surface(level,machine.pumpSource,sourceFluid)
-                || level.getGameTime()>=nextScan){
+        if(level.getGameTime()>=nextScan || machine.pumpSource!=null && !surface(level,machine.pumpSource,sourceFluid)){
             nextScan=level.getGameTime()+100;
             BlockPos found=find(level,machine);
             if(!Objects.equals(machine.pumpSource,found)){

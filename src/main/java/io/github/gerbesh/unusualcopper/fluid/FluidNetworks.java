@@ -1,6 +1,7 @@
 package io.github.gerbesh.unusualcopper.fluid;
 import io.github.gerbesh.unusualcopper.gameplay.ProtectionPolicy;
 import io.github.gerbesh.unusualcopper.itempipe.PipeMode;
+import io.github.gerbesh.unusualcopper.machine.CopperMachineBlockEntity;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
@@ -58,8 +59,11 @@ public final class FluidNetworks {
                     if(source.effective(side)!=PipeMode.EXTRACT)continue;
                     BlockPos providerPos=source.getBlockPos().relative(side);
                     if(!level.hasChunkAt(providerPos))continue;
+                    if(source.owner()!=null&&!ProtectionPolicy.allowed(level,providerPos,source.owner()))continue;
                     var provider=level.getBlockEntity(providerPos);
                     if(provider==null||provider instanceof FluidPipeBlockEntity)continue;
+                    if(provider instanceof CopperMachineBlockEntity machine && machine.owner()!=null
+                            && !machine.owner().equals(source.owner()))continue;
                     var optional=provider.getCapability(ForgeCapabilities.FLUID_HANDLER,side.getOpposite());
                     if(!optional.isPresent())continue;
                     IFluidHandler handler=optional.orElseThrow(IllegalStateException::new);
@@ -105,8 +109,11 @@ public final class FluidNetworks {
                         if(adjacent!=null&&adjacent.mode(side.getOpposite())==PipeMode.AUTO&&visited.size()<MAX_NODES&&visited.add(next))queue.add(next);
                     }
                     if(current.effective(side)!=PipeMode.INSERT||(origin!=null&&origin.equals(next)))continue;
+                    if(source.owner()!=null&&!ProtectionPolicy.allowed(level,next,source.owner()))continue;
                     var target=level.getBlockEntity(next);
                     if(target==null||target instanceof FluidPipeBlockEntity)continue;
+                    if(target instanceof CopperMachineBlockEntity machine && machine.owner()!=null
+                            && !machine.owner().equals(source.owner()))continue;
                     var cap=target.getCapability(ForgeCapabilities.FLUID_HANDLER,side.getOpposite());
                     if(!cap.isPresent())continue;
                     IFluidHandler handler=cap.orElseThrow(IllegalStateException::new);
