@@ -51,6 +51,32 @@ public final class CopperMachineBlock extends BaseEntityBlock {
             if(!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity m) m.installSentinelFocus(player,hand);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
+        if(kind==MachineKind.COPPER_FLUID_TANK && !level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity tank
+                && tank.canAccess(player)) {
+            var held=player.getItemInHand(hand);
+            net.minecraft.world.level.material.Fluid fluid=held.is(net.minecraft.world.item.Items.WATER_BUCKET)?net.minecraft.world.level.material.Fluids.WATER
+                    :held.is(net.minecraft.world.item.Items.LAVA_BUCKET)?net.minecraft.world.level.material.Fluids.LAVA:net.minecraft.world.level.material.Fluids.EMPTY;
+            if(fluid!=net.minecraft.world.level.material.Fluids.EMPTY) {
+                int filled=tank.water.fill(new net.minecraftforge.fluids.FluidStack(fluid,1000),net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                if(filled==1000 && !player.getAbilities().instabuild) {
+                    held.shrink(1);
+                    ItemStack bucket=new ItemStack(net.minecraft.world.item.Items.BUCKET);
+                    if(!player.getInventory().add(bucket))player.drop(bucket,false);
+                }
+                if(filled==1000)return InteractionResult.SUCCESS;
+            } else if(held.is(net.minecraft.world.item.Items.BUCKET)){
+                var drained=tank.water.drain(1000,net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
+                net.minecraft.world.item.Item bucketItem=drained.getFluid()==net.minecraft.world.level.material.Fluids.WATER?net.minecraft.world.item.Items.WATER_BUCKET
+                        :drained.getFluid()==net.minecraft.world.level.material.Fluids.LAVA?net.minecraft.world.item.Items.LAVA_BUCKET:null;
+                if(bucketItem!=null && drained.getAmount()==1000) {
+                    tank.water.drain(1000,net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                    if(!player.getAbilities().instabuild)held.shrink(1);
+                    ItemStack full=new ItemStack(bucketItem);
+                    if(!player.getInventory().add(full))player.drop(full,false);
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
         if (player.getItemInHand(hand).is(ModContent.FACE_SELECTOR.get()) || player.getItemInHand(hand).is(ModContent.AREA_WAND.get())) return InteractionResult.PASS;
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) NetworkHooks.openScreen((ServerPlayer)player, machine, pos);
         return InteractionResult.sidedSuccess(level.isClientSide);

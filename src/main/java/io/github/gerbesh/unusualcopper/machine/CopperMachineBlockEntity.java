@@ -427,18 +427,18 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
 
     private void rebuildCaps() {
-        fluidCap=LazyOptional.of(() -> new IFluidHandler() {
-            private final long epoch=capabilityEpoch;
-            private boolean live(){return epoch==capabilityEpoch && !isRemoved();}
-            @Override public int getTanks(){return 1;}
-            @Override public FluidStack getFluidInTank(int tank){return live()&&tank==0?water.getFluid().copy():FluidStack.EMPTY;}
-            @Override public int getTankCapacity(int tank){return tank==0?water.getCapacity():0;}
-            @Override public boolean isFluidValid(int tank,FluidStack stack){return live()&&tank==0&&stack.getFluid()==Fluids.WATER;}
-            @Override public int fill(FluidStack stack,FluidAction action){return live()?water.fill(stack,action):0;}
-            @Override public FluidStack drain(FluidStack stack,FluidAction action){return FluidStack.EMPTY;}
-            @Override public FluidStack drain(int amount,FluidAction action){return FluidStack.EMPTY;}
-        });
         for (Direction side : Direction.values()) {
+            fluidCaps.put(side,LazyOptional.of(() -> new IFluidHandler() {
+                private final long epoch=capabilityEpoch;
+                private boolean live(){return epoch==capabilityEpoch && !isRemoved() && sideMode(side)!=SideMode.DISABLED;}
+                @Override public int getTanks(){return 1;}
+                @Override public FluidStack getFluidInTank(int tank){return live()&&tank==0?water.getFluid().copy():FluidStack.EMPTY;}
+                @Override public int getTankCapacity(int tank){return live()&&tank==0?water.getCapacity():0;}
+                @Override public boolean isFluidValid(int tank,FluidStack stack){return live()&&tank==0&&sideMode(side)==SideMode.FLUID_INPUT&&water.isFluidValid(0,stack);}
+                @Override public int fill(FluidStack stack,FluidAction action){return isFluidValid(0,stack)?water.fill(stack,action):0;}
+                @Override public FluidStack drain(FluidStack stack,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(stack,action):FluidStack.EMPTY;}
+                @Override public FluidStack drain(int amount,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(amount,action):FluidStack.EMPTY;}
+            }));
             itemCaps.put(side, LazyOptional.of(() -> new IItemHandler() {
                 private final long epoch = capabilityEpoch;
                 private boolean live() { return epoch == capabilityEpoch && !isRemoved(); }
@@ -471,8 +471,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
         if (side != null && !isRemoved()) {
-            if(cap==ForgeCapabilities.FLUID_HANDLER && (kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER)
-                    && sideMode(side)!=SideMode.DISABLED) return fluidCap.cast();
+            if(cap==ForgeCapabilities.FLUID_HANDLER && (sideMode(side)==SideMode.FLUID_INPUT || sideMode(side)==SideMode.FLUID_OUTPUT)) return fluidCaps.get(side).cast();
             if (cap == ForgeCapabilities.ITEM_HANDLER && (sideMode(side) == SideMode.ITEM_INPUT || sideMode(side) == SideMode.ITEM_OUTPUT)) return itemCaps.get(side).cast();
             if (cap == CopperCapabilities.ENERGY && energy.capacity() > 0 && (sideMode(side) == SideMode.ENERGY_INPUT || sideMode(side) == SideMode.ENERGY_OUTPUT)) return energyCaps.get(side).cast();
         }
@@ -480,7 +479,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     @Override public void invalidateCaps() {
         capabilityEpoch++;
-        super.invalidateCaps(); fluidCap.invalidate(); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
+        super.invalidateCaps(); fluidCaps.values().forEach(LazyOptional::invalidate); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
     @Override public void onLoad() { super.onLoad();if(mining!=null&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
