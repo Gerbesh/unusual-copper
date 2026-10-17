@@ -107,3 +107,10 @@
 4. Attach a pump to a lava lake, verify lava tank works but cannot enter purifier. Change the lake to fewer than 15 exposed source blocks and confirm extraction stops.
 5. Change pipe faces with selector: AUTO, EXTRACT, INSERT, DISABLED. Check full and mixed tanks, unloading/loading chunks and server restarts, water-filled buckets, item pipe and SSN coexistence.
 6. Check that the collector sphere and sparkles exist only in a client rendering context, not as server entities.
+
+## Bundled survival assets and CI acceptance (2026-10-17)
+- Explicitly bundled generated crafting recipes for the crystallizer, circuit etcher, etching reagent, pattern card, precision assembler, fluid pump, 64-bucket reservoir and copper fluid conduit. The recipes no longer depend on a separate local `runData` before launching the client.
+- Added loot tables and the vanilla pickaxe-mineable tag entries for all six newly registered E3B/E4/fluid blocks. `IndustrialSurvivalAssetsTest` checks the **shipped resource files** against each registered survival machine.
+- `FluidFlowPolicyTest` fixes the 15-source lake threshold, 15-block collection radius, 250 mB/5-tick transport budget, and pump cost per bucket (water 160 CuE, other liquid 480 CuE).
+- Preserved compatibility for existing 4,000 mB purifiers/etchers on legacy non-disabled sides: fill-only Forge fluid capability remains available after loading older NBT, even though explicit `FLUID_INPUT` is now recommended.
+- Remaining gameplay verification: source selection on waterlogged/modded liquids, server performance with many disconnected ponds, tank breaking with stored liquids (currently contents spill and are not returned as portable fluid NBT), other-mod IFluidHandler interoperability, real SMP claims/ownership, JEI icons and polished visual assets.
