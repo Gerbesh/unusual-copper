@@ -84,3 +84,8 @@
 3. Fill outputs, remove one reagent mid-operation, unload/reload or /reload. No duplicated output, missing materials or repeated energy billing.
 4. Check 9-slot GUI layout, shift transfer, separate item-pipe insertion into slots 4–12, proper side modes and item drops after block break.
 5. Test empty/unrelated grid, card removal, low energy, redstone control, old worlds, SSN bridge and the two-step dependency processor → module blank.
+
+## E3 balance revision: washed dust x3 (2026-10-17)
+- User explicitly superseded the earlier 1:1 copper mass rule: every grit now produces **3 washed dust** for the existing 250 mB water and 300 CuE process. Copper: 1 raw copper → 1 grit → 3 dust → 3 ingots. Iron/gold: 1 raw → 2 grit → 6 dust → 6 ingots.
+- No loop converting ingots, plates, dust or tailings back to raw copper is added. The gain still needs finite mined raw ore, CuE, water and additional smelting payments.
+- The legacy production docs were updated so the former x1 copper cap no longer misstates the author's new balance.
