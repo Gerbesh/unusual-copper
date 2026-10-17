@@ -32,6 +32,7 @@
     "unusualcopper:precision_assembler",
     "unusualcopper:copper_fluid_pipe",
     "unusualcopper:copper_fluid_pump",
-    "unusualcopper:copper_fluid_tank"
+    "unusualcopper:copper_fluid_tank",
+    "unusualcopper:production_controller"
   ]
 }

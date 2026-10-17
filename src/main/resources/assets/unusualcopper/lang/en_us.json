@@ -404,5 +404,13 @@
   "gui.unusualcopper.pump_fluid": "Fluid: %s / 16000 mB",
   "fluid.unusualcopper.pipe_status": "Transit: %s / %s mB",
   "side.unusualcopper.fluid_input": "Fluid input",
-  "side.unusualcopper.fluid_output": "Fluid output"
+  "side.unusualcopper.fluid_output": "Fluid output",
+  "block.unusualcopper.production_controller": "Production Controller",
+  "production.unusualcopper.orders": "Queued: %s | Completed: %s",
+  "production.unusualcopper.target.0": "Coil (4 wires + redstone)",
+  "production.unusualcopper.target.1": "Reinforced Frame",
+  "production.unusualcopper.queue_one": "Queue one craft",
+  "production.unusualcopper.queue_batch": "Queue sixteen crafts",
+  "production.unusualcopper.pattern": "Plan",
+  "production.unusualcopper.pattern_hint": "Choose coil or reinforced frame while idle. Load its exact 3x3 crafting pattern. Input belongs to the controller until completion."
 }

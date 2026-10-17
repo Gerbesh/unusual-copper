@@ -90,6 +90,12 @@ public final class ModDataGeneration {
                     .define('P',ModContent.COPPER_PLATE.get()).define('G',Items.GLASS)
                     .define('C',ModContent.RESONANT_COIL.get())
                     .unlockedBy("has_coil",has(ModContent.RESONANT_COIL.get())).save(out);
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRODUCTION_CONTROLLER).get())
+                    .pattern("RCR").pattern("PEP").pattern("RFR")
+                    .define('R',ModContent.RESONANT_COIL.get()).define('C',ModContent.RESONANT_CRYSTAL.get())
+                    .define('P',ModContent.COPPER_PLATE.get()).define('E',ModContent.ETCHED_CIRCUIT.get())
+                    .define('F',ModContent.REINFORCED_FRAME.get())
+                    .unlockedBy("has_circuit",has(ModContent.ETCHED_CIRCUIT.get())).save(out);
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC,ModContent.MACHINES.get(MachineKind.PRECISION_ASSEMBLER).get())
                     .pattern("RCR").pattern("PEP").pattern("RFR")
                     .define('R',ModContent.RESONANT_COIL.get()).define('C',ModContent.RESONANT_CRYSTAL.get())

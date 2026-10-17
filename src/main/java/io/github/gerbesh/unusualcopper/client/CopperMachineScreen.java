@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
     private Button cancelButton, redstoneButton,brewerButton,energyButton,batteryButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
+    private Button orderOne, orderBatch, orderPattern;
     public CopperMachineScreen(CopperMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 224; imageHeight = 214; inventoryLabelY = 118;
     }
@@ -31,6 +32,12 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         areaButton = addRenderableWidget(Button.builder(Component.translatable("gui.unusualcopper.preview"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 3)).bounds(leftPos + 13, topPos + 91, 70, 18).build());
         clearBinding = addRenderableWidget(Button.builder(Component.literal("×"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 4)).tooltip(Tooltip.create(Component.translatable("gui.unusualcopper.unbind"))).bounds(leftPos + 184, topPos + 51, 28, 10).build());
         recoverBinding = addRenderableWidget(Button.builder(Component.literal("↓"), b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 5)).tooltip(Tooltip.create(Component.translatable("gui.unusualcopper.recover"))).bounds(leftPos + 188, topPos + 91, 28, 18).build());
+        orderOne=addRenderableWidget(Button.builder(Component.literal("+1"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,12))
+                .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.queue_one"))).bounds(leftPos+75,topPos+91,30,18).build());
+        orderBatch=addRenderableWidget(Button.builder(Component.literal("+16"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,13))
+                .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.queue_batch"))).bounds(leftPos+108,topPos+91,34,18).build());
+        orderPattern=addRenderableWidget(Button.builder(Component.translatable("production.unusualcopper.pattern"),b->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,15))
+                .tooltip(Tooltip.create(Component.translatable("production.unusualcopper.pattern_hint"))).bounds(leftPos+145,topPos+91,39,18).build());
     }
     @Override protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
@@ -59,7 +66,11 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         if (menu.kind().hasInventory()) g.drawString(font, Component.translatable("gui.unusualcopper.output"), 133, 52, 0xffe6f5ee, false);
         if(menu.kind()==MachineKind.VORTEX_PURIFIER || menu.kind()==MachineKind.CIRCUIT_ETCHER || menu.kind()==MachineKind.COPPER_FLUID_PUMP || menu.kind()==MachineKind.COPPER_FLUID_TANK)
             g.drawString(font,Component.translatable(menu.kind()==MachineKind.COPPER_FLUID_TANK?"gui.unusualcopper.fluid_tank":menu.kind()==MachineKind.COPPER_FLUID_PUMP?"gui.unusualcopper.pump_fluid":"gui.unusualcopper.water_tank",menu.data.get(47)),68,81,0xffe6f5ee,false);
-        if (menu.operationCost() > 0) g.drawString(font, menu.operationCost() + " CuE", 68, 59, 0xffe6f5ee, false);
+        if (menu.operationCost() > 0 && menu.kind()!=MachineKind.PRODUCTION_CONTROLLER) g.drawString(font, menu.operationCost() + " CuE", 68, 59, 0xffe6f5ee, false);
+        if(menu.kind()==MachineKind.PRODUCTION_CONTROLLER){
+            g.drawString(font,Component.translatable("production.unusualcopper.orders",menu.data.get(48),menu.data.get(49)),70,59,0xffe6f5ee,false);
+            g.drawString(font,Component.translatable("production.unusualcopper.target."+menu.data.get(50)),70,79,0xffe6f5ee,false);
+        }
         if(menu.kind()==MachineKind.ARBORIST) g.drawString(font,Component.translatable("arborist.unusualcopper.stats",menu.data.get(34),menu.data.get(36)),69,81,0xffe6f5ee,false);
         if(menu.kind()==MachineKind.COPPER_SENTINEL) {
             g.drawString(font,Component.translatable("sentinel.unusualcopper.stats",menu.data.get(40),menu.data.get(18)),13,57,0xffe6f5ee,false);
@@ -92,13 +103,16 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         batteryButton.visible=menu.kind().isCell();
         batteryButton.setMessage(Component.translatable("battery.unusualcopper.mode."+Math.floorMod(menu.data.get(45),3)));
         energyButton.visible=menu.kind().capacity>0;
-        redstoneButton.visible=menu.kind()!=MachineKind.COPPER_FLUID_TANK;
+        redstoneButton.visible=menu.kind()!=MachineKind.COPPER_FLUID_TANK && menu.kind()!=MachineKind.PRODUCTION_CONTROLLER;
+        boolean controller=menu.kind()==MachineKind.PRODUCTION_CONTROLLER;
+        orderOne.visible=controller;orderBatch.visible=controller;orderPattern.visible=controller;
+        orderPattern.active=controller && menu.data.get(48)==0 && menu.duration()==0;
         brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
         cancelButton.visible = menu.kind().acceptsInputs();
         redstoneButton.setTooltip(Tooltip.create(Component.translatable("gui.unusualcopper.redstone_mode."+menu.data.get(7))));
         reaperButton.visible = menu.kind() == MachineKind.MOB_REAPER;
         if (reaperButton.visible) reaperButton.setTooltip(Tooltip.create(Component.translatable("reaper.unusualcopper.cost", (menu.data.get(32)&0xffff)|((menu.data.get(33)&0xffff)<<16))));
-        cancelButton.active = menu.duration() > 0 || menu.kind()==MachineKind.ARBORIST;
+        cancelButton.active = menu.duration() > 0 || menu.kind()==MachineKind.ARBORIST || (menu.kind()==MachineKind.PRODUCTION_CONTROLLER && menu.data.get(48)>0);
         plantationButton.visible=menu.kind()==MachineKind.ARBORIST; plantationButton.active=menu.data.get(34)>0;
         if(plantationButton.visible) cancelButton.setTooltip(Tooltip.create(Component.translatable("arborist.unusualcopper.cancel")));
         growthButton.visible = menu.kind() == MachineKind.AURA_CULTIVATOR; areaButton.visible = menu.kind().usesArea();

@@ -98,7 +98,7 @@ public final class CopperMachineBlock extends BaseEntityBlock {
                 if(job!=null) { if(!job.tool.isEmpty()) held.add(job.tool); if(!job.saplings.isEmpty()) held.add(job.saplings); }
                 if(!held.isEmpty()) popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(held));
             }
-            if(machine.kind==MachineKind.PRECISION_ASSEMBLER) {
+            if(machine.kind==MachineKind.PRECISION_ASSEMBLER || machine.kind==MachineKind.PRODUCTION_CONTROLLER) {
                 ItemStack[] grid=new ItemStack[9];
                 for(int i=0;i<9;i++)grid[i]=machine.assemblyGrid.getStackInSlot(i).copy();
                 Containers.dropContents(level,pos,new SimpleContainer(grid));

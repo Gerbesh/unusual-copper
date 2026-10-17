@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 48;
+    public static final int DATA_COUNT = 51;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     public final ContainerData data;
@@ -26,7 +26,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     private CopperMachineMenu(int id, Inventory playerInventory, CopperMachineBlockEntity machine, BlockPos pos, IItemHandler slots, ContainerData data) {
         super(ModContent.MACHINE_MENU.get(), id); this.machine = machine; this.pos = pos; this.data = data;
-        int[][] positions = kind()==MachineKind.PRECISION_ASSEMBLER
+        int[][] positions = kind()==MachineKind.PRECISION_ASSEMBLER || kind()==MachineKind.PRODUCTION_CONTROLLER
                 ? new int[][]{{185,63},{44,91},{134,63},{152,63}}
                 : new int[][]{{44,63},{44,91},{134,63},{152,63}};
         for (int index = 0; index < 4; index++) {
@@ -54,7 +54,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         for(int i=0;i<9;i++){
             final int slotIndex=i;
             addSlot(new SlotItemHandler(grid,i,13+(i%3)*18,61+(i/3)*18){
-                @Override public boolean isActive(){return kind()==MachineKind.PRECISION_ASSEMBLER;}
+                @Override public boolean isActive(){return kind()==MachineKind.PRECISION_ASSEMBLER || kind()==MachineKind.PRODUCTION_CONTROLLER;}
                 @Override public boolean mayPickup(Player player){return machine==null||!machine.hasOperation();}
             });
         }
@@ -65,6 +65,12 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (machine == null || !stillValid(player)) return false;
+        if(machine.kind==MachineKind.PRODUCTION_CONTROLLER) {
+            if(button==12){machine.queueProduction(1);return true;}
+            if(button==13){machine.queueProduction(16);return true;}
+            if(button==14 || button==1){machine.cancelProduction();return true;}
+            if(button==15){machine.nextProductionPattern();return true;}
+        }
         if(button==11 && machine.kind.isCell()) { machine.batteryMode=(machine.batteryMode+1)%3;machine.setChanged();return true; }
         if(button==10&&player instanceof net.minecraft.server.level.ServerPlayer server&&(machine.kind.capacity>0||machine.kind.energyControl())){EnergyControlMenu.open(server,machine);return true;}
         if (button == 0) { machine.redstoneMode = (machine.redstoneMode + 1) % 3; machine.setChanged(); return true; }
@@ -90,7 +96,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         ItemStack current = slot.getItem(); ItemStack original = current.copy();
         if (index < 4 || index==40 || index==41 || index>=42) { if (!moveItemStackTo(current, 4, 40, true)) return ItemStack.EMPTY; }
         else if(kind().isCell()) { if(!moveItemStackTo(current,40,41,false))return ItemStack.EMPTY; }
-        else if(kind()==MachineKind.PRECISION_ASSEMBLER && !current.is(ModContent.PATTERN_CARD.get())) {
+        else if((kind()==MachineKind.PRECISION_ASSEMBLER || kind()==MachineKind.PRODUCTION_CONTROLLER) && !current.is(ModContent.PATTERN_CARD.get())) {
             if(!moveItemStackTo(current,42,51,false))return ItemStack.EMPTY;
         }
         else if ((kind()==MachineKind.RESONANCE_CRYSTALLIZER && current.is(ModContent.ESSENCE.get()))

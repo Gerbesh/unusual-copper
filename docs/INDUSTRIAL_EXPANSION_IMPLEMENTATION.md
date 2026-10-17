@@ -118,3 +118,22 @@
 ## Ergonomic fluid-side defaults
 - Newly placed pumps take CuE through the block's **rear face** (opposite the way the front faces), not a hard-coded world-west port; all remaining faces export liquid.
 - Newly placed fluid tanks accept fluid from all sides except the bottom, which exports fluid. Players can override any face with the existing Face Selector. Previously placed tanks/pumps retain their persisted per-face NBT settings.
+
+
+
+## E5A: machine-local production orders (2026-10-17)
+
+- Added additive registry ID `production_controller` with a 50,000 CuE buffer, ordinary energy/item faces, existing four-slot machine inventory, standard owner and redstone rules, and physical nine-slot grid persisted under the same `AssemblyGrid` NBT schema used by the assembler. Earlier `MachineKind` ordinals are unchanged.
+- Two explicit server-side, RecipeManager-backed patterns: `resonant_coil` (80 ticks, 240 CuE) and `reinforced_frame` (120 ticks, 1,800 CuE). The controller deliberately uses **the existing vanilla crafting recipe and physical parts**. It does not conjure plate/wire production or bypass E2 presses, and does not accept arbitrary modded recipes.
+- A blank physical `pattern_card` occupies primary slot 0; the nine grid positions must match the selected 3×3 crafting pattern. A player may request +1 or +16, max 4,096 pending; server is authoritative. No client-controlled output ID or NBT.
+- Input stacks remain physically owned by the machine and locked for manual withdrawal during a paid job. External item pipes can insert into the grid but can only extract completed outputs. There are no optimistic reservations in SSN, external chests or other controllers. On completion, the nine input debits and output insertion happen in one local server-thread commit. Progress, paid energy, queued count, selection and grid snapshot persist; full output, redstone and power loss pause.
+- The controller never destroys items on cancel: an in-place reservation is simply unlocked. Breaking the controller drops the stored grid and regular outputs. The queue is intentionally discarded if the block is broken, as no input is pre-consumed for future jobs.
+- UI: add one, add sixteen, change pattern when idle, cancel; RU/EN; generated crafting, block loot, pickaxe tag and models, unit tests for order bounds and deterministic paid CuE.
+- **E5 is not fully complete**: no recursive DAG planner, no auto-feeding intermediate E2/E3 machines, no external chest reservations, no 128-node DAG, no SSN order interoperability. These are deferred to E5B. The current vertical slice produces 16 coils when all 16 units of each ingredient are already present in the machine grid, with E2 materials physically created upstream.
+
+### Manual E5A checks
+1. Craft controller with E2/E3 parts and a pattern card, power it from CuE, load 16 wire spools in **each** of four outer middle-row/column positions, plus 16 redstone at center; request +16. Confirm exactly 16 coils and 3,840 CuE spent, including pause during redstone and energy interruptions.
+2. When an operation is in progress, attempt manual extraction and pipe extraction from input slots: must fail. Fill both output slots: progress pauses without spending CuE. Confirm no item doubles after chunk unload/restart or `/reload`.
+3. Switch to reinforced-frame pattern only while queue idle, load the exact vanilla recipe layout; confirm recipe ID/output validation and 1,800 CuE per item.
+4. Verify two controllers cannot share one grid or consume a neighboring SSN/chest via simulated reservation. Assert craft cancellation keeps all unconsumed inputs.
+5. In-game UI/animations, saved-world migration, claim protection and concurrency remain user acceptance tests; no Minecraft/GameTest launched.
