@@ -29,7 +29,7 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue REPAIR_CUE,REPAIR_PER_XP;
     private static final ForgeConfigSpec.DoubleValue ENCHANT_XP_MULT,ENCHANT_ADDITIONAL;
     private static final ForgeConfigSpec.DoubleValue[] ENCHANT_RARITY=new ForgeConfigSpec.DoubleValue[4];
-    private static final ForgeConfigSpec.BooleanValue ENCHANT_TREASURE,ENCHANT_CURSES;
+    private static final ForgeConfigSpec.BooleanValue ENCHANT_TREASURE,ENCHANT_CURSES,ENCHANT_AUTOMATIC;
     private static final ForgeConfigSpec.ConfigValue<java.util.List<String>> ENCHANT_ITEMS,ENCHANT_ENCHANTMENTS;
     static {
         var builder = new ForgeConfigSpec.Builder();
@@ -92,14 +92,15 @@ public final class ServerConfig {
         BREWER_INTERVAL=builder.defineInRange("stage_interval_ticks",20,20,1200);
         BREWER_BUDGET=builder.defineInRange("machines_per_dimension_tick",8,1,64);
         builder.pop().push("enchanter");
-        ENCHANT_LEVEL=builder.defineInRange("maximum_level",255,1,255);
+        ENCHANT_LEVEL=builder.defineInRange("maximum_level",32767,1,32767);
         ENCHANT_XP_BASE=builder.defineInRange("xp_base",25,1,1000);
         ENCHANT_XP_MULT=builder.defineInRange("xp_multiplier",1.5,.1,10.0);
         ENCHANT_CUE_BASE=builder.defineInRange("cue_base",25000,1000,100000);
         ENCHANT_CUE_MIN=builder.defineInRange("cue_minimum",80000,1,2000000);
         ENCHANT_ADDITIONAL=builder.defineInRange("additional_enchantment_multiplier",.25,0,10.0);
         for(int i=0;i<4;i++)ENCHANT_RARITY[i]=builder.defineInRange("rarity_"+new String[]{"common","uncommon","rare","very_rare"}[i],new double[]{1,1.5,2,2.5}[i],.1,10.0);
-        ENCHANT_TREASURE=builder.define("allow_treasure",false);ENCHANT_CURSES=builder.define("allow_curses",false);
+        ENCHANT_AUTOMATIC=builder.comment("Use registered items/enchantments from every mod. False restores the explicit legacy mod ID allowlists.").define("automatic_mod_compatibility",true);
+        ENCHANT_TREASURE=builder.define("allow_treasure",true);ENCHANT_CURSES=builder.define("allow_curses",true);
         java.util.function.Predicate<Object> ids=value->value instanceof java.util.List<?> list&&list.size()<=128&&list.stream().allMatch(raw->raw instanceof String s&&net.minecraft.resources.ResourceLocation.tryParse(s)!=null);
         ENCHANT_ITEMS=builder.define("allowed_mod_items",java.util.List.<String>of(),ids);
         ENCHANT_ENCHANTMENTS=builder.define("allowed_mod_enchantments",java.util.List.<String>of(),ids);
@@ -157,6 +158,7 @@ public final class ServerConfig {
     public static double enchanterAdditional(){return SPEC.isLoaded()?ENCHANT_ADDITIONAL.get():ENCHANT_ADDITIONAL.getDefault();}
     public static double enchanterRarity(int index){var v=ENCHANT_RARITY[index];return SPEC.isLoaded()?v.get():v.getDefault();}
     public static boolean enchanterTreasure(){return SPEC.isLoaded()?ENCHANT_TREASURE.get():ENCHANT_TREASURE.getDefault();}
+    public static boolean enchanterAutomatic(){return SPEC.isLoaded()?ENCHANT_AUTOMATIC.get():ENCHANT_AUTOMATIC.getDefault();}
     public static boolean enchanterCurses(){return SPEC.isLoaded()?ENCHANT_CURSES.get():ENCHANT_CURSES.getDefault();}
     public static java.util.List<String> enchanterItems(){return SPEC.isLoaded()?ENCHANT_ITEMS.get():ENCHANT_ITEMS.getDefault();}
     public static java.util.List<String> enchanterEnchantments(){return SPEC.isLoaded()?ENCHANT_ENCHANTMENTS.get():ENCHANT_ENCHANTMENTS.getDefault();}

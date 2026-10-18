@@ -25,6 +25,10 @@ public final class EnchanterMenu extends AbstractContainerMenu {
     private record Pending(UUID nonce,UUID actor,long issued,long revision,ItemKey item,EnchantmentPolicy.Offer offer,ItemStack preview){}
     public final BlockPos pos;private final CopperMachineBlockEntity machine;private final Player viewer;
     private Pending pending;private long lastReply=Long.MIN_VALUE,lastSelect=Long.MIN_VALUE;private Result result=Result.NONE;
+    private UUID catalogId;private ItemKey catalogItem;private List<?> catalogConfig;
+    private long catalogRevision=-1,lastPage=Long.MIN_VALUE,lastRefresh=Long.MIN_VALUE;
+    private int catalogRegistry=-1,nextPage;private List<EnchantmentPolicy.Offer> catalogOffers=List.of();
+    private final EnchantmentCatalog<EnchantmentPolicy.Offer> clientCatalog=new EnchantmentCatalog<>();
     public EnchanterNetwork.Reply snapshot;public int serial;
     public EnchanterMenu(int id,Inventory inventory,FriendlyByteBuf b){this(id,inventory,null,b.readBlockPos(),new ItemStackHandler(4));}
     public EnchanterMenu(int id,Inventory inventory,CopperMachineBlockEntity machine){this(id,inventory,machine,machine.getBlockPos(),machine.inventory);}
@@ -36,7 +40,26 @@ public final class EnchanterMenu extends AbstractContainerMenu {
     @Override public boolean stillValid(Player player){return machine==null||player==viewer&&!machine.isRemoved()&&machine.kind==MachineKind.ENCHANTMENT_RESONATOR&&player.level()==machine.getLevel()&&player.level().hasChunkAt(pos)&&player.level().getBlockEntity(pos)==machine&&machine.canAccess(player)&&player.distanceToSqr(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5)<=64&&player.level() instanceof ServerLevel level&&ProtectionPolicy.allowed(level,pos,machine.owner());}
     private boolean context(ServerPlayer player,UUID runtime){return machine!=null&&player.containerMenu==this&&stillValid(player)&&machine.runtimeIdentity.equals(runtime);}
     @Override public ItemStack quickMoveStack(Player player,int index){if(index<0||index>=slots.size()||!stillValid(player))return ItemStack.EMPTY;var slot=slots.get(index);if(!slot.hasItem())return ItemStack.EMPTY;var stack=slot.getItem();var original=stack.copy();boolean moved=index<2?moveItemStackTo(stack,2,slots.size(),true):stack.is(Items.LAPIS_LAZULI)?moveItemStackTo(stack,1,2,false):moveItemStackTo(stack,0,1,false);if(!moved)return ItemStack.EMPTY;if(stack.isEmpty())slot.set(ItemStack.EMPTY);else slot.setChanged();slot.onTake(player,stack);return original;}
-    public void receive(EnchanterNetwork.Reply reply){if(reply.menu()==containerId&&reply.pos().equals(pos)){snapshot=reply;serial++;}}
+    public void receive(EnchanterNetwork.Reply reply){if(reply.menu()==containerId&&reply.pos().equals(pos)){
+        clientCatalog.begin(reply.catalog(),reply.total(),net.minecraftforge.registries.ForgeRegistries.ENCHANTMENTS.getKeys().size());
+        clientCatalog.append(reply.catalog(),0,reply.offers());snapshot=reply.withOffers(clientCatalog.entries());serial++;
+    }}
+    public void receivePage(EnchanterNetwork.Page page){
+        if(snapshot==null||page.menu()!=containerId||!page.pos().equals(pos)||!page.runtime().equals(snapshot.runtime())||!page.catalog().equals(snapshot.catalog()))return;
+        if(page.total()!=snapshot.total())throw new IllegalArgumentException("Changed enchantment catalog total");
+        if(clientCatalog.append(page.catalog(),page.offset(),page.offers())){snapshot=snapshot.withOffers(clientCatalog.entries());serial++;}
+    }
+    private void catalog(){
+        var stack=machine.inventory.getStackInSlot(0);var key=stack.isEmpty()?null:ItemKey.of(stack);var config=EnchantmentPolicy.configuration();
+        int registered=net.minecraftforge.registries.ForgeRegistries.ENCHANTMENTS.getKeys().size();
+        if(catalogId!=null&&catalogRevision==machine.enchantmentRevision&&catalogRegistry==registered&&Objects.equals(catalogItem,key)&&Objects.equals(catalogConfig,config))return;
+        catalogOffers=EnchantmentPolicy.offers(stack);catalogId=UUID.randomUUID();catalogItem=key;catalogConfig=config;
+        catalogRevision=machine.enchantmentRevision;catalogRegistry=registered;nextPage=EnchantmentPolicy.page(catalogOffers,0).size();
+    }
+    public void refresh(UUID runtime,ServerPlayer player){
+        if(!context(player,runtime))return;long now=player.level().getGameTime();
+        if(lastRefresh!=Long.MIN_VALUE&&now-lastRefresh<20)return;lastRefresh=now;catalogId=null;reply(player,Result.NONE);
+    }
     public EnchanterNetwork.Quote quote(){if(pending==null)return null;return new EnchanterNetwork.Quote(pending.nonce,pending.offer,pending.preview,(int)Math.max(0,QUOTE_TICKS-(viewer.level().getGameTime()-pending.issued)));}
     public boolean select(UUID runtime,ResourceLocation enchantment,ServerPlayer player){
         if(!context(player,runtime))return false;long now=player.level().getGameTime();if(lastSelect!=Long.MIN_VALUE&&now-lastSelect<2)return false;lastSelect=now;pending=null;
@@ -70,8 +93,17 @@ public final class EnchanterMenu extends AbstractContainerMenu {
     private void reply(ServerPlayer player,Result reason){
         if(reason!=Result.NONE)result=reason;long points=0;try{points=(long)Math.floor(XpWallet.points(player)+.0001);}catch(IllegalArgumentException ignored){}
         var item=machine.inventory.getStackInSlot(0);if(pending!=null&&(!unchanged(pending)||player.level().getGameTime()-pending.issued>=QUOTE_TICKS)){pending=null;result=Result.STALE;}
-        var lapis=machine.inventory.getStackInSlot(1);EnchanterNetwork.reply(player,new EnchanterNetwork.Reply(containerId,pos,machine.runtimeIdentity,EnchantmentPolicy.offers(item),quote(),points,machine.energy.stored(),lapis.is(Items.LAPIS_LAZULI)?lapis.getCount():0,result,machine.redstoneMode,machine.energyEnabled()));lastReply=player.level().getGameTime();
+        catalog();var lapis=machine.inventory.getStackInSlot(1);EnchanterNetwork.reply(player,new EnchanterNetwork.Reply(containerId,pos,machine.runtimeIdentity,EnchantmentPolicy.page(catalogOffers,0),quote(),points,machine.energy.stored(),lapis.is(Items.LAPIS_LAZULI)?lapis.getCount():0,result,machine.redstoneMode,machine.energyEnabled(),catalogId,catalogOffers.size()));lastReply=player.level().getGameTime();
     }
-    @Override public void broadcastChanges(){super.broadcastChanges();if(machine!=null&&viewer instanceof ServerPlayer player&&player.containerMenu==this&&stillValid(player)&&(lastReply==Long.MIN_VALUE||player.level().getGameTime()-lastReply>=10))reply(player,Result.NONE);}
+    @Override public void broadcastChanges(){
+        super.broadcastChanges();if(machine==null||!(viewer instanceof ServerPlayer player)||player.containerMenu!=this||!stillValid(player))return;
+        long now=player.level().getGameTime();
+        if(lastReply==Long.MIN_VALUE||now-lastReply>=10||catalogRevision!=machine.enchantmentRevision)reply(player,Result.NONE);
+        if(nextPage<catalogOffers.size()&&lastPage!=now){
+            var page=EnchantmentPolicy.page(catalogOffers,nextPage);
+            EnchanterNetwork.page(player,new EnchanterNetwork.Page(containerId,pos,machine.runtimeIdentity,catalogId,nextPage,catalogOffers.size(),page));
+            nextPage+=page.size();lastPage=now;
+        }
+    }
     @Override public boolean clickMenuButton(Player player,int button){if(button!=0||!(player instanceof ServerPlayer server)||machine==null||!context(server,machine.runtimeIdentity))return false;machine.redstoneMode=(machine.redstoneMode+1)%3;machine.setChanged();reply(server,Result.NONE);return true;}
 }

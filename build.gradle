@@ -57,6 +57,13 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('enchanterVisualClient')) {
+                workingDirectory project.file('run-industrial-visual')
+                property 'unusualcopper.enchanterVisualClient', 'true'
+                property 'unusualcopper.enchanterCompatFixture', 'true'
+                args '--quickPlaySingleplayer', 'cue-industrial-visual', '--width', (project.findProperty('industrialVisualWidth') ?: '1600').toString(), '--height', (project.findProperty('industrialVisualHeight') ?: '900').toString()
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
             if (project.hasProperty('fluidTankVisualClient')) {
                 workingDirectory project.file('run-industrial-visual')
                 property 'unusualcopper.fluidTankVisualClient', 'true'
@@ -133,6 +140,7 @@ minecraft {
             }
         }
         gameTestServer {
+            property 'unusualcopper.enchanterCompatFixture', 'true'
             mods {
                 "${mod_id}" { source sourceSets.gameTest }
             }

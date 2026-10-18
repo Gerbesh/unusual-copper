@@ -32,7 +32,7 @@
   "enchanter.unusualcopper.item": "Item",
   "enchanter.unusualcopper.lapis": "Lapis",
   "enchanter.unusualcopper.preview": "Preview",
-  "enchanter.unusualcopper.choose": "Choose an enchantment to request its exact price",
+  "enchanter.unusualcopper.choose": "Choose a compatible enchantment",
   "enchanter.unusualcopper.no_offers": "No compatible enchantments for this item",
   "enchanter.unusualcopper.price": "Price: %s XP points + %s CuE + 64 lapis",
   "enchanter.unusualcopper.wallet": "Available: %s XP points | %s CuE | Lapis: %s / 64",
@@ -578,5 +578,7 @@
   "tank.unusualcopper.amount": "%s / %s mB",
   "tank.unusualcopper.blocks": "%s cubes × 16,000 mB",
   "tank.unusualcopper.empty": "Empty",
-  "tank.unusualcopper.ports_hint": "Shared level. Configure sides with the copper wrench."
+  "tank.unusualcopper.ports_hint": "Shared level. Configure sides with the copper wrench.",
+  "enchanter.unusualcopper.refresh": "Refresh compatible enchantments",
+  "enchanter.unusualcopper.loading": "Loading enchantment catalog…"
 }
