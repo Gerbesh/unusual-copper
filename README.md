@@ -1,10 +1,10 @@
 # Unusual Copper
 
-**Текущая разработка:** **0.21.0-alpha.1** — [терморезонансный реактор 3×3×4 со встроенным охлаждением](docs/COPPER_REACTOR.md) и [креативная батарея с живой рамкой области](docs/CREATIVE_BATTERY_AND_AREA_PREVIEW.md) (кандидат, не установлен). Ранее: [модовая одежда и зачарования](docs/ENCHANTER_COMPATIBILITY.md), [жидкостные мультиблоки по 16 000 мБ/куб](docs/FLUID_TANKS.md), [термоизоляция, регенератор и сервоприводы](docs/ARMOR_SUPPORT.md), [визор и полевой анализатор](docs/ARMOR_SENSES.md), [физические уровни и открытые шлемы](docs/ARMOR_MODULE_LEVELS.md), настройки/приоритеты, HUD F3 и [общие платежи](docs/ARMOR_PAYMENT_BATCHES.md). Установленная пара — **UC 0.20.16-alpha.1 + SSN Progressive 1.4.1** с оформлением промышленных устройств, компонентов и брони. [Настройка брони](docs/ARMOR_CONSOLE.md) · [Полный список оставшейся разработки](docs/COMPLETION_TRACKER.md). Кадры витрины подтверждают внешний вид в тестовом клиенте, а не функциональную приёмку всей фабрики.
+**Текущая разработка:** **0.21.0-alpha.1** — [терморезонансный реактор 3×3×4 со встроенным охлаждением](docs/COPPER_REACTOR.md) и [креативная батарея с живой рамкой области](docs/CREATIVE_BATTERY_AND_AREA_PREVIEW.md) (установлено в клиент и сервер 18 октября). Ранее: [модовая одежда и зачарования](docs/ENCHANTER_COMPATIBILITY.md), [жидкостные мультиблоки по 16 000 мБ/куб](docs/FLUID_TANKS.md), [термоизоляция, регенератор и сервоприводы](docs/ARMOR_SUPPORT.md), [визор и полевой анализатор](docs/ARMOR_SENSES.md), [физические уровни и открытые шлемы](docs/ARMOR_MODULE_LEVELS.md), настройки/приоритеты, HUD F3 и [общие платежи](docs/ARMOR_PAYMENT_BATCHES.md). Установленная пара — **UC 0.21.0-alpha.1 + SSN Progressive 1.4.1** с оформлением промышленных устройств, компонентов и брони. [Настройка брони](docs/ARMOR_CONSOLE.md) · [Полный список оставшейся разработки](docs/COMPLETION_TRACKER.md). Кадры витрины подтверждают внешний вид в тестовом клиенте, а не функциональную приёмку всей фабрики.
 
 Медная энергия, магические механизмы и автоматизация для **Minecraft Java 1.20.1 · Forge 47.x · Java 17**.
 
-**Опубликованный релиз: 0.20.6-alpha.1.** Локально установлена промышленная 0.20.16-alpha.1; кандидат 0.21.0-alpha.1 пока не устанавливался. Проект находится в alpha: полная приёмка 1.0 ещё не завершена.
+**Опубликованный релиз: 0.20.6-alpha.1.** Локально установлена промышленная **0.21.0-alpha.1**; [запись установки](docs/verification/install-0.21.0-2026-10-18.json). Проект находится в alpha: полная приёмка 1.0 ещё не завершена.
 
 [Скачать 0.20.6-alpha.1](https://github.com/Gerbesh/unusual-copper/releases/tag/v0.20.6-alpha.1) · [Изменения](CHANGELOG.md) · [Руководства](docs/INDEX.md) · [Маршрут](docs/ROADMAP.md) · [Задачи](https://github.com/Gerbesh/unusual-copper/issues)
 
@@ -36,7 +36,7 @@
 
 ## Документация
 
-**Промышленная разработка:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Реализованные alpha-срезы и их ограничения описаны в [журнале промышленной реализации](docs/INDUSTRIAL_EXPANSION_IMPLEMENTATION.md) и [списке оставшейся разработки](docs/COMPLETION_TRACKER.md). Установленная 0.20.9 содержит промышленные устройства, но ещё не весь план E0–E9.
+**Промышленная разработка:** [Industrial Expansion E0–E9](docs/INDUSTRIAL_EXPANSION_ROADMAP.md) · [полный GDD](docs/INDUSTRIAL_EXPANSION_GDD.md) · [программируемая броня и полёт](docs/PROGRAMMABLE_ARMOR.md) · [инженерный TDD](docs/INDUSTRIAL_EXPANSION_TDD.md). Реализованные alpha-срезы и их ограничения описаны в [журнале промышленной реализации](docs/INDUSTRIAL_EXPANSION_IMPLEMENTATION.md) и [списке оставшейся разработки](docs/COMPLETION_TRACKER.md). Установленная 0.21.0 содержит промышленные устройства, но ещё не весь план E0–E9.
 
 - [Экстрактор и сфера](docs/RESONANT_EXTRACTOR.md) — кирка, энергия, область, руды, очередь и визуальные эффекты.
 - [Реактор](docs/COPPER_REACTOR.md), [батареи](docs/BATTERIES.md), [предметные трубы](docs/ITEM_PIPES.md), [SSN Bridge](docs/SSN_BRIDGE.md).
