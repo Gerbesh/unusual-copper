@@ -1,0 +1,40 @@
+{
+  "timestamp_utc": "20261018T152939Z",
+  "version": "0.20.16-alpha.1",
+  "sha256": "85d9dd7088b98d28620849b64ab6e2ffdc5b6984fd18140800d4ca2b8433ca32",
+  "bytes": 1711216,
+  "destinations": [
+    "Better MC FORGE BMC4 client",
+    "Pash_Ver_minecraft server"
+  ],
+  "installed_checksums_verified": true,
+  "previous_version": "0.20.15-alpha.1",
+  "previous_sha256": "ede0ae7e22939689e72e324d653ac8f7b091d917e1dd964b5ee90be7aa171cbf",
+  "previous_jars_backed_up_and_verified": true,
+  "local_jar_receipt": ".codex-tmp/cue-install-20261018T152940Z.json",
+  "local_receipt": ".codex-tmp/cue-enchanter-install-20261018T152939Z.json",
+  "server_policy": {
+    "before": {
+      "automatic_mod_compatibility": null,
+      "allow_treasure": false,
+      "allow_curses": false,
+      "maximum_level": 255
+    },
+    "after": {
+      "automatic_mod_compatibility": true,
+      "allow_treasure": true,
+      "allow_curses": true,
+      "maximum_level": 32767
+    },
+    "before_sha256": "8d6aceb28a00ec5908f621065624ca0da99d55a4a96ce6647c6525c96bb376ca",
+    "after_sha256": "0fac3848d3c62bf4312f9986f01b0228bf8000acb5968ad3b00c359ce874eecb",
+    "original_backed_up_and_verified": true,
+    "local_backup": ".codex-tmp/installs/20261018T152939Z-enchanter-policy/server/unusualcopper-server.toml"
+  },
+  "ssn_version": "1.4.1",
+  "ssn_sha256": "c3bd41bc8eda3c4c2e7ab7fa2b205866ac88eba90c6e4d6330d8d0c1c22013f6",
+  "ssn_changed": false,
+  "game_or_server_launched": false,
+  "world_save_data_modified": false,
+  "functional_acceptance": "User performs in-game acceptance; deployment is not evidence of runtime acceptance"
+}
