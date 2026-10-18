@@ -20,7 +20,8 @@ public final class AreaNetwork {
         public static Selection decode(FriendlyByteBuf b){return new Selection(b.readUUID(),b.readResourceLocation(),b.readBlockPos(),b.readBlockPos(),b.readBoolean());}
         public static void encode(Selection s,FriendlyByteBuf b){b.writeUUID(s.token);b.writeResourceLocation(s.dimension);b.writeBlockPos(s.anchor);b.writeBlockPos(s.first);b.writeBoolean(s.mining);}
     }
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "area"), () -> "2", "2"::equals, "2"::equals);
+    // Protocol 3 accompanies the coolant recipe wire extension; mixed pre-reactor clients must not join.
+    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID, "area"), () -> "3", "3"::equals, "3"::equals);
     private static Consumer<Preview> receiver = ignored -> {};
     private static Consumer<Selection> selectionReceiver=ignored->{};
     private AreaNetwork() {}

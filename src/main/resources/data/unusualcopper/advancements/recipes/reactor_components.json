@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "material": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "unusualcopper:reinforced_frame"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "material"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "unusualcopper:reactor_block",
+      "unusualcopper:reactor_diamond_lens",
+      "unusualcopper:reactor_diamond_filter",
+      "unusualcopper:reactor_insulation",
+      "unusualcopper:coolant_concentrate"
+    ]
+  }
+}

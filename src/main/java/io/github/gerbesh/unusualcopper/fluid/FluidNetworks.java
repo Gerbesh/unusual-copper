@@ -61,6 +61,7 @@ public final class FluidNetworks {
                     if(!level.hasChunkAt(providerPos))continue;
                     if(source.owner()!=null&&!ProtectionPolicy.allowed(level,providerPos,source.owner()))continue;
                     var provider=level.getBlockEntity(providerPos);
+                    if(provider instanceof io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity r&&!r.automationAllowed(source.owner()))continue;
                     if(provider==null||provider instanceof FluidPipeBlockEntity)continue;
                     if(provider instanceof CopperMachineBlockEntity machine && machine.owner()!=null
                             && !machine.owner().equals(source.owner()))continue;
@@ -111,6 +112,7 @@ public final class FluidNetworks {
                     if(current.effective(side)!=PipeMode.INSERT||(origin!=null&&origin.equals(next)))continue;
                     if(source.owner()!=null&&!ProtectionPolicy.allowed(level,next,source.owner()))continue;
                     var target=level.getBlockEntity(next);
+                    if(target instanceof io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity r&&!r.automationAllowed(source.owner()))continue;
                     if(target==null||target instanceof FluidPipeBlockEntity)continue;
                     if(target instanceof CopperMachineBlockEntity machine && machine.owner()!=null
                             && !machine.owner().equals(source.owner()))continue;

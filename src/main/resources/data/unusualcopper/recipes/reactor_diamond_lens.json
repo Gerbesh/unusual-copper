@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "COC",
+    "ADA",
+    "COC"
+  ],
+  "key": {
+    "C": {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:reactor_diamond_lens",
+    "count": 1
+  }
+}

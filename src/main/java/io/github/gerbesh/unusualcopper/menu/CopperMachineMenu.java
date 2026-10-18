@@ -14,7 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class CopperMachineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 54;
+    public static final int DATA_COUNT = 55;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
     private final net.minecraft.world.level.Level level;

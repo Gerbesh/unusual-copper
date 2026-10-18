@@ -1,0 +1,15 @@
+{
+  "type": "unusualcopper:industrial_processing",
+  "machine": "vortex_purifier",
+  "ingredient": {
+    "item": "unusualcopper:coolant_concentrate"
+  },
+  "input_count": 1,
+  "result": {
+    "item": "unusualcopper:reactor_coolant_bucket"
+  },
+  "ticks": 40,
+  "cue": 200,
+  "water_mb": 1000,
+  "coolant_mb": 1000
+}

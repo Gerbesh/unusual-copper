@@ -49,14 +49,15 @@ final class IndustrialProcessingCategory implements IRecipeCategory<IndustrialRe
         if(ingredients.size()>2)
             layout.addSlot(RecipeIngredientRole.INPUT,89,17).addIngredients(ingredients.get(2));
         if(recipe.waterMb()>0)layout.addSlot(RecipeIngredientRole.CATALYST,89,45).addItemStack(new ItemStack(Items.WATER_BUCKET));
-        layout.addSlot(RecipeIngredientRole.OUTPUT,139,17)
-                .addItemStack(recipe.getResultItem(RegistryAccess.EMPTY));
+        if(recipe.fluidOutput()>0)layout.addSlot(RecipeIngredientRole.OUTPUT,139,17)
+                .addIngredients(mezz.jei.api.forge.ForgeTypes.FLUID_STACK,java.util.List.of(new net.minecraftforge.fluids.FluidStack(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.STILL.get(),recipe.fluidOutput())));
+        else layout.addSlot(RecipeIngredientRole.OUTPUT,139,17).addItemStack(recipe.getResultItem(RegistryAccess.EMPTY));
         if(!recipe.secondary().isEmpty())
             layout.addSlot(RecipeIngredientRole.OUTPUT,139,45).addItemStack(recipe.secondary());
     }
     @Override public void draw(IndustrialRecipe recipe,IRecipeSlotsView slots,GuiGraphics graphics,double mouseX,double mouseY) {
         graphics.drawString(Minecraft.getInstance().font,recipe.cost()+" CuE / "+recipe.ticks()+" t",6,59,0xff52625c,false);
         if(recipe.waterMb()>0)
-            graphics.drawString(Minecraft.getInstance().font,recipe.waterMb()+" mB",56,59,0xff52625c,false);
+            graphics.drawString(Minecraft.getInstance().font,recipe.waterMb()+" mB",6,69,0xff52625c,false);
     }
 }

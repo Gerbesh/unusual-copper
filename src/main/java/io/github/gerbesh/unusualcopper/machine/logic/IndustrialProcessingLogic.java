@@ -15,6 +15,9 @@ public final class IndustrialProcessingLogic implements MachineLogic {
     @Override public void tick(CopperMachineBlockEntity m, ServerLevel level) {
         if(m.kind==io.github.gerbesh.unusualcopper.machine.MachineKind.VORTEX_PURIFIER) {
             ItemStack bucket=m.inventory.getStackInSlot(1);
+            if(bucket.is(net.minecraft.world.item.Items.BUCKET)&&m.coolantOutput.getFluidAmount()>=1000&&m.canFitOutput(new ItemStack(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.BUCKET.get()))) {
+                m.commitLocally(()->{bucket.shrink(1);m.coolantOutput.drain(1000,net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);m.insertOutput(new ItemStack(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.BUCKET.get()));});
+            }
             if(bucket.is(net.minecraft.world.item.Items.WATER_BUCKET) && m.water.getFluidAmount()<=3000) {
                 m.commitLocally(() -> {
                     m.water.fill(new net.minecraftforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
@@ -48,12 +51,13 @@ public final class IndustrialProcessingLogic implements MachineLogic {
         ItemStack result=recipe.assemble(container,level.registryAccess());
         if (m.hasOperation() && (!m.inputMatches() || !m.industrialInputsMatch() || m.duration!=recipe.ticks()
                 || m.operationCost!=recipe.cost() || m.operationWater!=recipe.waterMb()
+                || m.operationCoolant!=recipe.fluidOutput()
                 || !ItemStack.matches(m.secondaryResult,recipe.secondary())
                 || !ItemStack.matches(m.result,result))) {
             m.status(MachineStatus.RECIPE_CHANGED); return;
         }
         if (!m.hasOperation()) {
-            if (!m.canFitOutputs(result,recipe.secondary())) { m.status(MachineStatus.OUTPUT_FULL); return; }
+            if (recipe.fluidOutput()>0?m.coolantOutput.getCapacity()-m.coolantOutput.getFluidAmount()<recipe.fluidOutput():!m.canFitOutputs(result,recipe.secondary())) { m.status(MachineStatus.OUTPUT_FULL); return; }
             m.begin(recipe.getId().toString(),input.copyWithCount(recipe.inputCount()),result,recipe.ticks(),recipe.cost());
             m.secondaryResult=recipe.secondary();
             if(m.hasIndustrialExtra()) {
@@ -62,9 +66,10 @@ public final class IndustrialProcessingLogic implements MachineLogic {
                         ?m.industrialExtra.getStackInSlot(0).copyWithCount(1):ItemStack.EMPTY;
             }
             m.operationWater=recipe.waterMb();
+            m.operationCoolant=recipe.fluidOutput();
             m.setChanged();
         }
-        if (!m.canFitOutputs(m.result,m.secondaryResult)) { m.status(MachineStatus.OUTPUT_FULL); return; }
+        if (m.operationCoolant>0?m.coolantOutput.getCapacity()-m.coolantOutput.getFluidAmount()<m.operationCoolant:!m.canFitOutputs(m.result,m.secondaryResult)) { m.status(MachineStatus.OUTPUT_FULL); return; }
         if (m.operationWater>0 && m.water.getFluidAmount()<m.operationWater) { m.status(MachineStatus.NO_WATER); return; }
         if (m.progress>=m.duration) { m.finish(); return; }
         int due=OperationMath.payment(m.operationCost,m.progress+1,m.duration);

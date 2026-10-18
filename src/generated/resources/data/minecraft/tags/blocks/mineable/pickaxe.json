@@ -34,6 +34,7 @@
     "unusualcopper:copper_fluid_pump",
     "unusualcopper:copper_fluid_tank",
     "unusualcopper:production_controller",
-    "unusualcopper:armor_workbench"
+    "unusualcopper:armor_workbench",
+    "unusualcopper:reactor_block"
   ]
 }

@@ -1,0 +1,214 @@
+{
+  "block.unusualcopper.reactor_block": [
+    "Reactor Block",
+    "Реакторный блок"
+  ],
+  "block.unusualcopper.reactor_coolant": [
+    "Reactor Coolant",
+    "Реакторный хладагент"
+  ],
+  "fluid_type.unusualcopper.reactor_coolant": [
+    "Reactor Coolant",
+    "Реакторный хладагент"
+  ],
+  "item.unusualcopper.reactor_coolant_bucket": [
+    "Reactor Coolant Bucket",
+    "Ведро реакторного хладагента"
+  ],
+  "item.unusualcopper.reactor_diamond_lens": [
+    "Diamond Resonance Lens",
+    "Алмазная резонансная линза"
+  ],
+  "item.unusualcopper.reactor_diamond_filter": [
+    "Diamond Reactor Filter",
+    "Алмазный фильтр реактора"
+  ],
+  "item.unusualcopper.reactor_insulation": [
+    "Obsidian Reactor Lining",
+    "Обсидиановая облицовка реактора"
+  ],
+  "item.unusualcopper.coolant_concentrate": [
+    "Coolant Concentrate",
+    "Концентрат хладагента"
+  ],
+  "reactor.build": [
+    "Build 36 identical blocks: 3 × 3 base, 4 layers. Forms automatically.",
+    "Соберите 36 одинаковых блоков: основание 3 × 3, высота 4. Формируется автоматически."
+  ],
+  "reactor.retained": [
+    "Retained core contents, energy and temperature. Rebuild around this block.",
+    "Содержимое ядра, энергия и температура сохранены. Восстановите структуру вокруг этого блока."
+  ],
+  "reactor.port_open": [
+    "Reactor face enabled",
+    "Грань реактора включена"
+  ],
+  "reactor.port_closed": [
+    "Reactor face disabled",
+    "Грань реактора выключена"
+  ],
+  "reactor.life": [
+    "Remaining service life: %s units",
+    "Остаток ресурса: %s ед."
+  ],
+  "reactor.slots": [
+    "Copper · 4 lenses · filter · lining · buckets →",
+    "Медь · 4 линзы · фильтр · облицовка · вёдра →"
+  ],
+  "reactor.energy": [
+    "%s CuE · +%s/t · →%s/t",
+    "%s CuE · +%s/т · →%s/т"
+  ],
+  "reactor.coolant": [
+    "Coolant: %s / 16000 mB",
+    "Хладагент: %s / 16000 мБ"
+  ],
+  "reactor.lava": [
+    "Lava: %s / 16000 mB",
+    "Лава: %s / 16000 мБ"
+  ],
+  "reactor.heat": [
+    "Core: %s °C",
+    "Ядро: %s °C"
+  ],
+  "reactor.yield": [
+    "64 000 CuE / copper ingot",
+    "64 000 CuE / слиток меди"
+  ],
+  "reactor.stop": [
+    "Pause reaction",
+    "Остановить"
+  ],
+  "reactor.start": [
+    "Start reaction",
+    "Запустить"
+  ],
+  "reactor.mode": [
+    "Production: %s CuE/t",
+    "Мощность: %s CuE/т"
+  ],
+  "reactor.mode_hint": [
+    "Switch 2 000 / 8 000 / 32 000 CuE/t. More coolant sustains higher power. Eight lower sockets share 32 000 CuE/t output; each socket allows 4 096/t. Pausing stops new production; stored energy remains available.",
+    "Переключить 2 000 / 8 000 / 32 000 CuE/т. Для высокой мощности нужна достаточная заправка. Восемь нижних разъёмов делят выдачу 32 000 CuE/т, по 4 096 на разъём. Остановка прекращает выработку; накопленная энергия доступна."
+  ],
+  "reactor.status.incomplete": [
+    "Build 36 blocks: 3 × 3 × 4",
+    "Соберите 36 блоков: 3 × 3 × 4"
+  ],
+  "reactor.status.unloaded": [
+    "Waiting for all structure chunks",
+    "Ожидание загрузки всей структуры"
+  ],
+  "reactor.status.protected": [
+    "Structure access denied by claims",
+    "Нет доступа к территории структуры"
+  ],
+  "reactor.status.paused": [
+    "Paused · built-in cooling continues",
+    "Остановлен · встроенное охлаждение работает"
+  ],
+  "reactor.status.no_coolant": [
+    "Add coolant: minimum 1 000 mB; full charge 16 000",
+    "Залейте хладагент: минимум 1 000 мБ, полный бак 16 000"
+  ],
+  "reactor.status.no_lenses": [
+    "Insert 4 serviceable diamond lenses",
+    "Вставьте 4 исправные алмазные линзы"
+  ],
+  "reactor.status.no_filter": [
+    "Replace diamond filter",
+    "Замените алмазный фильтр"
+  ],
+  "reactor.status.no_insulation": [
+    "Insert serviceable obsidian lining",
+    "Вставьте исправную обсидиановую облицовку"
+  ],
+  "reactor.status.no_copper": [
+    "Add copper: 8 ingots per batch",
+    "Добавьте медь: партия 8 слитков"
+  ],
+  "reactor.status.no_lava": [
+    "Add lava: 250 mB per batch",
+    "Залейте лаву: 250 мБ на партию"
+  ],
+  "reactor.status.full": [
+    "Buffer full · production throttled",
+    "Буфер заполнен · выработка приостановлена"
+  ],
+  "reactor.status.hot": [
+    "Cooling down · add coolant for sustained high power",
+    "Охлаждение · долейте хладагент для высокой мощности"
+  ],
+  "reactor.status.working": [
+    "Reaction stable · internal cooling",
+    "Реакция идёт · охлаждение встроено"
+  ],
+  "reactor.status.idle": [
+    "Ready",
+    "Готов"
+  ],
+  "reactor.purifier_output": [
+    "Coolant: %s mB",
+    "Хладагент: %s мБ"
+  ],
+  "reactor.slot.0": [
+    "Copper ingots or copper blocks",
+    "Медные слитки или медные блоки"
+  ],
+  "reactor.slot.1": [
+    "Diamond lens 1 of 4",
+    "Алмазная линза 1 из 4"
+  ],
+  "reactor.slot.2": [
+    "Diamond lens 2 of 4",
+    "Алмазная линза 2 из 4"
+  ],
+  "reactor.slot.3": [
+    "Diamond lens 3 of 4",
+    "Алмазная линза 3 из 4"
+  ],
+  "reactor.slot.4": [
+    "Diamond lens 4 of 4",
+    "Алмазная линза 4 из 4"
+  ],
+  "reactor.slot.5": [
+    "Diamond filter · wear per batch",
+    "Алмазный фильтр · износ за партию"
+  ],
+  "reactor.slot.6": [
+    "Obsidian lining · wears only when overheated",
+    "Обсидиановая облицовка · износ при перегреве"
+  ],
+  "reactor.slot.7": [
+    "Lava or coolant bucket · emptied automatically",
+    "Ведро лавы или хладагента · опустошается автоматически"
+  ],
+  "reactor.slot.8": [
+    "Empty bucket output",
+    "Выход пустых вёдер"
+  ],
+  "reactor.credit_hint": [
+    "Return unused copper units from a copper block to the fuel slot. Pause and cool the reactor first.",
+    "Вернуть остаток меди от медного блока в топливный слот. Сначала остановите и остудите реактор."
+  ],
+  "reactor.title": [
+    "Copper Thermoresonance Reactor",
+    "Медный терморезонансный реактор"
+  ],
+  "reactor.build_owner": [
+    "All 36 building blocks must belong to the same owner.",
+    "Все 36 реакторных блоков должны принадлежать одному владельцу."
+  ],
+  "reactor.build_protected": [
+    "Claims deny access to part of this structure.",
+    "Защита территории запрещает доступ к части структуры."
+  ],
+  "reactor.build_multiple": [
+    "Use only one block with retained core contents per reactor.",
+    "На один реактор используйте только один блок с сохранённым содержимым ядра."
+  ],
+  "reactor.credit": [
+    "Cu: %s",
+    "Медь: %s"
+  ]
+}

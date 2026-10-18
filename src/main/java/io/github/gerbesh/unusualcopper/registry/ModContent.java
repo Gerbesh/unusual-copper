@@ -66,6 +66,16 @@ public final class ModContent {
     public static final RegistryObject<Block> CRYSTALLINE_ENERGY_PIPE = BLOCKS.register("crystalline_energy_pipe", () -> new EnergyPipeBlock(2));
     public static final RegistryObject<Item> CRYSTALLINE_ENERGY_PIPE_ITEM = ITEMS.register("crystalline_energy_pipe", () -> new BlockItem(CRYSTALLINE_ENERGY_PIPE.get(), new Item.Properties()));
     public static final RegistryObject<Item> ESSENCE = ITEMS.register("saturated_copper_essence", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Block> REACTOR_BLOCK=BLOCKS.register("reactor_block",io.github.gerbesh.unusualcopper.reactor.ReactorBlock::new);
+    public static final RegistryObject<Item> REACTOR_ITEM=ITEMS.register("reactor_block",()->new BlockItem(REACTOR_BLOCK.get(),new Item.Properties()){
+        @Override public void appendHoverText(ItemStack stack,net.minecraft.world.level.Level level,java.util.List<Component> lines,TooltipFlag flag){lines.add(Component.translatable("reactor.build"));if(stack.hasTag()&&stack.getTag().contains("BlockEntityTag"))lines.add(Component.translatable("reactor.retained"));}
+    });
+    public static final RegistryObject<BlockEntityType<io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity>> REACTOR_ENTITY=ENTITIES.register("reactor",()->BlockEntityType.Builder.of(io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity::new,REACTOR_BLOCK.get()).build(null));
+    public static final RegistryObject<MenuType<io.github.gerbesh.unusualcopper.reactor.ReactorMenu>> REACTOR_MENU=MENUS.register("reactor",()->IForgeMenuType.create(io.github.gerbesh.unusualcopper.reactor.ReactorMenu::new));
+    public static final RegistryObject<Item> REACTOR_LENS=ITEMS.register("reactor_diamond_lens",()->new io.github.gerbesh.unusualcopper.reactor.ReactorComponentItem(65536));
+    public static final RegistryObject<Item> REACTOR_FILTER=ITEMS.register("reactor_diamond_filter",()->new io.github.gerbesh.unusualcopper.reactor.ReactorComponentItem(4096));
+    public static final RegistryObject<Item> REACTOR_INSULATION=ITEMS.register("reactor_insulation",()->new io.github.gerbesh.unusualcopper.reactor.ReactorComponentItem(16384));
+    public static final RegistryObject<Item> COOLANT_CONCENTRATE=ITEMS.register("coolant_concentrate",()->new Item(new Item.Properties()));
     public static final RegistryObject<Item> SOLAR_LENS = ITEMS.register("diamond_solar_lens", SolarLensItem::new);
     public static final RegistryObject<Item> SENTINEL_FOCUS = ITEMS.register("sentinel_range_focus", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FRAME = ITEMS.register("copper_frame", () -> new Item(new Item.Properties()));

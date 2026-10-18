@@ -84,6 +84,7 @@ public class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMe
         if(menu.kind()==MachineKind.VORTEX_PURIFIER || menu.kind()==MachineKind.CIRCUIT_ETCHER || menu.kind()==MachineKind.COPPER_FLUID_PUMP || menu.kind()==MachineKind.COPPER_FLUID_TANK)
             g.drawString(font,Component.translatable(menu.kind()==MachineKind.COPPER_FLUID_TANK?"gui.unusualcopper.fluid_tank":menu.kind()==MachineKind.COPPER_FLUID_PUMP?"gui.unusualcopper.pump_fluid":"gui.unusualcopper.water_tank",menu.data.get(47)),68,81,0xffe6f5ee,false);
         if (menu.operationCost() > 0 && menu.kind()!=MachineKind.PRODUCTION_CONTROLLER) g.drawString(font, menu.operationCost() + " CuE", 68, 59, 0xffe6f5ee, false);
+        if(menu.kind()==MachineKind.VORTEX_PURIFIER)g.drawString(font,Component.translatable("reactor.purifier_output",menu.data.get(54)),68,96,0xff8cdee4,false);
         if(menu.kind()==MachineKind.ARMOR_WORKBENCH){
             g.drawString(font,Component.translatable("armor.unusualcopper.sockets",menu.data.get(51),menu.data.get(52)),70,59,0xffe6f5ee,false);
             g.drawString(font,Component.translatable("armor.unusualcopper.profile."+Math.floorMod(menu.data.get(53),4)),70,79,0xffe6f5ee,false);
@@ -123,7 +124,7 @@ public class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMe
             g.drawString(font,charge,40,81,0xffe6f5ee,false);
         }
         if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST && !menu.kind().isCell()
-                && menu.kind()!=MachineKind.COPPER_FLUID_PUMP && menu.kind()!=MachineKind.COPPER_FLUID_TANK) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
+                && menu.kind()!=MachineKind.COPPER_FLUID_PUMP && menu.kind()!=MachineKind.COPPER_FLUID_TANK && menu.kind()!=MachineKind.VORTEX_PURIFIER && menu.kind()!=MachineKind.CIRCUIT_ETCHER) g.drawString(font, Component.translatable("gui.unusualcopper.redstone_mode." + menu.data.get(7)), 67, 82, 0xffe6f5ee, false);
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
@@ -142,13 +143,16 @@ public class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMe
         boolean assembler=menu.kind()==MachineKind.PRECISION_ASSEMBLER;
         patternEngrave.visible=assembler;
         patternEngrave.active=assembler && menu.duration()==0 && !menu.slots.get(0).getItem().isEmpty();
-        redstoneButton.setX(leftPos+(assembler?129:88));
-        redstoneButton.setWidth(assembler?57:98);
-        redstoneButton.setMessage(assembler?Component.literal("R"):Component.translatable("gui.unusualcopper.redstone"));
+        boolean chemistry=menu.kind()==MachineKind.VORTEX_PURIFIER||menu.kind()==MachineKind.CIRCUIT_ETCHER;
+        redstoneButton.setX(leftPos+(chemistry?188:assembler?129:88));
+        redstoneButton.setY(topPos+(chemistry?61:91));
+        redstoneButton.setWidth(chemistry?28:assembler?57:98);
+        redstoneButton.setMessage(assembler||chemistry?Component.literal("R"):Component.translatable("gui.unusualcopper.redstone"));
         boolean controller=menu.kind()==MachineKind.PRODUCTION_CONTROLLER;
         orderOne.visible=controller;orderBatch.visible=controller;orderPattern.visible=controller;orderPreview.visible=controller;
         orderPattern.active=controller && menu.data.get(48)==0 && menu.duration()==0;
         brewerButton.visible=menu.kind()==MachineKind.AETHERIC_BREWER;
+        cancelButton.setMessage(chemistry?Component.literal("×"):Component.translatable("gui.unusualcopper.cancel"));
         cancelButton.visible = menu.kind().acceptsInputs() && menu.kind()!=MachineKind.ARMOR_WORKBENCH;
         redstoneButton.setTooltip(Tooltip.create(Component.translatable("gui.unusualcopper.redstone_mode."+menu.data.get(7))));
         reaperButton.visible = menu.kind() == MachineKind.MOB_REAPER;

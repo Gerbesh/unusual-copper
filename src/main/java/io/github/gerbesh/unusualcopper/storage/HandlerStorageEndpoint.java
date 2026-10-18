@@ -47,6 +47,7 @@ public final class HandlerStorageEndpoint implements StorageEndpoint {
         var entity = level.getBlockEntity(pos);
         if (entity == null || entity.isRemoved()) return null;
         if (entity instanceof CopperMachineBlockEntity machine && !machine.allowsAutomation(owner)) return null;
+        if(entity instanceof io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity reactor&&!reactor.automationAllowed(owner))return null;
         IItemHandler handler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null);
         if (previous.get() != handler) { previous = new WeakReference<>(handler); hints.clear(); scanCursor = extractCursor = insertCursor = spaceCursor = spaceVisited = 0; simulatedInsertion = -1; rawSnapshot = null; census.reset(); }
         var other=level.getBlockEntity(partner);if(other==null)return null;
