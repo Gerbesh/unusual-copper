@@ -14,6 +14,7 @@ public final class ArmorKeys {
     public static final KeyMapping OPEN=new KeyMapping("key.unusualcopper.armor_open",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_K,"key.categories.unusualcopper");
     public static final KeyMapping PROFILE=new KeyMapping("key.unusualcopper.armor_profile",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_V,"key.categories.unusualcopper");
     public static final KeyMapping HUD=new KeyMapping("key.unusualcopper.armor_hud",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_H,"key.categories.unusualcopper");
-    @SubscribeEvent public static void register(RegisterKeyMappingsEvent event){event.register(OPEN);event.register(PROFILE);event.register(HUD);}
+    public static final KeyMapping SCAN=new KeyMapping("key.unusualcopper.armor_scan",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_UNKNOWN,"key.categories.unusualcopper");
+    @SubscribeEvent public static void register(RegisterKeyMappingsEvent event){event.register(OPEN);event.register(PROFILE);event.register(HUD);event.register(SCAN);}
     private ArmorKeys(){}
 }

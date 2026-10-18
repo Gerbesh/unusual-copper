@@ -108,6 +108,12 @@ public final class ArmorRuntime {
         // Build intentions first. Neither an effect nor its energy debit may run until
         // the server has allocated all eligible tick requests to piece and set limits.
         var actions=new java.util.EnumMap<ArmorModuleType,Runnable>(ArmorModuleType.class);
+        if(equipped(player,EquipmentSlot.HEAD,ArmorModuleType.OPTIC_VISOR,profile)
+                &&(!player.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)
+                ||level(player,ArmorModuleType.OPTIC_VISOR)>=2&&io.github.gerbesh.unusualcopper.config.ArmorSenseConfig.ores()))
+            actions.put(ArmorModuleType.OPTIC_VISOR,()->ArmorSensors.paid(player,ArmorModuleType.OPTIC_VISOR,level(player,ArmorModuleType.OPTIC_VISOR)));
+        if(io.github.gerbesh.unusualcopper.config.ArmorSenseConfig.diagnostics()&&equipped(player,EquipmentSlot.HEAD,ArmorModuleType.FIELD_SCANNER,profile))
+            actions.put(ArmorModuleType.FIELD_SCANNER,()->ArmorSensors.paid(player,ArmorModuleType.FIELD_SCANNER,level(player,ArmorModuleType.FIELD_SCANNER)));
         if(player.isUnderWater()&&equipped(player,EquipmentSlot.HEAD,ArmorModuleType.AQUA_LUNGS,profile)) {
             boolean needsAir=player.getAirSupply()<player.getMaxAirSupply()&&!player.hasEffect(net.minecraft.world.effect.MobEffects.WATER_BREATHING);
             double swimBoost=level(player,ArmorModuleType.AQUA_LUNGS)>=2?addition(swim,.35D,2D):0;
@@ -193,8 +199,7 @@ public final class ArmorRuntime {
             }
         }
         // Jump is charged on the actual jump event only, never for standing still.
-        // Optic visor and mining servo are not fake idle consumers: their runtime
-        // visual/event features have independent activation paths.
+        // Mining has an independent paid event path; senses publish only after settlement.
         var requests=actions.keySet().stream()
                 .map(module->new ArmorPowerScheduler.Demand(module,
                         ArmorData.settings(player.getItemBySlot(module.slot),module,profile).priority(),module.cue(level(player,module)))).toList();

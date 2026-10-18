@@ -60,6 +60,8 @@ minecraft {
             if (project.hasProperty('industrialVisualClient')) {
                 workingDirectory project.file('run-industrial-visual')
                 property 'unusualcopper.industrialVisualClient', 'true'
+                property 'unusualcopper.armorSenseVisualOnly', project.hasProperty('armorSenseVisualOnly').toString()
+                property 'unusualcopper.verifyShaderSenseUniform', project.hasProperty('shaderClient').toString()
                 args '--quickPlaySingleplayer', 'cue-industrial-visual', '--width', (project.findProperty('industrialVisualWidth') ?: '1600').toString(), '--height', (project.findProperty('industrialVisualHeight') ?: '900').toString()
                 mods { "${mod_id}" { source sourceSets.gameTest } }
             }

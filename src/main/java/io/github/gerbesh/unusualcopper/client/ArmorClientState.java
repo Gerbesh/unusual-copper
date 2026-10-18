@@ -21,7 +21,7 @@ public final class ArmorClientState {
     private static ArmorNetwork.Snapshot snapshot;
     private static ClientLevel world;
     private static int clock,received,sent,warningBand;
-    private static boolean opening,pending,profileQueued;
+    private static boolean opening,pending,profileQueued,scanQueued;
     public static ArmorNetwork.Snapshot view(){return snapshot;}
     public static boolean pending(){return pending;}
     public static void receive(ArmorNetwork.Snapshot value){
@@ -36,8 +36,15 @@ public final class ArmorClientState {
         warningBand=band;
         if(opening){opening=false;if(mc.screen==null)mc.setScreen(new ArmorScreen());}
         if(profileQueued){profileQueued=false;if(value.pieces().get(1).tier()>0&&(mc.screen==null||mc.screen instanceof ArmorScreen))send(1,null,ArmorControlPolicy.Operation.PROFILE,(value.profile()+1)%4);}
+        if(scanQueued){scanQueued=false;if(mc.screen==null||mc.screen instanceof ArmorScreen)toggleScanner();}
     }
     public static void open(){opening=true;ArmorNetwork.request();}
+    private static void toggleScanner(){
+        if(snapshot==null||pending)return;
+        var row=snapshot.pieces().get(0).modules().stream().filter(module->module.module()==ArmorModuleType.FIELD_SCANNER).findFirst();
+        if(row.isPresent())send(0,ArmorModuleType.FIELD_SCANNER,ArmorControlPolicy.Operation.ENABLE,row.get().settings().enabled()?0:1);
+        else{var p=Minecraft.getInstance().player;if(p!=null)p.displayClientMessage(Component.translatable("armor.sense.no_scanner"),true);}
+    }
     public static void send(int piece,ArmorModuleType module,ArmorControlPolicy.Operation operation,int value){
         if(snapshot==null||pending)return;
         pending=true;sent=clock;
@@ -45,7 +52,7 @@ public final class ArmorClientState {
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event){
         if(event.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();clock++;
-        if(mc.level!=world||mc.player==null){world=mc.level;snapshot=null;opening=pending=profileQueued=false;warningBand=0;}
+        if(mc.level!=world||mc.player==null){world=mc.level;snapshot=null;opening=pending=profileQueued=scanQueued=false;warningBand=0;}
         if(mc.player==null||mc.level==null)return;
         if(pending&&clock-sent>40){pending=false;ArmorNetwork.request();}
         if(clock%20==0&&snapshot==null&&mc.player.getArmorSlots().iterator().hasNext()){
@@ -56,6 +63,7 @@ public final class ArmorClientState {
         }
         while(ArmorKeys.PROFILE.consumeClick())if(mc.screen==null||mc.screen instanceof ArmorScreen){if(snapshot!=null)send(1,null,ArmorControlPolicy.Operation.PROFILE,(snapshot.profile()+1)%4);else{profileQueued=true;ArmorNetwork.request();}}
         while(ArmorKeys.HUD.consumeClick())if(mc.screen==null||mc.screen instanceof ArmorScreen){ArmorClientConfig.HUD.set(!ArmorClientConfig.HUD.get());ArmorClientConfig.SPEC.save();}
+        while(ArmorKeys.SCAN.consumeClick())if(mc.screen==null||mc.screen instanceof ArmorScreen){if(snapshot==null){scanQueued=true;ArmorNetwork.request();}else toggleScanner();}
     }
     @SubscribeEvent public static void hud(RenderGuiEvent.Post event){
         var mc=Minecraft.getInstance();var v=snapshot;

@@ -12,16 +12,17 @@ public enum ArmorModuleType {
     FALL_DAMPER("fall_damper", EquipmentSlot.FEET, 2),
     JUMP_DRIVE("jump_drive", EquipmentSlot.FEET, 10),
     HOVER_DRIVE("hover_drive", EquipmentSlot.FEET, 80),
-    FLIGHT_CORE_II("flight_core_ii", EquipmentSlot.CHEST, 200);
+    FLIGHT_CORE_II("flight_core_ii", EquipmentSlot.CHEST, 200),
+    FIELD_SCANNER("field_scanner", EquipmentSlot.HEAD, 2);
 
     public final String id;
     public final EquipmentSlot slot;
     public final int cue;
-    public int maxLevel(){return switch(this){case SHIELD_FIELD,MINING_SERVO->3;case OPTIC_VISOR,AQUA_LUNGS,STRIDE_DRIVE,JUMP_DRIVE->2;default->1;};}
+    public int maxLevel(){return switch(this){case SHIELD_FIELD,MINING_SERVO->3;case OPTIC_VISOR,AQUA_LUNGS,STRIDE_DRIVE,JUMP_DRIVE,FIELD_SCANNER->2;default->1;};}
     public int cue(int level){
         if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");
         if(level==1)return cue;
-        return switch(this){case OPTIC_VISOR,AQUA_LUNGS->8;case SHIELD_FIELD->level==2?15:35;
+        return switch(this){case OPTIC_VISOR,AQUA_LUNGS->8;case FIELD_SCANNER->6;case SHIELD_FIELD->level==2?15:35;
             case STRIDE_DRIVE->15;case MINING_SERVO->level==2?24:60;
             case JUMP_DRIVE->25;default->throw new IllegalArgumentException("Module level");};
     }

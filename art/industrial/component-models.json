@@ -30,6 +30,8 @@
     "hover_drive_module",
     "flight_core_ii_module",
     "shield_field_module_tier_2",
-    "shield_field_module_tier_3"
+    "shield_field_module_tier_3",
+    "field_scanner_module",
+    "field_scanner_module_tier_2"
   ]
 }

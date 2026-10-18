@@ -1,0 +1,19 @@
+{
+  "key.unusualcopper.armor_scan": ["Toggle Field Scanner", "Включить / выключить анализатор"],
+  "armor.sense.no_scanner": ["Install a Field Scanner in your helmet first", "Сначала установите анализатор в шлем"],
+  "armorconsole.sense_server_disabled": ["Disabled by server", "Запрещено сервером"],
+  "armorconsole.ore_server_disabled": ["Night vision; ore scan disabled", "Зрение; поиск руд запрещён"],
+  "armor.sense.aim": ["Aim at a block to analyze", "Наведитесь на блок"],
+  "armor.sense.diagnostic.aim": ["Aim at a block to analyze", "Наведитесь на блок"],
+  "armor.sense.diagnostic.protected": ["No permission to inspect", "Нет доступа к блоку"],
+  "armor.sense.diagnostic.unloaded": ["Target chunk is not loaded", "Чанк цели не загружен"],
+  "armor.sense.diagnostic.budget": ["Waiting for scan budget", "Ожидание очереди поиска"],
+  "armor.sense.diagnostic.unsupported": ["Block cannot be analyzed", "Блок не поддерживает анализ"],
+  "armor.sense.partial": ["Ores: %s · part of area unavailable", "Руд: %s · часть зоны недоступна"],
+  "armor.sense.energy": ["%s / %s CuE", "%s / %s CuE"],
+  "armor.sense.disabled": ["Ore highlights disabled by server", "Поиск руд запрещён сервером"],
+  "armor.sense.ready": ["Nearby ores: %s · scan complete", "Рядом руд: %s · поиск завершён"],
+  "armor.sense.progress": ["Nearby ores: %s · scanning %s%%", "Рядом руд: %s · поиск %s%%"],
+  "armor.unusualcopper.visor_hint": ["Paid night vision; II highlights tagged ores nearby, only in loaded permitted chunks. Does not replace potion effects.", "Оплачиваемое ночное зрение; II подсвечивает ближайшие руды по тегам в загруженных разрешённых чанках. Не заменяет зелья."],
+  "armor.unusualcopper.scanner_hint": ["Aim within 8 blocks. Shows block identity; machine charge/status require permission to open it. II outlines configured ports.", "Наведитесь на блок в пределах 8 блоков. Для заряда и статуса машины нужны права на её открытие. II показывает контуры настроенных портов."]
+}
