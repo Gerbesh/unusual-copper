@@ -1,0 +1,376 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-18T04:24:05.495982+00:00",
+  "version": "0.20.15-alpha.1",
+  "source_base_commit": "21fff983c68777f79de2d696f1702466f871d064",
+  "source_branch": "codex/fluid-tank-multiblocks",
+  "source_files": [
+    {
+      "path": "art/blockbench/copper_fluid_tank.bbmodel",
+      "sha256": "612282f8e65816c404f0246f8bd5c89fa28bc17139c9b11c3c89f9c3e70f0417"
+    },
+    {
+      "path": "build.gradle",
+      "sha256": "c7c1d8e5ce0c3f9dd9579619a849dbb2ad928d05321600b160c68d6e6ddba355"
+    },
+    {
+      "path": "gradle.properties",
+      "sha256": "1ab7492c7e2e9c3bcc63f19a551636a029a94a4c415564f41196426dd04094c5"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/FluidTankGameTests.java",
+      "sha256": "54a1443c6216e1a36790c4c631dd35353b9fd9571dd7d6327a5938d577853df6"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/FluidTankVisualClient.java",
+      "sha256": "a78d074f50021464c0676915fa0b4d37f1ecd9b145b3e76bb4dbbe14d9eb3db2"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/UnusualCopper.java",
+      "sha256": "a001ee5d87b351f67e724a66641229bb3cbca131902a214f28455ce65e7ee742"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ClientSetup.java",
+      "sha256": "49d1b9e15d5c55ed35386ee3cb95e1d1fdf48d4363ea62c61ee3799840cbb335"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/CopperMachineRenderer.java",
+      "sha256": "c7efd0a0763e25ec52fbee6611155afefc8e6473732c9862bda9b114bb42fd79"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/CopperMachineScreen.java",
+      "sha256": "e2b495e4630aebc1cacf0e5a060ffd808e97ad6267414092bb2ec19f38c48696"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/FluidTankItemRenderer.java",
+      "sha256": "81e426b1bb55efe91b1c277cb79806fa40264bf59553e4abcc8e381b207485e8"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/FluidTankPanel.java",
+      "sha256": "92ceff7e841db385a165d499bb055baadd9de6b83ee9502e3f3ec17c93f3e537"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/FluidTankRenderer.java",
+      "sha256": "e72f34281852ccd91c0d37ea57e5ced7c983eb893dec95a8104e49b09fdb3e81"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/FluidTankBlockItem.java",
+      "sha256": "d6ab4dc3b32bc3db52adfcf2dc244c25b42c283e1fa26e801bde6c3eadf9f905"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/LocalTank.java",
+      "sha256": "9e7ea65c772e85426830539c42b9f3f74cf9e088126160c48445e3505c96810f"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankBucketInteractions.java",
+      "sha256": "dd8803f39698f116f883f8b50afd57ce3ad8db6c16b0de9e11dfbf64183ab49d"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankItemStorage.java",
+      "sha256": "f13af0fdbae1485816b127b2fb55ab6ecbf46fd4ed3d93b83ece678a1deef33b"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankNetworks.java",
+      "sha256": "6dbe2ec0aa39b61d2bef9b739b61f8d80adc557ff5fb43926ef9cc89de34a900"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankSurfaceAnimation.java",
+      "sha256": "ff6269fb5cac77ac83c3d16aff55ee1b4e1d445f07cb92ae7e5cd3a45c53b289"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankTopology.java",
+      "sha256": "1394df1b5594bcbfb12cd730af98dbbaa4bdbe9f120f43a0398fe92de31480ea"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankView.java",
+      "sha256": "c951885e4b1c4dad829d63bf927cf28e082178815bcfd551352f8749dba827de"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/fluid/tank/TankVolumes.java",
+      "sha256": "e0125afca9fe9e5f5b72dd6515dc08e4679ed249707cb3485294aac64ed206ba"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/machine/CopperMachineBlock.java",
+      "sha256": "ee120c825cdf6cd18dff036fde43583332e519853bc233a833bc897c81f959f1"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/machine/CopperMachineBlockEntity.java",
+      "sha256": "312858c69d77582f8accfca58c8d8df4f959a6e931d072a3bae424df7e944755"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/menu/CopperMachineMenu.java",
+      "sha256": "483f22b85693b1c4dacaca8a9b328e8249a94a0e7e3a170813a4dbd68b4aafaf"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/registry/ModContent.java",
+      "sha256": "d265c487b66a0717532877f41df5d3c8525db2652755857f2c98226a7a1718a3"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/lang/en_us.json",
+      "sha256": "059567bb0c7a6e000cf08cb12f87b3cc01684d218fde1ec79a7490b1d7be6c27"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/lang/ru_ru.json",
+      "sha256": "f6009c2f83376812e71564d087fcfa2f63c7d51ad975a856f647ddd0c624e841"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/models/block/copper_fluid_tank.json",
+      "sha256": "cf86af9c27e7ade8d71b946b1ee1b83e82d4f48dbb1379ab4b1fe06e17a77b0b"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/models/item/copper_fluid_tank.json",
+      "sha256": "f992021176f0d08231777c4dba3bd59ed48155c9c30f35c9f6e7c65593873d9c"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/fluid/tank/TankStorageTest.java",
+      "sha256": "87de12dbf79197b8159bc5ab0a592262055ffc80128fc75485205175785bff39"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/fluid/tank/TankSurfaceAnimationTest.java",
+      "sha256": "0928149c63ad646d857f8f18413fc726ad12f42bcba86a0c00daec7538276ccd"
+    },
+    {
+      "path": "tools/generate_industrial_assets.py",
+      "sha256": "e3ef36c6dd64c1560fd61e77d9b9f35917571a5c773c36a8e307645c44a3dd97"
+    },
+    {
+      "path": "tools/import_tank_translations.py",
+      "sha256": "dba7c59690affc7f0a3b2beb5fb7c15e29373b23f34c1301c1000bb0125d9480"
+    },
+    {
+      "path": "tools/tank_translations.json",
+      "sha256": "9faa5118665dcb19ae038add2e9e2d78978019f94de421e4a66ab25f68ad0dd7"
+    }
+  ],
+  "artifact": "dist/unusualcopper-0.20.15-alpha.1.jar",
+  "sha256": "ede0ae7e22939689e72e324d653ac8f7b091d917e1dd964b5ee90be7aa171cbf",
+  "bytes": 1700082,
+  "installed": false,
+  "junit": {
+    "tests": 177,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Deterministic mixed-fluid topology, shared stepped surface, legacy conservation, 10000 randomized volume plans, bounded DTO roundtrip, convex/concave posts, frame-rate independent monotonic animation; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "whole bucket refusal is read-only; simulations/copies",
+      "legacy merge/split, item NBT and multiple prefilled loot copies",
+      "fluid NBT and owner separation; removed handler is dead",
+      "chunk lifecycle keeps old capabilities invalid after reload"
+    ]
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Fixed display scene quantities and real client screens/items, not functional bucket/pipe/break acceptance",
+    "environment": "Isolated repository display world: native EN 1600x900, RU 1280x720; Oculus 1.8.0 + Xenon 0.3.31 with Complementary Reimagined r5.8.1 EN 1600x900; not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/fill-a.png",
+        "sha256": "0247a0d19755e162c1c3bd920f9c740eb0696e1273e817b680e5f28a65b7a1fe",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/fill-b.png",
+        "sha256": "70e69482935e35e5fca9cb03d0bf4c757a9c2632c1c88a3f4c50d9688d77c85c",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/front-low.png",
+        "sha256": "c11dadfe73990ac291b9bb9cc066f9260ef84f30eaef25d45fd844ead185ccc5",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/group-menu.png",
+        "sha256": "0eedc760c015b275ac7ba7eb49e20e6b02e7ee347a943fef039bff208be21ba4",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/items.png",
+        "sha256": "436feed3940a282830b55a8b94e55a7f8b23e5d2d6525600c452690637374919",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/legacy-menu.png",
+        "sha256": "fc16540a6418249e2fd41a2d1f39a22f18be0c389949437788729137d3f638a1",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/mixed.png",
+        "sha256": "0f8133d9314f8e106c6c5fab853b30d387051e31ec25a45f7e6d2b59b1e67640",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/night.png",
+        "sha256": "b308d139b75d04c0a9072e65d42cdffbc0e0080e068cf3aab6088c151f0a6aec",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/side.png",
+        "sha256": "9b0efc1c0ec9c6688a432f5c4577e3e2391f53dcd62d8857258908a1638d3688",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/complementary-en/top.png",
+        "sha256": "6024ec607c24eaf53fcde0f31bd103195a502f894149e4ebe63f147ebc3f0b1a",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/fill-a.png",
+        "sha256": "be676e29f1f4fb90c90950d2b5f9b3aeb951010670e388970ebb7b777c1d5296",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/fill-b.png",
+        "sha256": "8aa45fb064029c117746ebbb979182dc58791766f523606c44e6f39b6307616f",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/front-low.png",
+        "sha256": "ec450a2588c9d1604b04003c1c5304f257a72d72be6ec9ae090f0bed00c56277",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/group-menu.png",
+        "sha256": "3f52fec4ab736e2715315d404ddb56f0e2c1e2d0e5a2e054019147a0eda1c677",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/items.png",
+        "sha256": "324fa6329af51ba15273cd08d269f56d83573cb4a09318d3fa6e7058436d44a9",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/legacy-menu.png",
+        "sha256": "ac80b9344038a9d3c9ffe27d9ddb8df037f8637776462036b006c1a59fe605e9",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/mixed.png",
+        "sha256": "7b184e482a341723385c4ba57510447f41acc2dd4bb3ecaf32bd54cf952cf9a5",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/night.png",
+        "sha256": "eedf5cae900d7c2d65516aeebf120f4452fb5f6a0492619dacb345a98ed6ea8c",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/side.png",
+        "sha256": "8533c8565cc50624f7b25db4488ffa8a931a7681ba1c55e98678cfd78f482f7c",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-en/top.png",
+        "sha256": "b72bda63903df2516f91eb92af7682126a90a87ac0d3fe1bbbde15b0583e9fd2",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/fill-a.png",
+        "sha256": "81e3564e192752c2a2fd86d349a7885bc0ee050afd70659ee5ed3c78db22ef4d",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/fill-b.png",
+        "sha256": "a461a6ca3de1e54e08414570771754e9a37342125df319f9b38057b5d65c9f68",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/front-low.png",
+        "sha256": "57f5ddc1fd1275ff76d949bfb36d1670d0e60e49f77a03502ba2e069fd85d787",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/group-menu.png",
+        "sha256": "ebac15cb5470abd5400d1454d2462b3df98a475c1f112faa6382ab9011bc2f1f",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/items.png",
+        "sha256": "b3307f8708602030337a959e9923da47fc5fb5b785f7f1e29e6f906ad610e274",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/legacy-menu.png",
+        "sha256": "9753cd9f4d7653b271a6595969f8321a35c829e85c31e5b9d9005cd4b590ced1",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/mixed.png",
+        "sha256": "a63bd0d2a8d265c0a3cadeab8238861fa806c5cec06656948942640c985f0f86",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/night.png",
+        "sha256": "fcf1b3c887077a9bd0da42e32a1ebadef6afa0d174f9a2103031d1a0cf9ba32c",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/side.png",
+        "sha256": "74771869122a4ffc509df2cd41b46bf443812d95dceca3924402d974b270f1ae",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/fluid-tanks/native-ru/top.png",
+        "sha256": "992c296737880c51d5d5ed3c37c38b3da183532eb1bce9c38ba22fd83965dee2",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "manual_review": "Single cube, tall column, 2x2x3 and stepped L frame, rising shared level, water/lava boundary, legacy and group menus, actual empty/filled/legacy item fluids, day/night",
+    "shader_preset_limit": "Better MC Medium failed GLSL in the prior isolated E6E run; not reclassified as supported or retested here"
+  },
+  "static_assets": {
+    "models": 202,
+    "transparent_authored_sprites": 23
+  },
+  "installation": {
+    "performed": false,
+    "unchanged_pair": "Unusual Copper 0.20.9-alpha.1 + SSN Progressive 1.4.1"
+  },
+  "remaining": [
+    "functional bucket/pipe/split and item placement acceptance",
+    "SMP, claims, chunk/load and migration acceptance; no cross-chunk crash atomicity claim",
+    "E5 full DAG escrow and execution",
+    "E6 armed jump upkeep/cooldown and remaining event prices/conflicts",
+    "E7 F4 and safe landing/reserve",
+    "E8 physical bus and solar array",
+    "E9 guide, sounds, orientation/connection matrix and performance acceptance"
+  ],
+  "performance": {
+    "measured": false,
+    "budget": "User-approved Ryzen 5600X: total p95 <45 ms and added mod cost <=5 ms"
+  }
+}

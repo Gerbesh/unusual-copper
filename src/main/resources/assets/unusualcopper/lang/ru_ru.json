@@ -565,5 +565,18 @@
   "armor.unusualcopper.kinetic_stabilizer_hint": "+%s%% к сопротивлению отбрасыванию при питании; общий предел 100%%.",
   "item.unusualcopper.regen_core_module_tier_2": "Модуль регенератора II",
   "item.unusualcopper.strength_servo_module_tier_2": "Модуль силового сервопривода II",
-  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Модуль кинетического стабилизатора II"
+  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Модуль кинетического стабилизатора II",
+  "tank.unusualcopper.item_hint": "Соединяется с соседними баками своего владельца. 16 000 мБ на куб, до %s кубов.",
+  "tank.unusualcopper.item_contents": "Содержимое: %s · %s мБ",
+  "tank.unusualcopper.legacy": "Старый запас: добавьте баки или выгрузите жидкость.",
+  "tank.unusualcopper.protected": "Защита территории: перенос запрещён.",
+  "tank.unusualcopper.limit": "Лимит 256 кубов: баки работают по отдельности.",
+  "tank.unusualcopper.bucket_room": "Недостаточно места для целого ведра (1 000 мБ).",
+  "tank.unusualcopper.bucket_amount": "Для ведра нужно не меньше 1 000 мБ.",
+  "tank.unusualcopper.incompatible": "В этом хранилище другая жидкость.",
+  "tank.unusualcopper.no_bucket": "У этой жидкости нет ведра: используйте трубы.",
+  "tank.unusualcopper.amount": "%s / %s мБ",
+  "tank.unusualcopper.blocks": "%s куб. × 16 000 мБ",
+  "tank.unusualcopper.empty": "Пусто",
+  "tank.unusualcopper.ports_hint": "Общий уровень. Стороны — медным ключом."
 }

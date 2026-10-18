@@ -93,10 +93,28 @@ def models():
             part([5,5,5],[11,6,11],'dark')]
     export('copper_fluid_pump',pump,windows(5.1,12.5),[part([7.5,6,7.5],[8.5,12.5,8.5],'copper'),part([4.5,9,7.5],[11.5,9.7,8.5],'patina')])
 
-    tank=base()+posts(3.4,14.5)+ring(3.4,3.3,14.5,.9,'patina')+ring(13.5,3.3,14.5,1.2)
-    tank+=[part([4,14.7,4],[12,15.5,12],'dark'),part([6,15.5,6],[10,16,10],'copper')]
-    for y in (5,7,9,11):tank.append(part([12.9,y,1.5],[13.4,y+.25,2.1],'dark'))
-    export('copper_fluid_tank',tank,windows(4.3,13.4))
+    tank=[part([0,0,0],[16,1.2,16],'dark')]+posts(1.2,14,0,2)+ring(14,2,16,2)+ring(1.2,1.8,15.9,.7,'patina')
+    tank += [part([12.9,2.7,-.4],[15.5,12.3,.02],'copper'),part([13.4,3.2,-.56],[15,11.8,-.42],'dark')]
+    for turn in range(4):
+        for x in (3,12.2):
+            points=[]
+            for xx in (x,x+.8):
+                for zz in (-.18,-.05):
+                    px,pz=xx,zz
+                    for _ in range(turn):px,pz=pz,16-px
+                    points.append((px,pz))
+            tank.append(part([min(p[0] for p in points),14.6,min(p[1] for p in points)],[max(p[0] for p in points),15.4,max(p[1] for p in points)],'dark'))
+    panes=[part([1.4,1.22,.48],[14.6,14,.52],'glass'),part([1.4,1.22,15.48],[14.6,14,15.52],'glass'),
+           part([.48,1.22,1.4],[.52,14,14.6],'glass'),part([15.48,1.22,1.4],[15.52,14,14.6],'glass'),
+           part([1.4,14.45,1.4],[14.6,14.5,14.6],'glass')]
+    # The world BER removes shared faces; this complete one-cube source is also the inventory model.
+    textures={m:f'unusualcopper:block/{m}' for m in list(PALETTE)+['glass']};textures['particle']='unusualcopper:block/copper'
+    tank_model={'render_type':'minecraft:translucent','textures':textures,'elements':clean_surfaces(tank)+clean_surfaces(panes,tank),
+                'display':{'gui':{'rotation':[30,225,0],'scale':[.625,.625,.625]},'ground':{'scale':[.25,.25,.25]},
+                           'thirdperson_righthand':{'rotation':[75,45,0],'scale':[.375,.375,.375]}}}
+    write_json(ASSETS/'models/block/copper_fluid_tank.json',tank_model)
+    write_json(ASSETS/'models/item/copper_fluid_tank.json',{'parent':'builtin/entity','textures':{'particle':textures['particle']},'display':tank_model['display']})
+    write_bbmodel('copper_fluid_tank',tank+panes,list(PALETTE)+['glass'])
 
     controller=base()+[part([2,3.4,3],[14,13,14],'patina'),part([1.5,12.5,2],[14.5,14,14.5],'copper'),
                        part([2.5,5,1],[13.5,12,3],'copper'),part([3.4,5.8,.7],[12.6,11.3,1],'dark'),

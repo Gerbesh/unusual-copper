@@ -17,6 +17,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     public static final int DATA_COUNT = 54;
     private final CopperMachineBlockEntity machine;
     private final BlockPos pos;
+    private final net.minecraft.world.level.Level level;
     public final ContainerData data;
     public CopperMachineMenu(int id, Inventory inventory, FriendlyByteBuf buffer) {
         this(id, inventory, null, buffer.readBlockPos(), new ItemStackHandler(4), new SimpleContainerData(DATA_COUNT));
@@ -26,6 +27,7 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
     }
     private CopperMachineMenu(int id, Inventory playerInventory, CopperMachineBlockEntity machine, BlockPos pos, IItemHandler slots, ContainerData data) {
         super(ModContent.MACHINE_MENU.get(), id); this.machine = machine; this.pos = pos; this.data = data;
+        this.level=playerInventory.player.level();
         int[][] positions = kind()==MachineKind.PRECISION_ASSEMBLER || kind()==MachineKind.PRODUCTION_CONTROLLER
                 ? new int[][]{{185,63},{44,91},{134,63},{152,63}}
                 : new int[][]{{44,63},{44,91},{134,63},{152,63}};
@@ -120,6 +122,11 @@ public final class CopperMachineMenu extends AbstractContainerMenu {
         slot.onTake(player, current); return original;
     }
     public int energy() { return (data.get(0) & 0xffff) | ((data.get(1) & 0xffff) << 16); }
+    public io.github.gerbesh.unusualcopper.fluid.tank.TankView tankView(){
+        if(machine!=null)return io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.view(machine);
+        var chunk=level.getChunkSource().getChunk(pos.getX()>>4,pos.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
+        return chunk!=null&&chunk.getBlockEntity(pos) instanceof CopperMachineBlockEntity m?m.tankView:io.github.gerbesh.unusualcopper.fluid.tank.TankView.EMPTY;
+    }
     private int plantationPreview;
     public int capacity() { return (data.get(2) & 0xffff) | ((data.get(3) & 0xffff) << 16); }
     public int progress() { return (data.get(4) & 0xffff) | ((data.get(10) & 0xffff) << 16); }

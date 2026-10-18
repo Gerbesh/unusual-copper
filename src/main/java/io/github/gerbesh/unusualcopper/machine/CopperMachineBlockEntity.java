@@ -132,6 +132,10 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
     /** Water chemistry or pumped bulk storage, depending on machine kind. */
     public final FluidTank water;
+    private final IFluidHandler fluidStorage;
+    public IFluidHandler fluidStorage(){return fluidStorage;}
+    public io.github.gerbesh.unusualcopper.fluid.tank.TankView tankView=io.github.gerbesh.unusualcopper.fluid.tank.TankView.EMPTY;
+    public boolean tankUnloaded;
     /** Public appearance only; no fluid tags, inventory stacks or capabilities are synchronized. */
     public int visualFluidAmount;
     public net.minecraft.world.level.material.Fluid visualFluid=Fluids.EMPTY;
@@ -243,11 +247,12 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public CopperMachineBlockEntity(BlockPos pos, BlockState state) {
         super(ModContent.MACHINE_ENTITY.get(), pos, state);
         kind = ((CopperMachineBlock)state.getBlock()).kind;
-        int fluidCapacity=kind==MachineKind.COPPER_FLUID_PUMP?16000:kind==MachineKind.COPPER_FLUID_TANK?64000:4000;
-        water=new FluidTank(fluidCapacity, stack -> kind==MachineKind.COPPER_FLUID_PUMP || kind==MachineKind.COPPER_FLUID_TANK
+        int fluidCapacity=kind==MachineKind.COPPER_FLUID_PUMP?16000:4000;
+        water=kind==MachineKind.COPPER_FLUID_TANK?new io.github.gerbesh.unusualcopper.fluid.tank.LocalTank(this):new FluidTank(fluidCapacity, stack -> kind==MachineKind.COPPER_FLUID_PUMP
                 ? !stack.isEmpty() : stack.getFluid()==Fluids.WATER) {
             @Override protected void onContentsChanged(){setChanged();}
         };
+        fluidStorage=kind==MachineKind.COPPER_FLUID_TANK?io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.handler(this):water;
         cultivation = kind == MachineKind.AURA_CULTIVATOR ? new io.github.gerbesh.unusualcopper.gameplay.CultivationSweep() : null;
         reaper = kind == MachineKind.MOB_REAPER ? new ReaperState() : null;
         arborist = kind == MachineKind.ARBORIST ? new ArboristState() : null;
@@ -339,7 +344,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     public int energyTransferRate() { return io.github.gerbesh.unusualcopper.config.ServerConfig.pipeRate(kind.energyTier()); }
     public int energyFaceLimit(Direction side) { return kind==MachineKind.ENERGY_DISTRIBUTOR?Math.min(energyTransferRate(),branchLimit(side)):energyTransferRate(); }
     public int energyOutputPriority(Direction side) { return kind==MachineKind.ENERGY_DISTRIBUTOR?branchPriority(side):1; }
-    public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged(); }
+    public void setOwner(UUID id) { owner = id; boundEndpoint = null; setChanged();io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.changed(this); }
     public boolean togglePlantation(BlockPos pos,Player player) {
         if(arborist==null || !canAccess(player) || !(level instanceof ServerLevel server)) return false;
         for(var point:java.util.List.copyOf(arborist.points)) if(point.pos().equals(pos)||point.pos().equals(pos.above())) {
@@ -485,6 +490,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     }
 
     public static void tick(ServerLevel level, BlockPos pos, BlockState state, CopperMachineBlockEntity machine) {
+        if(machine.kind==MachineKind.COPPER_FLUID_TANK){machine.status(MachineStatus.IDLE);if(state.getValue(CopperMachineBlock.ACTIVE))level.setBlock(pos,state.setValue(CopperMachineBlock.ACTIVE,false),2);return;}
         boolean signal = level.hasNeighborSignal(pos);
         if(machine.brewer!=null)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(level,machine);
         boolean sentinelWasActive=machine.sentinel!=null && machine.sentinel.active;
@@ -512,17 +518,17 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
                 private final long epoch=capabilityEpoch;
                 private boolean live(){return epoch==capabilityEpoch && !isRemoved() && sideMode(side)!=SideMode.DISABLED;}
                 @Override public int getTanks(){return 1;}
-                @Override public FluidStack getFluidInTank(int tank){return live()&&tank==0?water.getFluid().copy():FluidStack.EMPTY;}
-                @Override public int getTankCapacity(int tank){return live()&&tank==0?water.getCapacity():0;}
+                @Override public FluidStack getFluidInTank(int tank){return live()&&tank==0?fluidStorage.getFluidInTank(0).copy():FluidStack.EMPTY;}
+                @Override public int getTankCapacity(int tank){return live()&&tank==0?fluidStorage.getTankCapacity(0):0;}
                 @Override public boolean isFluidValid(int tank,FluidStack stack){
                     boolean legacyChemistry=(kind==MachineKind.VORTEX_PURIFIER || kind==MachineKind.CIRCUIT_ETCHER)
                             && sideMode(side)!=SideMode.DISABLED;
                     return live()&&tank==0&&(sideMode(side)==SideMode.FLUID_INPUT||legacyChemistry)
-                            && water.isFluidValid(0,stack);
+                            && fluidStorage.isFluidValid(0,stack);
                 }
-                @Override public int fill(FluidStack stack,FluidAction action){return isFluidValid(0,stack)?water.fill(stack,action):0;}
-                @Override public FluidStack drain(FluidStack stack,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(stack,action):FluidStack.EMPTY;}
-                @Override public FluidStack drain(int amount,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?water.drain(amount,action):FluidStack.EMPTY;}
+                @Override public int fill(FluidStack stack,FluidAction action){return isFluidValid(0,stack)?fluidStorage.fill(stack,action):0;}
+                @Override public FluidStack drain(FluidStack stack,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?fluidStorage.drain(stack,action):FluidStack.EMPTY;}
+                @Override public FluidStack drain(int amount,FluidAction action){return live()&&sideMode(side)==SideMode.FLUID_OUTPUT?fluidStorage.drain(amount,action):FluidStack.EMPTY;}
             }));
             itemCaps.put(side, LazyOptional.of(() -> new IItemHandler() {
                 private final long epoch = capabilityEpoch;
@@ -569,9 +575,9 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
         super.invalidateCaps(); fluidCaps.values().forEach(LazyOptional::invalidate); itemCaps.values().forEach(LazyOptional::invalidate); energyCaps.values().forEach(LazyOptional::invalidate);
     }
     @Override public void reviveCaps() { super.reviveCaps(); rebuildCaps(); }
-    @Override public void onLoad() { super.onLoad();if(mining!=null&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
-    @Override public void onChunkUnloaded() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
-    @Override public void setRemoved() { if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
+    @Override public void onLoad() { super.onLoad();tankUnloaded=false;io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.register(this);if(mining!=null&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this); if (!itemCaps.get(Direction.UP).isPresent()) rebuildCaps(); EnergyNetworks.dirty(level); if(sentinel!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.gameplay.SentinelScheduler.register(server,this); if(brewer!=null && level instanceof ServerLevel server)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.register(server,this); }
+    @Override public void onChunkUnloaded() { tankUnloaded=true;io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.remove(this); if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} invalidateCaps(); EnergyNetworks.dirty(level); super.onChunkUnloaded(); }
+    @Override public void setRemoved() { tankUnloaded=true; io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.remove(this);if(brewer!=null && level instanceof ServerLevel brewerLevel)io.github.gerbesh.unusualcopper.gameplay.BrewerScheduler.forget(brewerLevel,this); releaseSentinel(); if(reaper!=null && level instanceof ServerLevel server) io.github.gerbesh.unusualcopper.machine.logic.ReaperLogic.cancel(this,server); if(arborist!=null) {arborist.scan=null;arborist.actor=null;} super.setRemoved(); EnergyNetworks.dirty(level); }
 
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -705,13 +711,16 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
             var fluid=net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(water.getFluid().getFluid());
             if(fluid!=null)tag.putString("VisualFluid",fluid.toString());
         }
+        if(kind==MachineKind.COPPER_FLUID_TANK){var view=io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.view(this);view.write(tag);tag.putString("VisualFluid",view.fluid());tag.putInt("VisualFluidAmount",(int)(view.fill()*16000));}
         if(kind==MachineKind.COPPER_FLUID_PUMP&&pumpSource!=null)tag.putLong("PumpSource",pumpSource.asLong()); if(mining!=null){mining.writeVisual(tag,worldPosition);tag.putUUID("MiningRuntime",runtimeIdentity);} if(sentinel!=null) { tag.putBoolean("SentinelActive",sentinel.active); tag.putBoolean("SentinelFocused",sentinel.focused); } saveSides(tag); return tag;
     }
     @Override public void handleUpdateTag(CompoundTag tag) {
+        if(kind==MachineKind.COPPER_FLUID_TANK)tankView=io.github.gerbesh.unusualcopper.fluid.tank.TankView.read(tag);
         visualFluidAmount=Math.max(0,Math.min(water.getCapacity(),tag.getInt("VisualFluidAmount")));
         var fluidId=net.minecraft.resources.ResourceLocation.tryParse(tag.getString("VisualFluid"));
         visualFluid=fluidId==null?Fluids.EMPTY:net.minecraftforge.registries.ForgeRegistries.FLUIDS.getValue(fluidId);
         if(visualFluid==null)visualFluid=Fluids.EMPTY;
+        if(kind==MachineKind.COPPER_FLUID_TANK&&level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.acceptVisual(this);
         previousVisualEnergy=visualEnergy(0);visualEnergyChanged=level==null?0:level.getGameTime();
         energy.restore(tag.getInt("Energy")); if(kind==MachineKind.COPPER_FLUID_PUMP)pumpSource=tag.contains("PumpSource")?BlockPos.of(tag.getLong("PumpSource")):null; status = MachineStatus.values()[Math.floorMod(tag.getInt("Status"), MachineStatus.values().length)]; loadSides(tag);
         if(mining!=null){mining.visualIdentity=tag.hasUUID("MiningRuntime")?tag.getUUID("MiningRuntime"):null;var a=tag.getIntArray("MiningArea");mining.area=null;if(a.length==4)try{mining.area=new io.github.gerbesh.unusualcopper.gameplay.MiningFootprint(a[0],a[1],a[2],a[3]);}catch(IllegalArgumentException ignored){}mining.enabled=tag.getBoolean("MiningEnabled");mining.visualTick=level==null?0:level.getGameTime();mining.visualRevision++;mining.jobs.clear();for(var raw:tag.getList("MiningBeams",net.minecraft.nbt.Tag.TAG_COMPOUND)){if(mining.jobs.size()>=5)break;var row=(CompoundTag)raw;var job=new MiningState.Job(BlockPos.of(row.getLong("Pos")),net.minecraft.world.level.block.Block.stateById(row.getInt("StateId")),ItemStack.EMPTY,0,0);job.visualId=row.getLong("Flight");job.progress=Math.max(0,Math.min(job.ticks,row.getInt("Progress")));mining.jobs.add(job);}if(level!=null&&level.isClientSide)io.github.gerbesh.unusualcopper.network.MiningNetwork.trackField(this);}

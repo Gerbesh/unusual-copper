@@ -565,5 +565,18 @@
   "armor.unusualcopper.kinetic_stabilizer_hint": "+%s%% knockback resistance while powered; combined cap 100%%.",
   "item.unusualcopper.regen_core_module_tier_2": "Regeneration Core Module II",
   "item.unusualcopper.strength_servo_module_tier_2": "Strength Servo Module II",
-  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Kinetic Stabilizer Module II"
+  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Kinetic Stabilizer Module II",
+  "tank.unusualcopper.item_hint": "Connects to adjacent tanks of the same owner. 16,000 mB per cube, up to %s cubes.",
+  "tank.unusualcopper.item_contents": "Stored: %s · %s mB",
+  "tank.unusualcopper.legacy": "Legacy contents: add tanks or drain the excess.",
+  "tank.unusualcopper.protected": "Land protection: fluid transfer denied.",
+  "tank.unusualcopper.limit": "256-cube limit: tanks operate individually.",
+  "tank.unusualcopper.bucket_room": "Not enough space for a whole bucket (1,000 mB).",
+  "tank.unusualcopper.bucket_amount": "A bucket needs at least 1,000 mB.",
+  "tank.unusualcopper.incompatible": "This reservoir contains a different fluid.",
+  "tank.unusualcopper.no_bucket": "This fluid has no bucket; use fluid pipes.",
+  "tank.unusualcopper.amount": "%s / %s mB",
+  "tank.unusualcopper.blocks": "%s cubes × 16,000 mB",
+  "tank.unusualcopper.empty": "Empty",
+  "tank.unusualcopper.ports_hint": "Shared level. Configure sides with the copper wrench."
 }

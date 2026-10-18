@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public final class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
+public class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMenu> {
     private Button cancelButton, redstoneButton,brewerButton,energyButton,batteryButton;
     private Button growthButton, areaButton, clearBinding, recoverBinding, petButton, reaperButton, plantationButton;
     private Button orderOne, orderBatch, orderPattern, orderPreview, patternEngrave;
@@ -60,6 +60,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         g.fill(x + 3, y + 3, x + imageWidth - 3, y + imageHeight - 3, 0xffaa724d);
         g.fill(x + 7, y + 20, x + imageWidth - 7, y + 116, 0xff243a36);
         for (var slot : menu.slots) if (slot.isActive()) { g.fill(x + slot.x - 1, y + slot.y - 1, x + slot.x + 17, y + slot.y + 17, 0xff1d2825); g.fill(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xff52625c); }
+        if(menu.kind()==MachineKind.COPPER_FLUID_TANK)return;
         g.fill(x + 13, y + 43, x + 211, y + 49, 0xff142d2b);
         int bar = menu.capacity() == 0 ? 0 : (int)(198L * menu.energy() / menu.capacity());
         g.fill(x + 13, y + 43, x + 13 + bar, y + 49, 0xff3dd6d3);
@@ -71,6 +72,7 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
     }
     @Override protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, 8, 7, 0xff201b15, false);
+        if(menu.kind()==MachineKind.COPPER_FLUID_TANK){FluidTankPanel.labels(g,font,menu.tankView());g.drawString(font,playerInventoryTitle,inventoryLabelX,inventoryLabelY,0xff201b15,false);return;}
         MachineStatus status = MachineStatus.values()[Math.floorMod(menu.data.get(6), MachineStatus.values().length)];
         String statusKey=menu.kind().isCell() && status==MachineStatus.CHARGING?"battery.unusualcopper.transferring":status.translationKey();
         g.drawString(font, Component.translatable(statusKey), 13, 24, 0xffb8efdf, false);
@@ -125,6 +127,12 @@ public final class CopperMachineScreen extends AbstractContainerScreen<CopperMac
         g.drawString(font, playerInventoryTitle, 31, 118, 0xff201b15, false);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        if(menu.kind()==MachineKind.COPPER_FLUID_TANK){
+            for(var child:children())if(child instanceof Button button)button.visible=false;
+            renderBackground(g);super.render(g,mouseX,mouseY,partialTick);renderTooltip(g,mouseX,mouseY);
+            if(mouseX>=leftPos+7&&mouseX<leftPos+219&&mouseY>=topPos+20&&mouseY<topPos+116)FluidTankPanel.tooltip(g,font,menu.tankView(),mouseX,mouseY);
+            return;
+        }
         batteryButton.visible=menu.kind().isCell();
         batteryButton.setMessage(Component.translatable("battery.unusualcopper.mode."+Math.floorMod(menu.data.get(45),3)));
         energyButton.visible=menu.kind().capacity>0;
