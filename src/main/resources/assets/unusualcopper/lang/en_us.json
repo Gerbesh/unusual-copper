@@ -580,5 +580,15 @@
   "tank.unusualcopper.empty": "Empty",
   "tank.unusualcopper.ports_hint": "Shared level. Configure sides with the copper wrench.",
   "enchanter.unusualcopper.refresh": "Refresh compatible enchantments",
-  "enchanter.unusualcopper.loading": "Loading enchantment catalog…"
+  "enchanter.unusualcopper.loading": "Loading enchantment catalog…",
+  "item.unusualcopper.creative_battery": "Creative CuE Battery",
+  "battery.unusualcopper.infinite": "∞ CuE · Infinite supply",
+  "battery.unusualcopper.creative_hint": "Creative only. Cell mode: Battery → cell. Also powers armor. Normal transfer limits apply.",
+  "wand.unusualcopper.preview_size": "%s × %s × %s · Volume: %s",
+  "wand.unusualcopper.preview_mining": "%s × %s · to world bottom",
+  "wand.unusualcopper.preview_limit": "Too large: maximum 16 × 16 × 16",
+  "wand.unusualcopper.preview_limit_mining": "Too large: maximum 128 × 128",
+  "wand.unusualcopper.preview_range": "Corner is too far from the machine",
+  "wand.unusualcopper.preview_aim": "First corner fixed · aim at the second block",
+  "wand.unusualcopper.preview_confirm": "Preview · right-click the second block to confirm"
 }

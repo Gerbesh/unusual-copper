@@ -42,6 +42,7 @@ public final class ClientSetup {
             MenuScreens.register(ModContent.MACHINE_MENU.get(), CopperMachineScreen::new);
             MenuScreens.register(ModContent.PIPE_MENU.get(), ItemPipeScreen::new);
             io.github.gerbesh.unusualcopper.network.AreaNetwork.clientReceiver(AreaPreviewRenderer::accept);
+            io.github.gerbesh.unusualcopper.network.AreaNetwork.selectionReceiver(AreaPreviewRenderer::selection);
             io.github.gerbesh.unusualcopper.network.MachineEffects.clientReceiver(ShepherdEffects::accept);
             io.github.gerbesh.unusualcopper.network.MachineEffects.reaperReceiver(ReaperEffects::accept);
             io.github.gerbesh.unusualcopper.network.MachineEffects.forestryReceiver(ArboristEffects::accept);

@@ -65,6 +65,10 @@ public final class ArmorClientState {
         while(ArmorKeys.HUD.consumeClick())if(mc.screen==null||mc.screen instanceof ArmorScreen){ArmorClientConfig.HUD.set(!ArmorClientConfig.HUD.get());ArmorClientConfig.SPEC.save();}
         while(ArmorKeys.SCAN.consumeClick())if(mc.screen==null||mc.screen instanceof ArmorScreen){if(snapshot==null){scanQueued=true;ArmorNetwork.request();}else toggleScanner();}
     }
+    public static boolean creativeBattery(){
+        var player=Minecraft.getInstance().player;
+        return player!=null&&CopperBatteryItem.infinite(io.github.gerbesh.unusualcopper.armor.ArmorData.battery(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST)));
+    }
     @SubscribeEvent public static void hud(RenderGuiEvent.Post event){
         var mc=Minecraft.getInstance();var v=snapshot;
         if(v==null||mc.player==null||mc.options.hideGui||!ArmorClientConfig.HUD.get()||clock-received>60||v.pieces().stream().noneMatch(p->p.tier()>0))return;
@@ -74,7 +78,7 @@ public final class ArmorClientState {
         g.fill(x,y,x+w,y+h,0xb0112422);g.fill(x,y,x+2,y+h,0xffb66b42);
         int percent=v.capacity()==0?0:(int)(100L*v.charge()/v.capacity());
         int color=percent<=5?0xffffa385:percent<=10?0xffffc174:percent<=25?0xffe6d389:0xff83e7d0;
-        String charge=v.capacity()==0?Component.translatable("armorconsole.no_battery").getString():percent+"% · "+compact(v.charge())+" CuE";
+        String charge=creativeBattery()?Component.translatable("battery.unusualcopper.infinite").getString():v.capacity()==0?Component.translatable("armorconsole.no_battery").getString():percent+"% · "+compact(v.charge())+" CuE";
         g.drawString(mc.font,charge,x+7,y+5,color,false);
         g.fill(x+7,y+17,x+w-7,y+20,0xff122d2a);if(v.capacity()>0)g.fill(x+7,y+17,x+7+(w-14)*percent/100,y+20,color);
         g.drawString(mc.font,Component.translatable("armorconsole.hud_cost",compact(v.perSecond())),x+7,y+24,0xffc3e1d6,false);

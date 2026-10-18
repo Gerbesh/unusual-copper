@@ -9,17 +9,21 @@ import java.util.List;
 public final class CopperBatteryItem extends Item {
     public static final String ENERGY_TAG=BatteryChargeLedger.ENERGY;
     public final int tier, capacity;
-    public CopperBatteryItem(int tier) {
-        super(new Properties().stacksTo(1));
-        this.tier=tier;this.capacity=capacityForTier(tier);
+    private final boolean infinite;
+    public CopperBatteryItem(int tier) { this(tier,false); }
+    public CopperBatteryItem(int tier,boolean infinite) {
+        super(new Properties().stacksTo(1).rarity(infinite?Rarity.EPIC:Rarity.COMMON));
+        this.tier=tier;this.capacity=capacityForTier(tier);this.infinite=infinite;
     }
+    public static boolean infinite(ItemStack stack) { return stack.getItem() instanceof CopperBatteryItem battery&&battery.infinite; }
     public static int capacityForTier(int tier) { return BatteryTierPolicy.capacityForTier(tier); }
     public static int stored(ItemStack stack) {
-        return stack.getItem() instanceof CopperBatteryItem battery && stack.hasTag()
-                ?BatteryChargeLedger.available(stack.getTag(),battery.capacity):0;
+        if(!(stack.getItem() instanceof CopperBatteryItem battery))return 0;
+        return battery.infinite?CreativeBatteryCharge.available(stack.getTag(),battery.capacity)
+                :BatteryChargeLedger.available(stack.getTag(),battery.capacity);
     }
     public static void stored(ItemStack stack,int value) {
-        if(!(stack.getItem() instanceof CopperBatteryItem battery))return;
+        if(!(stack.getItem() instanceof CopperBatteryItem battery)||battery.infinite)return;
         int charge=Math.max(0,Math.min(battery.capacity,value));
         if(charge>0)BatteryChargeLedger.assign(stack.getOrCreateTag(),battery.capacity,charge);
         else if(stack.hasTag()) {
@@ -30,8 +34,9 @@ public final class CopperBatteryItem extends Item {
         }
     }
     public static boolean reserve(ItemStack stack,int amount){
-        return stack.getCount()==1&&stack.getItem() instanceof CopperBatteryItem battery
-                &&BatteryChargeLedger.reserve(stack.getTag(),battery.capacity,amount);
+        if(stack.getCount()!=1||!(stack.getItem() instanceof CopperBatteryItem battery))return false;
+        return battery.infinite?CreativeBatteryCharge.reserve(stack.getOrCreateTag(),battery.capacity,amount)
+                :BatteryChargeLedger.reserve(stack.getTag(),battery.capacity,amount);
     }
     public static boolean validReservations(ItemStack stack){
         return stack.getCount()==1&&stack.getItem() instanceof CopperBatteryItem battery
@@ -44,17 +49,24 @@ public final class CopperBatteryItem extends Item {
     }
     public static boolean settle(ItemStack stack){
         if(!(stack.getItem() instanceof CopperBatteryItem battery)||stack.getCount()!=1)return false;
-        boolean changed=BatteryChargeLedger.settle(stack.getTag(),battery.capacity);
+        boolean changed=battery.infinite?CreativeBatteryCharge.settle(stack.getTag(),battery.capacity)
+                :BatteryChargeLedger.settle(stack.getTag(),battery.capacity);
         if(stack.hasTag()&&stack.getTag().isEmpty())stack.setTag(null);
         return changed;
     }
     public static int capacity(ItemStack stack) { return stack.getItem() instanceof CopperBatteryItem battery?battery.capacity:0; }
     public static String amount(int value) { return String.format(java.util.Locale.ROOT,"%,d",value).replace(',',' '); }
+    public static Component chargeText(ItemStack stack) {
+        return infinite(stack)?Component.translatable("battery.unusualcopper.infinite")
+                :Component.translatable("battery.unusualcopper.charge",amount(stored(stack)),amount(capacity(stack)));
+    }
+    @Override public boolean isFoil(ItemStack stack) { return infinite||super.isFoil(stack); }
     @Override public boolean isBarVisible(ItemStack stack) { return true; }
-    @Override public int getBarWidth(ItemStack stack) { return (int)(13L*stored(stack)/capacity); }
+    @Override public int getBarWidth(ItemStack stack) { return infinite?13:(int)(13L*stored(stack)/capacity); }
     @Override public int getBarColor(ItemStack stack) { return 0x3dd6d3; }
     @Override public void appendHoverText(ItemStack stack,Level level,List<Component> tooltip,TooltipFlag flag) {
-        tooltip.add(Component.translatable("battery.unusualcopper.charge",amount(stored(stack)),amount(capacity)));
-        tooltip.add(Component.translatable("battery.unusualcopper.hint"));
+        tooltip.add(chargeText(stack));
+        if(infinite)tooltip.add(Component.translatable("battery.unusualcopper.creative_hint"));
+        else tooltip.add(Component.translatable("battery.unusualcopper.hint"));
     }
 }

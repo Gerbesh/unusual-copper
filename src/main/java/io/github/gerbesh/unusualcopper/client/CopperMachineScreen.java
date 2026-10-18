@@ -119,7 +119,7 @@ public class CopperMachineScreen extends AbstractContainerScreen<CopperMachineMe
         if(menu.kind().isCell()) {
             g.drawString(font,Component.translatable("battery.unusualcopper.slot"),13,52,0xffe6f5ee,false);
             var portable=menu.slots.get(40).getItem();
-            var charge=portable.isEmpty()?Component.translatable("battery.unusualcopper.empty"):Component.translatable("battery.unusualcopper.charge",io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(portable)),io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.capacity(portable)));
+            var charge=portable.isEmpty()?Component.translatable("battery.unusualcopper.empty"):io.github.gerbesh.unusualcopper.item.CopperBatteryItem.chargeText(portable);
             g.drawString(font,charge,40,81,0xffe6f5ee,false);
         }
         if (!menu.kind().usesArea() && menu.kind()!=MachineKind.ARBORIST && !menu.kind().isCell()
