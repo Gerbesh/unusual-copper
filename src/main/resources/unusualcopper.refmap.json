@@ -1,5 +1,10 @@
 {
   "mappings": {
+    "io/github/gerbesh/unusualcopper/mixin/ArmorLightTextureMixin": {
+      "updateLightTexture(F)V": "Lnet/minecraft/client/renderer/LightTexture;m_109881_(F)V",
+      "Lnet/minecraft/client/player/LocalPlayer;hasEffect(Lnet/minecraft/world/effect/MobEffect;)Z": "Lnet/minecraft/client/player/LocalPlayer;m_21023_(Lnet/minecraft/world/effect/MobEffect;)Z",
+      "Lnet/minecraft/client/renderer/GameRenderer;getNightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F": "Lnet/minecraft/client/renderer/GameRenderer;m_109108_(Lnet/minecraft/world/entity/LivingEntity;F)F"
+    },
     "io/github/gerbesh/unusualcopper/mixin/ServerLifecycleMixin": {
       "halt(Z)V": "Lnet/minecraft/server/MinecraftServer;m_7570_(Z)V",
       "stopServer()V": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"
@@ -14,6 +19,11 @@
   },
   "data": {
     "searge": {
+      "io/github/gerbesh/unusualcopper/mixin/ArmorLightTextureMixin": {
+        "updateLightTexture(F)V": "Lnet/minecraft/client/renderer/LightTexture;m_109881_(F)V",
+        "Lnet/minecraft/client/player/LocalPlayer;hasEffect(Lnet/minecraft/world/effect/MobEffect;)Z": "Lnet/minecraft/client/player/LocalPlayer;m_21023_(Lnet/minecraft/world/effect/MobEffect;)Z",
+        "Lnet/minecraft/client/renderer/GameRenderer;getNightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F": "Lnet/minecraft/client/renderer/GameRenderer;m_109108_(Lnet/minecraft/world/entity/LivingEntity;F)F"
+      },
       "io/github/gerbesh/unusualcopper/mixin/ServerLifecycleMixin": {
         "halt(Z)V": "Lnet/minecraft/server/MinecraftServer;m_7570_(Z)V",
         "stopServer()V": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"

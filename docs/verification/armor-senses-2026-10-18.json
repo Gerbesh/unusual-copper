@@ -1,0 +1,254 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-17T23:00:01.345600+00:00",
+  "version": "0.20.13-alpha.1",
+  "source_base_commit": "039be3d7053de98a2cce0d3678c5653f885e6dfd",
+  "source_branch": "codex/armor-visor-scanner",
+  "artifact": "dist/unusualcopper-0.20.13-alpha.1.jar",
+  "sha256": "72aea9eaddaf5fa985cafe87641802ddea11402707a87324acfa2606bf526276",
+  "bytes": 1593759,
+  "installed": false,
+  "armor_protocol": "6",
+  "junit": {
+    "tests": 158,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Finite center-first scan cursor; shared/personal budget and bounded fair slices; twenty full rays served within three ticks; large atomic ray not starved by cheap readers; bounded sense DTO/negative privacy cases; server policy bits; compiled redirect metadata matched to pinned MC 1.20.1 SRG refs; client-only mixin declarations; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "scanner reservation once per tick; external Night Vision untouched and not redundantly charged by visor I; sensing logout cleanup before fake player packet delivery"
+    ],
+    "updated_scenarios": [
+      "mining query acceptance now supplies a correct physical pickaxe and loaded test coordinate"
+    ]
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Synthetic owner leases on display gear worn by a spectator: native lightmap night vision, expired lease, occluded ore outlines, machine ports/HUD and scanner pagination. No live scanning/payment acceptance.",
+    "environment": "Separate copied repository test world; Forge development client; EN 1600x900 / RU 1280x720; not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/armor-senses/en-armor-console-head.png",
+        "sha256": "953de5ac3d1bb8176e741619b34fb2f3a61a4022a52391534be0130b44fedd9e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-gear-inventory.png",
+        "sha256": "30843597e51b17a1048545ab2a83759673d47a99d3de7222b2c376641de69887",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-scanner-console.png",
+        "sha256": "63a9f621e39421f37691c0e7090aa2456fad29f2e65e900cbf9a050832529a2e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-scanner-ports.png",
+        "sha256": "54e77686a9d7751f913936c080f0ee35000d12a8cac836d5110b677d605fa833",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-visor-dark.png",
+        "sha256": "8a05c46dd78a44040c5e16b9c8e84c0dea2c1d0138ea670effaa44c3c090647e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-visor-expired.png",
+        "sha256": "8a05c46dd78a44040c5e16b9c8e84c0dea2c1d0138ea670effaa44c3c090647e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/en-visor-lit.png",
+        "sha256": "b1de8012c2f611dcfcda35a5be68e33a0fc5ae5246fab3aed5d6f1f6be46730a",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/ru-armor-console-head.png",
+        "sha256": "5337c9c439c64d3aec3ab1a7930e3b9251565295ff757bd3863bbda3fabec8bc",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-gear-inventory.png",
+        "sha256": "3027952673d52d482182b6d53e86dccf6f5d6654276da228d29dccafa88686e0",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-scanner-console.png",
+        "sha256": "f615a6e840a024bc7428dfd84435677e0dfbbbbe0d709314ffae8bd6f0141830",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-scanner-ports.png",
+        "sha256": "5f5219225faddc11ebf3c4ebaa6b03004ddf60e488040f138843669e093f61db",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-visor-dark.png",
+        "sha256": "57f5a2e2c866cec5afd9b854f0ff496a9ab844679187437a7dc2533ffa5cd1c0",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-visor-expired.png",
+        "sha256": "57f5a2e2c866cec5afd9b854f0ff496a9ab844679187437a7dc2533ffa5cd1c0",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-senses/ru-visor-lit.png",
+        "sha256": "c7c028c5e1c1b7ce849da06be22bca3a8038f8106e4b5681dd28d6547037c3c3",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "pixel_checks": {
+      "en": {
+        "dark_mean": 0.03416309896077984,
+        "visor_mean": 0.34522198064715276,
+        "expired_mean": 0.03416309896077984,
+        "ore_outline_pixels_outside_machine": 800
+      },
+      "ru": {
+        "dark_mean": 0.03409963828836378,
+        "visor_mean": 0.34447678551477573,
+        "expired_mean": 0.03409963828836378,
+        "ore_outline_pixels_outside_machine": 628
+      }
+    },
+    "missing_unusualcopper_textures": false,
+    "live_user_server_launched": false,
+    "user_worlds_modified": false,
+    "later_than_ru_frames": "Current EN/shader capture and build include loaded-chunk hardening, client eligibility caching, pinned SRG refs and optional shader adapter. RU layout/DTO unchanged."
+  },
+  "renderer_compat": {
+    "mods": [
+      "Oculus 1.8.0",
+      "Xenon 0.3.31+mc1.20.1",
+      "EuphoriaPatcher 1.9.3-r5.8.1",
+      "Iris Shader Folder 1.4.1"
+    ],
+    "frames": [
+      {
+        "path": "art/previews/armor-senses/oculus-no-shaders/scanner-console.png",
+        "sha256": "bea77ca5ffa72296333f9ac905f21af4124122c5a7a13351a821af58b665ade0",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/oculus-no-shaders/scanner-ports.png",
+        "sha256": "2b9881182a7675b5f487e420e41f586eb9cfd0b13eb5a81a6ffeb5a51462187b",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/oculus-no-shaders/visor-dark.png",
+        "sha256": "8200537ab62c49f2eb346cd764f62820b01ab3cfd1fa44dfc330867722613a11",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/oculus-no-shaders/visor-expired.png",
+        "sha256": "8101b133000c64105399ba65990a83376d361fab4bd88a4ac3bf9334631c07fe",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/oculus-no-shaders/visor-lit.png",
+        "sha256": "6cd687a39a48abac1e9f2d245ed5867b2d873171b9b7ef3dcf742f0e79cf1ca2",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/complementary/scanner-console.png",
+        "sha256": "7df08d57e434acf71fa08d0b84cd4cdd30d3035a1c3565f97c1eea899a7a425f",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/complementary/scanner-ports.png",
+        "sha256": "6c23b240928114b64ba54d48153239e358facec1f148834e8746b2cedf290794",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/complementary/visor-dark.png",
+        "sha256": "7d8244958a62a709e6b3d4baf8e4b23180d1d86ebc8eeccc804ef53ef9e97cf7",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/complementary/visor-expired.png",
+        "sha256": "01bebcb3d3a75f827080fb9d8fa027eda6dc0c15495d81539af161a166f50476",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-senses/complementary/visor-lit.png",
+        "sha256": "933eadc4a7ce58b58eb321c082acc93e14fa6559c67caef8e783a4f1b39ddaca",
+        "width": 1600,
+        "height": 900
+      }
+    ],
+    "without_shaderpack": {
+      "startup_passed": true,
+      "visual_capture_completed": true
+    },
+    "complementary": {
+      "preset": "ComplementaryReimagined_r5.8.1.zip",
+      "pipeline_loaded": true,
+      "uniform_probe": {
+        "17": 0.0,
+        "18": 1.0,
+        "19": 1.0,
+        "20": 0.0
+      },
+      "dark_mean": 0.03204090671176068,
+      "visor_mean": 0.25251410306308236,
+      "expired_mean": 0.032018755619975574,
+      "ore_outlines_visually_inspected": true
+    },
+    "user_preset": {
+      "name": "Better MC - Medium",
+      "accepted": false,
+      "pipeline_failed": true,
+      "fallback_to_vanilla": true,
+      "error": "final.fsh: error C1503: undefined variable \"_10\"",
+      "cause_established": false
+    },
+    "performance_measured": false
+  },
+  "static_checks": {
+    "models": 195,
+    "transparent_sprites": 23,
+    "component_models": 32,
+    "ru_en_keys_equal": true,
+    "client_only_light_mixin": true,
+    "client_only_optional_uniform_mixin": true,
+    "no_foreign_shader_class_link": true,
+    "light_mixin_refmap_contains_all_targets": true,
+    "common_sensor_has_no_client_class_link": true,
+    "ordinary_jar_excludes_fixtures": true,
+    "historical_frames_unchanged": true
+  },
+  "limitations": [
+    "Functional GameTests compiled only; user performs gameplay acceptance",
+    "SMP/claims/performance not executed; fair queue JUnit is not an MSPT result",
+    "Full Better MC not verified; user Medium shader preset failed to compile in the isolated stack, cause unproven; base Complementary render passed",
+    "Remaining E6 effects/config/jump arming, E5, E7 F4/reserve/landing, E8/E9 and tank multiblock remain open in the full tracker"
+  ]
+}

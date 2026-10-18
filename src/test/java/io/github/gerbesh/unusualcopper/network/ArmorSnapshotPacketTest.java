@@ -29,4 +29,10 @@ class ArmorSnapshotPacketTest {
         assertThrows(IllegalArgumentException.class,()->ArmorNetwork.Codec.decode(b));b.release();
         assertThrows(IllegalArgumentException.class,()->new ArmorNetwork.Row(ArmorModuleType.FALL_DAMPER,row.settings(),2));
     }
+    @Test void serverSensePermissionsRoundTripAndUnknownBitsAreRejected(){
+        var empty=new ArmorNetwork.Piece("",0,0,List.of());var base=sample(List.of(empty,empty,empty,empty));
+        var value=new ArmorNetwork.Snapshot(base.session(),base.revision(),base.complete(),base.profile(),base.charge(),base.capacity(),base.perSecond(),base.recent(),base.limited(),base.conditions(),base.flight(),base.pieces(),base.result(),3);
+        var b=new FriendlyByteBuf(Unpooled.buffer());ArmorNetwork.Codec.encode(value,b);assertEquals(value,ArmorNetwork.Codec.decode(b));b.release();
+        assertThrows(IllegalArgumentException.class,()->new ArmorNetwork.Snapshot(base.session(),base.revision(),false,0,0,0,0,0,0,0,base.flight(),base.pieces(),base.result(),4));
+    }
 }

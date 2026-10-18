@@ -5,5 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "unusualcopper.refmap.json",
   "mixins": ["EntityPopulationMixin", "EntityDataPopulationMixin", "HorsePopulationMixin", "MobLeashPopulationMixin", "ReaperVictimMixin", "InventoryChangesMixin", "SsnNetworkMixin", "ServerLifecycleMixin", "QuarkFeedingTroughMixin"],
+  "client": ["ArmorLightTextureMixin", "ArmorIrisUniformMixin"],
   "injectors": {"defaultRequire": 1}
 }

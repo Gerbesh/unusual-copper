@@ -30,7 +30,9 @@ public final class IndustrialVisualClient {
             MachineKind.VORTEX_PURIFIER,MachineKind.RESONANCE_CRYSTALLIZER,MachineKind.CIRCUIT_ETCHER,
             MachineKind.PRECISION_ASSEMBLER,MachineKind.COPPER_FLUID_PUMP,MachineKind.COPPER_FLUID_TANK,
             MachineKind.PRODUCTION_CONTROLLER,MachineKind.ARMOR_WORKBENCH};
-    private static final String[] SHOTS={"front-idle","front-working-a","front-working-b","rear-working","night-working","close-processing","close-assembly","armor-front","armor-back","inventory","gear-inventory","armor-console-head","armor-console-chest","armor-console-boots","armor-hud","armor-hud-expired","armor-faces"};
+    private static final String[] SHOTS={"front-idle","front-working-a","front-working-b","rear-working","night-working","close-processing","close-assembly","armor-front","armor-back","inventory","gear-inventory","armor-console-head","armor-console-chest","armor-console-boots","armor-hud","armor-hud-expired","armor-faces","visor-dark","visor-lit","scanner-ports","visor-expired","scanner-console"};
+    private static volatile int displayedPorts;
+    private static final BlockPos SENSE_TARGET=new BlockPos(108,139,111);
     private static final AtomicBoolean ready=new AtomicBoolean(),saved=new AtomicBoolean();
     private static volatile int stage;
     private static boolean started,captured;
@@ -93,9 +95,11 @@ public final class IndustrialVisualClient {
             });return;
         }
         if(!ready.get())return;
-        if(stage>=11)io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
+        if(stage>=11&&stage<17||stage==21)io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
+        if(stage>=17&&stage<20)io.github.gerbesh.unusualcopper.client.ArmorSenseClient.receive(displaySenses(stage));
         if(++ticks<(stage==0?120:45))return;
         if(!captured){
+            if(stage>=17&&stage<=20&&Boolean.getBoolean("unusualcopper.verifyShaderSenseUniform"))verifyShaderUniform(stage);
             captured=true;Screenshot.grab(mc.gameDirectory,"industrial-"+SHOTS[stage]+".png",mc.getMainRenderTarget(),message->{
                 UnusualCopper.LOGGER.info("INDUSTRIAL VISUAL FRAME {}: {}",stage,message.getString());saved.set(true);
             });return;
@@ -105,10 +109,30 @@ public final class IndustrialVisualClient {
             UnusualCopper.LOGGER.info("INDUSTRIAL VISUAL CAPTURE COMPLETE: ten devices, two motion phases, rear, night and item catalogue; screenshot fixture only");
             mc.options.hideGui=false;mc.stop();return;
         }
-        stage++;ticks=0;captured=false;saved.set(false);
+        stage=stage==0&&Boolean.getBoolean("unusualcopper.armorSenseVisualOnly")?17:stage+1;ticks=0;captured=false;saved.set(false);
         if(stage==5)mc.options.fov().set(45);
         if(stage==9||stage==10){mc.setScreen(new Catalogue(stage==10));return;}
         if(stage==16){mc.options.hideGui=true;mc.setScreen(new ArmorFaces());return;}
+        if(stage==21){
+            io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));mc.options.hideGui=true;
+            mc.setScreen(new io.github.gerbesh.unusualcopper.client.ArmorScreen(0){
+                @Override protected void init(){
+                    super.init();
+                    // Pagination alone changes client display state; no owner-setting action is sent.
+                    for(int click=0;click<2;click++)for(var widget:new java.util.ArrayList<>(children()))
+                        if(widget instanceof net.minecraft.client.gui.components.Button button&&button.getMessage().getString().equals("›")){button.onPress();break;}
+                }
+                @Override public void render(GuiGraphics g,int x,int y,float partial){io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));super.render(g,-1,-1,partial);}
+            });return;
+        }
+        if(stage>=17){
+            mc.options.hideGui=stage!=19;mc.setScreen(null);
+            if(stage==17){ready.set(false);mc.getSingleplayerServer().execute(()->{
+                var p=display.getServer().getPlayerList().getPlayer(mc.player.getUUID());
+                prepareSenseRoom(p);ready.set(true);
+            });}
+            return;
+        }
         if(stage>=11){
             io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
             mc.options.hideGui=stage<14;
@@ -126,6 +150,49 @@ public final class IndustrialVisualClient {
             if(stage==8)p.teleportTo(display,108.5,152,126.5,180,14);
             ready.set(true);
         });
+    }
+    private static void verifyShaderUniform(int frame){
+        try{
+            var method=Class.forName("net.irisshaders.iris.uniforms.CommonUniforms").getDeclaredMethod("getNightVision");method.setAccessible(true);
+            float actual=(float)method.invoke(null),expected=frame==18||frame==19?1F:0F;
+            if(!Float.isFinite(actual)||Math.abs(actual-expected)>.001F)throw new IllegalStateException("Unexpected night-vision uniform: "+actual+", expected "+expected);
+            UnusualCopper.LOGGER.info("ARMOR SHADER UNIFORM frame={} actual={} expected={}",frame,actual,expected);
+        }catch(ReflectiveOperationException incompatible){throw new IllegalStateException("Cannot verify optional Oculus vision uniform",incompatible);}
+    }
+    /** Display-only gear on a spectator. The server runtime refuses all paid abilities in this mode. */
+    private static void prepareSenseRoom(net.minecraft.server.level.ServerPlayer player){
+        display.setDayTime(18000);
+        for(int x=102;x<=115;x++)for(int y=136;y<=144;y++)for(int z=102;z<=113;z++){
+            boolean wall=x==102||x==115||y==136||y==144||z==102||z==113;
+            display.setBlock(new BlockPos(x,y,z),(wall?Blocks.STONE_BRICKS:Blocks.AIR).defaultBlockState(),2);
+        }
+        display.setBlock(SENSE_TARGET.below(),Blocks.POLISHED_DEEPSLATE.defaultBlockState(),2);
+        display.setBlock(SENSE_TARGET,ModContent.MACHINES.get(MachineKind.COPPER_PRESS).get().defaultBlockState(),3);
+        var machine=(CopperMachineBlockEntity)display.getBlockEntity(SENSE_TARGET);machine.redstoneMode=1;machine.setOwner(player.getUUID());machine.energy.restore(4800);machine.status(MachineStatus.REDSTONE_PAUSED);
+        displayedPorts=0;for(var side:net.minecraft.core.Direction.values())displayedPorts|=machine.sideMode(side).ordinal()<<(side.ordinal()*3);
+        display.sendBlockUpdated(SENSE_TARGET,machine.getBlockState(),machine.getBlockState(),2);
+        for(var pos:java.util.List.of(new BlockPos(105,139,114),new BlockPos(109,140,114),new BlockPos(112,138,114)))display.setBlock(pos,Blocks.DIAMOND_ORE.defaultBlockState(),2);
+        for(var type:net.minecraft.world.item.ArmorItem.Type.values()){
+            var item=new ItemStack(ModContent.PROGRAMMABLE_ARMOR.get("programmable_"+type.getName()+"_tier_3").get());
+            if(type==net.minecraft.world.item.ArmorItem.Type.HELMET){
+                io.github.gerbesh.unusualcopper.armor.ArmorData.install(item,io.github.gerbesh.unusualcopper.armor.ArmorModuleType.OPTIC_VISOR,2);
+                io.github.gerbesh.unusualcopper.armor.ArmorData.install(item,io.github.gerbesh.unusualcopper.armor.ArmorModuleType.FIELD_SCANNER,2);
+                io.github.gerbesh.unusualcopper.armor.ArmorData.install(item,io.github.gerbesh.unusualcopper.armor.ArmorModuleType.AQUA_LUNGS,2);
+            }
+            if(type==net.minecraft.world.item.ArmorItem.Type.CHESTPLATE){
+                var cell=new ItemStack(ModContent.AETHERIC_BATTERY.get());io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(cell,1_000_000);
+                io.github.gerbesh.unusualcopper.armor.ArmorData.installBattery(item,cell);io.github.gerbesh.unusualcopper.armor.ArmorData.profile(item,3);
+            }
+            player.setItemSlot(((io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem)item.getItem()).getEquipmentSlot(),item);
+        }
+        player.getInventory().setChanged();player.inventoryMenu.broadcastChanges();player.teleportTo(display,108.5,138,108.5,0,5);
+    }
+    private static io.github.gerbesh.unusualcopper.network.ArmorSenseSnapshot displaySenses(int frame){
+        boolean on=frame>=18,diagnostics=frame==19;
+        var ores=diagnostics?java.util.List.of(new BlockPos(105,139,114),new BlockPos(109,140,114),new BlockPos(112,138,114)):java.util.List.<BlockPos>of();
+        var target=diagnostics?new io.github.gerbesh.unusualcopper.network.ArmorSenseSnapshot.Target(SENSE_TARGET,"unusualcopper:copper_press",4800,20_000,MachineStatus.REDSTONE_PAUSED.ordinal(),displayedPorts):null;
+        return new io.github.gerbesh.unusualcopper.network.ArmorSenseSnapshot("minecraft:overworld",3,on?2:0,diagnostics?2:0,0,
+                on?io.github.gerbesh.unusualcopper.network.ArmorSenseSnapshot.ScanState.READY:io.github.gerbesh.unusualcopper.network.ArmorSenseSnapshot.ScanState.OFF,on?925:0,on?925:0,ores,target);
     }
     /** Synthetic display snapshot only: this does not configure, equip or pay for real armor. */
     private static io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot displayArmor(int frame){

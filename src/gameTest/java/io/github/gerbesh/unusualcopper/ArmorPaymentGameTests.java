@@ -46,10 +46,31 @@ public final class ArmorPaymentGameTests {
     public static void multipleMiningQueriesShareOneTickAllocation(GameTestHelper h){
         var p=wearer(h);var chest=p.getItemBySlot(EquipmentSlot.CHEST);ArmorData.profile(chest,1);
         ArmorData.install(p.getItemBySlot(EquipmentSlot.LEGS),ArmorModuleType.MINING_SERVO);
-        var first=new PlayerEvent.BreakSpeed(p,Blocks.STONE.defaultBlockState(),1F,p.blockPosition());
-        var second=new PlayerEvent.BreakSpeed(p,Blocks.STONE.defaultBlockState(),1F,p.blockPosition());
+        p.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE));
+        var pos=h.absolutePos(net.minecraft.core.BlockPos.ZERO);
+        var first=new PlayerEvent.BreakSpeed(p,Blocks.STONE.defaultBlockState(),1F,pos);
+        var second=new PlayerEvent.BreakSpeed(p,Blocks.STONE.defaultBlockState(),1F,pos);
         ArmorRuntime.mining(first);ArmorRuntime.mining(second);ArmorRuntime.mining(second);
         h.assertTrue(first.getNewSpeed()==1.4F&&second.getNewSpeed()==1.4F,"Repeated callback multiplied mining twice");
         h.runAfterDelay(1,()->{h.assertTrue(CopperBatteryItem.stored(ArmorData.battery(chest))==9992&&ArmorTelemetry.perSecond(p)==8,"Mining was billed per query");h.succeed();});
+    }
+    @GameTest(template="empty",timeoutTicks=40)
+    public static void paidScannerDoesNotRewriteOrChargeForExternalNightVision(GameTestHelper h){
+        var p=wearer(h);var chest=p.getItemBySlot(EquipmentSlot.CHEST);ArmorData.profile(chest,3);
+        var helmet=p.getItemBySlot(EquipmentSlot.HEAD);
+        ArmorData.install(helmet,ArmorModuleType.OPTIC_VISOR);ArmorData.install(helmet,ArmorModuleType.FIELD_SCANNER,2);
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NIGHT_VISION,600,0));
+        var external=p.getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+        var event=new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END,p);
+        try{
+            ArmorRuntime.tick(event);ArmorRuntime.tick(event);
+            h.assertTrue(p.getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)==external&&external.getDuration()==600,"External potion rewritten");
+            h.assertTrue(CopperBatteryItem.stored(ArmorData.battery(chest))==9994,"Scanner not reserved exactly once, or redundant visor charged");
+        }finally{
+            // No live client exists for a FakePlayer. Verify payment here, then close its
+            // sensing session before the normal owner-packet publishing phase.
+            ArmorSensors.logout(new PlayerEvent.PlayerLoggedOutEvent(p));
+        }
+        h.succeed();
     }
 }

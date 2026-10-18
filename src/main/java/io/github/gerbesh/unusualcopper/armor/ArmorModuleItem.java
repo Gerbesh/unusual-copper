@@ -20,6 +20,8 @@ public final class ArmorModuleItem extends Item {
         if(module.maxLevel()>1)tooltip.add(Component.translatable("armor.unusualcopper.module_level",moduleLevel));
         tooltip.add(Component.translatable("armor.unusualcopper.module_chassis",module.requiredTier(moduleLevel)));
         tooltip.add(Component.translatable("armor.unusualcopper.module_cost",module.cue(moduleLevel)));
+        if(module==ArmorModuleType.OPTIC_VISOR)tooltip.add(Component.translatable("armor.unusualcopper.visor_hint"));
+        if(module==ArmorModuleType.FIELD_SCANNER)tooltip.add(Component.translatable("armor.unusualcopper.scanner_hint"));
         if(module==ArmorModuleType.FALL_DAMPER)tooltip.add(Component.translatable("armor.unusualcopper.event_cost",1000));
         if(module==ArmorModuleType.JUMP_DRIVE)tooltip.add(Component.translatable("armor.unusualcopper.event_cost",moduleLevel==1?2000:5000));
         if(module==ArmorModuleType.HOVER_DRIVE)tooltip.add(Component.translatable("armor.unusualcopper.hover_hint"));

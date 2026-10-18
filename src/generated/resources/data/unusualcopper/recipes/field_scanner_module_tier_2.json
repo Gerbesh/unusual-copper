@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "unusualcopper:field_scanner_module"
+    },
+    {
+      "item": "unusualcopper:precision_processor"
+    },
+    {
+      "item": "unusualcopper:resonant_crystal"
+    },
+    {
+      "item": "unusualcopper:resonant_crystal"
+    }
+  ],
+  "result": {
+    "item": "unusualcopper:field_scanner_module_tier_2"
+  }
+}

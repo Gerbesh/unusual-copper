@@ -90,12 +90,13 @@ def models():
         'flight_core_ii':[block([7,6,5.6],[9,11,6.5],'aqua'),block([4.6,5,5.8],[6,10.5,6.5]),block([10,5,5.8],[11.4,10.5,6.5])],
         'shield_field':frame(5,6,11,12,5.8,6.5,'copper',.8)+[block([6,5,5.8],[10,6,6.5],'aqua'),block([7,4.5,5.8],[9,5,6.5],'aqua'),
                             dict(block([6.7,7.2,5.3],[9.3,9.8,6.3],'aqua'),rotation={'origin':[8,8.5,5.8],'axis':'z','angle':45})],
+        'field_scanner':frame(5,5,11,11,5.8,6.4,'aqua',.5)+[block([7.7,6,5.4],[8.3,10,6],'copper'),block([6,7.7,5.4],[10,8.3,6],'copper'),block([9.3,9.3,5.2],[10.3,10.3,5.8],'aqua')],
     }
     for name,glyph in glyphs.items():
         if name=='fall_damper':
             for y in (6.5,8,9.5):glyph.append(block([5.5,y,5.6],[10.5,y+.6,6.5],'aqua'))
         if name!='shield_field':out(name+'_module',cartridge()+glyph)
-        max_level=3 if name in ('mining_servo','shield_field') else 2 if name in ('optic_visor','aqua_lungs','stride_drive','jump_drive') else 1
+        max_level=3 if name in ('mining_servo','shield_field') else 2 if name in ('optic_visor','aqua_lungs','stride_drive','jump_drive','field_scanner') else 1
         for level in range(2,max_level+1):
             body=cartridge()+glyph
             for index in range(level):

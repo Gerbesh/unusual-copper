@@ -72,7 +72,7 @@ public final class ArmorControlServer {
         }else pieces.add(new ArmorNetwork.Piece("",0,0,List.of()));}
         return new ArmorNetwork.Snapshot(session.nonce,session.revision,ArmorRuntime.completeSet(player),profile,CopperBatteryItem.stored(battery),CopperBatteryItem.capacity(battery),
                 ArmorTelemetry.perSecond(player),ArmorTelemetry.recent(player),ArmorTelemetry.limited(player),ArmorRuntime.conditions(player),
-                ArmorRuntime.flightStatus(player),pieces,result);
+                ArmorRuntime.flightStatus(player),pieces,result,(!io.github.gerbesh.unusualcopper.config.ArmorSenseConfig.ores()?1:0)|(!io.github.gerbesh.unusualcopper.config.ArmorSenseConfig.diagnostics()?2:0));
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event){
         if(event.phase!=TickEvent.Phase.END||!(event.player instanceof ServerPlayer player)||player.tickCount%10!=0)return;

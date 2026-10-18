@@ -21,24 +21,31 @@ public final class ArmorNetwork {
     }
     public record Piece(String item,int tier,int sockets,List<Row> modules){public Piece{modules=List.copyOf(modules);}}
     public record Snapshot(UUID session,long revision,boolean complete,int profile,int charge,int capacity,int perSecond,
-                           long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);}}
+                           long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result,int disabledSenses){
+        public Snapshot{pieces=List.copyOf(pieces);Objects.requireNonNull(flight);if(disabledSenses<0||disabledSenses>3)throw new IllegalArgumentException("Sense policy");}
+        public Snapshot(UUID session,long revision,boolean complete,int profile,int charge,int capacity,int perSecond,long recent,long limited,int conditions,ArmorRuntime.FlightStatus flight,List<Piece> pieces,Result result){
+            this(session,revision,complete,profile,charge,capacity,perSecond,recent,limited,conditions,flight,pieces,result,0);
+        }
+    }
     // Both sides must understand reserved battery NBT as unavailable charge.
-    private static final String PROTOCOL="5";
+    private static final String PROTOCOL="6";
     private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->PROTOCOL,PROTOCOL::equals,PROTOCOL::equals);
     private static Consumer<Snapshot> receiver=ignored->{};
+    private static Consumer<ArmorSenseSnapshot> senseReceiver=ignored->{};
     public static void register(){
         CHANNEL.registerMessage(0,Request.class,(v,b)->{},b->new Request(),(v,s)->{var c=s.get();c.enqueueWork(()->{if(c.getSender()!=null)ArmorControlServer.request(c.getSender());});c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(1,Action.class,(v,b)->{b.writeUUID(v.session);b.writeVarLong(v.revision);b.writeVarInt(v.piece);b.writeVarInt(v.module);b.writeEnum(v.operation);b.writeVarInt(v.value);},
                 b->new Action(b.readUUID(),b.readVarLong(),b.readVarInt(),b.readVarInt(),b.readEnum(ArmorControlPolicy.Operation.class),b.readVarInt()),
                 (v,s)->{var c=s.get();c.enqueueWork(()->{if(c.getSender()!=null)ArmorControlServer.action(c.getSender(),v);});c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(2,Snapshot.class,Codec::encode,Codec::decode,(v,s)->{var c=s.get();c.enqueueWork(()->receiver.accept(v));c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(3,ArmorSenseSnapshot.class,ArmorSenseSnapshot.Codec::encode,ArmorSenseSnapshot.Codec::decode,(v,s)->{var c=s.get();c.enqueueWork(()->senseReceiver.accept(v));c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     /** Wire validation can be exercised without initializing Forge's live channel. */
     public static final class Codec {
     private Codec(){}
     public static void encode(Snapshot v,FriendlyByteBuf b){
         b.writeUUID(v.session);b.writeVarLong(v.revision);b.writeBoolean(v.complete);b.writeVarInt(v.profile);b.writeVarInt(v.charge);b.writeVarInt(v.capacity);
-        b.writeVarInt(v.perSecond);b.writeLong(v.recent);b.writeLong(v.limited);b.writeVarInt(v.conditions);
+        b.writeVarInt(v.perSecond);b.writeLong(v.recent);b.writeLong(v.limited);b.writeVarInt(v.conditions);b.writeVarInt(v.disabledSenses);
         b.writeBoolean(v.flight.session());b.writeVarInt(v.flight.ticksLeft());b.writeVarInt(v.flight.heightLeft());
         b.writeEnum(v.result);b.writeVarInt(v.pieces.size());
         for(var p:v.pieces){b.writeUtf(p.item,128);b.writeVarInt(p.tier);b.writeVarInt(p.sockets);b.writeVarInt(p.modules.size());
@@ -46,7 +53,7 @@ public final class ArmorNetwork {
     }
     public static Snapshot decode(FriendlyByteBuf b){
         var session=b.readUUID();long revision=b.readVarLong();boolean complete=b.readBoolean();int profile=b.readVarInt(),charge=b.readVarInt(),capacity=b.readVarInt(),spent=b.readVarInt();
-        long recent=b.readLong(),limited=b.readLong();int conditions=b.readVarInt();
+        long recent=b.readLong(),limited=b.readLong();int conditions=b.readVarInt(),disabledSenses=b.readVarInt();
         var flight=new ArmorRuntime.FlightStatus(b.readBoolean(),b.readVarInt(),b.readVarInt());
         var result=b.readEnum(Result.class);int count=b.readVarInt();
         if(revision<0||profile<0||profile>3||charge<0||capacity<charge||capacity>250_000_000||spent<0||count!=4||conditions<0||conditions>255||limited<0||limited>>>ArmorModuleType.values().length!=0)throw new IllegalArgumentException("Armor snapshot");
@@ -61,12 +68,14 @@ public final class ArmorNetwork {
                 rows.add(new Row(module,new ArmorModuleSettings(b.readBoolean(),b.readEnum(ArmorModuleSettings.Trigger.class),b.readVarInt(),b.readBoolean(),b.readVarInt()),level));}
             pieces.add(new Piece(item,tier,sockets,rows));
         }
-        return new Snapshot(session,revision,complete,profile,charge,capacity,spent,recent,limited,conditions,flight,pieces,result);
+        return new Snapshot(session,revision,complete,profile,charge,capacity,spent,recent,limited,conditions,flight,pieces,result,disabledSenses);
     }
     }
     public static void request(){CHANNEL.sendToServer(new Request());}
     public static void action(Action action){CHANNEL.sendToServer(action);}
     public static void send(ServerPlayer player,Snapshot value){CHANNEL.send(PacketDistributor.PLAYER.with(()->player),value);}
     public static void receiver(Consumer<Snapshot> handler){receiver=handler;}
+    public static void senseReceiver(Consumer<ArmorSenseSnapshot> handler){senseReceiver=handler;}
+    public static void sendSense(ServerPlayer player,ArmorSenseSnapshot value){CHANNEL.send(PacketDistributor.PLAYER.with(()->player),value);}
     private ArmorNetwork(){}
 }

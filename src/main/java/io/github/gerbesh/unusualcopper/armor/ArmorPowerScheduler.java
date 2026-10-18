@@ -42,7 +42,7 @@ public final class ArmorPowerScheduler {
             case AQUA_LUNGS,SHIELD_FIELD,FALL_DAMPER -> 3;
             case STRIDE_DRIVE,JUMP_DRIVE -> 4;
             case MINING_SERVO -> 5;
-            case OPTIC_VISOR -> 6;
+            case OPTIC_VISOR,FIELD_SCANNER -> 6;
         };
     }
     public static Plan plan(Collection<Demand> requests,int available) {
