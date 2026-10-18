@@ -27,7 +27,7 @@ public final class MiningScreen extends AbstractContainerScreen<MiningMenu> {
         text(g,tr("tool"),leftPos+18,topPos+38,45,0xffb4e7d3);text(g,tr("buffer"),leftPos+65,topPos+38,110,0xffb4e7d3);
         var s=menu.snapshot;if(s==null)return;
         text(g,tr("energy",s.energy(),s.cost()),leftPos+12,topPos+78,176,0xff8eedd7);
-        var status=MachineStatus.values()[Math.floorMod(s.status(),MachineStatus.values().length)];text(g,status==MachineStatus.NO_ENERGY&&s.cost()>s.energy()?tr("energy_wait",s.cost()-s.energy()):Component.translatable(status.translationKey()),leftPos+12,topPos+90,180,0xffffd7a7);
+        var status=MachineStatus.values()[Math.floorMod(s.status(),MachineStatus.values().length)];text(g,status==MachineStatus.CHUNK_LOADING?tr("chunks",s.chunksLoaded(),s.chunksTotal()):status==MachineStatus.NO_ENERGY&&s.cost()>s.energy()?tr("energy_wait",s.cost()-s.energy()):Component.translatable(status.translationKey()),leftPos+12,topPos+90,180,0xffffd7a7);
         text(g,tr("counts",s.mined(),s.experience()),leftPos+208,topPos+244,214,0xffadcfbf);
         int percent=s.total()==0?0:(int)Math.min(100,(long)s.scanned()*100/s.total());text(g,tr("scan",percent),leftPos+208,topPos+204,210,0xff9fcebc);
         text(g,s.area().length==4?tr("size",s.area()[2]-s.area()[0]+1,s.area()[3]-s.area()[1]+1):tr("no_area"),leftPos+12,topPos+101,180,0xffb8d9c9);
@@ -39,7 +39,7 @@ public final class MiningScreen extends AbstractContainerScreen<MiningMenu> {
     @Override protected void renderLabels(GuiGraphics g,int mx,int my){text(g,title,12,9,180,0xffe7f3df);text(g,tr("ores"),208,9,214,0xffe7f3df);g.drawString(font,playerInventoryTitle,16,155,0xffbed7c6,false);}
     @Override public void render(GuiGraphics g,int mx,int my,float dt){renderBackground(g);if(menu.snapshot!=null){pause.setMessage(tr(menu.snapshot.enabled()?"pause":"resume"));var bound=menu.snapshot.output();output.setTooltip(Tooltip.create(bound==null?tr("no_output"):tr("output_at",bound.getX(),bound.getY(),bound.getZ())));}super.render(g,mx,my,dt);renderTooltip(g,mx,my);
         int x=mx-leftPos-208,y=my-topPos-54;if(x>=0&&x<216&&y>=0&&y<144){int i=page*24+x/36+y/36*6;if(i<shown.size()){var e=shown.get(i);g.renderTooltip(font,List.of(e.icon().getHoverName(),Component.literal(e.id().toString()),tr(e.enabled()?"enabled":"disabled"),tr("found",e.found())),Optional.empty(),mx,my);}}
-        if(mx>=leftPos+12&&mx<leftPos+184&&my>=topPos+101&&my<topPos+110)g.renderTooltip(font,tr("bind_hint"),mx,my);
+        if(mx>=leftPos+12&&mx<leftPos+184&&my>=topPos+101&&my<topPos+110){var s=menu.snapshot;if(s!=null)g.renderTooltip(font,List.of(tr("chunks",s.chunksLoaded(),s.chunksTotal()),tr("chunk_state."+io.github.gerbesh.unusualcopper.gameplay.MiningChunkStatus.values()[s.chunkState()].name().toLowerCase(Locale.ROOT)),tr("bind_hint")),Optional.empty(),mx,my);}
     }
     @Override public boolean mouseClicked(double x,double y,int button){int dx=(int)x-leftPos-208,dy=(int)y-topPos-54;if(button==0&&dx>=0&&dx<216&&dy>=0&&dy<144&&menu.snapshot!=null){int i=page*24+dx/36+dy/36*6;if(i<shown.size()){MiningNetwork.toggle(new MiningNetwork.Toggle(menu.containerId,menu.pos,menu.snapshot.runtime(),shown.get(i).id()));return true;}}return super.mouseClicked(x,y,button);}
 }

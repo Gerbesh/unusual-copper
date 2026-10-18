@@ -35,12 +35,15 @@ public final class ProtectionPolicy {
     }
     public static boolean allowed(ServerLevel level, BlockPos pos, UUID owner) {
         if (!level.hasChunkAt(pos)) return false;
+        return allowedChunk(level, pos.getX() >> 4, pos.getZ() >> 4, owner);
+    }
+    /** Claim lookup before acquiring a ticket; does not read blocks or load the target chunk. */
+    public static boolean allowedChunk(ServerLevel level, int x, int z, UUID owner) {
         initialize();
         if (unknownProvider || failed) return false;
         if (getApi == null) return true;
         try {
             var api = getApi.invoke(null, level.getServer());
-            int x = pos.getX() >> 4, z = pos.getZ() >> 4;
             var claim = claimAt.invoke(claims.invoke(api), level.dimension().location(), x, z);
             if (claim == null) return true;
             return owner != null && (boolean)chunkAccess.invoke(protection.invoke(api), owner, level.dimension().location(), x, z);

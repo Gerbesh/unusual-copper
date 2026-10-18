@@ -643,5 +643,16 @@
   "reactor.build_owner": "All 36 building blocks must belong to the same owner.",
   "reactor.build_protected": "Claims deny access to part of this structure.",
   "reactor.build_multiple": "Use only one block with retained core contents per reactor.",
-  "reactor.credit": "Cu: %s"
+  "reactor.credit": "Cu: %s",
+  "status.unusualcopper.chunk_loading": "Loading extractor chunks",
+  "status.unusualcopper.chunk_limit": "Extractor chunk limit reached",
+  "status.unusualcopper.chunk_load_failed": "Chunk loading failed; retrying",
+  "mining.unusualcopper.chunks": "Chunks loaded: %s / %s",
+  "mining.unusualcopper.chunk_state.disabled": "Automatic chunk loading is disabled by the server",
+  "mining.unusualcopper.chunk_state.idle": "Chunk loading is paused or not required",
+  "mining.unusualcopper.chunk_state.loading": "Loading the area, station and storage in a bounded queue",
+  "mining.unusualcopper.chunk_state.ready": "Area, station and storage are kept loaded",
+  "mining.unusualcopper.chunk_state.limit": "Server or owner chunk-ticket budget reached",
+  "mining.unusualcopper.chunk_state.protected": "Chunk loading is denied by territory protection or invalid geometry",
+  "mining.unusualcopper.chunk_state.failed": "Chunk loading failed; automatic retry after 10 seconds"
 }

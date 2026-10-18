@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-18",
+  "version": "0.21.1-alpha.1",
+  "sourceBase": "0bd794a",
+  "branch": "codex/extractor-chunk-loading",
+  "status": "candidate-not-installed",
+  "artifact": {
+    "path": "dist/unusualcopper-0.21.1-alpha.1.jar",
+    "sha256": "1e0b9ef350c2b7363836f99d96fb5e95867d80bdec2e4e8066e5f77795f92b90",
+    "bytes": 1836786,
+    "gameTestAndVisualFixturesExcluded": true
+  },
+  "verification": {
+    "build": "passed",
+    "junit": {
+      "tests": 214,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "newJUnitTests": 11,
+    "compileGameTestJava": "passed",
+    "newGameTestScenariosCompiled": 5,
+    "gameTestsExecuted": false,
+    "minecraftClientLaunched": false,
+    "userServerLaunched": false,
+    "languageKeysValidated": [
+      "en_us",
+      "ru_ru"
+    ]
+  },
+  "behavior": {
+    "maxArea": "128x128",
+    "maxAreaChunks": 81,
+    "maxPlanTickets": 84,
+    "areaTicking": false,
+    "controllerAndStorageTicking": true,
+    "actualDoubleChestPartner": true,
+    "persistentForgeTickets": true,
+    "startupRetainsValidatedControllerOnly": true,
+    "chunkWarmup": "temporary region ticket and nonblocking getChunkNow polling",
+    "warmupsAndAdmissionsPerTick": 2,
+    "ownerTicketsPerDimension": 256,
+    "totalTicketsPerDimension": 1024,
+    "manualPauseRemovesAllTickets": true,
+    "redstonePauseKeepsController": true
+  },
+  "installedUnchanged": {
+    "unusualCopper": "0.21.0-alpha.1",
+    "ssnProgressive": "1.4.1"
+  },
+  "remaining": [
+    "In-game acceptance after leaving area or changing dimension",
+    "Real restart, chunk generation, claims changes and multiplayer acceptance",
+    "Performance target total p95 <45ms and mod increment <=5ms not measured",
+    "Full industrial E5-E9 completion"
+  ]
+}

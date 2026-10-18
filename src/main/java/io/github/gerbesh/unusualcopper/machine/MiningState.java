@@ -17,6 +17,8 @@ public final class MiningState {
     public final ArrayDeque<BlockPos> targets=new ArrayDeque<>();public final List<Job> jobs=new ArrayList<>();
     public final OwnedItems recovery=new OwnedItems();
     public net.minecraftforge.common.util.FakePlayer actor;
+    public MiningChunkStatus chunkLoading=MiningChunkStatus.IDLE;
+    public int chunksLoaded,chunksTotal;
     public static final class Job {
         private static final java.util.concurrent.atomic.AtomicLong IDS=new java.util.concurrent.atomic.AtomicLong();
         public long visualId=IDS.incrementAndGet();

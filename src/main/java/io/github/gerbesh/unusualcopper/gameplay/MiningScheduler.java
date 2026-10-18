@@ -10,7 +10,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.*;
 
-/** One server-wide cooperative budget, no chunk tickets and no worker access to Minecraft. */
+/** One server-wide cooperative mining budget; chunk tickets have their own bounded lifecycle. */
 public final class MiningScheduler {
     private record Key(ServerLevel level,BlockPos pos){}
     private static final LinkedHashMap<Key,UUID> queue=new LinkedHashMap<>();

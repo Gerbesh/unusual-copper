@@ -37,8 +37,12 @@ public final class UnusualCopper {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, io.github.gerbesh.unusualcopper.config.ArmorEffectsConfig.SPEC,"unusualcopper-armor-effects.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, io.github.gerbesh.unusualcopper.config.ArmorClientConfig.SPEC);
         bus.addListener(CopperCapabilities::register);
+        bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(() ->
+                net.minecraftforge.common.world.ForgeChunkManager.setForcedChunkLoadingCallback(MOD_ID,
+                        io.github.gerbesh.unusualcopper.gameplay.MiningChunkLoading::validateTickets)));
         MinecraftForge.EVENT_BUS.register(EnergyNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MiningScheduler.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MiningChunkLoading.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.fluid.FluidNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.class);
