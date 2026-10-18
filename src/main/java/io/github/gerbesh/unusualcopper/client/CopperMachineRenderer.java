@@ -30,6 +30,7 @@ public final class CopperMachineRenderer implements BlockEntityRenderer<CopperMa
     @Override public void render(CopperMachineBlockEntity m,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
         if(m.getLevel()==null)return;
         ports(m,pose,buffers,light);
+        if(m.kind==MachineKind.COPPER_FLUID_TANK){FluidTankRenderer.render(m,pose,buffers,light);return;}
         if(m.mining!=null){MiningEffects.track(m);return;}
         if(m.sentinel!=null){sentinel.render(m,partial,pose,buffers,light,overlay);return;}
         boolean working=m.getBlockState().getValue(CopperMachineBlock.ACTIVE);

@@ -40,6 +40,7 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.MiningScheduler.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.itempipe.ItemNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.fluid.FluidNetworks.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorRuntime.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorPayments.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorSupport.class);

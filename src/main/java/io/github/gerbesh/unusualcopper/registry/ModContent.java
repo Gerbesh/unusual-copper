@@ -34,7 +34,8 @@ public final class ModContent {
     static {
         for (MachineKind kind : MachineKind.values()) {
             RegistryObject<Block> block = BLOCKS.register(kind.id, () -> new CopperMachineBlock(kind));
-            MACHINES.put(kind, block); ITEMS.register(kind.id, () -> new BlockItem(block.get(), new Item.Properties()));
+            MACHINES.put(kind, block); ITEMS.register(kind.id, () -> kind==MachineKind.COPPER_FLUID_TANK
+                    ?new io.github.gerbesh.unusualcopper.fluid.tank.FluidTankBlockItem(block.get()):new BlockItem(block.get(), new Item.Properties()));
         }
     }
     /** Stable individual armor item IDs. Never replace an older item's registry entry. */

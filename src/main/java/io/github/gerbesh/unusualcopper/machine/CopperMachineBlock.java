@@ -41,7 +41,13 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) { builder.add(FACING, ACTIVE); }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) { return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()); }
-    @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+    @Override public java.util.List<ItemStack> getDrops(BlockState state,net.minecraft.world.level.storage.loot.LootParams.Builder builder){
+        var drops=super.getDrops(state,builder);
+        if(kind==MachineKind.COPPER_FLUID_TANK&&builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY) instanceof CopperMachineBlockEntity m)
+            return io.github.gerbesh.unusualcopper.fluid.tank.TankItemStorage.drops(drops,asItem(),m);
+        return drops;
+    }
+    @Override public RenderShape getRenderShape(BlockState state) { return kind==MachineKind.COPPER_FLUID_TANK?RenderShape.ENTITYBLOCK_ANIMATED:RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new CopperMachineBlockEntity(pos, state); }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide ? null : createTickerHelper(type, ModContent.MACHINE_ENTITY.get(), (world, pos, blockState, be) -> CopperMachineBlockEntity.tick((ServerLevel)world, pos, blockState, be));
@@ -51,34 +57,15 @@ public final class CopperMachineBlock extends BaseEntityBlock {
             if(!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity m) m.installSentinelFocus(player,hand);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
-        if(kind==MachineKind.COPPER_FLUID_TANK && !level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity tank
-                && tank.canAccess(player)) {
-            var held=player.getItemInHand(hand);
-            net.minecraft.world.level.material.Fluid fluid=held.is(net.minecraft.world.item.Items.WATER_BUCKET)?net.minecraft.world.level.material.Fluids.WATER
-                    :held.is(net.minecraft.world.item.Items.LAVA_BUCKET)?net.minecraft.world.level.material.Fluids.LAVA:net.minecraft.world.level.material.Fluids.EMPTY;
-            if(fluid!=net.minecraft.world.level.material.Fluids.EMPTY) {
-                int filled=tank.water.fill(new net.minecraftforge.fluids.FluidStack(fluid,1000),net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                if(filled==1000 && !player.getAbilities().instabuild) {
-                    held.shrink(1);
-                    ItemStack bucket=new ItemStack(net.minecraft.world.item.Items.BUCKET);
-                    if(!player.getInventory().add(bucket))player.drop(bucket,false);
-                }
-                if(filled==1000)return InteractionResult.SUCCESS;
-            } else if(held.is(net.minecraft.world.item.Items.BUCKET)){
-                var drained=tank.water.drain(1000,net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
-                net.minecraft.world.item.Item bucketItem=drained.getFluid()==net.minecraft.world.level.material.Fluids.WATER?net.minecraft.world.item.Items.WATER_BUCKET
-                        :drained.getFluid()==net.minecraft.world.level.material.Fluids.LAVA?net.minecraft.world.item.Items.LAVA_BUCKET:null;
-                if(bucketItem!=null && drained.getAmount()==1000) {
-                    tank.water.drain(1000,net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                    if(!player.getAbilities().instabuild)held.shrink(1);
-                    ItemStack full=new ItemStack(bucketItem);
-                    if(!player.getInventory().add(full))player.drop(full,false);
-                    return InteractionResult.SUCCESS;
-                }
-            }
+        if(kind==MachineKind.COPPER_FLUID_TANK && !level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity tank && tank.canAccess(player)) {
+            var result=io.github.gerbesh.unusualcopper.fluid.tank.TankBucketInteractions.use(tank,player,hand);
+            if(result!=InteractionResult.PASS)return result;
         }
         if (player.getItemInHand(hand).is(ModContent.FACE_SELECTOR.get()) || player.getItemInHand(hand).is(ModContent.AREA_WAND.get())) return InteractionResult.PASS;
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) NetworkHooks.openScreen((ServerPlayer)player, machine, pos);
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine && machine.canAccess(player)) {
+            if(kind==MachineKind.COPPER_FLUID_TANK){var packet=machine.getUpdatePacket();if(packet!=null)((ServerPlayer)player).connection.send(packet);}
+            NetworkHooks.openScreen((ServerPlayer)player,machine,pos);
+        }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
     @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {

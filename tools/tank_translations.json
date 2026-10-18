@@ -1,0 +1,15 @@
+{
+  "tank.unusualcopper.item_hint": ["Connects to adjacent tanks of the same owner. 16,000 mB per cube, up to %s cubes.", "Соединяется с соседними баками своего владельца. 16 000 мБ на куб, до %s кубов."],
+  "tank.unusualcopper.item_contents": ["Stored: %s · %s mB", "Содержимое: %s · %s мБ"],
+  "tank.unusualcopper.legacy": ["Legacy contents: add tanks or drain the excess.", "Старый запас: добавьте баки или выгрузите жидкость."],
+  "tank.unusualcopper.protected": ["Land protection: fluid transfer denied.", "Защита территории: перенос запрещён."],
+  "tank.unusualcopper.limit": ["256-cube limit: tanks operate individually.", "Лимит 256 кубов: баки работают по отдельности."],
+  "tank.unusualcopper.bucket_room": ["Not enough space for a whole bucket (1,000 mB).", "Недостаточно места для целого ведра (1 000 мБ)."],
+  "tank.unusualcopper.bucket_amount": ["A bucket needs at least 1,000 mB.", "Для ведра нужно не меньше 1 000 мБ."],
+  "tank.unusualcopper.incompatible": ["This reservoir contains a different fluid.", "В этом хранилище другая жидкость."],
+  "tank.unusualcopper.no_bucket": ["This fluid has no bucket; use fluid pipes.", "У этой жидкости нет ведра: используйте трубы."],
+  "tank.unusualcopper.amount": ["%s / %s mB", "%s / %s мБ"],
+  "tank.unusualcopper.blocks": ["%s cubes × 16,000 mB", "%s куб. × 16 000 мБ"],
+  "tank.unusualcopper.empty": ["Empty", "Пусто"],
+  "tank.unusualcopper.ports_hint": ["Shared level. Configure sides with the copper wrench.", "Общий уровень. Стороны — медным ключом."]
+}

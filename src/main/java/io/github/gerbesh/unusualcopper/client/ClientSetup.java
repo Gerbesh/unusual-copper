@@ -19,6 +19,7 @@ public final class ClientSetup {
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.receiver(ArmorClientState::receive);
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.senseReceiver(ArmorSenseClient::receive);
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.effectReceiver(ArmorSupportEffects::accept);
+            io.github.gerbesh.unusualcopper.fluid.tank.TankNetworks.visualReceiver(FluidTankRenderer::receive);
             MenuScreens.register(ModContent.REAPER_MENU.get(), ReaperScreen::new);
             MenuScreens.register(ModContent.MINING_MENU.get(),MiningScreen::new);
             io.github.gerbesh.unusualcopper.network.MiningNetwork.clientReceiver(r->{var p=net.minecraft.client.Minecraft.getInstance().player;if(p!=null&&p.containerMenu instanceof io.github.gerbesh.unusualcopper.menu.MiningMenu menu)menu.receive(r);});
