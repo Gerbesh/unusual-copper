@@ -156,6 +156,10 @@ public final class ModDataGeneration {
                     case HOVER_DRIVE -> Items.SHULKER_SHELL;
                     case FLIGHT_CORE_II -> Items.NETHER_STAR;
                     case FIELD_SCANNER -> Items.SPYGLASS;
+                    case THERMAL_SHELL -> Items.MAGMA_CREAM;
+                    case REGEN_CORE -> Items.GHAST_TEAR;
+                    case STRENGTH_SERVO -> Items.BLAZE_ROD;
+                    case KINETIC_STABILIZER -> Items.SLIME_BALL;
                 };
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,ModContent.ARMOR_MODULES.get(type).get())
                         .requires(ModContent.MODULE_BLANK_I.get()).requires(catalyst).requires(Items.REDSTONE)

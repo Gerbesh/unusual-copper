@@ -98,7 +98,11 @@ public class ArmorScreen extends Screen {
             String status=!row.settings().enabled()?"off":!v.complete()?"incomplete":v.capacity()==0?"no_battery":row.module()==ArmorModuleType.FIELD_SCANNER&&(v.disabledSenses()&2)!=0?"sense_server_disabled":row.module()==ArmorModuleType.OPTIC_VISOR&&row.level()==2&&(v.disabledSenses()&1)!=0?"ore_server_disabled":!row.settings().permits(percent,v.conditions())?"waiting":(v.limited()&1L<<row.module().ordinal())!=0?"limited":(v.recent()&1L<<row.module().ordinal())!=0?"recent":"ready";
             String state=font.plainSubstrByWidth(text(status).getString(),panelWidth-labelEnd-55);
             g.drawString(font,state,left+panelWidth-12-font.width(state),y+2,status.endsWith("disabled")?0xffe5b67a:0xff8fc3b0,false);
-            if(mouseX>=left+10&&mouseX<left+panelWidth-10&&mouseY>=y&&mouseY<y+16)g.renderTooltip(font,List.of(Component.literal(name),text(status),text("nominal",row.module().cue(row.level()))),java.util.Optional.empty(),mouseX,mouseY);
+            if(mouseX>=left+10&&mouseX<left+panelWidth-10&&mouseY>=y&&mouseY<y+16){
+                var tooltip=new java.util.ArrayList<Component>(List.of(Component.literal(name),text(status),text("nominal",row.module().cue(row.level()))));
+                var hint=io.github.gerbesh.unusualcopper.armor.ArmorModuleItem.supportHint(row.module(),row.level());if(hint!=null)tooltip.add(hint);
+                g.renderTooltip(font,tooltip,java.util.Optional.empty(),mouseX,mouseY);
+            }
         }
         if(modules.isEmpty())g.drawString(font,text("empty"),left+12,top+140,0xffc6d6c7,false);
         Component footer=ArmorClientState.pending()?text("sync"):v.result()!=ArmorNetwork.Result.OK?text("result."+v.result().ordinal()):!v.complete()?text("incomplete"):text("footer");

@@ -1,0 +1,10 @@
+{
+  "item.unusualcopper.thermal_shell_module": ["Thermal Shell Module", "Модуль термоизоляции"],
+  "item.unusualcopper.regen_core_module": ["Regeneration Core Module", "Модуль регенератора"],
+  "item.unusualcopper.strength_servo_module": ["Strength Servo Module", "Модуль силового сервопривода"],
+  "item.unusualcopper.kinetic_stabilizer_module": ["Kinetic Stabilizer Module", "Модуль кинетического стабилизатора"],
+  "armor.unusualcopper.thermal_shell_hint": ["Blocks fire and lava damage while powered. Does not grant Fire Resistance.", "Предотвращает урон огня и лавы при наличии питания. Не выдаёт эффект огнестойкости."],
+  "armor.unusualcopper.regen_core_hint": ["Up to %s HP every %s s while wounded; additionally %s CuE per HP restored. Pauses with Regeneration.", "До %s HP каждые %s с при ранении; дополнительно %s CuE за восстановленный HP. Пауза при эффекте регенерации."],
+  "armor.unusualcopper.strength_servo_hint": ["Up to +%s HP on direct melee hits, scaled by attack cooldown; combined cap 30 HP. Server controls PvP bonus.", "До +%s HP к прямому удару с учётом перезарядки; общий предел 30 HP. Прибавку в PvP разрешает сервер."],
+  "armor.unusualcopper.kinetic_stabilizer_hint": ["+%s%% knockback resistance while powered; combined cap 100%%.", "+%s%% к сопротивлению отбрасыванию при питании; общий предел 100%%."]
+}

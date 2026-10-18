@@ -554,5 +554,16 @@
   "armor.sense.diagnostic.unsupported": "Блок не поддерживает анализ",
   "armor.sense.partial": "Руд: %s · часть зоны недоступна",
   "key.unusualcopper.armor_scan": "Включить / выключить анализатор",
-  "armor.sense.no_scanner": "Сначала установите анализатор в шлем"
+  "armor.sense.no_scanner": "Сначала установите анализатор в шлем",
+  "item.unusualcopper.thermal_shell_module": "Модуль термоизоляции",
+  "item.unusualcopper.regen_core_module": "Модуль регенератора",
+  "item.unusualcopper.strength_servo_module": "Модуль силового сервопривода",
+  "item.unusualcopper.kinetic_stabilizer_module": "Модуль кинетического стабилизатора",
+  "armor.unusualcopper.thermal_shell_hint": "Предотвращает урон огня и лавы при наличии питания. Не выдаёт эффект огнестойкости.",
+  "armor.unusualcopper.regen_core_hint": "До %s HP каждые %s с при ранении; дополнительно %s CuE за восстановленный HP. Пауза при эффекте регенерации.",
+  "armor.unusualcopper.strength_servo_hint": "До +%s HP к прямому удару с учётом перезарядки; общий предел 30 HP. Прибавку в PvP разрешает сервер.",
+  "armor.unusualcopper.kinetic_stabilizer_hint": "+%s%% к сопротивлению отбрасыванию при питании; общий предел 100%%.",
+  "item.unusualcopper.regen_core_module_tier_2": "Модуль регенератора II",
+  "item.unusualcopper.strength_servo_module_tier_2": "Модуль силового сервопривода II",
+  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Модуль кинетического стабилизатора II"
 }

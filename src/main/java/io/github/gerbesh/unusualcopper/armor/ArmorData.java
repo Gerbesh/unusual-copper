@@ -120,7 +120,9 @@ public final class ArmorData {
         return switch(profile){
             case 0 -> module==ArmorModuleType.AQUA_LUNGS || module==ArmorModuleType.FALL_DAMPER || module==ArmorModuleType.OPTIC_VISOR;
             case 1 -> module==ArmorModuleType.STRIDE_DRIVE || module==ArmorModuleType.MINING_SERVO || module==ArmorModuleType.AQUA_LUNGS || module==ArmorModuleType.JUMP_DRIVE;
-            case 2 -> module==ArmorModuleType.SHIELD_FIELD || module==ArmorModuleType.FALL_DAMPER;
+            case 2 -> module==ArmorModuleType.SHIELD_FIELD || module==ArmorModuleType.FALL_DAMPER
+                    ||module==ArmorModuleType.THERMAL_SHELL||module==ArmorModuleType.REGEN_CORE
+                    ||module==ArmorModuleType.STRENGTH_SERVO||module==ArmorModuleType.KINETIC_STABILIZER;
             default -> true;
         };
     }

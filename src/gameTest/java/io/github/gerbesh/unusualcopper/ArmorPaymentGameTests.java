@@ -55,6 +55,23 @@ public final class ArmorPaymentGameTests {
         h.runAfterDelay(1,()->{h.assertTrue(CopperBatteryItem.stored(ArmorData.battery(chest))==9992&&ArmorTelemetry.perSecond(p)==8,"Mining was billed per query");h.succeed();});
     }
     @GameTest(template="empty",timeoutTicks=40)
+    public static void earlyFireAndContinuousShellShareTheirTickCharge(GameTestHelper h){
+        var p=wearer(h);var chest=p.getItemBySlot(EquipmentSlot.CHEST);ArmorData.profile(chest,2);
+        ArmorData.install(chest,ArmorModuleType.THERMAL_SHELL);p.setRemainingFireTicks(100);
+        var hit=new LivingDamageEvent(p,p.damageSources().onFire(),4F);ArmorSupport.thermal(hit);
+        ArmorRuntime.tick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END,p));
+        h.assertTrue(hit.getAmount()==0&&CopperBatteryItem.stored(ArmorData.battery(chest))==9990,"Fire applied without one shared authorization");
+        h.runAfterDelay(1,()->{h.assertTrue(ArmorTelemetry.perSecond(p)==10,"Shell charged twice");p.clearFire();h.succeed();});
+    }
+    @GameTest(template="empty",timeoutTicks=40)
+    public static void regenerationPaysForPartialActualHpAndPreservesPotions(GameTestHelper h){
+        var p=wearer(h);var chest=p.getItemBySlot(EquipmentSlot.CHEST);ArmorData.profile(chest,2);
+        ArmorData.install(chest,ArmorModuleType.REGEN_CORE);p.setHealth(19.5F);
+        ArmorRuntime.tick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END,p));
+        h.assertTrue(p.getHealth()==20F&&p.getEffect(net.minecraft.world.effect.MobEffects.REGENERATION)==null,"Core did not heal directly");
+        h.runAfterDelay(1,()->{h.assertTrue(CopperBatteryItem.stored(ArmorData.battery(chest))==9735,"Core did not bill 15 upkeep + 250 for half HP");h.succeed();});
+    }
+    @GameTest(template="empty",timeoutTicks=40)
     public static void paidScannerDoesNotRewriteOrChargeForExternalNightVision(GameTestHelper h){
         var p=wearer(h);var chest=p.getItemBySlot(EquipmentSlot.CHEST);ArmorData.profile(chest,3);
         var helmet=p.getItemBySlot(EquipmentSlot.HEAD);

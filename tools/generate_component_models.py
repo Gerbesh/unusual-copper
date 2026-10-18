@@ -91,17 +91,23 @@ def models():
         'shield_field':frame(5,6,11,12,5.8,6.5,'copper',.8)+[block([6,5,5.8],[10,6,6.5],'aqua'),block([7,4.5,5.8],[9,5,6.5],'aqua'),
                             dict(block([6.7,7.2,5.3],[9.3,9.8,6.3],'aqua'),rotation={'origin':[8,8.5,5.8],'axis':'z','angle':45})],
         'field_scanner':frame(5,5,11,11,5.8,6.4,'aqua',.5)+[block([7.7,6,5.4],[8.3,10,6],'copper'),block([6,7.7,5.4],[10,8.3,6],'copper'),block([9.3,9.3,5.2],[10.3,10.3,5.8],'aqua')],
+        'thermal_shell':frame(5,5,11,11.5,5.9,6.5,'copper',.7)+[block([6.3,6,5.5],[7.2,9,6],'aqua'),block([7.6,6,5.5],[8.5,11,6],'aqua'),block([8.9,6,5.5],[9.8,9.8,6],'aqua')],
+        'regen_core':[block([7,5,5.6],[9,11,6.5],'aqua'),block([5,7,5.6],[7,9,6.5],'aqua'),block([9,7,5.6],[11,9,6.5],'aqua')],
+        'strength_servo':[block([5,6,5.8],[7,10,6.5]),block([9,6,5.8],[11,10,6.5]),block([7,7.5,5.5],[9,8.5,6.5],'aqua'),block([4.8,10,5.5],[7.2,10.7,6],'aqua'),block([8.8,5.3,5.5],[11.2,6,6],'aqua')],
+        'kinetic_stabilizer':[block([7.4,5,5.6],[8.6,11,6.5],'aqua'),block([5,5,5.8],[6,11,6.5]),block([10,5,5.8],[11,11,6.5]),block([6,7.5,5.8],[7.4,8.5,6.5]),block([8.6,7.5,5.8],[10,8.5,6.5])],
     }
     for name,glyph in glyphs.items():
         if name=='fall_damper':
             for y in (6.5,8,9.5):glyph.append(block([5.5,y,5.6],[10.5,y+.6,6.5],'aqua'))
         if name!='shield_field':out(name+'_module',cartridge()+glyph)
-        max_level=3 if name in ('mining_servo','shield_field') else 2 if name in ('optic_visor','aqua_lungs','stride_drive','jump_drive','field_scanner') else 1
+        max_level=3 if name in ('mining_servo','shield_field') else 2 if name in ('optic_visor','aqua_lungs','stride_drive','jump_drive','field_scanner','regen_core','strength_servo','kinetic_stabilizer') else 1
         for level in range(2,max_level+1):
             body=cartridge()+glyph
             for index in range(level):
                 x=5+index*2.2
                 body.append(block([x,12.6,6],[x+1.3,13.3,6.5],'aqua'))
+            if name in ('regen_core','strength_servo','kinetic_stabilizer'):
+                for x in (5,9):body.append(block([x,13.7,6],[x+1.8,15,8],'aqua'))
             if level==3:body+=frame(4.2,3.8,11.8,12,6.4,6.6,'copper',.3)
             out(name+'_module_tier_'+str(level),body)
     write_json(ART/'industrial/component-models.json',{'authorship':'Original cuboid geometry; materials reused from project art','models':names})

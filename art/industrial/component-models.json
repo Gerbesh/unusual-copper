@@ -32,6 +32,13 @@
     "shield_field_module_tier_2",
     "shield_field_module_tier_3",
     "field_scanner_module",
-    "field_scanner_module_tier_2"
+    "field_scanner_module_tier_2",
+    "thermal_shell_module",
+    "regen_core_module",
+    "regen_core_module_tier_2",
+    "strength_servo_module",
+    "strength_servo_module_tier_2",
+    "kinetic_stabilizer_module",
+    "kinetic_stabilizer_module_tier_2"
   ]
 }

@@ -1,6 +1,6 @@
 # Документация Unusual Copper
 
-Опубликованный релиз: **0.20.6-alpha.1** / SSN Progressive **1.4.0**. Локально установлены **0.20.9-alpha.1 / 1.4.1**; разработка продолжается в **0.20.13-alpha.1**. Industrial Expansion содержит и реализованные alpha-срезы, и оставшийся план: сверяйтесь с [трекером завершения](COMPLETION_TRACKER.md). [Изменения](../CHANGELOG.md) · [Манифест опубликованного релиза](../releases/0.20.6-alpha.1.json).
+Опубликованный релиз: **0.20.6-alpha.1** / SSN Progressive **1.4.0**. Локально установлены **0.20.9-alpha.1 / 1.4.1**; разработка продолжается в **0.20.14-alpha.1**. Industrial Expansion содержит и реализованные alpha-срезы, и оставшийся план: сверяйтесь с [трекером завершения](COMPLETION_TRACKER.md). [Изменения](../CHANGELOG.md) · [Манифест опубликованного релиза](../releases/0.20.6-alpha.1.json).
 
 | Тема | Документы |
 |---|---|
@@ -12,7 +12,7 @@
 | Существа | [Жнец](MOB_REAPER.md), [учёт популяции](MOB_POPULATIONS.md), [Пастырь роста](GROWTH_SHEPHERD.md), [кормушки Quark](QUARK_TROUGHS.md) |
 | Магические машины | [Медный часовой](COPPER_SENTINEL.md), [автоклав](AETHERIC_BREWER.md), [стабильность запасов](BREWER_STOCK_0_19.md), [зачарования](ENCHANTMENT_RESONATOR.md), [ремонт](REPAIR_CRYSTAL.md) |
 | Добыча | [Резонансный экстрактор](RESONANT_EXTRACTOR.md) |
-| Экипировка | [Настройки брони и HUD](ARMOR_CONSOLE.md), [платежи](ARMOR_PAYMENT_BATCHES.md), [уровни модулей](ARMOR_MODULE_LEVELS.md), [визор и анализатор](ARMOR_SENSES.md), [полный контракт](PROGRAMMABLE_ARMOR.md) |
+| Экипировка | [Настройки брони и HUD](ARMOR_CONSOLE.md), [платежи](ARMOR_PAYMENT_BATCHES.md), [уровни модулей](ARMOR_MODULE_LEVELS.md), [визор и анализатор](ARMOR_SENSES.md), [поддержка и сервоприводы](ARMOR_SUPPORT.md), [полный контракт](PROGRAMMABLE_ARMOR.md) |
 | Визуал | [Blockbench и стиль](MODELING.md), [визуальный проход](VISUALS.md), [интерфейсы выбора](MACHINE_SELECTION_UI.md), [шейдеры](SHADER_COMPAT.md) |
 | Проверки | [Матрица приёмки](TEST_PLAN.md), [профили клиента](TEST_CLIENT.md), [производительность](PERFORMANCE.md), [аудит](AUDIT_2026-10-16.md) |
 | Исходная идея | [GDD/TDD v0.2](Unusual_Copper_GDD_TDD_v0.2.md), [визуальный референс](references/visual-style.png) |

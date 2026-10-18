@@ -13,18 +13,23 @@ public enum ArmorModuleType {
     JUMP_DRIVE("jump_drive", EquipmentSlot.FEET, 10),
     HOVER_DRIVE("hover_drive", EquipmentSlot.FEET, 80),
     FLIGHT_CORE_II("flight_core_ii", EquipmentSlot.CHEST, 200),
-    FIELD_SCANNER("field_scanner", EquipmentSlot.HEAD, 2);
+    FIELD_SCANNER("field_scanner", EquipmentSlot.HEAD, 2),
+    THERMAL_SHELL("thermal_shell", EquipmentSlot.CHEST, 10),
+    REGEN_CORE("regen_core", EquipmentSlot.CHEST, 15),
+    STRENGTH_SERVO("strength_servo", EquipmentSlot.CHEST, 12),
+    KINETIC_STABILIZER("kinetic_stabilizer", EquipmentSlot.LEGS, 4);
 
     public final String id;
     public final EquipmentSlot slot;
     public final int cue;
-    public int maxLevel(){return switch(this){case SHIELD_FIELD,MINING_SERVO->3;case OPTIC_VISOR,AQUA_LUNGS,STRIDE_DRIVE,JUMP_DRIVE,FIELD_SCANNER->2;default->1;};}
-    public int cue(int level){
+    public int maxLevel(){return switch(this){case SHIELD_FIELD,MINING_SERVO->3;case OPTIC_VISOR,AQUA_LUNGS,STRIDE_DRIVE,JUMP_DRIVE,FIELD_SCANNER,REGEN_CORE,STRENGTH_SERVO,KINETIC_STABILIZER->2;default->1;};}
+    public int cue(int level){return io.github.gerbesh.unusualcopper.config.ArmorEffectsConfig.cue(this,level);}
+    public int baseCue(int level){
         if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");
         if(level==1)return cue;
         return switch(this){case OPTIC_VISOR,AQUA_LUNGS->8;case FIELD_SCANNER->6;case SHIELD_FIELD->level==2?15:35;
             case STRIDE_DRIVE->15;case MINING_SERVO->level==2?24:60;
-            case JUMP_DRIVE->25;default->throw new IllegalArgumentException("Module level");};
+            case JUMP_DRIVE->25;case REGEN_CORE->45;case STRENGTH_SERVO->36;case KINETIC_STABILIZER->12;default->throw new IllegalArgumentException("Module level");};
     }
     public String itemId(int level){if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");return id+"_module"+(level==1?"":"_tier_"+level);}
     public int requiredTier(int level){if(level<1||level>maxLevel())throw new IllegalArgumentException("Module level");return this==FLIGHT_CORE_II?LimitedFlightPolicy.REQUIRED_TIER:this==HOVER_DRIVE?HoverPolicy.REQUIRED_TIER:level;}

@@ -69,7 +69,8 @@ public final class ArmorClientState {
         var mc=Minecraft.getInstance();var v=snapshot;
         if(v==null||mc.player==null||mc.options.hideGui||!ArmorClientConfig.HUD.get()||clock-received>60||v.pieces().stream().noneMatch(p->p.tier()>0))return;
         var g=event.getGuiGraphics();int x=8,y=8,w=160;
-        int h=v.flight().session()?79:64;
+        int rows=Math.max(1,(Long.bitCount(v.recent())+8)/9),extra=(rows-1)*17;
+        int h=(v.flight().session()?79:64)+extra;
         g.fill(x,y,x+w,y+h,0xb0112422);g.fill(x,y,x+2,y+h,0xffb66b42);
         int percent=v.capacity()==0?0:(int)(100L*v.charge()/v.capacity());
         int color=percent<=5?0xffffa385:percent<=10?0xffffc174:percent<=25?0xffe6d389:0xff83e7d0;
@@ -79,10 +80,10 @@ public final class ArmorClientState {
         g.drawString(mc.font,Component.translatable("armorconsole.hud_cost",compact(v.perSecond())),x+7,y+24,0xffc3e1d6,false);
         if(!v.complete())g.drawString(mc.font,Component.translatable("armorconsole.hud_incomplete"),x+7,y+35,0xffffc174,false);
         else{
-            int index=0;for(var module:ArmorModuleType.values())if((v.recent()&1L<<module.ordinal())!=0&&index<9){
+            int index=0;for(var module:ArmorModuleType.values())if((v.recent()&1L<<module.ordinal())!=0){
                 int level=v.pieces().stream().flatMap(piece->piece.modules().stream()).filter(row->row.module()==module).mapToInt(ArmorNetwork.Row::level).findFirst().orElse(1);
                 var item=io.github.gerbesh.unusualcopper.registry.ModContent.armorModuleItem(module,level);
-                g.renderItem(new ItemStack(item),x+6+index++*17,y+43);
+                g.renderItem(new ItemStack(item),x+6+(index%9)*17,y+43+(index/9)*17);index++;
             }
         }
         if(v.flight().session()) {
@@ -91,7 +92,7 @@ public final class ArmorClientState {
                     ?Component.translatable("armorconsole.hud_f3_exhausted")
                     :Component.translatable("armorconsole.hud_f3",
                             (flight.ticksLeft()+19)/20,flight.heightLeft());
-            g.drawString(mc.font,mc.font.plainSubstrByWidth(label.getString(),w-14),x+7,y+65,
+            g.drawString(mc.font,mc.font.plainSubstrByWidth(label.getString(),w-14),x+7,y+65+extra,
                     flight.ticksLeft()==0?0xffffc174:0xff83e7d0,false);
         }
     }

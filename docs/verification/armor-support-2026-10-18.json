@@ -1,0 +1,357 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-18T02:56:12.637549+00:00",
+  "version": "0.20.14-alpha.1",
+  "source_base_commit": "b76fef1562aad6ba6207db0f9fb997af45393cad",
+  "source_branch": "codex/armor-support-modules",
+  "source_files": [
+    {
+      "path": "build.gradle",
+      "sha256": "fbff1b914e0c42ea6d5950ee5c4bde6e555a38cb9577de393624f731d26a5bbd"
+    },
+    {
+      "path": "gradle.properties",
+      "sha256": "e21dbea19941346b475d43fedfe9d2228007548f72e677a2eabeadc75a5ea974"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/ArmorPaymentGameTests.java",
+      "sha256": "5b06a45322a1768806c2d09608bd6998d6be619a9f205e2e8e57d318ff886bc0"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/IndustrialVisualClient.java",
+      "sha256": "fc859d13105f64c8c4bf202372bcc30535d64f569cee059972e5aefbe0a68dbb"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/UnusualCopper.java",
+      "sha256": "6e1fac9ac709025a3a312e49f7d9a382222479a8b9676a57530c52400423274f"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorData.java",
+      "sha256": "4605558dc05501e89ec5bb5e659055ea79b0f1c15bdfc77d14933d5435452df9"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorEffectEvents.java",
+      "sha256": "87e3b14ebd8fce09cd295af1c74e7caeb642d2ecab1a603a8b9f0b0123cb4d6b"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorHealingMath.java",
+      "sha256": "3304ba479decd1451b5e90e20829cbcea7e233cbcdcf8a1ebd881a2848fef33b"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorModuleItem.java",
+      "sha256": "1797873fc7711c476eb918dce4b3b74803c4c24d2dbe11068f3c7faf316ffadc"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorModuleType.java",
+      "sha256": "95a8020b743f0b5329021b6ce021bdbec9a25f0216226351ef1d3271ae25c9a0"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorPayments.java",
+      "sha256": "83434f14c5435aacdf74462129dc555ef9155d40955e0a71c0596559aafad0e2"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorPowerScheduler.java",
+      "sha256": "a43dd958397add02d8c6ac9536cf1795a648f35003f5208a3c37a962d4bb41fd"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorReceiptPolicy.java",
+      "sha256": "d4d488502603b21a8230c04e80f72d16c035b14507c8abd1ee86f0a5b43fe238"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorRuntime.java",
+      "sha256": "74c1731b3f1205f7cc7fa6f8ed0f0d7b50cb6dd641d040c7bfb7fca3493af4d1"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorSupport.java",
+      "sha256": "ca0adb445e175d4f8fbb220cdad41ea0d27ffb1488c012008886f2a2496a5bd8"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/armor/ArmorTickReceipt.java",
+      "sha256": "e9f2362629d854acc90461fc85c372228522791f15a8e84073726dad7ef28ec6"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ArmorClientState.java",
+      "sha256": "ea62d533d80537273ce5d9704c90a14ebb7849691b455c025ca9dfe6aa58efda"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ArmorScreen.java",
+      "sha256": "2645cf9afe4da21dd9f69abae5c7180c741bce53578b506f1c0d065a405d760e"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ArmorSupportEffects.java",
+      "sha256": "207d4f901db9dbd8036173145e3385694e22240d6ae98910dae3f66de81dea9f"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ClientSetup.java",
+      "sha256": "7fc7931748d56004825ee81d3325a68310e07ebbb33b12ff0a0057bad05acb50"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/config/ArmorEffectsConfig.java",
+      "sha256": "e37c007891180c4bc1b602db3f79ccbabacf105db631712284dd192f48e8a735"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/data/ModDataGeneration.java",
+      "sha256": "39dce049c0afb14082ebd98495b4f489d40716e09b4725221e14f0a41019dd19"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/network/ArmorNetwork.java",
+      "sha256": "43a491329bb662a790700a3a24e2cf3aae76adea964d95c3375ca84d1682481c"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/armor/ArmorHealingMathTest.java",
+      "sha256": "78e34521bc8935340153a4042454f2e485d2ada382624d6cdf09baf593cf42f4"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/armor/ArmorSupportPricingTest.java",
+      "sha256": "3636961e11c1f5ca4760505f06c3879c7f58daa770f5a518c2862ad7550fd79b"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/armor/ArmorTickReceiptTest.java",
+      "sha256": "c59b8463f4f7010beece6ee535b87d45dd54d49971c3c7ae58d76d03780bc224"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/network/ArmorEffectPacketTest.java",
+      "sha256": "b4185ece500b27f7f3bc37200039dfabeb244dad7dfa73885f1cd100c2b84f3e"
+    },
+    {
+      "path": "tools/generate_component_models.py",
+      "sha256": "ac1cb4ca2ae91c380d0d04254147e9723f5b4d8d9672b191ff9fe5e9e55b3c33"
+    },
+    {
+      "path": "tools/import_armor_module_levels.py",
+      "sha256": "2e787f07a7869206b0a05d63562cee4378f05dfb41260c89ac4999bcfc2fbbcf"
+    }
+  ],
+  "artifact": "dist/unusualcopper-0.20.14-alpha.1.jar",
+  "sha256": "a17b01cc446c1827fc42ad9dd7054839f6c9747a95ef24aa16adb6922b8f8ebd",
+  "bytes": 1647811,
+  "installed": false,
+  "armor_protocol": "7",
+  "junit": {
+    "tests": 168,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Durable and once-per-tick payment regressions; cancelled reactive receipts and confirmed-only callbacks; bounded physical heal targets, partial costs and post-hook baseline; bounded public body DTO; server default prices and shared chest bus; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "early fire and continuous shell share one tick allocation",
+      "partial HP regeneration charges own HP plus core upkeep, without a potion"
+    ]
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Synthetic support packets on a client-only mannequin with empty armor, not server damage/healing or payment acceptance; physical cartridge catalogue, console pagination, two-row HUD and open faces",
+    "environment": "Isolated repository display world, native EN 1600x900 and RU 1280x720; Oculus 1.8.0 + Xenon 0.3.31 and Complementary Reimagined r5.8.1 EN 1600x900, not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/armor-support/complementary-en/catalogue.png",
+        "sha256": "b137b561177c3f535edcf118001f829d2b39527f1252184fd88b5b364b3205af",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/console-last.png",
+        "sha256": "1898ef26e675ad12fcf6fa9b9ed54dddf5f5e12ee87241fbbdfb59c6a5948641",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/console.png",
+        "sha256": "6cbd6f4af3f098eb8a252f574ed6117cb2e832cfe3c7fdd4bb26154109693171",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/faces.png",
+        "sha256": "dddd1157e5d21278012c6acb4d5e56e1a2df102f811df8e22d704634ba2d7929",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/heal-a.png",
+        "sha256": "bddb97fb19ce683104377db9b26ef56eedb6f53d63ae58a0543e258569bf225b",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/heal-b.png",
+        "sha256": "76bb3826a1a5063aef3ef79a696c33eb0d39eefc1f98eac3ded18a0057451c3e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/hud.png",
+        "sha256": "63ce8a62c70898d403896e3e7e0568314d7a916b207f01b7c689996f509b0254",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/legs.png",
+        "sha256": "0214db64670e5a922910126121d27b60a6f8fb48c006e74990baa9f18ef9a55f",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/strength.png",
+        "sha256": "a6751170a7be1f63b3064c03237ed1e9507b5cd2bbe75f520f61b10412dc9f2e",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/complementary-en/thermal.png",
+        "sha256": "c55d180504692b4f0f8adaef7dbc1491a3a153cdc9a158af18ccd8de5ccec7db",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/catalogue.png",
+        "sha256": "4d106c272233ddb91991bf79aa43a0fdc0e8e8b09f1314d0f7758fd707a66dd8",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/console-last.png",
+        "sha256": "0bdc89611ae077f0f3d80dbdbe315acfcd3ebb9ec088823f0a286eae00243931",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/console.png",
+        "sha256": "de0917e523c1f77bed0075bf3ee65f36227c4d137b80a10f18020c709de53639",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/faces.png",
+        "sha256": "dddd1157e5d21278012c6acb4d5e56e1a2df102f811df8e22d704634ba2d7929",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/heal-a.png",
+        "sha256": "bdc014a56080e292ba9964256234f9a209d287e1e18ef1a91c5632bba3fd2ea8",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/heal-b.png",
+        "sha256": "667eb80c4df1db08ae82f3b1577f668de408983a856a78737fcfd44d767f8d7d",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/hud.png",
+        "sha256": "374d41c09f0bacb97250b9b5642338ba729efae1301c01ae0b2b3157234fce73",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/legs.png",
+        "sha256": "62cd7ee0f6a1445be256d30c8c1aa1a8a1c16b2b1970997e147588f70d701ae1",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/strength.png",
+        "sha256": "f220b3369ff36a94901ec0bca28c527bed37aeed3a1e949f3ae48b20b2676afb",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-en/thermal.png",
+        "sha256": "7aee98630007e0afb027589edfb7ba029f9b927bcc34e12b7103df9e804e1ae6",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/catalogue.png",
+        "sha256": "8e159cbf73b06cd355762eb2e5763d5e2dcf12796462e578330cc57cd8c34728",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/console-last.png",
+        "sha256": "b887ea21563233514a8dd6fb86fcd7174493c0e7d4e81051967955a472226b1f",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/console.png",
+        "sha256": "e69bb5dc54e16c17ea350ff9d74978ed65c66845b5b7c3b6f7473de5bd47d40f",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/faces.png",
+        "sha256": "f78ede108993af3ff55fc9ff060ab3d3cefc03d07f0b7bdb6c8bc26de980a12f",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/heal-a.png",
+        "sha256": "89282b5c7bb7d8fd203a5fda7c7a6a247956499ad42a0181f85febca4e3e58b0",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/heal-b.png",
+        "sha256": "cb753a2e33923df72b4bf126aad7336ffe32334725f7bd5c968616fe937ba91c",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/hud.png",
+        "sha256": "e9162057419849c60bc3a22797102f60607612bb70bb0dd2713523179d3e1326",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/legs.png",
+        "sha256": "5bedbe0e4986d56590bd1e2d5b5ae9cfde0f7ce4fbd4f7b53e61bd9948fd28be",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/strength.png",
+        "sha256": "69894fd4f0ecbcffbcd1c869aa30e8112850ab39ed314d1a05b2dedb58fde9ac",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/armor-support/native-ru/thermal.png",
+        "sha256": "85c36769a22672dc9ac33d7a49c6554bce186d0d3d1653969666f725b828b4df",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "manual_review": "Cartridge glyphs and raised tier II contacts; adaptive catalogue; first/last console pages; two healing ages, amber fire and expanding copper strike; two-row HUD and all three open-face chassis",
+    "shader_preset_limit": "Better MC Medium failed GLSL in prior E6E isolated run; not reclassified as supported or retested here"
+  },
+  "static_assets": {
+    "models": 202,
+    "transparent_authored_sprites": 23,
+    "native_hardware_models": 39,
+    "new_physical_modules": 7
+  },
+  "installation": {
+    "performed": false,
+    "unchanged_pair": "Unusual Copper 0.20.9-alpha.1 + SSN Progressive 1.4.1"
+  },
+  "remaining": [
+    "armed jump upkeep/cooldown UI and other event price configuration",
+    "full effect conflict/Forge hook, SMP and migration acceptance",
+    "E5 full DAG escrow and execution",
+    "E7 F4 and safe landing/reserve",
+    "E8 physical bus and solar array",
+    "fluid multiblocks 16000 mB/block with lossless legacy migration",
+    "E9 guide, sounds, connection/orientation matrix and performance acceptance"
+  ],
+  "performance": {
+    "measured": false,
+    "budget": "User-approved Ryzen 5600X: total p95 <45 ms and added mod cost <=5 ms"
+  }
+}
