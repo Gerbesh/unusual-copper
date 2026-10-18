@@ -1,0 +1,117 @@
+{
+  "version": "0.20.17-alpha.1",
+  "date": "2026-10-18",
+  "source_base": "716f71c9870e02cbb52a86f6b3f7a1b9e07e04aa",
+  "branch": "codex/creative-battery-area-preview",
+  "artifact": {
+    "name": "unusualcopper-0.20.17-alpha.1.jar",
+    "bytes": 1727531,
+    "sha256": "9b5642a377beda074f500eb82cfabf3bf208be1e33c2e9dd6b640f22b3aa9c9e",
+    "game_test_fixtures_excluded": true
+  },
+  "local_build": "build compileGameTestJava --offline: passed",
+  "junit": {
+    "tests": 193,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "game_tests": {
+    "new_scenarios_compiled": 3,
+    "run": false
+  },
+  "visual_assets": {
+    "models_checked": 203,
+    "transparent_sprites_checked": 23
+  },
+  "visual_frames": [
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-area-first-corner.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "1f456a03a5bfb40a5ea78094f9410a6afeaf0461349deb3a125c51619b967bd2"
+    },
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-area-live.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "6c4111464141ba4217a204cc76afca01eb906be35eb211d1bcb62d9f3479ede8"
+    },
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-area-too-large.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "640067a64dfc28a3bfa31a4342d62ac4b655ec8109ee41665193fc28e4094fd5"
+    },
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-creative-dock.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "159adce527563022086d9bf23fdc273f3c69b40155592a561ed04bc3df1c7b6f"
+    },
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-creative-tooltip.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "f3a1d3136e92d83fb789e4d315a018c24b89dcfd19038cfaa5bb0d60d3b21b11"
+    },
+    {
+      "path": "art/previews/utility/ru-1280x720/utility-mining-128.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "8360bcaca90c71e428efbfd2c50f8ab59bec55658560d8d4719a3a33a166d30c"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-area-first-corner.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "b39bdc4e18f0f8dc47a703b623e5b341bc621b6c3f51a813e12857ff04cafb13"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-area-live.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "00703edc61262266e28491d7885466ad9cc4d27c730b7e33a79b8515b67a3c4b"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-area-too-large.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "b8cb2cae21fab223d150939326d3b2933b3c556aebcaa18243858af9b8f66d00"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-creative-dock.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "5721d518e3b096b9baf78057dd1d9ba9cabf5ddb90442316a8cf8c965b9daf2a"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-creative-tooltip.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "1b0ddfb8a36c907dc6ee3145c55a447849e520a6d1700672d896d7deb7bd58dc"
+    },
+    {
+      "path": "art/previews/utility/en-1600x900/utility-mining-128.png",
+      "width": 1600,
+      "height": 900,
+      "sha256": "2f0c61c8f23c379d52c79fdaa92a0462fbc06dfd63ea8291b2be13d325a35e67"
+    }
+  ],
+  "visual_scope": "Fixed display fixtures only. No resource transfer, area confirmation or gameplay acceptance.",
+  "reactor_status": "Proposal only; no reactor implemented in this artifact.",
+  "area_protocol": "2",
+  "installed": false,
+  "live_client_started": false,
+  "live_server_started": false,
+  "installed_pair_unchanged": {
+    "unusual_copper": "0.20.16-alpha.1",
+    "ssn_progressive": "1.4.1"
+  },
+  "open_acceptance": [
+    "Actual cell transfers and armor events",
+    "Wand hover, offhand, mode changes and reconnect in multiplayer",
+    "Claims, stale machine and chunk changes",
+    "Functional E5-E9 and load budget remain open"
+  ]
+}

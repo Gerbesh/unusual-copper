@@ -44,7 +44,7 @@ public final class ProgrammableArmorItem extends ArmorItem {
         tooltip.add(Component.translatable("armorconsole.open_hint"));
         if(getType()==Type.CHESTPLATE) {
             var battery=ArmorData.battery(stack);
-            tooltip.add(Component.translatable("armor.unusualcopper.battery",
+            tooltip.add(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.infinite(battery)?Component.translatable("battery.unusualcopper.infinite"):Component.translatable("armor.unusualcopper.battery",
                     io.github.gerbesh.unusualcopper.item.CopperBatteryItem.amount(
                         io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(battery))));
             tooltip.add(Component.translatable("armor.unusualcopper.profile."+ArmorData.profile(stack)));

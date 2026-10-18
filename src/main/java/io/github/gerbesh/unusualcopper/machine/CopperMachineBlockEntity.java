@@ -482,6 +482,7 @@ public final class CopperMachineBlockEntity extends BlockEntity implements MenuP
     private void transferBattery() {
         var stack=battery.getStackInSlot(0);
         if(!(stack.getItem() instanceof io.github.gerbesh.unusualcopper.item.CopperBatteryItem) || stack.getCount()!=1 || batteryMode==2)return;
+        if(batteryMode==0&&io.github.gerbesh.unusualcopper.item.CopperBatteryItem.infinite(stack))return;
         int held=io.github.gerbesh.unusualcopper.item.CopperBatteryItem.stored(stack);
         int moved=batteryMode==0?energy.extract(io.github.gerbesh.unusualcopper.item.CopperBatteryItem.capacity(stack)-held,false):energy.receive(held,false);
         if(moved==0)return;

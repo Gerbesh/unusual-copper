@@ -1,9 +1,11 @@
 # Документация Unusual Copper
 
-Опубликованный релиз: **0.20.6-alpha.1** / SSN Progressive **1.4.0**. Локально установлены **0.20.16-alpha.1 / 1.4.1**; разработка продолжается в **0.20.16-alpha.1**. Industrial Expansion содержит и реализованные alpha-срезы, и оставшийся план: сверяйтесь с [трекером завершения](COMPLETION_TRACKER.md). [Изменения](../CHANGELOG.md) · [Манифест опубликованного релиза](../releases/0.20.6-alpha.1.json).
+Опубликованный релиз: **0.20.6-alpha.1** / SSN Progressive **1.4.0**. Локально установлены **0.20.16-alpha.1 / 1.4.1**; разработка продолжается в **0.20.17-alpha.1**. Industrial Expansion содержит и реализованные alpha-срезы, и оставшийся план: сверяйтесь с [трекером завершения](COMPLETION_TRACKER.md). [Изменения](../CHANGELOG.md) · [Манифест опубликованного релиза](../releases/0.20.6-alpha.1.json).
 
 | Тема | Документы |
 |---|---|
+| Бесконечная батарея и область до подтверждения | [Батарея из креатива, живая рамка и размеры](CREATIVE_BATTERY_AND_AREA_PREVIEW.md) |
+| Предложение мощного источника энергии | [Медный терморезонансный реактор](COPPER_REACTOR_PROPOSAL.md) — пока проект |
 | Начало и устройство мода | [Архитектура](ARCHITECTURE.md), [маршрут M0–M5](ROADMAP.md), [backlog](BACKLOG.md), [решения](DECISIONS.md) |
 | **Промышленная разработка** | **[Порядок разработки E0–E9](INDUSTRIAL_EXPANSION_ROADMAP.md)**, [мастер-GDD](INDUSTRIAL_EXPANSION_GDD.md), [программируемая броня и полёт](PROGRAMMABLE_ARMOR.md), [TDD и матрица проверок](INDUSTRIAL_EXPANSION_TDD.md) |
 | Энергия | [Три класса](ENERGY_TIERS.md), [приоритеты и управление](ENERGY_CONTROL.md), [батареи](BATTERIES.md) |

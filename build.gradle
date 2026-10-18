@@ -57,6 +57,13 @@ minecraft {
             }
         }
         client {
+            if (project.hasProperty('utilityVisualClient')) {
+                workingDirectory project.file('run-industrial-visual')
+                property 'unusualcopper.utilityVisualClient', 'true'
+                property 'unusualcopper.utilityVisualLanguage', (project.findProperty('utilityVisualLanguage') ?: 'ru_ru').toString()
+                args '--quickPlaySingleplayer', 'cue-industrial-visual', '--width', (project.findProperty('industrialVisualWidth') ?: '1280').toString(), '--height', (project.findProperty('industrialVisualHeight') ?: '720').toString()
+                mods { "${mod_id}" { source sourceSets.gameTest } }
+            }
             if (project.hasProperty('enchanterVisualClient')) {
                 workingDirectory project.file('run-industrial-visual')
                 property 'unusualcopper.enchanterVisualClient', 'true'

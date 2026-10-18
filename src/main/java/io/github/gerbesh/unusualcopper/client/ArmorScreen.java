@@ -82,9 +82,9 @@ public class ArmorScreen extends Screen {
             g.drawString(font,piece.tier()==0?"—":"I".repeat(piece.tier()),left+37+i*card,top+47,0xffa3d2be,false);
         }
         g.fill(left+12+v.profile()*card,top+82,left+9+(v.profile()+1)*card,top+84,0xff3dd6d3);
-        g.drawString(font,text("charge",CopperBatteryItem.amount(v.charge()),CopperBatteryItem.amount(v.capacity())),left+12,top+89,0xffb9e8da,false);
+        g.drawString(font,ArmorClientState.creativeBattery()?Component.translatable("battery.unusualcopper.infinite"):text("charge",CopperBatteryItem.amount(v.charge()),CopperBatteryItem.amount(v.capacity())),left+12,top+89,0xffb9e8da,false);
         String usage=text("consumption",CopperBatteryItem.amount(v.perSecond())).getString();
-        if(v.perSecond()>0){long seconds=(long)v.charge()/v.perSecond();
+        if(v.perSecond()>0&&!ArmorClientState.creativeBattery()){long seconds=(long)v.charge()/v.perSecond();
             usage+=" · "+(seconds>=3600?text("hours",seconds/3600,seconds/60%60):seconds>=60?text("minutes",seconds/60,seconds%60):text("seconds",seconds)).getString();}
         g.drawString(font,font.plainSubstrByWidth(usage,panelWidth-24),left+12,top+101,0xffb9cfc3,false);
         int percent=v.capacity()==0?0:(int)(100L*v.charge()/v.capacity());g.fill(left+12,top+114,left+panelWidth-12,top+119,0xff173b34);

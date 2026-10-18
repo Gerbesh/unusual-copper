@@ -580,5 +580,15 @@
   "tank.unusualcopper.empty": "Пусто",
   "tank.unusualcopper.ports_hint": "Общий уровень. Стороны — медным ключом.",
   "enchanter.unusualcopper.refresh": "Обновить подходящие зачарования",
-  "enchanter.unusualcopper.loading": "Загружается каталог зачарований…"
+  "enchanter.unusualcopper.loading": "Загружается каталог зачарований…",
+  "item.unusualcopper.creative_battery": "Креативная CuE-батарея",
+  "battery.unusualcopper.infinite": "∞ CuE · Вечный заряд",
+  "battery.unusualcopper.creative_hint": "Только креатив. В ячейке: «Батарея → ячейка». Питает и броню. Лимиты передачи сохранены.",
+  "wand.unusualcopper.preview_size": "%s × %s × %s · Объём: %s",
+  "wand.unusualcopper.preview_mining": "%s × %s · до дна мира",
+  "wand.unusualcopper.preview_limit": "Слишком большая область: максимум 16 × 16 × 16",
+  "wand.unusualcopper.preview_limit_mining": "Слишком большая область: максимум 128 × 128",
+  "wand.unusualcopper.preview_range": "Угол слишком далеко от машины",
+  "wand.unusualcopper.preview_aim": "Первый угол выбран · наведитесь на второй блок",
+  "wand.unusualcopper.preview_confirm": "Предпросмотр · ПКМ по второму блоку для подтверждения"
 }
