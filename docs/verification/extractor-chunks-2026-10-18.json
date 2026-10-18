@@ -6,8 +6,8 @@
   "status": "candidate-not-installed",
   "artifact": {
     "path": "dist/unusualcopper-0.21.1-alpha.1.jar",
-    "sha256": "1e0b9ef350c2b7363836f99d96fb5e95867d80bdec2e4e8066e5f77795f92b90",
-    "bytes": 1836786,
+    "sha256": "12b755f83c7cdf394a9f67b7bb3e8e2412020361bd560dfbdf4492d1caa219c1",
+    "bytes": 1836831,
     "gameTestAndVisualFixturesExcluded": true
   },
   "verification": {
@@ -43,7 +43,8 @@
     "ownerTicketsPerDimension": 256,
     "totalTicketsPerDimension": 1024,
     "manualPauseRemovesAllTickets": true,
-    "redstonePauseKeepsController": true
+    "redstonePauseKeepsController": true,
+    "claimsRecheckedBeforeEachTicket": true
   },
   "installedUnchanged": {
     "unusualCopper": "0.21.0-alpha.1",

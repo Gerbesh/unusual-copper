@@ -210,6 +210,11 @@ public final class MiningChunkLoading {
             if (!Objects.equals(lease.held.get(entry.getKey()), entry.getValue())) { next = entry.getKey(); break; }
         if (next == null || !admission) { publish(lease); return false; }
         var chunk = new ChunkPos(next);
+        // A claim can change while a large plan is warming; recheck the exact chunk before issuing either ticket.
+        if (!allowed(lease, Map.of(next, lease.desired.get(next)), current.owner)) {
+            reconcile(lease, Map.of()); lease.world.reservations.release(lease.pos);
+            lease.result = MiningChunkStatus.PROTECTED; publish(lease); return false;
+        }
         try {
             if (lease.level.getChunkSource().getChunkNow(chunk.x, chunk.z) != null) {
                 boolean ticking = lease.desired.get(next);
@@ -218,8 +223,8 @@ public final class MiningChunkLoading {
                     throw new IllegalStateException("Could not acquire persistent extractor ticket");
                 lease.held.put(next, ticking); cancelWarmup(lease);
             } else if (lease.pending == null && warming < ServerConfig.miningChunksWarming()) {
-                lease.level.getChunkSource().addRegionTicket(WARMING, chunk, 2, lease.pos, false);
                 lease.pending = next; lease.pendingSince = now; warming++;
+                lease.level.getChunkSource().addRegionTicket(WARMING, chunk, 2, lease.pos, false);
             } else { publish(lease); return false; }
         } catch (RuntimeException error) { failed(lease, next, error); }
         publish(lease); return true;
