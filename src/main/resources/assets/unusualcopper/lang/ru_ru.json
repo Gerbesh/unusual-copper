@@ -32,8 +32,8 @@
   "enchanter.unusualcopper.item": "Предмет",
   "enchanter.unusualcopper.lapis": "Лазурит",
   "enchanter.unusualcopper.preview": "Результат",
-  "enchanter.unusualcopper.choose": "Выберите чары для расчёта точной цены",
-  "enchanter.unusualcopper.no_offers": "Нет подходящих чар для этого предмета",
+  "enchanter.unusualcopper.choose": "Выберите совместимое зачарование",
+  "enchanter.unusualcopper.no_offers": "Нет совместимых зачарований для предмета",
   "enchanter.unusualcopper.price": "Цена: %s XP + %s CuE + 64 лазурита",
   "enchanter.unusualcopper.wallet": "Доступно: %s XP | %s CuE | Лазурит: %s / 64",
   "enchanter.unusualcopper.confirm": "Подтвердить трату",
@@ -578,5 +578,7 @@
   "tank.unusualcopper.amount": "%s / %s мБ",
   "tank.unusualcopper.blocks": "%s куб. × 16 000 мБ",
   "tank.unusualcopper.empty": "Пусто",
-  "tank.unusualcopper.ports_hint": "Общий уровень. Стороны — медным ключом."
+  "tank.unusualcopper.ports_hint": "Общий уровень. Стороны — медным ключом.",
+  "enchanter.unusualcopper.refresh": "Обновить подходящие зачарования",
+  "enchanter.unusualcopper.loading": "Загружается каталог зачарований…"
 }

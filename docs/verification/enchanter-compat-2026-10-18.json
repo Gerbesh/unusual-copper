@@ -1,0 +1,262 @@
+{
+  "date": "2026-10-18",
+  "verified_at_utc": "2026-10-18T11:42:51.378032+00:00",
+  "version": "0.20.16-alpha.1",
+  "source_base_commit": "94af3125919838a57b420f5e501f9be1bcda5937",
+  "source_branch": "codex/enchanter-modded-compat",
+  "source_files": [
+    {
+      "path": "build.gradle",
+      "sha256": "cc09e483e0ba736cae42dd259a02c99ce3222ff07f17a83c15b51685f8c4c4f9"
+    },
+    {
+      "path": "gradle.properties",
+      "sha256": "7ef78e37e9cf4399ef9aab1f40ab54af94d339ba7ca76b58acac56359eb2ba45"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/EnchanterCompatFixtures.java",
+      "sha256": "a60186d382d0b6e4d994dca8f70026a9d5e7102d08809cf9466f92eda3b848e5"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/EnchanterCompatGameTests.java",
+      "sha256": "51df8d4e83bd90a11744bb1de4949a9f3fd1f022b720812c93dcf9ad5ced26a0"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/EnchanterGameTests.java",
+      "sha256": "31d5df76fe6e7d1114df5b9b9f9ebe76ad40ae25f82bb87224615cf6041f3791"
+    },
+    {
+      "path": "src/gameTest/java/io/github/gerbesh/unusualcopper/EnchanterVisualClient.java",
+      "sha256": "0c1df4c4b2321037d899ae8a50c33a33df117caf69ca86910bdaff64cdf94d06"
+    },
+    {
+      "path": "src/gameTest/resources/assets/uc_enchanter_fixture/lang/en_us.json",
+      "sha256": "238cac4569113bc23afab1defc139781e135381f13ec545bb7cc6a3b531ddfe8"
+    },
+    {
+      "path": "src/gameTest/resources/assets/uc_enchanter_fixture/lang/ru_ru.json",
+      "sha256": "8a2665abca7f0795f930c3672a5b4ce0144d13e8ea3d8e7671b8f1831b5a0bac"
+    },
+    {
+      "path": "src/gameTest/resources/assets/uc_enchanter_fixture/models/item/gloves.json",
+      "sha256": "f0a6c9fd7953c1548f5e4e235804de0ee5ff0a53e90da64cf925c742b2532d04"
+    },
+    {
+      "path": "src/gameTest/resources/assets/uc_enchanter_fixture/models/item/opaque_gloves.json",
+      "sha256": "dc95a6f1374b2265b476039bb0766e74664de4b0d81b65dbfe97447657a930ab"
+    },
+    {
+      "path": "src/gameTest/resources/assets/uc_enchanter_fixture/models/item/sealed_gloves.json",
+      "sha256": "f0a6c9fd7953c1548f5e4e235804de0ee5ff0a53e90da64cf925c742b2532d04"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/ClientSetup.java",
+      "sha256": "070abe20dfc9d2ebdd8e7b16ae1f3599eaa8630972fa22a096e996f1495fca85"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/client/EnchanterScreen.java",
+      "sha256": "ccc3d51c25988cd23f585deece10cda2b083cebcc46b4883f9bba22010ef6298"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/config/ServerConfig.java",
+      "sha256": "2ba2f49708a0508e518e410fb827db40f74ed868244d8f7f4c3f8f1f5c99c949"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/gameplay/EnchantmentCatalog.java",
+      "sha256": "181dc747702d775fcde4313d8360c729fc3c2a7c9ceb99409320fb63ac89bdd0"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/gameplay/EnchantmentPolicy.java",
+      "sha256": "943646a4956aa155206a5e4d9e13d8808fd3dbf356a6e7cd03a1bc4900a56168"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/menu/EnchanterMenu.java",
+      "sha256": "764c8aa84854dd7477b3d8f50e1bbeeac51662f6b1e144da31a1de6fc4d14ea0"
+    },
+    {
+      "path": "src/main/java/io/github/gerbesh/unusualcopper/network/EnchanterNetwork.java",
+      "sha256": "2d8b800dc4fb986ee2e85089876bc6adb2b3612c56c4986476ffe089a1dd2f54"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/lang/en_us.json",
+      "sha256": "557728002995b9c46afdabf801dc6d0768f8641c4fea6e817c24715bc8f6f76a"
+    },
+    {
+      "path": "src/main/resources/assets/unusualcopper/lang/ru_ru.json",
+      "sha256": "3ffaaf3372833b6d7a89d99a9c689be1df55279368c5a88d752db793c5373a05"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/gameplay/EnchanterDefaultsTest.java",
+      "sha256": "a6825719a944276851ce2fe816c3ff6def2c0ffd50a5a5b475e6a082ad0daa5d"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/gameplay/EnchantmentCatalogTest.java",
+      "sha256": "ca63fcf9766c13b410e8d85ed26aaf6983dcb31a8528e1da542bf2ce031295ff"
+    },
+    {
+      "path": "src/test/java/io/github/gerbesh/unusualcopper/network/EnchanterPacketTest.java",
+      "sha256": "7c350923b540fa2505c864f4d6783180edd5a340e762e51896a80d0b0b481087"
+    }
+  ],
+  "artifact": "dist/unusualcopper-0.20.16-alpha.1.jar",
+  "sha256": "85d9dd7088b98d28620849b64ab6e2ffdc5b6984fd18140800d4ca2b8433ca32",
+  "bytes": 1711216,
+  "installed": false,
+  "enchanter_protocol": "2",
+  "junit": {
+    "tests": 187,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "4097 catalog choices; stale identities, repeated headers and malformed pages; synchronized registry bound; long valid IDs and byte budgets; default all-mod/treasure/curse policies; existing suite"
+  },
+  "game_tests": {
+    "compiled": true,
+    "executed": false,
+    "new_scenarios": [
+      "non-ArmorItem clothing with zero enchantability uses Forge hook",
+      "virtual binding curse blocks incompatible mod enchantment",
+      "book catalog retains more than 300 compatible enchantments",
+      "item ignoring Forge enchantment writes cannot yield a paid result"
+    ],
+    "fixture_namespace": "uc_enchanter_fixture; excluded from production JAR; requires automatic compatibility and treasure enabled"
+  },
+  "visual_client": {
+    "explicitly_authorized": true,
+    "scope": "Fixed client catalog pages/quotes/preview copies, no server selection, confirmation, currency transfer or gameplay acceptance",
+    "environment": "Isolated repository world, native EN 1600x900 and RU 1280x720; not full Better MC",
+    "frames": [
+      {
+        "path": "art/previews/enchanter-compat/native-en/catalog.png",
+        "sha256": "24979d50e9fc410fb37cc44994d0bd57d3e3a0932cf6da132a64dc830e5909dd",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-en/curse-book.png",
+        "sha256": "ef4bc0eb3f0617f036777d4d9a460be5745e75f424c1d90a8f91bb1338e47abd",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-en/loading.png",
+        "sha256": "d28c6967d60dabe72c82839a0a554fca9da2b94299fce63550380aaaaee2aec9",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-en/mod-tooltip.png",
+        "sha256": "d0ee98e30a19d5d06d4151c3bd8fb47034c99e4acfbde38bc1d473102dcb5653",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-en/reach-quote.png",
+        "sha256": "203289fa5bef150314857cb933731037d5a6715f07ff4e11fa6bab98bb0913ac",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-en/search.png",
+        "sha256": "a0483d15dcb6aaf3d8f84f548a41ef14496948ddfbc95e2ec9a30d04e1d19963",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/catalog.png",
+        "sha256": "0fdbb9ddb80d19a757c24ce225ccd5ae6a893265991b2cada81393960aa495b2",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/curse-book.png",
+        "sha256": "5f37159406d5f8507ce0dbbf6748f52e2ec714af52a487510ad6704ec061c8a1",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/loading.png",
+        "sha256": "7f074c1965fc70c8f7f4434123f2be5607f4af0444b0f3cbb98fee1a2e0458d9",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/mod-tooltip.png",
+        "sha256": "d2a4bdc6c4e97e53f48e0f1ab04772ab3ef2d4980329a2a618af18c7db4b2f0f",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/reach-quote.png",
+        "sha256": "858c5a9513fa9b50a9327fd54f1b781be88c1146d54d1bb271fc212798abe89d",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "path": "art/previews/enchanter-compat/native-ru/search.png",
+        "sha256": "25e10e07af05d98de83c61bcb00a707ca10bcc0dd5bdafdc68e0e674a62a3368",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "manual_review": "64/301 loading, complete catalog, mod clothing preview, localized search for the final entry, registry ID/price tooltip, red curse name and enchanted book result"
+  },
+  "modpack_static_inspection": [
+    {
+      "jar": "aether-1.20.1-1.5.2-neoforge.jar",
+      "sha256": "5cb64ab1f27e78e8338fe67f9c766578904aad9bc1f8bcc90f306ea52aea3fc5",
+      "classes": [
+        "com.aetherteam.aether.item.accessories.gloves.GlovesItem",
+        "com.aetherteam.aether.item.accessories.AccessoryItem"
+      ],
+      "evidence": "Static javap inspection; not runtime modpack acceptance"
+    },
+    {
+      "jar": "deep_aether-1.20.1-1.1.7.jar",
+      "sha256": "ab6bce474afa41edb53299d6ccbba6af22b881b7a7eab4988124ba6b6eff7feb",
+      "classes": [
+        "teamrazor.deepaether.enchantments.GlovesReachEnchantment"
+      ],
+      "evidence": "Static javap inspection; not runtime modpack acceptance"
+    },
+    {
+      "jar": "Quark-4.0-462.jar",
+      "sha256": "c90b96f049d92825c4a103721988c80d72e5ad380d17be46a0f53e114874c478",
+      "classes": [
+        "org.violetmoon.quark.content.tools.item.AncientTomeItem"
+      ],
+      "evidence": "Static javap inspection; not runtime modpack acceptance"
+    }
+  ],
+  "configuration": {
+    "new_defaults": {
+      "automatic_mod_compatibility": true,
+      "allow_treasure": true,
+      "allow_curses": true,
+      "maximum_level": 32767
+    },
+    "existing_server_observed": {
+      "allow_treasure": false,
+      "allow_curses": false,
+      "maximum_level": 255
+    },
+    "changed_live_configuration": false
+  },
+  "static_assets": {
+    "models": 202,
+    "transparent_authored_sprites": 23
+  },
+  "installation": {
+    "performed": false,
+    "unchanged_pair": "Unusual Copper 0.20.15-alpha.1 + SSN Progressive 1.4.1"
+  },
+  "remaining": [
+    "real Better MC item/enchantment paid-flow, preservation, SMP and reload acceptance",
+    "enable all requested policies in the offline actual profile configurations during deployment",
+    "full E5-E9 development and acceptance; see COMPLETION_TRACKER.md"
+  ],
+  "performance": {
+    "measured": false,
+    "budget": "User-approved Ryzen 5600X: total p95 <45 ms and added mod cost <=5 ms"
+  }
+}
