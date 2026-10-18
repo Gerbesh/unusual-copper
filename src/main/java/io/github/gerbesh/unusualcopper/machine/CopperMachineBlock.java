@@ -75,6 +75,7 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     }
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!state.is(replacement.getBlock()) && level.getBlockEntity(pos) instanceof CopperMachineBlockEntity machine) {
+            if(machine.mining!=null&&level instanceof ServerLevel miningLevel)io.github.gerbesh.unusualcopper.gameplay.MiningChunkLoading.removed(miningLevel,pos);
             if(machine.brewer!=null){var held=new java.util.ArrayList<>(machine.brewer.recovery.items());var job=machine.brewer.job;if(job!=null&&!job.current.isEmpty())for(int i=0;i<job.batch;i++)held.add(job.current.copyWithCount(1));if(!held.isEmpty())popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(held));}
             if(machine.mining!=null&&level instanceof ServerLevel miningLevel&&machine.mining.experience>0){popExperience(miningLevel,pos,machine.mining.experience);machine.mining.experience=0;}
             if(machine.mining!=null&&!machine.mining.recovery.empty())popResource(level,pos,io.github.gerbesh.unusualcopper.item.CargoBundleItem.pack(machine.mining.recovery.items()));

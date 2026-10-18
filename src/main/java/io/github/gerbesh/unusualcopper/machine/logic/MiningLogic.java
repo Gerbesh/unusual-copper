@@ -37,6 +37,8 @@ public final class MiningLogic implements MachineLogic {
         if(s.faulted){pause(m,MachineStatus.MINING_FAULT);return;}
         if(s.area==null||!geometry(level,m.getBlockPos(),s.area)){pause(m,MachineStatus.NO_AREA);return;}
         if(!access(m,level,m.getBlockPos())){s.jobs.clear();pause(m,MachineStatus.PROTECTED);return;}
+        var chunks = MiningChunkLoading.blockedStatus(level,m);
+        if(chunks!=null){pause(m,chunks);return;}
         s.recovery.drain(m,4);
         if(m.boundInventory()==null){pause(m,MachineStatus.NO_STORAGE);return;}
         var output=m.boundEndpoint(level);if(output==null||!output.isAvailable()){pause(m,MachineStatus.UNLOADED);return;}

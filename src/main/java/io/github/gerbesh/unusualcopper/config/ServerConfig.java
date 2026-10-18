@@ -26,6 +26,8 @@ public final class ServerConfig {
     private static final ForgeConfigSpec.IntValue BREWER_COST,BREWER_EXTRA,BREWER_INTERVAL,BREWER_BUDGET;
     private static final ForgeConfigSpec.IntValue ENCHANT_LEVEL,ENCHANT_XP_BASE,ENCHANT_CUE_BASE,ENCHANT_CUE_MIN;
     private static final ForgeConfigSpec.IntValue MINING_COST;
+    private static final ForgeConfigSpec.BooleanValue MINING_CHUNK_LOADING;
+    private static final ForgeConfigSpec.IntValue MINING_CHUNKS_OWNER, MINING_CHUNKS_LEVEL, MINING_CHUNKS_WARMING;
     private static final ForgeConfigSpec.IntValue REPAIR_CUE,REPAIR_PER_XP;
     private static final ForgeConfigSpec.DoubleValue ENCHANT_XP_MULT,ENCHANT_ADDITIONAL;
     private static final ForgeConfigSpec.DoubleValue[] ENCHANT_RARITY=new ForgeConfigSpec.DoubleValue[4];
@@ -107,7 +109,12 @@ public final class ServerConfig {
         builder.pop().push("repair");
         REPAIR_CUE=builder.comment("CuE per restored durability point. No copper items are consumed.").defineInRange("cue_per_durability",100,1,10000);
         REPAIR_PER_XP=builder.comment("Restored durability per player XP point; cost rounds up per confirmed repair.").defineInRange("durability_per_xp",4,1,128);
-        builder.pop().push("mining");MINING_COST=builder.comment("Legacy base CuE per ore before the global 0.25 mining discount; footprint, depth and hardness multiply this cost.").defineInRange("ore_base_cue",1200,1,100000);builder.pop(); SPEC = builder.build();
+        builder.pop().push("mining");MINING_COST=builder.comment("Legacy base CuE per ore before the global 0.25 mining discount; footprint, depth and hardness multiply this cost.").defineInRange("ore_base_cue",1200,1,100000);
+        MINING_CHUNK_LOADING=builder.comment("Keep the extractor, its mining footprint and bound storage loaded while enabled. Manual pause releases tickets.").define("chunk_loading",true);
+        MINING_CHUNKS_OWNER=builder.comment("Reserved extractor chunk tickets per owner per dimension; overlapping stations each count their tickets.").defineInRange("chunk_tickets_per_owner",256,1,8192);
+        MINING_CHUNKS_LEVEL=builder.comment("Reserved extractor chunk tickets per dimension, including pending loads.").defineInRange("chunk_tickets_per_dimension",1024,1,16384);
+        MINING_CHUNKS_WARMING=builder.comment("Server-wide concurrent asynchronous chunk warm-ups and maximum new tickets per tick.").defineInRange("chunk_loads_per_tick",2,1,8);
+        builder.pop(); SPEC = builder.build();
     }
     private static int value(ForgeConfigSpec.IntValue entry) { return SPEC.isLoaded() ? entry.get() : entry.getDefault(); }
     public static int solarTicks() { return value(SOLAR_TICKS); }
@@ -148,6 +155,10 @@ public final class ServerConfig {
     public static int sentinelCost() { return value(SENTINEL_COST); }
     public static int brewerCost(){return value(BREWER_COST);}
     public static int miningCost(){return value(MINING_COST);}
+    public static boolean miningChunkLoading(){return SPEC.isLoaded()?MINING_CHUNK_LOADING.get():MINING_CHUNK_LOADING.getDefault();}
+    public static int miningChunksOwner(){return value(MINING_CHUNKS_OWNER);}
+    public static int miningChunksLevel(){return value(MINING_CHUNKS_LEVEL);}
+    public static int miningChunksWarming(){return value(MINING_CHUNKS_WARMING);}
     public static int repairCue(){return value(REPAIR_CUE);}
     public static int repairDurabilityPerXp(){return value(REPAIR_PER_XP);}
     public static int enchanterMaxLevel(){return value(ENCHANT_LEVEL);}

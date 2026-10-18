@@ -1,0 +1,20 @@
+{
+  "timestamp_utc": "20261018T201312Z",
+  "version": "0.21.1-alpha.1",
+  "source_commit": "ba468f0ac4d6f2ca4b7b5520b314d74d926eb326",
+  "sha256": "12b755f83c7cdf394a9f67b7bb3e8e2412020361bd560dfbdf4492d1caa219c1",
+  "bytes": 1836831,
+  "destinations": [
+    "Better MC FORGE BMC4 client",
+    "Pash_Ver_minecraft server"
+  ],
+  "installed_checksums_verified": true,
+  "previous_version": "0.21.0-alpha.1",
+  "previous_jars_backed_up_and_verified": true,
+  "backup_directory": ".codex-tmp/installs/20261018T201312Z",
+  "local_receipt": ".codex-tmp/cue-install-20261018T201312Z.json",
+  "ssn_changed": false,
+  "game_or_server_launched": false,
+  "world_save_data_modified": false,
+  "functional_acceptance": "User performs in-game acceptance; deployment is not evidence of runtime acceptance"
+}

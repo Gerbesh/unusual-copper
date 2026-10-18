@@ -643,5 +643,16 @@
   "reactor.build_owner": "Все 36 реакторных блоков должны принадлежать одному владельцу.",
   "reactor.build_protected": "Защита территории запрещает доступ к части структуры.",
   "reactor.build_multiple": "На один реактор используйте только один блок с сохранённым содержимым ядра.",
-  "reactor.credit": "Медь: %s"
+  "reactor.credit": "Медь: %s",
+  "status.unusualcopper.chunk_loading": "Загрузка чанков экстрактора",
+  "status.unusualcopper.chunk_limit": "Лимит чанков экстрактора",
+  "status.unusualcopper.chunk_load_failed": "Ошибка загрузки чанков; повтор",
+  "mining.unusualcopper.chunks": "Загружено чанков: %s / %s",
+  "mining.unusualcopper.chunk_state.disabled": "Автозагрузка чанков отключена сервером",
+  "mining.unusualcopper.chunk_state.idle": "Загрузка приостановлена или не требуется",
+  "mining.unusualcopper.chunk_state.loading": "Загружаются область, станция и хранилище",
+  "mining.unusualcopper.chunk_state.ready": "Область, станция и хранилище удерживаются загруженными",
+  "mining.unusualcopper.chunk_state.limit": "Достигнут серверный лимит билетов чанков или лимит владельца",
+  "mining.unusualcopper.chunk_state.protected": "Загрузка запрещена защитой территории или неверными границами",
+  "mining.unusualcopper.chunk_state.failed": "Ошибка загрузки; автоматический повтор через 10 секунд"
 }
