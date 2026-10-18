@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "POP",
+    "OFO",
+    "POP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "F": {
+      "item": "unusualcopper:reinforced_frame"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:reactor_insulation",
+    "count": 1
+  }
+}

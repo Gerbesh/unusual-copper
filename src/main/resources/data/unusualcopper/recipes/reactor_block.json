@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "POP",
+    "GFG",
+    "PCP"
+  ],
+  "key": {
+    "P": {
+      "item": "unusualcopper:copper_plate"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "F": {
+      "item": "unusualcopper:reinforced_frame"
+    },
+    "C": {
+      "item": "unusualcopper:etched_circuit"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:reactor_block",
+    "count": 4
+  }
+}

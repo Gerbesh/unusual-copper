@@ -1,0 +1,192 @@
+{
+  "date": "2026-10-18",
+  "version": "0.21.0-alpha.1",
+  "sourceBase": "ba1377d",
+  "branch": "codex/thermoresonance-reactor",
+  "status": "candidate-not-installed",
+  "artifact": {
+    "path": "dist/unusualcopper-0.21.0-alpha.1.jar",
+    "sha256": "8d81dc3aa6ce00addbc2b57932b1bc687466e04560808df67eec39b5fd49998d",
+    "bytes": 1815662,
+    "gameTestAndVisualFixturesExcluded": true
+  },
+  "verification": {
+    "build": "passed",
+    "junit": {
+      "tests": 203,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "compileGameTestJava": "passed",
+    "reactorGameTestScenarios": 6,
+    "gameTestsExecuted": false,
+    "visualOnlyClients": {
+      "ru_ru": "1280x720",
+      "en_us": "1600x900"
+    },
+    "reviewedFrames": [
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-active-corner.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "4d787880b7d13157409083b00a0d5718c226d7c7ec67fbcecd1b8e66e31e619b"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-active-front.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "a3e563e5f02423bec2db4006efac198820f18acc841dc11f12a77e4d12defb4a"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-active-night.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "f91e176db73c2c939eb982ede0022394e1faa7fec5e45ea7f14abb8dcb1d7c38"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-console.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "646d4e38a50eb06d6a50d08625843850024ace504e83c982aaaf8cde1df90151"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-coolant-purifier.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "a34977378392f144d7bbf0b902a2cd258d6d327561d6d828d26de5efa856eda2"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-empty-slots.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "7e7ed9d08496b3b3f65e03ad24d72104ae0a03230ab588eea63972e2ef3f4606"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-filter-tooltip.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "12760fb1c541a93a07b433c225e83a4d3432f9cd4646a2d63ace027912a55407"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-idle.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "9aabc76e04f41f86b8d2ff0662632effb4b5aeb14beca945c9c8a5002c99b268"
+      },
+      {
+        "path": "art/previews/reactor/ru-1280x720/reactor-incomplete.png",
+        "size": [
+          1280,
+          720
+        ],
+        "sha256": "37f5d5b20a7bdacfbd081b905ff64ae08aec165490df4228454b9fbaca8350c1"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-active-corner.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "096dda765510b9e60509432bb85027818ff735ad1ff3046752bbf67006b82c91"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-active-front.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "f5339877976c5c9f0cc8e36c82a52288792cef2df80e756bd3e6886d7b91300e"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-active-night.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "14bfd08e9300f867563a5ff4850704a345cc5b12fc8282d71e92628fbcec32aa"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-console.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "627f925aee8ae4675427f2d38065295de5871596861a76569fbbe8b291d2f180"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-coolant-purifier.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "cebb2a5cea048556578e16a276bbe34ef4e783604e4cb4969dea58165a9815b5"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-empty-slots.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "60d28c83bc09f29eb3050fae93a3e29078913ed696c1ba78d0453a38c3fe9c4a"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-filter-tooltip.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "fdcb50632e8b387f30cc5bfef9ac022efde92783170b25f9fa7986e1c5ceea47"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-idle.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "ba072d77fefa0afc882c35ba70a75c5dc6707f70e6d86d47b39880e1beeb4c5b"
+      },
+      {
+        "path": "art/previews/reactor/en-1600x900/reactor-incomplete.png",
+        "size": [
+          1600,
+          900
+        ],
+        "sha256": "c9ee5a378927af001e190d156a3f7bfb8e937337485d07f1b5090dd168039b86"
+      }
+    ],
+    "assetCheck": {
+      "models": 212,
+      "authoredTransparentSprites": 23,
+      "result": "passed"
+    },
+    "liveServerOrFunctionalSmokeRun": false
+  },
+  "installedUnchanged": {
+    "unusualCopper": "0.20.16-alpha.1",
+    "ssnProgressive": "1.4.1"
+  },
+  "remaining": [
+    "User functional acceptance in Better MC",
+    "Claims, multiplayer, crash/reload and chunk-edge acceptance",
+    "Performance: total p95 <45ms and mod increment <=5ms are not measured",
+    "Full industrial E5-E9 completion"
+  ],
+  "visualLimit": "Display-only client fixtures with no server-side reactor fuel, coolant or CuE; images do not establish functional reactor acceptance."
+}

@@ -41,6 +41,7 @@ public final class EnergyNetworks {
     private record PathKey(BlockPos from, BlockPos to) {}
     private record Face(BlockPos pos,Direction side) {}
     private record Source(Component component,Port port) {}
+    private record ReactorPort(BlockPos pipe,BlockPos pos,Direction side,io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity reactor){}
     private static final class Flow { long demand,delivered; }
     private record Observation(Set<Component> components,long epoch) {}
     private static <T> void prioritize(List<T> values,java.util.function.ToIntFunction<T> priority,int cursor){
@@ -51,6 +52,7 @@ public final class EnergyNetworks {
         final Set<BlockPos> pipes;
         final Map<BlockPos, Integer> tiers;
         final List<Port> ports = new ArrayList<>();
+        final List<ReactorPort> reactors=new ArrayList<>();
         final Map<PathKey, List<BlockPos>> paths = new HashMap<>();
         long transferred;
         Component(Set<BlockPos> pipes, Map<BlockPos, Integer> tiers) { this.pipes = pipes; this.tiers = Map.copyOf(tiers); }
@@ -87,6 +89,7 @@ public final class EnergyNetworks {
             Set<BlockPos> group;
             Map<BlockPos,Integer> tiers;
             List<Port> ports;
+            List<ReactorPort> reactors;
             Build() { for(var c:components)for(var p:c.pipes)previous.put(p,c); }
             boolean valid(ServerLevel level,BlockPos pos) {
                 return level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof EnergyPipeBlockEntity;
@@ -98,9 +101,10 @@ public final class EnergyNetworks {
                 } else {
                     Component next=new Component(Set.copyOf(group),tiers);
                     next.ports.addAll(ports);
+                    next.reactors.addAll(reactors);
                     next.ports.sort(Comparator.comparingLong(port->port.pos.asLong()));
                     Component old=previous.get(group.iterator().next());
-                    built.add(old!=null&&old.pipes.equals(next.pipes)&&old.tiers.equals(next.tiers)&&old.ports.equals(next.ports)?old:next);
+                    built.add(old!=null&&old.pipes.equals(next.pipes)&&old.tiers.equals(next.tiers)&&old.ports.equals(next.ports)&&old.reactors.equals(next.reactors)?old:next);
                 }
                 group=null;tiers=null;ports=null;
             }
@@ -111,7 +115,7 @@ public final class EnergyNetworks {
                         if(unseen.isEmpty())return true;
                         BlockPos p=unseen.iterator().next();unseen.remove(p);work++;
                         if(!valid(level,p)){pipes.remove(p);continue;}
-                        group=new HashSet<>();tiers=new HashMap<>();ports=new ArrayList<>();
+                        group=new HashSet<>();tiers=new HashMap<>();ports=new ArrayList<>();reactors=new ArrayList<>();
                         queue.add(p);
                     }
                     BlockPos p=queue.removeFirst();work++;
@@ -126,6 +130,8 @@ public final class EnergyNetworks {
                         }
                         if(level.hasChunkAt(next)&&level.getBlockEntity(next) instanceof CopperMachineBlockEntity m)
                             ports.add(new Port(p,next,d.getOpposite(),m));
+                        if(level.hasChunkAt(next)&&level.getBlockEntity(next) instanceof io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity r)
+                            reactors.add(new ReactorPort(p,next,d.getOpposite(),r));
                     }
                 }
                 return false;
@@ -146,6 +152,7 @@ public final class EnergyNetworks {
             // No graph invalidation, persistent writes or per-tick packets for animation.
             if (level.getGameTime() % 10 == 0) for (var component : components) {
                 int charge = 0;
+                for(var port:component.reactors)if(!port.reactor.isRemoved()&&port.reactor.extract(port.side,1,true)>0)charge=15;
                 for (var port : component.ports) if (live(port, level) && port.machine.kind.produces()
                         && port.machine.sideMode(port.side) == SideMode.ENERGY_OUTPUT && port.machine.energyFaceLimit(port.side) > 0
                         && port.machine.energy.stored() > 0) {
@@ -178,6 +185,27 @@ public final class EnergyNetworks {
             // A distributor's high-priority face is serviced before its other components.
             // Ordinary sources retain equal priority and rotate with the existing cursor.
             prioritize(sources,source->source.port.machine.energyOutputPriority(source.port.side),cursor);
+            // Physical reactor ports share a controller ledger across components and capability callers.
+            for(var component:components)for(var port:component.reactors){
+                var reactor=port.reactor;if(reactor.isRemoved()||!level.hasChunkAt(port.pos)||level.getBlockEntity(port.pos)!=reactor||!reactor.energyPort(port.side))continue;
+                var core=reactor.core();if(core==null||!core.ready())continue;
+                for(var sink:receivers.get(component)){
+                    if(++attempts>ServerConfig.transferBudget())return;
+                    if(core.owner!=null&&sink.machine.owner()!=null&&!core.owner.equals(sink.machine.owner()))continue;
+                    List<BlockPos> path=component.path(port.pipe,sink.pipe);if(path.isEmpty())continue;
+                    var face=new Face(sink.pos,sink.side);
+                    int sinkUsed=(sink.machine.kind==MachineKind.ENERGY_DISTRIBUTOR?received:used).getOrDefault(sink.pos,0);
+                    int amount=Math.min(sink.machine.energyTransferRate()-sinkUsed,sink.machine.energyFaceLimit(sink.side)-faces.getOrDefault(face,0));
+                    for(var node:path)amount=Math.min(amount,ServerConfig.pipeRate(component.tiers.get(node))-used.getOrDefault(node,0));
+                    amount=Math.min(reactor.extract(port.side,amount,true),sink.machine.energy.receive(amount,true));if(amount<=0)continue;
+                    int taken=reactor.extract(port.side,amount,false),accepted=sink.machine.energy.receive(taken,false);if(accepted<taken)reactor.refund(port.side,taken-accepted);
+                    if(accepted<=0)continue;used.merge(sink.pos,accepted,Integer::sum);received.merge(sink.pos,accepted,Integer::sum);faces.merge(face,accepted,Integer::sum);
+                    for(int i=0;i<path.size();i++){var node=path.get(i);used.merge(node,accepted,Integer::sum);if(level.getBlockEntity(node) instanceof EnergyPipeBlockEntity pipe){
+                        Direction entry=i+1<path.size()?Direction.fromDelta(path.get(i+1).getX()-node.getX(),path.get(i+1).getY()-node.getY(),path.get(i+1).getZ()-node.getZ()):port.side.getOpposite();
+                        Direction exit=i>0?Direction.fromDelta(path.get(i-1).getX()-node.getX(),path.get(i-1).getY()-node.getY(),path.get(i-1).getZ()-node.getZ()):sink.side.getOpposite();pipe.transferred(entry,exit);
+                    }}component.transferred+=accepted;flows.computeIfAbsent(sink.machine,ignored->new Flow()).delivered+=accepted;
+                }
+            }
             for(var route:sources){
                 var source=route.port;var component=route.component;
                 for(Port sink:receivers.get(component)){
@@ -214,6 +242,7 @@ public final class EnergyNetworks {
             }
         }
         Sample inspect(CopperMachineBlockEntity observer){
+            Set<io.github.gerbesh.unusualcopper.reactor.ReactorBlockEntity> reactors=Collections.newSetFromMap(new IdentityHashMap<>());
             Set<CopperMachineBlockEntity> machines=Collections.newSetFromMap(new IdentityHashMap<>());
             machines.add(observer);
             Set<Component> seen=Collections.newSetFromMap(new IdentityHashMap<>());
@@ -221,13 +250,15 @@ public final class EnergyNetworks {
             for(var component:components){
                 if(component.ports.stream().noneMatch(port->port.machine==observer))continue;
                 seen.add(component);
+                for(var port:component.reactors){var core=port.reactor.core();if(core!=null&&core.ready())reactors.add(core);}
                 nodes+=component.pipes.size();moved+=component.transferred;
                 for(var port:component.ports)if(!port.machine.isRemoved()&&port.machine.getLevel() instanceof ServerLevel level&&level.hasChunkAt(port.pos)&&level.getBlockEntity(port.pos)==port.machine)machines.add(port.machine);
             }
             long stored=0,capacity=0,produced=0,consumed=0,demand=0,delivered=0;
             for(var machine:machines){stored+=machine.energy.stored();capacity+=machine.energy.capacity();produced+=machine.energy.produced();consumed+=machine.energy.consumed();var flow=flows.get(machine);if(flow!=null){demand+=flow.demand;delivered+=flow.delivered;}}
+            for(var reactor:reactors){stored+=reactor.engine.stored;capacity+=io.github.gerbesh.unusualcopper.reactor.ReactorEngine.CAPACITY;produced+=reactor.engine.produced;}
             var observation=observations.get(observer);if(observation==null||!observation.components.equals(seen)){observation=new Observation(Set.copyOf(seen),++epoch);observations.put(observer,observation);}
-            return new Sample(observation.epoch,stored,capacity,produced,consumed,moved,demand,delivered,nodes,machines.size());
+            return new Sample(observation.epoch,stored,capacity,produced,consumed,moved,demand,delivered,nodes,machines.size()+reactors.size());
         }
     }
 }

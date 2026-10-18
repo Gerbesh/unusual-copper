@@ -32,9 +32,15 @@ public final class IndustrialRecipe implements Recipe<Container> {
     private final int cost;
     private final int water;
     private final ItemStack secondary;
+    private final int fluidOutput;
 
     public IndustrialRecipe(ResourceLocation id, MachineKind machine, Ingredient ingredient, Ingredient mold, Ingredient additive,
                             int inputCount, ItemStack result, int ticks, int cost, int water, ItemStack secondary) {
+        this(id,machine,ingredient,mold,additive,inputCount,result,ticks,cost,water,secondary,0);
+    }
+    public IndustrialRecipe(ResourceLocation id,MachineKind machine,Ingredient ingredient,Ingredient mold,Ingredient additive,
+                            int inputCount,ItemStack result,int ticks,int cost,int water,ItemStack secondary,int fluidOutput) {
+        if(fluidOutput!=0&&(fluidOutput!=1000||machine!=MachineKind.VORTEX_PURIFIER||result.getCount()!=1||!result.is(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.BUCKET.get())||!secondary.isEmpty()||water!=1000||!mold.isEmpty()||!additive.isEmpty()))throw new IllegalArgumentException("Invalid coolant output");
         if ((machine != MachineKind.RESONANCE_CRUSHER && machine != MachineKind.COPPER_PRESS && machine != MachineKind.VORTEX_PURIFIER && machine != MachineKind.RESONANCE_CRYSTALLIZER && machine != MachineKind.CIRCUIT_ETCHER) || inputCount < 1 || inputCount > 64
                 || result.isEmpty() || result.getCount() > 64 || ticks < 1 || ticks > 12000
                 || cost < 0 || cost > 1_000_000 || water < 0 || water > 4000 || ingredient.isEmpty()
@@ -48,8 +54,9 @@ public final class IndustrialRecipe implements Recipe<Container> {
         }
         this.id=id; this.machine=machine; this.ingredient=ingredient; this.mold=mold; this.additive=additive;
         this.inputCount=inputCount; this.result=result.copy(); this.ticks=ticks; this.cost=cost;
-        this.water=water; this.secondary=secondary.copy();
+        this.water=water; this.secondary=secondary.copy();this.fluidOutput=fluidOutput;
     }
+    public int fluidOutput(){return fluidOutput;}
     public MachineKind machine() { return machine; }
     public int inputCount() { return inputCount; }
     public int ticks() { return ticks; }
@@ -93,7 +100,7 @@ public final class IndustrialRecipe implements Recipe<Container> {
             try {
                 return new IndustrialRecipe(id,machine,input,mold,additive,GsonHelper.getAsInt(json,"input_count",1),
                         result,GsonHelper.getAsInt(json,"ticks"),GsonHelper.getAsInt(json,"cue"),
-                        GsonHelper.getAsInt(json,"water_mb",0),byproduct);
+                        GsonHelper.getAsInt(json,"water_mb",0),byproduct,GsonHelper.getAsInt(json,"coolant_mb",0));
             } catch (IllegalArgumentException ex) { throw new JsonParseException(ex.getMessage(),ex); }
         }
         @Override public @Nullable IndustrialRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
@@ -106,7 +113,7 @@ public final class IndustrialRecipe implements Recipe<Container> {
             int ticks=buf.readVarInt(), cost=buf.readVarInt();
             int water=buf.readVarInt();
             ItemStack secondary=buf.readItem();
-            return new IndustrialRecipe(id,machine,ingredient,mold,additive,count,result,ticks,cost,water,secondary);
+            return new IndustrialRecipe(id,machine,ingredient,mold,additive,count,result,ticks,cost,water,secondary,buf.readVarInt());
         }
         @Override public void toNetwork(FriendlyByteBuf buf, IndustrialRecipe recipe) {
             buf.writeEnum(recipe.machine);
@@ -119,6 +126,7 @@ public final class IndustrialRecipe implements Recipe<Container> {
             buf.writeVarInt(recipe.cost);
             buf.writeVarInt(recipe.water);
             buf.writeItem(recipe.secondary);
+            buf.writeVarInt(recipe.fluidOutput);
         }
     }
 }

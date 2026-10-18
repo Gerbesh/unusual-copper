@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "unusualcopper:block/reactor_fluid_empty"
+    }
+  }
+}

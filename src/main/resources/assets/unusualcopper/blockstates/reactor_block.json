@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "unusualcopper:block/reactor_block"
+    },
+    "formed=true": {
+      "model": "unusualcopper:block/reactor_assembly"
+    }
+  }
+}

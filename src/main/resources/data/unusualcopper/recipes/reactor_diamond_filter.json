@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CDC",
+    "DND",
+    "CDC"
+  ],
+  "key": {
+    "C": {
+      "item": "unusualcopper:copper_wire_spool"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "N": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "item": "unusualcopper:reactor_diamond_filter",
+    "count": 1
+  }
+}

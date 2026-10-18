@@ -19,6 +19,7 @@ public final class UnusualCopper {
 
     public UnusualCopper() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        io.github.gerbesh.unusualcopper.reactor.ReactorFluids.register(bus);
         ModContent.register(bus);
         io.github.gerbesh.unusualcopper.network.PipeNetwork.register();
         io.github.gerbesh.unusualcopper.network.AreaNetwork.register();

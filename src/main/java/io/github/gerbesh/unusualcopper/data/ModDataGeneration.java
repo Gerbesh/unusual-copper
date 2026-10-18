@@ -288,6 +288,7 @@ public final class ModDataGeneration {
         @Override public CompletableFuture<?> run(CachedOutput cache) {
             var writes = new ArrayList<CompletableFuture<?>>(); var mineable = new JsonArray();
             for (var entry : ModContent.BLOCKS.getEntries()) {
+                if(entry.get() instanceof net.minecraft.world.level.block.LiquidBlock)continue;
                 String id = entry.getId().toString(); mineable.add(id);
                 JsonObject drop = new JsonObject(); drop.addProperty("type", "minecraft:item"); drop.addProperty("name", id);
                 JsonObject condition = new JsonObject(); condition.addProperty("condition", "minecraft:survives_explosion");

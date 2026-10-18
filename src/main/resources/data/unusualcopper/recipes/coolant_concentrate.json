@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:snowball"
+    },
+    {
+      "item": "minecraft:snowball"
+    },
+    {
+      "item": "minecraft:snowball"
+    },
+    {
+      "item": "minecraft:snowball"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "unusualcopper:washed_copper_dust"
+    }
+  ],
+  "result": {
+    "item": "unusualcopper:coolant_concentrate"
+  }
+}

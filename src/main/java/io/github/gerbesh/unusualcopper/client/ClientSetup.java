@@ -11,11 +11,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @Mod.EventBusSubscriber(modid = UnusualCopper.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientSetup {
     @SubscribeEvent public static void renderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModContent.REACTOR_ENTITY.get(),ReactorRenderer::new);
         event.registerBlockEntityRenderer(ModContent.MACHINE_ENTITY.get(),CopperMachineRenderer::new);
         event.registerBlockEntityRenderer(ModContent.PIPE_ENTITY.get(),EnergyPipeRenderer::new);
     }
     @SubscribeEvent public static void setup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            MenuScreens.register(ModContent.REACTOR_MENU.get(),ReactorScreen::new);
+            net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.STILL.get(),net.minecraft.client.renderer.RenderType.translucent());
+            net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(io.github.gerbesh.unusualcopper.reactor.ReactorFluids.FLOWING.get(),net.minecraft.client.renderer.RenderType.translucent());
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.receiver(ArmorClientState::receive);
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.senseReceiver(ArmorSenseClient::receive);
             io.github.gerbesh.unusualcopper.network.ArmorNetwork.effectReceiver(ArmorSupportEffects::accept);

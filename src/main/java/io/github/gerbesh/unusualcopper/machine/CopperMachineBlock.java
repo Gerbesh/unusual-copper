@@ -43,6 +43,8 @@ public final class CopperMachineBlock extends BaseEntityBlock {
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) { return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()); }
     @Override public java.util.List<ItemStack> getDrops(BlockState state,net.minecraft.world.level.storage.loot.LootParams.Builder builder){
         var drops=super.getDrops(state,builder);
+        if(kind==MachineKind.VORTEX_PURIFIER&&builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY) instanceof CopperMachineBlockEntity m&&!m.coolantOutput.isEmpty())
+            for(var drop:drops)if(drop.is(asItem())){drop.getOrCreateTagElement("BlockEntityTag").put("CoolantOutput",m.coolantOutput.writeToNBT(new net.minecraft.nbt.CompoundTag()));break;}
         if(kind==MachineKind.COPPER_FLUID_TANK&&builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY) instanceof CopperMachineBlockEntity m)
             return io.github.gerbesh.unusualcopper.fluid.tank.TankItemStorage.drops(drops,asItem(),m);
         return drops;
