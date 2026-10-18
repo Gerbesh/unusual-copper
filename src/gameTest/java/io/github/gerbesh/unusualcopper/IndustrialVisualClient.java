@@ -31,6 +31,8 @@ public final class IndustrialVisualClient {
             MachineKind.PRECISION_ASSEMBLER,MachineKind.COPPER_FLUID_PUMP,MachineKind.COPPER_FLUID_TANK,
             MachineKind.PRODUCTION_CONTROLLER,MachineKind.ARMOR_WORKBENCH};
     private static final String[] SHOTS={"front-idle","front-working-a","front-working-b","rear-working","night-working","close-processing","close-assembly","armor-front","armor-back","inventory","gear-inventory","armor-console-head","armor-console-chest","armor-console-boots","armor-hud","armor-hud-expired","armor-faces","visor-dark","visor-lit","scanner-ports","visor-expired","scanner-console"};
+    private static final String[] SUPPORT_SHOTS={"support-catalogue","support-console","support-heal-a","support-heal-b","support-thermal","support-strength","support-hud","support-faces","support-console-last","support-legs"};
+    private static final int SUPPORT_DUMMY=2_000_000_123;
     private static volatile int displayedPorts;
     private static final BlockPos SENSE_TARGET=new BlockPos(108,139,111);
     private static final AtomicBoolean ready=new AtomicBoolean(),saved=new AtomicBoolean();
@@ -95,21 +97,53 @@ public final class IndustrialVisualClient {
             });return;
         }
         if(!ready.get())return;
-        if(stage>=11&&stage<17||stage==21)io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
+        if(stage>=11&&stage<17||stage==21||stage==23||stage==28||stage>=30)io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
         if(stage>=17&&stage<20)io.github.gerbesh.unusualcopper.client.ArmorSenseClient.receive(displaySenses(stage));
+        if(stage==24&&ticks==10)spawnSupportDummy();
+        if(stage>=24&&stage<=27&&ticks==(stage==25?33:40)){
+            var kind=stage==26?io.github.gerbesh.unusualcopper.armor.ArmorEffectEvents.Kind.THERMAL:
+                    stage==27?io.github.gerbesh.unusualcopper.armor.ArmorEffectEvents.Kind.STRENGTH:io.github.gerbesh.unusualcopper.armor.ArmorEffectEvents.Kind.HEAL;
+            io.github.gerbesh.unusualcopper.client.ArmorSupportEffects.accept(new io.github.gerbesh.unusualcopper.armor.ArmorEffectEvents.Burst(mc.level.dimension().location(),SUPPORT_DUMMY,kind,stage==26?1:2));
+        }
         if(++ticks<(stage==0?120:45))return;
         if(!captured){
+            if(stage>=24&&stage<=27)UnusualCopper.LOGGER.info("SUPPORT DISPLAY frame={} dummy={} camera={}",stage,mc.level.getEntity(SUPPORT_DUMMY),mc.player.position());
             if(stage>=17&&stage<=20&&Boolean.getBoolean("unusualcopper.verifyShaderSenseUniform"))verifyShaderUniform(stage);
-            captured=true;Screenshot.grab(mc.gameDirectory,"industrial-"+SHOTS[stage]+".png",mc.getMainRenderTarget(),message->{
+            captured=true;Screenshot.grab(mc.gameDirectory,"industrial-"+(stage>=22?SUPPORT_SHOTS[stage-22]:SHOTS[stage])+".png",mc.getMainRenderTarget(),message->{
                 UnusualCopper.LOGGER.info("INDUSTRIAL VISUAL FRAME {}: {}",stage,message.getString());saved.set(true);
             });return;
         }
         if(!saved.get())return;
-        if(stage==SHOTS.length-1){
+        if(stage==31||stage==SHOTS.length-1&&!Boolean.getBoolean("unusualcopper.armorSupportVisualOnly")){
             UnusualCopper.LOGGER.info("INDUSTRIAL VISUAL CAPTURE COMPLETE: ten devices, two motion phases, rear, night and item catalogue; screenshot fixture only");
             mc.options.hideGui=false;mc.stop();return;
         }
-        stage=stage==0&&Boolean.getBoolean("unusualcopper.armorSenseVisualOnly")?17:stage+1;ticks=0;captured=false;saved.set(false);
+        stage=stage==0&&Boolean.getBoolean("unusualcopper.armorSupportVisualOnly")?22:
+                stage==0&&Boolean.getBoolean("unusualcopper.armorSenseVisualOnly")?17:stage+1;ticks=0;captured=false;saved.set(false);
+        if(stage==22){mc.options.hideGui=true;mc.setScreen(new SupportCatalogue());return;}
+        if(stage==23||stage==30||stage==31){
+            io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
+            mc.options.hideGui=true;
+            mc.setScreen(new io.github.gerbesh.unusualcopper.client.ArmorScreen(stage==31?2:1){
+                @Override public void render(GuiGraphics g,int x,int y,float partial){
+                    io.github.gerbesh.unusualcopper.client.ArmorClientState.receive(displayArmor(stage));
+                    // The spectator's real empty equipment snapshot must not clamp a display page.
+                    super.tick();if(stage>=30)for(int click=0;click<3;click++)for(var widget:new java.util.ArrayList<>(children()))
+                        if(widget instanceof net.minecraft.client.gui.components.Button button&&button.getMessage().getString().equals("›")){button.onPress();break;}
+                    super.render(g,-1,-1,partial);
+                }
+            });return;
+        }
+        if(stage>=24){
+            mc.setScreen(stage==29?new ArmorFaces():null);mc.options.hideGui=stage!=28;
+            if(stage==24){
+                ready.set(false);mc.getSingleplayerServer().execute(()->{
+                    var p=display.getServer().getPlayerList().getPlayer(mc.player.getUUID());
+                    p.teleportTo(display,108.5,150.5,109.0,0,8);ready.set(true);
+                });
+            }
+            return;
+        }
         if(stage==5)mc.options.fov().set(45);
         if(stage==9||stage==10){mc.setScreen(new Catalogue(stage==10));return;}
         if(stage==16){mc.options.hideGui=true;mc.setScreen(new ArmorFaces());return;}
@@ -150,6 +184,18 @@ public final class IndustrialVisualClient {
             if(stage==8)p.teleportTo(display,108.5,152,126.5,180,14);
             ready.set(true);
         });
+    }
+    private static void spawnSupportDummy(){
+        var mc=Minecraft.getInstance();var dummy=new net.minecraft.client.player.RemotePlayer(mc.level,
+                new com.mojang.authlib.GameProfile(new java.util.UUID(0,444),"Copper mannequin"));
+        dummy.setPos(108.5,150,113.5);dummy.setYRot(180);dummy.yBodyRot=180;dummy.yHeadRot=180;
+        dummy.setId(SUPPORT_DUMMY);
+        dummy.xo=dummy.getX();dummy.yo=dummy.getY();dummy.zo=dummy.getZ();
+        for(var type:net.minecraft.world.item.ArmorItem.Type.values()){
+            var armor=ModContent.PROGRAMMABLE_ARMOR.get("programmable_"+type.getName()+"_tier_3").get();
+            dummy.setItemSlot(((io.github.gerbesh.unusualcopper.armor.ProgrammableArmorItem)armor).getEquipmentSlot(),new ItemStack(armor));
+        }
+        mc.level.addPlayer(SUPPORT_DUMMY,dummy);
     }
     private static void verifyShaderUniform(int frame){
         try{
@@ -201,7 +247,8 @@ public final class IndustrialVisualClient {
         var slots=new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD,net.minecraft.world.entity.EquipmentSlot.CHEST,net.minecraft.world.entity.EquipmentSlot.LEGS,net.minecraft.world.entity.EquipmentSlot.FEET};
         for(int i=0;i<4;i++){
             var rows=new java.util.ArrayList<io.github.gerbesh.unusualcopper.network.ArmorNetwork.Row>();
-            for(var module:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values())if(module.slot==slots[i]){
+            for(var module:io.github.gerbesh.unusualcopper.armor.ArmorModuleType.values())if(module.slot==slots[i]
+                    &&(frame>=22?module!=io.github.gerbesh.unusualcopper.armor.ArmorModuleType.FLIGHT_CORE_II:module.ordinal()<10)){
                 var trigger=module==io.github.gerbesh.unusualcopper.armor.ArmorModuleType.AQUA_LUNGS?io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.UNDERWATER:
                         module==io.github.gerbesh.unusualcopper.armor.ArmorModuleType.FLIGHT_CORE_II?io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.MANUAL:io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings.Trigger.AUTO;
                 rows.add(new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Row(module,new io.github.gerbesh.unusualcopper.armor.ArmorModuleSettings(true,trigger,10,false,
@@ -209,7 +256,26 @@ public final class IndustrialVisualClient {
             }
             pieces.add(new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Piece("unusualcopper:programmable_"+types[i]+"_tier_3",3,i==1?4:3,rows));
         }
-        return new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot(new java.util.UUID(0,42),1,true,1,frame>=14?800000:3400000,10000000,4440,36,1L<<io.github.gerbesh.unusualcopper.armor.ArmorModuleType.SHIELD_FIELD.ordinal(),4,new io.github.gerbesh.unusualcopper.armor.ArmorRuntime.FlightStatus(true,frame==15?0:820,39),pieces,io.github.gerbesh.unusualcopper.network.ArmorNetwork.Result.OK);
+        long recent=frame>=22?pieces.stream().flatMap(p->p.modules().stream()).mapToLong(r->1L<<r.module().ordinal()).reduce(0,(a,b)->a|b):36;
+        return new io.github.gerbesh.unusualcopper.network.ArmorNetwork.Snapshot(new java.util.UUID(0,42),1,true,frame>=22?2:1,frame>=14?800000:3400000,10000000,4440,recent,1L<<io.github.gerbesh.unusualcopper.armor.ArmorModuleType.SHIELD_FIELD.ordinal(),4,new io.github.gerbesh.unusualcopper.armor.ArmorRuntime.FlightStatus(frame<22,frame>=22?0:frame==15?0:820,frame>=22?0:39),pieces,io.github.gerbesh.unusualcopper.network.ArmorNetwork.Result.OK);
+    }
+    private static final class SupportCatalogue extends Screen {
+        SupportCatalogue(){super(Component.literal("Unusual Copper / support modules / display fixture"));}
+        @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){
+            g.fill(0,0,width,height,0xff142624);g.drawCenteredString(font,title,width/2,12,0xffe5cfab);
+            var types=new io.github.gerbesh.unusualcopper.armor.ArmorModuleType[]{io.github.gerbesh.unusualcopper.armor.ArmorModuleType.THERMAL_SHELL,
+                    io.github.gerbesh.unusualcopper.armor.ArmorModuleType.REGEN_CORE,io.github.gerbesh.unusualcopper.armor.ArmorModuleType.STRENGTH_SERVO,
+                    io.github.gerbesh.unusualcopper.armor.ArmorModuleType.KINETIC_STABILIZER};
+            int w=Math.min(170,(width-24)/4),left=(width-4*w)/2,cell=Math.min(110,(height-44)/2);
+            for(int i=0;i<types.length;i++)for(int level=1;level<=types[i].maxLevel();level++){
+                int x=left+i*w,y=37+(level-1)*cell;g.fill(x+2,y,x+w-2,y+cell-4,0xff24423c);
+                var stack=new ItemStack(ModContent.armorModuleItem(types[i],level));
+                g.pose().pushPose();g.pose().translate(x+w/2F-24,y+8,0);g.pose().scale(3,3,1);g.renderItem(stack,0,0);g.pose().popPose();
+                var label=font.split(stack.getHoverName(),w-12);for(int row=0;row<Math.min(3,label.size());row++)g.drawString(font,label.get(row),x+6,y+55+row*9,0xffe5cfab,false);
+                g.drawString(font,(level==1?"I":"II")+" / "+types[i].cue(level)+" CuE/t",x+6,y+cell-12,0xff89e0cb,false);
+            }
+        }
+        @Override public boolean isPauseScreen(){return false;}
     }
     /** Client-only mannequins: never inserted into the world or given working modules/cells. */
     private static final class ArmorFaces extends Screen {

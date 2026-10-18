@@ -12,8 +12,9 @@ import java.util.Map;
 
 /**
  * Pure, deterministic per-tick arbitration of the physical chest battery.
- * Event payments (jump, impact, shield hit, mining) are separate transactions.
- * No effects may be applied until the complete accepted tick cost is paid.
+ * Earlier reactive allocations occupy the same tick's bus without being billed twice.
+ * Additional event prices (jump, shield damage, healing) share the durable payment batch.
+ * No effects may be applied until the complete accepted tick cost is reserved.
  */
 public final class ArmorPowerScheduler {
     private ArmorPowerScheduler() {}
@@ -39,9 +40,9 @@ public final class ArmorPowerScheduler {
     public static int defaultPriority(ArmorModuleType module) {
         return switch(module) {
             case FLIGHT_CORE_II,HOVER_DRIVE -> 2;
-            case AQUA_LUNGS,SHIELD_FIELD,FALL_DAMPER -> 3;
-            case STRIDE_DRIVE,JUMP_DRIVE -> 4;
-            case MINING_SERVO -> 5;
+            case AQUA_LUNGS,SHIELD_FIELD,FALL_DAMPER,THERMAL_SHELL,REGEN_CORE -> 3;
+            case STRIDE_DRIVE,JUMP_DRIVE,KINETIC_STABILIZER -> 4;
+            case MINING_SERVO,STRENGTH_SERVO -> 5;
             case OPTIC_VISOR,FIELD_SCANNER -> 6;
         };
     }

@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 
 ROOT=Path(__file__).resolve().parents[1]
-LEVELS={'optic_visor':2,'aqua_lungs':2,'stride_drive':2,'mining_servo':3,'shield_field':3,'jump_drive':2,'field_scanner':2}
+LEVELS={'optic_visor':2,'aqua_lungs':2,'stride_drive':2,'mining_servo':3,'shield_field':3,'jump_drive':2,'field_scanner':2,'regen_core':2,'strength_servo':2,'kinetic_stabilizer':2}
 
 def main():
     for language in ('en_us','ru_ru'):
@@ -12,6 +12,8 @@ def main():
         data['item.unusualcopper.field_scanner_module']='Модуль полевого анализатора' if language=='ru_ru' else 'Field Scanner Module'
         entries=json.loads((ROOT/'tools/armor_sense_translations.json').read_text(encoding='utf-8'))
         for key,pair in entries.items():data[key]=pair[language=='ru_ru']
+        support=json.loads((ROOT/'tools/armor_support_translations.json').read_text(encoding='utf-8'))
+        for key,pair in support.items():data[key]=pair[language=='ru_ru']
         for module,maximum in LEVELS.items():
             name=data[f'item.unusualcopper.{module}_module']
             for level in range(2,maximum+1):

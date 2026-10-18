@@ -10,7 +10,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.*;
 import java.util.function.Consumer;
 
-/** Owner-only bounded settings/status channel; accepts no stacks, prices or target UUIDs. */
+/** Owner controls/status and bounded public body pulses; accepts no stacks, prices or target UUIDs. */
 public final class ArmorNetwork {
     public enum Result { OK,STALE,INVALID }
     public record Request(){}
@@ -28,7 +28,7 @@ public final class ArmorNetwork {
         }
     }
     // Both sides must understand reserved battery NBT as unavailable charge.
-    private static final String PROTOCOL="6";
+    private static final String PROTOCOL="7";
     private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(UnusualCopper.MOD_ID,"armor_control"),()->PROTOCOL,PROTOCOL::equals,PROTOCOL::equals);
     private static Consumer<Snapshot> receiver=ignored->{};
     private static Consumer<ArmorSenseSnapshot> senseReceiver=ignored->{};
@@ -39,7 +39,11 @@ public final class ArmorNetwork {
                 (v,s)->{var c=s.get();c.enqueueWork(()->{if(c.getSender()!=null)ArmorControlServer.action(c.getSender(),v);});c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(2,Snapshot.class,Codec::encode,Codec::decode,(v,s)->{var c=s.get();c.enqueueWork(()->receiver.accept(v));c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(3,ArmorSenseSnapshot.class,ArmorSenseSnapshot.Codec::encode,ArmorSenseSnapshot.Codec::decode,(v,s)->{var c=s.get();c.enqueueWork(()->senseReceiver.accept(v));c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(4,ArmorEffectEvents.Burst.class,ArmorEffectEvents.Burst::encode,ArmorEffectEvents.Burst::decode,(v,s)->{var c=s.get();c.enqueueWork(()->effectReceiver.accept(v));c.setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
+    private static Consumer<ArmorEffectEvents.Burst> effectReceiver=v->{};
+    public static void effectReceiver(Consumer<ArmorEffectEvents.Burst> receiver){effectReceiver=Objects.requireNonNull(receiver);}
+    public static void effect(ServerPlayer p,ArmorEffectEvents.Burst burst){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->p),burst);}
     /** Wire validation can be exercised without initializing Forge's live channel. */
     public static final class Codec {
     private Codec(){}

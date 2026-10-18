@@ -33,6 +33,7 @@ public final class UnusualCopper {
         io.github.gerbesh.unusualcopper.network.MachineEffects.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, io.github.gerbesh.unusualcopper.config.ArmorSenseConfig.SPEC,"unusualcopper-armor-senses.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, io.github.gerbesh.unusualcopper.config.ArmorEffectsConfig.SPEC,"unusualcopper-armor-effects.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, io.github.gerbesh.unusualcopper.config.ArmorClientConfig.SPEC);
         bus.addListener(CopperCapabilities::register);
         MinecraftForge.EVENT_BUS.register(EnergyNetworks.class);
@@ -41,6 +42,8 @@ public final class UnusualCopper {
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.fluid.FluidNetworks.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorRuntime.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorPayments.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorSupport.class);
+        MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorEffectEvents.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorControlServer.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.armor.ArmorSensors.class);
         MinecraftForge.EVENT_BUS.register(io.github.gerbesh.unusualcopper.gameplay.AreaWorkScheduler.class);

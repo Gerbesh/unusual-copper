@@ -62,17 +62,17 @@ public final class ArmorRuntime {
                 LimitedFlightPolicy.remainingTicks(now,start,same),
                 LimitedFlightPolicy.headroom(data.getDouble("UCF3AnchorY"),player.getY(),same));
     }
-    private static ItemStack chest(ServerPlayer player) {
+    static ItemStack chest(ServerPlayer player) {
         return player.isAlive()&&!player.isSpectator()&&!player.isCreative()&&completeSet(player)?player.getItemBySlot(EquipmentSlot.CHEST):ItemStack.EMPTY;
     }
-    private static int level(ServerPlayer player,ArmorModuleType module){return ArmorData.moduleLevel(player.getItemBySlot(module.slot),module);}
-    private static double addition(net.minecraft.world.entity.ai.attributes.AttributeInstance attribute,double requested,double cap){
+    static int level(ServerPlayer player,ArmorModuleType module){return ArmorData.moduleLevel(player.getItemBySlot(module.slot),module);}
+    static double addition(net.minecraft.world.entity.ai.attributes.AttributeInstance attribute,double requested,double cap){
         if(attribute==null)return 0;
         double multiplier=1+attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE).stream().mapToDouble(AttributeModifier::getAmount).sum();
         for(var mod:attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))multiplier*=1+mod.getAmount();
         return ArmorEffectLimits.addition(attribute.getValue(),requested,cap,multiplier);
     }
-    private static boolean equipped(ServerPlayer player,EquipmentSlot slot,ArmorModuleType module,int profile) {
+    static boolean equipped(ServerPlayer player,EquipmentSlot slot,ArmorModuleType module,int profile) {
         ItemStack stack=player.getItemBySlot(slot);
         return ArmorData.modules(stack).contains(module)
                 && ArmorData.settings(stack,module,profile).permits(ArmorData.percentage(player.getItemBySlot(EquipmentSlot.CHEST)),conditions(player));
@@ -87,6 +87,7 @@ public final class ArmorRuntime {
         if(MINING_UNTIL.getOrDefault(player,Long.MIN_VALUE)>=player.tickCount)flags|=1<<ArmorModuleSettings.Trigger.MINING.ordinal();
         return flags;
     }
+    static void combat(ServerPlayer player){COMBAT_UNTIL.put(player,(long)player.tickCount+100);}
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent event) {
         if(event.phase!=TickEvent.Phase.END || !(event.player instanceof ServerPlayer player))return;
         if(!ArmorPayments.beginContinuous(player))return;
@@ -102,6 +103,7 @@ public final class ArmorRuntime {
         if(movement!=null && movement.getModifier(STRIDE)!=null)movement.removeModifier(STRIDE);
         var swim=player.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
         if(swim!=null&&swim.getModifier(SWIM)!=null)swim.removeModifier(SWIM);
+        ArmorSupport.removeModifier(player);
         ItemStack chest=chest(player);
         if(chest.isEmpty()){ArmorTelemetry.limited(player,java.util.List.of());return;}
         int profile=ArmorData.profile(chest);
@@ -200,6 +202,8 @@ public final class ArmorRuntime {
         }
         // Jump is charged on the actual jump event only, never for standing still.
         // Mining has an independent paid event path; senses publish only after settlement.
+        ArmorSupport.contribute(player,chest,actions);
+        ArmorPayments.applyFunded(player,chest,actions);
         var requests=actions.keySet().stream()
                 .map(module->new ArmorPowerScheduler.Demand(module,
                         ArmorData.settings(player.getItemBySlot(module.slot),module,profile).priority(),module.cue(level(player,module)))).toList();

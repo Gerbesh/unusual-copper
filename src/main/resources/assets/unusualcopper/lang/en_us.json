@@ -554,5 +554,16 @@
   "armor.sense.diagnostic.unsupported": "Block cannot be analyzed",
   "armor.sense.partial": "Ores: %s · part of area unavailable",
   "key.unusualcopper.armor_scan": "Toggle Field Scanner",
-  "armor.sense.no_scanner": "Install a Field Scanner in your helmet first"
+  "armor.sense.no_scanner": "Install a Field Scanner in your helmet first",
+  "item.unusualcopper.thermal_shell_module": "Thermal Shell Module",
+  "item.unusualcopper.regen_core_module": "Regeneration Core Module",
+  "item.unusualcopper.strength_servo_module": "Strength Servo Module",
+  "item.unusualcopper.kinetic_stabilizer_module": "Kinetic Stabilizer Module",
+  "armor.unusualcopper.thermal_shell_hint": "Blocks fire and lava damage while powered. Does not grant Fire Resistance.",
+  "armor.unusualcopper.regen_core_hint": "Up to %s HP every %s s while wounded; additionally %s CuE per HP restored. Pauses with Regeneration.",
+  "armor.unusualcopper.strength_servo_hint": "Up to +%s HP on direct melee hits, scaled by attack cooldown; combined cap 30 HP. Server controls PvP bonus.",
+  "armor.unusualcopper.kinetic_stabilizer_hint": "+%s%% knockback resistance while powered; combined cap 100%%.",
+  "item.unusualcopper.regen_core_module_tier_2": "Regeneration Core Module II",
+  "item.unusualcopper.strength_servo_module_tier_2": "Strength Servo Module II",
+  "item.unusualcopper.kinetic_stabilizer_module_tier_2": "Kinetic Stabilizer Module II"
 }
